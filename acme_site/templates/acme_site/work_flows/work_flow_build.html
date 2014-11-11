@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %} work flow build{% endblock %}
+
+{% block content %}
+{% include "acme_site/acme_sidebars/sidebar_left.html" %}
+{% include "acme_site/acme_sidebars/sidebar_right.html" %}
+
+<div id="center">
+  {% include "acme_site/work_flows/work_flow_blank.html" %}
+  <h3>Build</h3> 
+</div>
+
+{% endblock %}

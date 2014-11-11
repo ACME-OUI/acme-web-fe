@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> {% block title %} ACME {% endblock %}</title>
+    <!-- Bootstrap core CSS -->
+    <link href="/acme/static/css/bootstrap.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 50px;
+      }
+      .starter-template {
+        padding: 40px 15px;
+      }
+      label{
+        min-width: 90px;
+      }
+      .footer{
+        padding: 25px 25px 25px 25px;
+      }
+    </style>
+
+    <!-- <link=href="https://raw.github.com/ehynds/jquery-ui-multiselect-widget/1.13/jquery.multiselect.css" rel="stylesheet">-->
+    <!-- <link=href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/ui-lightness/jquery-ui.min.css" rel="stylesheet">-->
+    <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="/acme/static/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/acme">ACME</a>
+        </div>
+        <div class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/acme/workflow">Workflows</a></li>
+            <li><a href="http://uv-cdat.org">UV-CDAT</a></li>
+            <li><a href="http://esgf.org">ESGF</a></li>
+            <li><a href="https://acme.globus.org">Globus</a></li>
+            <li><a href="https://www.pnl.gov">AKUNA</a></li>
+            <li><a href="http://acme-ui.ornl.gov:8081/exploratory_analysis">UV-CDAT EA</a></li>
+            <li><a href=" http://acme-ui.ornl.gov/uvlive/plots/home">UV-CDAT Live</a></li>
+            <!-- <li><a href="https://earthsystemcog.org">CoG</a></li> -->
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="http://acme.globus.org/SignIn?redirect=http://harris112ml.llnl.gov:8000/acme/workflow">Log In</a></li>
+            <li><a href="http://acme.globus.org/SignUp?redirect=http://harris112ml.llnl.gov:8000/?return=PENDING">Register</a></li>
+            <!--<li><a href="http://acme.globus.org/SignIn?redirect=https://acme-ui.ornl.gov/acme/workflow">Log In</a></li>-->
+            <!--<li><a href="http://acme.globus.org/SignUp?redirect=https://acme-ui.ornl.gov/acme/?return=PENDING">Register</a></li>-->
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+    <div class="container">
+      {% block content %}   {% endblock %}
+    </div>
+    <div id="footer" class="footer">
+      <p>
+      <a href="#">Privacy &amp; Legal Notice</a> &bull; 
+      <a href="https://github.com/aims-group/acme-site/issues">Site Issues</a> 
+      </p>      
+    </div>
+  </div><!-- /.container -->
+</body>
+</html>

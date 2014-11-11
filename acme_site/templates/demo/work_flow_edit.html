@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+{% block title %} work flow edit{% endblock %}
+
+
+{% block content %}
+
+<script src="/acme/static/js/work_flow_edit.js" type="text/javascript"></script>
+<script src="/acme/static/js/cookie.js" type="text/javascript"></script>
+<script src="/acme/static/js/akuna.js" type="text/javascript"></script>
+
+<style>
+  div.myBox{
+    background: none;
+    border: 1px solid #ccc;
+    border-radius: 0;
+    margin:  auto;
+    margin-bottom: 20px;
+    padding: 15px 30px;
+  }
+</style>
+
+<div id="center">
+  <h3 id="title" class="title"></h3>
+  <ul class="nav nav-tabs" id="myTab">
+    <li class="active"><a href="#case" data-toggle="tab">case</a></li>
+    <li><a href="#log" data-toggle="tab">log</a></li>
+    <li><a href="#output" data-toggle="tab">output</a></li>
+    <li><a href="#messages" data-toggle="tab">messages</a></li>
+    <li><a href="#run" data-toggle="tab">run</a></li>
+    <li><a href="#diagnostics" data-toggle="tab">diagnostics</a></li>
+  </ul>
+
+  <div class="tab-content">
+
+    <div class="tab-pane active" id="case">
+      <div id="files" style="float: left; width: 25%">
+        <div id="usertree" class="myBox"></div>
+        <br/>
+        <div id="uploadbutton" style="display: block;" > <a onclick="upload()"  href="javascript:void(0);"><button class="btn btn-primary">upload</button></a> </div>
+        <div id="uploadform" style="display:none">
+          <input type="file" id="fileupload"/>
+          <br/>
+          <a onclick="uploadsave()"  href="javascript:void(0);"><button class="btn btn-success">add file</button></a>
+        </div>
+      </div>
+      <div id="textareadiv" class="myBox" style="float: right; width: 75%; height: 100%">
+
+        <center><div id="warningbox" class=myBox" style="display:none"></div></center>
+
+        <textarea name="textarea" id="textarea" wrap="off" style="width: 100%; min-height: 550px; height: 100%"></textarea>
+        <input type="hidden" value="">
+        <br/></br/>
+        <a onclick="save_file_content()"  href="javascript:void(0);"><button class="btn btn-success">save</button></a>
+        <div style="display: none">
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="log">
+      <br/>
+      logs
+    </div>
+
+    <div class="tab-pane" id="output">
+      <br/>
+      Running the Loader
+      <br>------------------
+      <br>
+      <br>amqp/workflow/loader.py /data/fileexchange/F_1850_T31_g37_titan.tgz
+      <br>/lustre/atlas/proj-shared/csc121/xok/cases 0987654321 xok
+      <br>ssh xok\@acmetest.ornl.gov /data/amqp/workflow/amqpjsonsend.py -c cesm -s
+      <br>Loader -j 0987654321
+      <br>CaseDir; /lustre/atlas/proj-shared/csc121/xok/cases/F_1850_T31_g37_titan
+      <br>GridFTP copy command: globus-url-copy
+      <br>sshftp://xok@acmetest.ornl.gov//data/fileexchange/F_1850_T31_g37_titan.tgz
+      <br>/lustre/atlas/proj-shared/csc121/xok/cases/F_1850_T31_g37_titan.tgz
+      <br>F_1850_T31_g37_titan/
+      <br>F_1850_T31_g37_titan/README.case
+      <br>F_1850_T31_g37_titan/env_run.xml
+      <br>F_1850_T31_g37_titan/create_production_test
+      <br>F_1850_T31_g37_titan/Buildconf/
+      <br>F_1850_T31_g37_titan/Buildconf/docn.buildnml.csh
+      <br>F_1850_T31_g37_titan/Buildconf/docn.user_nl.csh
+      <br>F_1850_T31_g37_titan/Buildconf/cam.buildnml.csh
+      <br>F_1850_T31_g37_titan/Buildconf/clm.buildexe.csh
+      <br>F_1850_T31_g37_titan/Buildconf/cice_decomp.xml
+      <br>F_1850_T31_g37_titan/Buildconf/docn.buildexe.csh
+      <br>F_1850_T31_g37_titan/Buildconf/buildlib.csm_share
+      <br>F_1850_T31_g37_titan/Buildconf/cpl.buildnml.csh
+      <br>F_1850_T31_g37_titan/Buildconf/buildlib.mct
+      <br>F_1850_T31_g37_titan/Buildconf/sglc.buildexe.csh
+      <br>F_1850_T31_g37_titan/Buildconf/swav.buildexe.csh
+      <br>F_1850_T31_g37_titan/Buildconf/rtm.buildnml.csh
+      <br>F_1850_T31_g37_titan/Buildconf/cesm.buildexe.csh
+      <br>F_1850_T31_g37_titan/Buildconf/cpl.buildexe.csh
+      <br>F_1850_T31_g37_titan/Buildconf/buildlib.gptl
+      <br>F_1850_T31_g37_titan/Buildconf/cpl.user_nl.csh
+      <br>F_1850_T31_g37_titan/Buildconf/clm.user_nl.csh
+      <br>F_1850_T31_g37_titan/Buildconf/generate_cice_decomp.pl
+      <br>F_1850_T31_g37_titan/Buildconf/cam.buildexe.csh
+      <br>F_1850_T31_g37_titan/Buildconf/rtm.buildexe.csh
+      <br>F_1850_T31_g37_titan/Buildconf/clm.buildnml.csh
+      <br>F_1850_T31_g37_titan/Buildconf/cice.buildnml.csh
+      <br>F_1850_T31_g37_titan/Buildconf/cam.user_nl.csh
+      <br>F_1850_T31_g37_titan/Buildconf/sglc.buildnml.csh
+      <br>F_1850_T31_g37_titan/Buildconf/cice.user_nl.csh
+      <br>F_1850_T31_g37_titan/Buildconf/rtm.user_nl.csh
+      <br>F_1850_T31_g37_titan/Buildconf/cice.buildexe.csh
+      <br>F_1850_T31_g37_titan/Buildconf/buildlib.pio
+      <br>F_1850_T31_g37_titan/Buildconf/swav.buildnml.csh
+      <br>F_1850_T31_g37_titan/CaseStatus
+      <br>F_1850_T31_g37_titan/preview_namelists
+      <br>F_1850_T31_g37_titan/F_1850_T31_g37_titan.l_archive
+      <br>F_1850_T31_g37_titan/env_mach_specific
+      <br>F_1850_T31_g37_titan/xmlquery
+      <br>F_1850_T31_g37_titan/check_input_data
+      <br>F_1850_T31_g37_titan/xmlchange
+      <br>F_1850_T31_g37_titan/env_build.xml
+      <br>F_1850_T31_g37_titan/env_mach_pes.xml
+      <br>F_1850_T31_g37_titan/check_case
+      <br>F_1850_T31_g37_titan/F_1850_T31_g37_titan.build
+      <br>F_1850_T31_g37_titan/F_1850_T31_g37_titan.clean_build
+      <br>F_1850_T31_g37_titan/Tools/
+      <br>F_1850_T31_g37_titan/Tools/compare_namelists.pl
+      <br>F_1850_T31_g37_titan/Tools/cesm_prerun_setup
+      <br>F_1850_T31_g37_titan/Tools/lt_archive.sh
+      <br>F_1850_T31_g37_titan/Tools/ccsm_getenv
+      <br>F_1850_T31_g37_titan/Tools/config_compsets.xml
+      <br>F_1850_T31_g37_titan/Tools/mkDepends
+      <br>F_1850_T31_g37_titan/Tools/st_archive.sh
+      <br>F_1850_T31_g37_titan/Tools/mkbatch.titan
+      <br>F_1850_T31_g37_titan/Tools/mdiag_reduce.csh
+      <br>F_1850_T31_g37_titan/Tools/getTiming2.pl
+      <br>F_1850_T31_g37_titan/Tools/user_nl_add
+      <br>F_1850_T31_g37_titan/Tools/SetupTools.pm
+      <br>F_1850_T31_g37_titan/Tools/user_nlcreate
+      <br>F_1850_T31_g37_titan/Tools/cesm_prestage
+      <br>F_1850_T31_g37_titan/Tools/Makefile
+      <br>F_1850_T31_g37_titan/Tools/XML/
+      <br>F_1850_T31_g37_titan/Tools/XML/Lite.pm
+      <br>F_1850_T31_g37_titan/Tools/XML/Lite/
+      <br>F_1850_T31_g37_titan/Tools/XML/Lite/Element.pm
+      <br>F_1850_T31_g37_titan/Tools/mkSrcfiles
+      <br>F_1850_T31_g37_titan/Tools/cesm_buildexe
+      <br>F_1850_T31_g37_titan/Tools/xml2env
+      <br>F_1850_T31_g37_titan/Tools/cesm_postrun_setup
+      <br>F_1850_T31_g37_titan/Tools/taskmaker.pl
+      <br>F_1850_T31_g37_titan/Tools/getTiming.csh
+      <br>F_1850_T31_g37_titan/Tools/ConfigCase.pm
+      <br>F_1850_T31_g37_titan/Tools/config_definition.xml
+      <br>F_1850_T31_g37_titan/Tools/mach_syslog
+      <br>F_1850_T31_g37_titan/Tools/cesm_buildnml
+      <br>F_1850_T31_g37_titan/Tools/mdiag_reduce.pl
+      <br>F_1850_T31_g37_titan/Tools/cesm_buildstart
+      <br>F_1850_T31_g37_titan/Tools/ccsm_check_lockedfiles
+      <br>F_1850_T31_g37_titan/Tools/config_grid.xml
+      <br>F_1850_T31_g37_titan/F_1850_T31_g37_titan.submit
+      <br>F_1850_T31_g37_titan/archive_metadata.sh
+      <br>F_1850_T31_g37_titan/SourceMods/
+      <br>F_1850_T31_g37_titan/SourceMods/src.rtm/
+      <br>F_1850_T31_g37_titan/SourceMods/src.cam/
+      <br>F_1850_T31_g37_titan/SourceMods/src.share/
+      <br>F_1850_T31_g37_titan/SourceMods/src.sglc/
+      <br>F_1850_T31_g37_titan/SourceMods/src.clm/
+      <br>F_1850_T31_g37_titan/SourceMods/src.swav/
+      <br>F_1850_T31_g37_titan/SourceMods/src.cice/
+      <br>F_1850_T31_g37_titan/SourceMods/src.docn/
+      <br>F_1850_T31_g37_titan/SourceMods/src.drv/
+      <br>F_1850_T31_g37_titan/cesm_setup
+      <br>F_1850_T31_g37_titan/env_case.xml
+      <br>F_1850_T31_g37_titan/README.science_support
+      <br>F_1850_T31_g37_titan/LockedFiles/
+      <br>F_1850_T31_g37_titan/LockedFiles/env_case.xml.locked
+      <br>***** /data/fileexchange/F_1850_T31_g37_titan.tgz 0987654321 xok
+      <br>/lustre/atlas/proj-shared/csc121/xok/cases/F_1850_T31_g37_titan
+      <br>/lustre/atlas/proj-shared/csc121/bmayer/akunamaster.sh 0987654321 xok
+      <br>/lustre/atlas/proj-shared/csc121/xok/cases/F_1850_T31_g37_titan
+      <br>F_1850_T31_g37_titan
+      <br>AkunaJOBID 	0987654321
+      <br>UNAME 		xok
+      <br>CASEDIR 		/lustre/atlas/proj-shared/csc121/xok/cases/F_1850_T31_g37_titan
+      <br>CASENAME		F_1850_T31_g37_titan
+      <br>Setting up case
+      <br>
+      <br>Loader is configuring the model
+      <br>------------------
+      <br>
+      <br>'{"py/object": "akunamessage.akunaMessage", "status": "Configure",
+      <br>"description": "", "time": "2014-02-23 11:46:12.459165", "component":
+      <br>"cesm", "akunaJobID": "0987654321", "messageID":
+      <br>"00e46cf0-9caa-11e3-aead-52540051d951"}'
+      <br>
+      <br>Loader is building the model
+      <br>---------------------------
+      <br>
+      <br>'{"py/object": "akunamessage.akunaMessage", "status": "Build",
+      <br>"description": "", "time": "2014-02-23 11:46:23.623528", "component":
+      <br>"cesm", "akunaJobID": "0987654321", "messageID":
+      <br>"078bf848-9caa-11e3-921f-52540051d951"}'
+      <br>
+      <br>Output from the Model Build
+      <br>------------------
+      <br>
+      <br>CESM BUILDNML SCRIPT STARTING
+      <br>- To prestage restarts, untar a restart.tar file into
+      <br>/lustre/atlas/proj-shared/csc121/bmayer/cases/F1850.g37_pathcheck/run
+      <br>xt-libsci(3):ERROR:152: Module 'xt-libsci' is currently not loaded
+      <br>CMake - cross-platform, open-source build system
+      <br>infile is
+      <br>/lustre/atlas/proj-shared/csc121/bmayer/cases/F1850.g37_pathcheck/Buildconf
+      <br>/cplconf/cesm_namelist
+      <br>CAM writing dry deposition namelist to drv_flds_in
+      <br>Writing ocean component namelist to ./docn_in
+      <br>CAM writing namelist to atm_in
+      <br>CLM configure done.
+      <br>CLM adding use_case 1850_control defaults for var sim_year with val 1850
+      <br>CLM adding use_case 1850_control defaults for var sim_year_range with val
+      <br>constant
+      <br>CLM adding use_case 1850_control defaults for var use_case_desc with val
+      <br>Conditions to simulate 1850 land-use
+      <br>CICE configure done.
+      <br>CESM BUILDNML SCRIPT HAS FINISHED SUCCESSFULLY
+      <br>-------------------------------------------------------------------------
+      <br>-------------------------------------------------------------------------
+      <br>CESM PRESTAGE SCRIPT STARTING
+      <br>- Case input data directory, DIN_LOC_ROOT, is
+      <br>/lustre/atlas1/cli900/world-shared/cesm/inputdata
+      <br>- Checking the existence of input datasets in DIN_LOC_ROOT
+      <br>CESM PRESTAGE SCRIPT HAS FINISHED SUCCESSFULLY
+      <br>-------------------------------------------------------------------------
+      <br>
+      <br>Loader queued the case
+      <br>------------------
+      <br>
+      <br>'{"py/object": "akunamessage.akunaMessage", "status": "Queue",
+      <br>"description": "Run 0", "time": "2014-02-23 12:11:43.304331", "component":
+      <br>"cesm", "akunaJobID": "0987654321", "messageID":
+      <br>"9158db10-9cad-11e3-bce4-52540051d951"}'
+      <br>
+      <br>
+      <br>Titan has started running the case
+      <br>------------------
+      <br>
+      <br>'{"py/object": "akunamessage.akunaMessage", "status": "Running",
+      <br>"description": "Run 0", "time": "2014-02-23 12:12:16.831712", "component":
+      <br>"cesm", "akunaJobID": "0987654321", "messageID":
+      <br>"a554bda0-9cad-11e3-a922-52540051d951"}'
+      <br>
+      <br>Case has completed on Titan
+      <br>------------------
+      <br>
+      <br>'{"py/object": "akunamessage.akunaMessage", "status": "Complete",
+      <br>"description": "Run 0", "time": "2014-02-23 12:16:24.159112", "component":
+      <br>"cesm", "akunaJobID": "0987654321", "messageID":
+      <br>"38bfe89e-9cae-11e3-b5ad-52540051d951"}'
+      <br>
+
+    </div>
+
+    <div class="tab-pane" id="messages">
+      <div id="display-messages">
+        <br/>
+        current work in development: messages displaying for current running jobs
+      </div>
+    </div>
+
+    <div class="tab-pane" id="run">
+      <br/>
+      <label>Titan Username: </label> <input id="tud" type="input"/></br/>
+      <label>Titan Password: </label> <input id="tpw" type="password"/><br/>
+      Are you sure you want to starting a run on big iron with this.workflow?<br/>
+      <a onclick="run_workflow()"  href="javascript:void(0);"><button class="btn btn-success">run</button></a>
+    </div>
+
+    <div class="tab-pane" id="diagnostics">
+      <br/>
+      <ul>
+        <li><a href="http://acme-ui.ornl.gov:8081/exploratory_analysis">Explorator Analysis</a></li>
+        <li><a href=" http://acme-ui.ornl.gov/uvlive/plots/home">UV-CDAT Live</a></li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

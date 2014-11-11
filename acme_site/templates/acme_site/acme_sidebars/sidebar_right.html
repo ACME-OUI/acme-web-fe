@@ -1,0 +1,32 @@
+<script>
+  function hide_show_right(){
+    $("#right_sidebar").toggle('fast', function() {
+      if( $("#right_sidebar").is(':visible') ){
+        $("#center").css('right', '275px');
+      }
+      else {
+        $("#center").css('right', '10px');
+      }
+    });
+  }
+</script>
+
+  <div id="right_sidebar">
+    <div id="acme_sidebar_blank" class="well sidebar-nav">
+      <ul class="nav nav-list">
+        <li class="nav-header">Public Groups</li>
+        <li><a href="#">Atmosphere Model</a></li>
+        <li><a href="#">Land Model</a></li>
+        <li><a href="#">Ocean Model</a></li>
+        <li class="nav-header">Other Groups</li>
+        <li><a href="#">Coupled System</a></li>
+        <li><a href="#">Human Systems</a></li>
+        <li><a href="#">Ocean Model</a></li>
+        <li><a href="#">Ice Model</a></li>
+        <li class="nav-header">Events</li>
+        <li><a href="#">pull from somewhere</a></li>
+        <li class="nav-header">Highlights</li>
+        <li><a href="#">hard code ALL the things</a></li>
+      </ul>
+    </div>
+  </div>
