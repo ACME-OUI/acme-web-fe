@@ -2,6 +2,7 @@ acme-site
 =========
 
 ###Overarching user interface for the acme project
+**init**
 
     git clone git@github.com:aims-group/acme-site.git
     cd acme-site
@@ -10,20 +11,43 @@ acme-site
     source env/bin/activate
     pip install -r requirements.txt  
     python manage.py collectstatic
+
+**setup**
+    
+    vim local_settings
+
+    import os.path
+
+    STATICFILES_DIRS = (
+        '/path/to/acme-web-fe/acme_site/static/',
+    )
+
+    DATABASES = {
+      'default': {
+        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': os.path.join(os.path.abspath("."), 'db.sqlite3'),
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+      }
+    }
+
+**running**
+
     python manage.py runserver 
 
-If you have turned on websharing on your mac you can display it using
-your machines url, eg 
+If you have turned on websharing on your mac you can display it using your machines url, eg 
 
-    python manage.py runserver harris112ml.llnl.gov:8000
+    python manage.py runserver boxname.domain:8000
 
 then from your browser you can view the site at 
 
 * users front end
-  * *yourMachineName*.llnl.gov:8000/acme
+  * *boxname.domain*:8000/acme
   * 127.0.0.1:8000/acme
 * admin front end (**not implemented yet**)
-  * *yourMachineName*.llnl.gov:8000/admin
+  * *boxname.domain*:8000/admin
   * 127.0.0.1:8000/admin
 
 ###Changing HTML
@@ -47,6 +71,3 @@ then from your browser you can view the site at
 
 ###Itergration
 * https://github.com/globusonline/python-nexus-client 
-
-###AKUNA api
-* see the [wiki](https://github.com/aims-group/acme-site/wiki/AKUNA-API)
