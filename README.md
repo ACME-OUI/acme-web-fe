@@ -4,17 +4,18 @@ acme-site
 ###Overarching user interface for the acme project
 **init**
 
-    git clone git@github.com:aims-group/acme-site.git
-    cd acme-site
+    git clone git@github.com:acme-oui/acme-web-fe.git
+    cd acme-web-fe
     sudo pip install virtualenv
     virtualenv env
     source env/bin/activate
-    pip install -r requirements.txt  
-    python manage.py collectstatic
+    pip install -r requirements.txt
 
-**setup**
+**local settings**
     
-    vim local_settings
+    vim local_settings.py
+
+**add this**
 
     import os.path
 
@@ -32,6 +33,27 @@ acme-site
         'PORT': '',
       }
     }
+
+**static files**
+
+    mkdir acme_site/static
+    python manage.py collectstatic
+    
+**setup db**
+
+    python manage.py syncdb
+    
+**setup admin**
+
+    yes
+    admin
+    you@email.com
+    password
+    password
+
+**update db**
+
+    python mange.py migrate
 
 **running**
 
