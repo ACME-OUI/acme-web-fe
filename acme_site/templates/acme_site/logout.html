@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %} login {% endblock %}
+{% block title %} logout {% endblock %}
 
 {% block content %}
 <style>
@@ -44,25 +44,7 @@
     border-top-right-radius: 0;
   }
 </style>
-<br>
-{% if messages %}
-  <ul class="messages">
-      {% for message in messages %}
-      <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-      {% endfor %}
-  </ul>
-{% endif %}
-  <form id="login_form" action="login" method="post" >
-    {% csrf_token %}
-    <label for="username">User name:</label>
-    <input type="text" name="username" value="" id="username">
-    <label for="password">Password:</label>
-    <input type="password" name="password" value="" id="password">
-
-    <input type="submit" value="login" />
-    <input type="hidden" name="next" value="{{ acme }}" />
-  </form>
   <br>
-  <p><a href="register">New user registration.</a>
+  <input type="submit" name="logout" value="logout">
 {% endblock %}
 

@@ -8,6 +8,11 @@ from django.core.context_processors import csrf
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files import File
 
+##### For user registration
+from forms import UserCreationForm
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+
 #from acme_site.filters import
 #from acme_site.models import
 #from acme_site.forms import
@@ -46,8 +51,53 @@ def index(request):
     return HttpResponse(render_template(request, "home.html", {"data":data}))
 
 ##### Login
-def login(request):
-    return HttpResponse(render_template(request, "acme_site/login.html", {}))
+def user_login(request):
+    context = RequestContext(request)
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        print 'user ' + username
+        print 'pass ' + password
+        user = authenticate(username=username, password=password)
+        if user:
+            print 'user authenticated'
+            if user.is_active:
+                login(request, user)
+                messages.success(request, 'User: '+ username + ' successfully loged in')
+                return HttpResponseRedirect('')
+            else:
+                messages.error(request, 'User: ' + username + ' is a disactivated account')
+                return HttpResponseRedirect('login')
+        else:
+            messages.error(request, "Username or password incorrect")
+            return HttpResponseRedirect('login')
+        
+    return render_to_response("acme_site/login.html", {}, context)
+
+##### Logout
+def user_logout(request):
+    logout(request)
+    messages.success(request, 'Log out successful')
+    return HttpResponse(render_template(request, "home.html", {}))
+
+##### Register new user
+def register(request):
+    context = RequestContext(request)
+    registered = False
+    if request.method == 'POST':
+        user_form = UserCreationForm(data=request.POST)
+        if user_form.is_valid():
+            user = user_form.save()
+            ##user.set_password(user_form.password)
+            user.save()
+            registered = True
+        else:
+            print user_form.errors
+    else:
+        user_form = UserCreationForm()
+   
+    return render_to_response("acme_site/register.html", {"user_form": user_form, "registered": registered}, context)
+
 
 ##### Work Flows
 def workflow(request):
