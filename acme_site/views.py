@@ -88,7 +88,6 @@ def register(request):
         user_form = UserCreationForm(data=request.POST)
         if user_form.is_valid():
             user = user_form.save()
-            ##user.set_password(user_form.password)
             user.save()
             registered = True
         else:
