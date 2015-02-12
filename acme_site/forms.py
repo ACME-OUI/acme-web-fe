@@ -1,11 +1,13 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django import forms
+#from captcha.fields import ReCaptchaField
 
 
 
 class UserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput())
+    #captcha = ReCaptchaField()
 
     class Meta:
         model = User
