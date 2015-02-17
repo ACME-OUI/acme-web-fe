@@ -115,7 +115,6 @@ def code(request):
 def dashboard(request):
     return HttpResponse(render_template(request, "acme_site/dashboard.html", {}))
 
-
 @login_required(login_url='login')
 def config(request):
     return HttpResponse(render_template(request, "acme_site/work_flows/work_flow_config.html", {}))
