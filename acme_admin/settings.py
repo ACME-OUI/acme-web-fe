@@ -76,6 +76,8 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'w$#qeq6py$!u+4s-_s12idk-2050&+!$f%fhzba58_4w9rd6ko'
 
+
+
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
@@ -113,9 +115,14 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'acme_site',
     'django.contrib.admin',
-    'south'
+    'south',
+    'captcha'
     # 'django.contrib.admindocs',
 )
+
+RECAPTCHA_PUBLIC_KEY = '6Le--wETAAAAADFYR2npbwBmM1t1UNJ1UhXSPvMy'
+
+RECAPTCHA_PRIVATE_KEY = '6Le--wETAAAAAORVsGb55wl0BTg_XDw48B1qoKHq'
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 

@@ -8,6 +8,12 @@ from django.core.context_processors import csrf
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files import File
 
+##### For user registration
+from forms import UserCreationForm
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+
 #from acme_site.filters import
 #from acme_site.models import
 #from acme_site.forms import
@@ -46,29 +52,92 @@ def index(request):
     return HttpResponse(render_template(request, "home.html", {"data":data}))
 
 ##### Login
-def login(request):
-    return HttpResponse(render_template(request, "acme_site/login.html", {}))
+def user_login(request):
+    context = RequestContext(request)
+    
+    if request.method == 'POST':
+        user = authenticate(username=request.POST['username'], password=request.POST['password'])
+        if user:
+            if user.is_active:
+                login(request, user)
+                messages.success(request, 'User: '+ request.POST['username'] + ' successfully loged in')
+                print 'POSTnext: ' + request.POST.get('next')
+                return HttpResponseRedirect(request.POST.get('next'))
+            else:
+                messages.error(request, 'User: ' + request.POST['username'] + ' is a disactivated account')
+                return HttpResponseRedirect('login')
+        else:
+            messages.error(request, "Username or password incorrect")
+            return HttpResponseRedirect('login')
+    else:
+        if 'next' in request.GET:
+            redirect = request.GET.get('next')
+            print "GETnext:" + request.GET.get('next')
+
+        else:
+            redirect = ''
+        print 'redirect:' + redirect
+        response = HttpResponse(render_template(request, "acme_site/login.html", {"next": redirect}))
+        return response
+
+##### Logout
+def user_logout(request):
+    logout(request)
+    messages.success(request, 'Log out successful')
+    return HttpResponse(render_template(request, "home.html", {}))
+
+##### Register new user
+def register(request):
+    context = RequestContext(request)
+    registered = False
+    if request.method == 'POST':
+        user_form = UserCreationForm(data=request.POST)
+        if user_form.is_valid():
+            user = user_form.save()
+            user.save()
+            registered = True
+        else:
+            print user_form.errors
+    else:
+        user_form = UserCreationForm()
+   
+    return render_to_response("acme_site/register.html", {"user_form": user_form, "registered": registered}, context)
+
 
 ##### Work Flows
+@login_required(login_url='login')
 def workflow(request):
     return HttpResponse(render_template(request, "demo/work_flow_home.html", {}))
 
+@login_required(login_url='login')
 def code(request):
     return HttpResponse(render_template(request, "demo/work_flow_edit.html", {}))
 
+@login_required(login_url='login')
+def jspanel(request):
+    return HttpResponse(render_template(request, "acme_site/jspanel.html", {}))
 
+@login_required(login_url='login')
+def grid(request):
+    return HttpResponse(render_template(request, "acme_site/grid.html", {}))
+
+@login_required(login_url='login')
 def config(request):
     return HttpResponse(render_template(request, "acme_site/work_flows/work_flow_config.html", {}))
 
+@login_required(login_url='login')
 def inputs(request):
     return HttpResponse(render_template(request, "acme_site/work_flows/work_flow_inputs.html", {}))
 
+@login_required(login_url='login')
 def build(request):
     return HttpResponse(render_template(request, "acme_site/work_flows/work_flow_build.html", {}))
 
+@login_required(login_url='login')
 def run(request):
     return HttpResponse(render_template(request, "acme_site/work_flows/work_flow_run.html", {}))
 
+@login_required(login_url='login')
 def output(request):
     return HttpResponse(render_template(request, "acme_site/work_flows/work_flow_output.html", {}))
 
