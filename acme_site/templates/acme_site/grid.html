@@ -1,37 +1,48 @@
-{% extends "base.html" %}
-{% block title %} Grid{% endblock %}
-<style type="text/css">
-	
-.body{
-	background-color: #fff;
-}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- for recaptcha -->
+    
+    <title> {% block title %} Gridster Demo {% endblock %}</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
 
-</style>
-{% block content %}
-<link rel="stylesheet" type="text/css" href="static/css/jquery.gridster.min.css">
-<script type="text/javascript" src="static/js/grid.js"></script>
+   
 
-<div class="gridster">
-    <ul>
-        <li data-row="1" data-col="1" data-sizex="1" data-sizey="1"></li>
-        <li data-row="2" data-col="1" data-sizex="1" data-sizey="1"></li>
-        <li data-row="3" data-col="1" data-sizex="1" data-sizey="1"></li>
- 
-        <li data-row="1" data-col="2" data-sizex="2" data-sizey="1"></li>
-        <li data-row="2" data-col="2" data-sizex="2" data-sizey="2"></li>
- 
-        <li data-row="1" data-col="4" data-sizex="1" data-sizey="1"></li>
-        <li data-row="2" data-col="4" data-sizex="2" data-sizey="1"></li>
-        <li data-row="3" data-col="4" data-sizex="1" data-sizey="1"></li>
- 
-        <li data-row="1" data-col="5" data-sizex="1" data-sizey="1"></li>
-        <li data-row="3" data-col="5" data-sizex="1" data-sizey="1"></li>
- 
-        <li data-row="1" data-col="6" data-sizex="1" data-sizey="1"></li>
-        <li data-row="2" data-col="6" data-sizex="1" data-sizey="2"></li>
-    </ul>
-</div>
+    <!-- <link=href="https://raw.github.com/ehynds/jquery-ui-multiselect-widget/1.13/jquery.multiselect.css" rel="stylesheet">-->
+    <!-- <link=href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/ui-lightness/jquery-ui.min.css" rel="stylesheet">-->
+    <!--<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.gridster/0.5.6/jquery.gridster.js"></script>
+	<link rel="stylesheet" type="text/css" href="static/css/jquery.gridster.css">
+	<script type="text/javascript" src="static/js/grid.js"></script>
 
 
-
-{% endblock %}
+  </head>
+	<body>
+	<div class="demo">
+		<div class="gridster" style="border: 1px solid black;">
+		    <ul>
+		        <li data-row="1" data-col="1" data-sizex="1" data-sizey="1"></li>
+		        <li data-row="2" data-col="1" data-sizex="1" data-sizey="1"></li>
+		        <li data-row="3" data-col="1" data-sizex="1" data-sizey="1"></li>
+		 
+		        <li data-row="1" data-col="2" data-sizex="2" data-sizey="1"></li>
+		        <li data-row="2" data-col="2" data-sizex="2" data-sizey="2"></li>
+		 
+		        <li data-row="1" data-col="4" data-sizex="1" data-sizey="1"></li>
+		        <li data-row="2" data-col="4" data-sizex="2" data-sizey="1"></li>
+		        <li data-row="3" data-col="4" data-sizex="1" data-sizey="1"></li>
+		 
+		        <li data-row="1" data-col="5" data-sizex="1" data-sizey="1"></li>
+		        <li data-row="3" data-col="5" data-sizex="1" data-sizey="1"></li>
+		 
+		        <li data-row="1" data-col="6" data-sizex="1" data-sizey="1"></li>
+		        <li data-row="2" data-col="6" data-sizex="1" data-sizey="2"></li>
+		    </ul>
+		</div>
+	</div>
+	</body>
+</html>
