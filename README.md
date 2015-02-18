@@ -34,6 +34,10 @@ acme-site
       }
     }
 
+    #Get a key from the google registration page
+    RECAPTCHA_PUBLIC_KEY = ''
+    RECAPTCHA_PRIVATE_KEY = ''
+
 **static files**
 
     mkdir acme_site/static
