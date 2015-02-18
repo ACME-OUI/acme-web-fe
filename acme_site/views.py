@@ -61,6 +61,7 @@ def user_login(request):
             if user.is_active:
                 login(request, user)
                 messages.success(request, 'User: '+ request.POST['username'] + ' successfully loged in')
+                print 'POSTnext: ' + request.POST.get('next')
                 return HttpResponseRedirect(request.POST.get('next'))
             else:
                 messages.error(request, 'User: ' + request.POST['username'] + ' is a disactivated account')
@@ -71,11 +72,12 @@ def user_login(request):
     else:
         if 'next' in request.GET:
             redirect = request.GET.get('next')
-            print "next:" + request.GET.get('next')
+            print "GETnext:" + request.GET.get('next')
 
         else:
-            redirect = 'home.html'
-        response = render_to_response("acme_site/login.html", {"next": redirect}, context)
+            redirect = ''
+        print 'redirect:' + redirect
+        response = HttpResponse(render_template(request, "acme_site/login.html", {"next": redirect}))
         return response
 
 ##### Logout
@@ -112,8 +114,12 @@ def code(request):
     return HttpResponse(render_template(request, "demo/work_flow_edit.html", {}))
 
 @login_required(login_url='login')
-def dashboard(request):
-    return HttpResponse(render_template(request, "acme_site/dashboard.html", {}))
+def jspanel(request):
+    return HttpResponse(render_template(request, "acme_site/jspanel.html", {}))
+
+@login_required(login_url='login')
+def grid(request):
+    return HttpResponse(render_template(request, "acme_site/grid.html", {}))
 
 @login_required(login_url='login')
 def config(request):

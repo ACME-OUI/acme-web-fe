@@ -5,16 +5,16 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- for recaptcha -->
-    <script src='https://www.google.com/recaptcha/api.js'></script>
+    
     <title> {% block title %} ACME {% endblock %}</title>
     <!-- Bootstrap core CSS -->
     <link href="/acme/static/css/bootstrap.css" rel="stylesheet">
     <!-- For the jsPanel -->
-    <link rel="stylesheet" type="text/css" href="static/jquery.jspanel.min.css">
-    <script type="js/jspanel/jquery.jspanel.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/jquery-ui.min.js"></script>
-
+    
+    
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/jquery-ui.min.js"></script>
+    <script src="static/js/jquery.gridster.min.js"></script>
 
     <style type="text/css">
       body {
@@ -61,7 +61,7 @@
             <!-- <li><a href="https://earthsystemcog.org">CoG</a></li> -->
           </ul>
           <ul class="nav navbar-nav navbar-right">
-            <li><a href="login?next={{ request.get_full_path|urlencode }}">Log In</a></li>
+            <li><a href="login?next=index.html">Log In</a></li>
             <li><a href="logout">Log Out</a></li>
             <!--<li><a href="http://acme.globus.org/SignUp?redirect=http://harris112ml.llnl.gov:8000/?return=PENDING">Register</a></li>-->
             <!--<li><a href="http://acme.globus.org/SignIn?redirect=https://acme-ui.ornl.gov/acme/workflow">Log In</a></li>-->

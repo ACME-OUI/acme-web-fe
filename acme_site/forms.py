@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django import forms
-#from captcha.fields import ReCaptchaField
+from captcha.fields import ReCaptchaField
 
 
 
@@ -17,6 +17,7 @@ class UserForm(forms.ModelForm):
 
 class UserCreationForm(UserCreationForm):
 	email = forms.EmailField(required=True)
+	captcha = ReCaptchaField(attrs={'theme': 'blackglass'})
 
 	class Meta:
 		model = User
