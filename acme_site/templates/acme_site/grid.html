@@ -18,29 +18,31 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.gridster/0.5.6/jquery.gridster.js"></script>
 	<link rel="stylesheet" type="text/css" href="static/css/jquery.gridster.css">
 	<script type="text/javascript" src="static/js/grid.js"></script>
-
+	<style type="text/css">
+	#button_row {
+		margin-left: auto;
+		margin-right: auto;
+		width: 60%;
+	}
+	</style>
 
   </head>
 	<body>
+	<div id='button_row'>
+		<button type="button" class="btn" id="provenance">Provenance Capture</button>
+		<button type="button" class="btn" id="status">Status Messages</button>
+		<button type="button" class="btn" id="science">Science Input</button>
+		<button type="button" class="btn" id="nodeList">Node List</button>
+		<button type="button" class="btn" id="heatMap">Heat Map</button>
+		<button type="button" class="btn" id="modelRun">Model Run</button>
+		<button type="button" class="btn" id="nodeSelect">Node Selector</button>
+		<button type="button" class="btn" id="cdat">CDATWeb Analysis</button>
+		<button type="button" class="btn" id="charting">Charting System Status</button>
+	</div>
 	<div class="demo">
-		<div class="gridster" style="border: 1px solid black;">
+		<div class="gridster" id="grid_holder" style="border: 1px solid black; position: relative;">
 		    <ul>
-		        <li data-row="1" data-col="1" data-sizex="1" data-sizey="1"></li>
-		        <li data-row="2" data-col="1" data-sizex="1" data-sizey="1"></li>
-		        <li data-row="3" data-col="1" data-sizex="1" data-sizey="1"></li>
-		 
-		        <li data-row="1" data-col="2" data-sizex="2" data-sizey="1"></li>
-		        <li data-row="2" data-col="2" data-sizex="2" data-sizey="2"></li>
-		 
-		        <li data-row="1" data-col="4" data-sizex="1" data-sizey="1"></li>
-		        <li data-row="2" data-col="4" data-sizex="2" data-sizey="1"></li>
-		        <li data-row="3" data-col="4" data-sizex="1" data-sizey="1"></li>
-		 
-		        <li data-row="1" data-col="5" data-sizex="1" data-sizey="1"></li>
-		        <li data-row="3" data-col="5" data-sizex="1" data-sizey="1"></li>
-		 
-		        <li data-row="1" data-col="6" data-sizex="1" data-sizey="1"></li>
-		        <li data-row="2" data-col="6" data-sizex="1" data-sizey="2"></li>
+		        
 		    </ul>
 		</div>
 	</div>

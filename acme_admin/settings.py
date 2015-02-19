@@ -120,9 +120,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
 )
 
-RECAPTCHA_PUBLIC_KEY = '6Le--wETAAAAADFYR2npbwBmM1t1UNJ1UhXSPvMy'
 
-RECAPTCHA_PRIVATE_KEY = '6Le--wETAAAAAORVsGb55wl0BTg_XDw48B1qoKHq'
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
