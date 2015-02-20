@@ -9,6 +9,11 @@ $('body').ready(function(){
 	    resize: {
 	        enabled: true
 	    },
+      draggable: {
+        stop: function(e, ui, $widget) {
+          sizeFixup();
+        }
+      },
 	   	max_size_x: 5,
 	}).data('gridster');
 
@@ -46,6 +51,7 @@ $('body').ready(function(){
       if($('#' + name + '_window').length == 0) {
         var widget = ['<li id=' + name + '_window></li>',1,1];
     		gridster.add_widget.apply(gridster,widget);
+        $("#" + name).bind
       }
       sizeFixup();
   	}
@@ -58,13 +64,16 @@ $('body').ready(function(){
         var nodesInRow = 0;
         var j = 0;
         for(; j < windows.length; j++) { 
-          if(windows[i].attr('data-row') == windows[j].attr('data-row') || 
-            (windows[i].attr('data-row') <= windows[j].attr('data-row')+windows[j].attr('data-sizey') && windows[i].attr('data-row') >= windows[j].attr('data-row')    ) ) {
-            console.log("Window " + windows[i].attr('id') + " is in the same row as window " + windows[j].attr('id'));
-            nodesInRow++;
-          }
-          if(windows[i].attr('data-col') == windows[j].attr('data-col')) {
-            nodesInCol++;
+          if ($(windows[i]).attr('id') != $(windows[j]).attr('id')) {
+            if( $(windows[i]).attr('data-row') == $(windows[j]).attr('data-row') 
+                || ($(windows[i]).attr('data-row') <= $(windows[j]).attr('data-row')+$(windows[j]).attr('data-sizey') 
+                      && $(windows[i]).attr('data-row') >= $(windows[j]).attr('data-row') ) ) {
+              console.log("Window " + $(windows[i]).attr('id') + " is in the same row as window " + $(windows[j]).attr('id'));
+              nodesInRow++;
+            }
+            if($(windows[i]).attr('data-col') == $(windows[j]).attr('data-col')) {
+              nodesInCol++;
+            }
           }
         }
       }
