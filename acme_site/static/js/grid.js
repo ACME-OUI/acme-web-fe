@@ -49,7 +49,7 @@ $('body').ready(function(){
 
   	function add_grid(name){
       if($('#' + name + '_window').length == 0) {
-        var widget = ['<li id=' + name + '_window></li>',1,1];
+        var widget = ['<li id=' + name + '_window>' + name + '</li>',1,1];
     		gridster.add_widget.apply(gridster,widget);
         $("#" + name).bind
       }
@@ -65,13 +65,16 @@ $('body').ready(function(){
         var j = 0;
         for(; j < windows.length; j++) { 
           if ($(windows[i]).attr('id') != $(windows[j]).attr('id')) {
-            if( $(windows[i]).attr('data-row') == $(windows[j]).attr('data-row') 
-                || ($(windows[i]).attr('data-row') <= $(windows[j]).attr('data-row')+$(windows[j]).attr('data-sizey') 
-                      && $(windows[i]).attr('data-row') >= $(windows[j]).attr('data-row') ) ) {
-              console.log("Window " + $(windows[i]).attr('id') + " is in the same row as window " + $(windows[j]).attr('id'));
+            if( parseInt($(windows[i]).attr('data-row')) == parseInt($(windows[j]).attr('data-row')) 
+                || ( parseInt($(windows[i]).attr('data-row'))-1 <= parseInt($(windows[j]).attr('data-row'))-1+parseInt($(windows[j]).attr('data-sizey')) 
+                      && parseInt($(windows[i]).attr('data-row')) >= parseInt($(windows[j]).attr('data-row')) ) ) {
+              console.log($(windows[i]).attr('id') + " is in the same row as " + $(windows[j]).attr('id'));
               nodesInRow++;
             }
-            if($(windows[i]).attr('data-col') == $(windows[j]).attr('data-col')) {
+            if(parseInt($(windows[i]).attr('data-col')) == parseInt($(windows[j]).attr('data-col'))
+                || (parseInt($(windows[i]).attr('data-col'))-1 <= parseInt($(windows[j]).attr('data-col'))-1+parseInt($(windows[j]).attr('data-sizex'))
+                    && parseInt($(windows[i]).attr('data-col')) >= parseInt($(windows[j]).attr('data-col')) ) ) {
+              console.log($(windows[i]).attr('id') + " is in the same col as " + $(windows[j]).attr('id'));
               nodesInCol++;
             }
           }
