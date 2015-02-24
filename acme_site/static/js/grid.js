@@ -137,9 +137,8 @@ $('body').ready(function(){
         highestRow = parseInt($(windows[i]).attr('data-row')) + parseInt($(windows[i]).attr('data-sizey'));
       }
     }
-
     var j = 0;
-    for(; j < widget.x; j++) { //scan to the left of the x position, including the height of the widget
+    for(; j < widget.x; j++) { //scan to the left of the widget.x position
       if( gridster.is_widget(j, widget.y)) {
         nodes.left++;
       }
