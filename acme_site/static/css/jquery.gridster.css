@@ -139,8 +139,9 @@ ul, ol {
 
 * { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
 
+
 body {
-    background-color: #EEEEEE;
+    background: #004756;
     font-family: 'Helvetica Neue', Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     font-size: x-small;
