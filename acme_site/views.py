@@ -117,7 +117,7 @@ def code(request):
 def jspanel(request):
     return HttpResponse(render_template(request, "acme_site/jspanel.html", {}))
 
-@login_required(login_url='login')
+#@login_required(login_url='login')
 def grid(request):
     return HttpResponse(render_template(request, "acme_site/grid.html", {}))
 
