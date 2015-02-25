@@ -56,9 +56,11 @@
           </ul>
           <ul class="nav navbar-nav navbar-right">
             {% if user.is_authenticated %}
-              <li><a href="logout">Log Out</a></li>
+            <li><a href="/acme"> Welcome {{ user.username }}</a></li>
+            <li><a href="logout">Log Out</a></li>
             {% else %}
-              <li><a href="login?next=index.html">Log In</a></li>
+            <li><a href="login?next={% url 'index' %}">Welcome Guest</a></li>
+            <li><a href="login?next={% url 'index' %}">Log In</a></li>
             {% endif %}
           </ul>
         </div><!--/.nav-collapse -->
