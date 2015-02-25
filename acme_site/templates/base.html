@@ -33,7 +33,7 @@
     <!--<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>-->
     <script src="/acme/static/js/bootstrap.min.js"></script>
   </head>
-  <body>
+  <body role="document">
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="container">
         <div class="navbar-header">
@@ -55,22 +55,24 @@
             <li><a href="#">CDATWEB</a></li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
-            <li><a href="login?next=index.html">Log In</a></li>
-            <li><a href="logout">Log Out</a></li>
+            {% if user.is_authenticated %}
+              <li><a href="logout">Log Out</a></li>
+            {% else %}
+              <li><a href="login?next=index.html">Log In</a></li>
+            {% endif %}
           </ul>
         </div><!--/.nav-collapse -->
       </div>
     </div>
-    <div class="container">
+    <div class="container theme-showcase" role="main">
       {% block content %}   
 
       {% endblock %}
     </div>
     <div id="footer" class="footer">
-      <p>
-      <a href="#">Privacy &amp; Legal Notice</a> &bull; 
-      <a href="https://github.com/aims-group/acme-site/issues">Site Issues</a> 
-      </p>      
+    <hr>
+      <a href="#">Privacy &amp; Legal Notice</a> &nbsp;
+      <a href="https://github.com/aims-group/acme-site/issues">Site Issues</a>
     </div>
   </div><!-- /.container -->
 </body>
