@@ -2,25 +2,29 @@ $('body').ready(function(){
     
   	var gridster;
     var maxCols = 6;
-    var maxHeight = 6;
+    var maxHeight = 4;
     var resize_handle_html = '<span class="gs-resize-handle gs-resize-handle-both"></span>'
 
 	gridster = $(".gridster ul").gridster({
 	    widget_margins: [10, 10],
 	    widget_base_dimensions: [140, 140],
-	    min_cols: 6,
+	    max_cols: maxCols,
+      min_cols: maxCols,
 	    resize: {
         enabled: true,
         stop: function(e, ui, $widget) {
-          sizeFixup();
+          resizeFixup(e, ui);
         }
 	    },
       draggable: {
         stop: function(e, ui, $widget) {
-          sizeFixup();
-        }
+          dragFixup(e, ui);
+        },
       },
 	}).data('gridster');
+
+  gridster.set_dom_grid_height(642);
+  //gridster.set_dom_grid_width(maxCols);
 
 
 	$('#provenance').click(function(){
@@ -52,6 +56,11 @@ $('body').ready(function(){
     });
   
 
+  function dragFixup() {
+
+  }
+
+
   /**
    * Registers call backs for window creation buttons
    */
@@ -61,13 +70,13 @@ $('body').ready(function(){
   		gridster.add_widget.apply(gridster,widget);
       $('#' + name).bind
     }
-    sizeFixup();
+    new_window_fixup();
 	}
 
   /**
   * Computes and sets the size for each window
   */
-  function sizeFixup() {
+  function sizeFixup(e, ui) {
     var i = 0;
     var windows = $(".gs-w");
     for(; i < windows.length; i++) {
@@ -84,17 +93,6 @@ $('body').ready(function(){
         sizex: parseInt($(windows[i]).attr('data-sizex')),
         sizey: parseInt($(windows[i]).attr('data-sizey')),
       });
-      re_place_window({
-        x: $(windows[i]).attr('data-col'),
-        y: $(windows[i]).attr('data-row'),
-        id: $(windows[i]).attr('id'),
-        nodesInRow: rowsCols.row,
-        nodesInCol: rowsCols.col,
-        occupiedLeft: nodes.left,
-        occupiedRight: nodes.right,
-        occupiedUp: nodes.up,
-        occupiedDown: nodes.down,
-      });
     }
   }
 
@@ -104,8 +102,114 @@ $('body').ready(function(){
    * Recomputes and then places each window in its correct position
    * widget -> x, y, id, sizex, sizey, nodesInRow, nodesInCol, occupiedLeft, occupiedRight, occupiedUp, occupiedDown
    */
-  function re_place_window(widget) {
-    
+  function new_window_fixup(e, ui) {
+    var windows = $('.gs-w');
+    var rowArray = [];
+    var smallestRow;
+    var smallestSize
+    if (windows.length == 1) {
+      rowArray.push(1);
+      gridster.mutate_widget_in_gridmap($(windows[0]),
+      {
+        col: 1,
+        row: 1,
+        size_x: 1,
+        size_y: 1
+      },
+      {
+        col: 1,
+        row: 1,
+        size_x: maxCols,
+        size_y: maxHeight
+      });
+      gridster.set_dom_grid_height();
+      gridster.set_dom_grid_width();
+    } else {
+      //check to see if we need to create a new row
+      //maxCol is the size of the row with the most columns
+      var maxCol = 1;
+      for (i = 0; i < rowArray.length; i++) {
+        if (rowArray[i] > maxCol) {
+          maxCol = rowArray[i];
+        }
+      }
+      //if the largest row is larger then the
+      //number of rows, add a new row
+      if (maxCol > rowArray.length) {
+        //new row is needed
+        rowArray.push(0); //add the new row size to the rowArray
+        smallestRow = rowArray.length-1;
+        smallestSize = 1;
+      } else {
+        smallestRow = rowArray[0];//index of the smallest row
+        smallestSize = maxCols+1; //value of the smallest row
+        for (i = rowArray.length - 1; i >= 0; i--) { //find the index and length of the smallest row
+          if (rowArray[i] <= smallestSize) {
+            smallestRow = i;
+            smallestSize = rowArray[i];
+          }
+        }
+      }
+      gridster.mutate_widget_in_gridmap($(windows[i]), //move the grid to the correct row/col
+      {
+        x: parseInt($(windows[i]).attr('data-col')),
+        y: parseInt($(windows[i]).attr('data-row')),
+        size_x: parseInt($(windows[i]).attr('data-sizex')),
+        size_y: parseInt($(windows[i]).attr('data-sizey'))
+      },{
+        x: smallestRow,
+        y: smallestSize,
+        size_x: parseInt($(windows[i]).attr('data-sizex')),
+        size_y: parseInt($(windows[i]).attr('data-sizey'))
+      });
+      
+      rowArray[smallestRow] ++;
+      
+      for (i = 0; i < windows.length; i++) {
+        /*If the grid is in the smallest row
+        if (parseInt($(windows[i]).attr('data-row'))-1 == smallestRow) { 
+          gridster.mutate_widget_in_gridmap(
+            $(windows[i]),
+            {
+              x: parseInt($(windows[i]).attr('data-col')),
+              y: parseInt($(windows[i]).attr('data-row')),
+              size_x: parseInt($(windows[i]).attr('data-sizex')),
+              size_y: parseInt($(windows[i]).attr('data-sizey'))
+            },{
+              x: parseInt($(windows[i]).attr('data-col')),
+              y: parseInt($(windows[i]).attr('data-row')),
+              size_x: Math.floor(maxCols / rowArray[smallestRow]),
+              size_y: Math.floor(maxHeight / rowArray.length),
+          });
+        }*/
+      
+        if (parseInt($(windows[i]).attr('data-col')) != 1) {
+          for(var j = 0; j < panelArray.length; j++) {
+            if ((panelArray[j].data('pos').row == panelArray[i].data('pos').row) && (panelArray[j].data('pos').col == (panelArray[i].data('pos').col -1 ) )) {
+              var offset = panelArray[j].offset();
+              break;
+            }
+          }
+          panelArray[i].offset({
+            left: offset.left+panelArray[i].width(), 
+            top: panelArray[i].parent().offset().top + (panelArray[i].data('pos').row * panelArray[i].height() ) });
+        } else if (panelArray[i].data('pos').col == 0 && panelArray[i].data('pos').row != 0) {
+          panelArray[i].offset({
+            top: panelArray[i].parent().offset().top + (panelArray[i].data('pos').row * panelArray[i].height() ) });
+        }
+      }
+      for (i = 0; i < rowArray.length; i++) {
+        if (rowArray[i] % 2 != 0 && rowArray[i] % 3 != 0 && rowArray[i] != 1) {
+          for (j = 0; j < panelArray.length; j++) {
+            if (panelArray[j].data('pos').row == i && (panelArray[j].data('pos').col+1) == rowArray[i]) {
+              panelArray[j].width(panelArray[j].width() + pixPerGrid);
+              break;;
+            }
+          }
+        }
+      } 
+    }
+
   }
 
   /**
