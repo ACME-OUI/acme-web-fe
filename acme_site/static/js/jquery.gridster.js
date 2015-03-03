@@ -1929,7 +1929,7 @@
         }).appendTo(this.$el);
 
         if (this.options.draggable.start) {
-          this.options.draggable.start.call(this, event, ui);
+          this.options.draggable.start.call(this, event, ui, this.$player);
         }
     };
 
@@ -1942,6 +1942,7 @@
     * @param {Object} ui A prepared ui object with useful drag-related data
     */
     fn.on_drag = function(event, ui) {
+        
         //break if dragstop has been fired
         if (this.$player === null) {
             return false;
@@ -1970,12 +1971,13 @@
         this.colliders_data = this.collision_api.get_closest_colliders(
             abs_offset);
 
+/*
         this.on_overlapped_column_change(
             this.on_start_overlapping_column, this.on_stop_overlapping_column);
 
         this.on_overlapped_row_change(
             this.on_start_overlapping_row, this.on_stop_overlapping_row);
-
+*/
 
         if (this.helper && this.$player) {
             this.$player.css({
@@ -1985,6 +1987,8 @@
         }
 
         if (this.options.draggable.drag) {
+            //console.log(this.$widgets[0].id);
+            //var id = this.$widgets[0].id;
             this.options.draggable.drag.call(this, event, ui);
         }
     };
@@ -1998,6 +2002,7 @@
     * @param {Object} ui A prepared ui object with useful drag-related data
     */
     fn.on_stop_drag = function(event, ui) {
+        
         this.$helper.add(this.$player).add(this.$wrapper)
             .removeClass('dragging');
 
@@ -2006,16 +2011,29 @@
         this.colliders_data = this.collision_api.get_closest_colliders(
             ui.position);
 
+       
+/*
         this.on_overlapped_column_change(
             this.on_start_overlapping_column,
             this.on_stop_overlapping_column
         );
+        
+
 
         this.on_overlapped_row_change(
             this.on_start_overlapping_row,
             this.on_stop_overlapping_row
         );
+*/
 
+//console.log("start over col:" + this.get_targeted_columns(this.colliders_data[0].el.data.col));
+        //console.log("start over row:" + this.get_targeted_rows(this.colliders_data[0].el.data.row));
+        var startCollideCol = this.get_targeted_columns(this.colliders_data[0].el.data.col);
+        var startCollideRow = this.get_targeted_rows(this.colliders_data[0].el.data.row);
+        if (this.options.draggable.stop) {
+          this.options.draggable.stop.call(this, event, ui, startCollideCol, startCollideRow);
+        }
+/*
         this.$player.addClass('player-revert').removeClass('player')
             .attr({
                 'data-col': this.placeholder_grid_data.col,
@@ -2024,9 +2042,9 @@
                 'left': '',
                 'top': ''
             });
-
+8?
         this.$changed = this.$changed.add(this.$player);
-
+/*
         this.cells_occupied_by_player = this.get_cells_occupied(
             this.placeholder_grid_data);
         this.set_cells_player_occupies(
@@ -2034,10 +2052,8 @@
 
         this.$player.coords().grid.row = this.placeholder_grid_data.row;
         this.$player.coords().grid.col = this.placeholder_grid_data.col;
-
-        if (this.options.draggable.stop) {
-          this.options.draggable.stop.call(this, event, ui);
-        }
+*/
+        
 
         this.$preview_holder.remove();
 
@@ -2050,10 +2066,11 @@
 
         this.set_dom_grid_height();
         this.set_dom_grid_width();
-
+/*
         if (this.options.autogrow_cols) {
             this.drag_api.set_limits(this.cols * this.min_widget_width);
         }
+*/
     };
 
 

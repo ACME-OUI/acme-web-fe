@@ -1,39 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- for recaptcha -->
+    
+    <title> {% block title %} Gridster Demo {% endblock %}</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
 
-{% extends "base.html" %}
-{% block title %} Gridster Demo {% endblock %}
+   
 
-{% block content %}
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.gridster/0.5.6/jquery.gridster.js"></script>
-<link rel="stylesheet" type="text/css" href="static/css/jquery.gridster.css">
-<script type="text/javascript" src="static/js/grid.js"></script>
+    <!-- <link=href="https://raw.github.com/ehynds/jquery-ui-multiselect-widget/1.13/jquery.multiselect.css" rel="stylesheet">-->
+    <!-- <link=href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/ui-lightness/jquery-ui.min.css" rel="stylesheet">-->
+    <!--<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>-->
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.gridster/0.5.6/jquery.gridster.js"></script>-->
+    <script type="text/javascript" src="static/js/jquery.gridster.js"></script>
+    <link rel="stylesheet" type="text/css" href="static/css/jquery.gridster.css">
+    <!--<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">-->
+    <script type="text/javascript" src="static/js/grid.js"></script>
+    <style type="text/css">
+    #button_row {
+      margin-left: auto;
+      margin-right: auto;
+      width: 965px;
+    }
 
-<style type="text/css">
-.btn{
-  margin-top: 1px;
-  margin-bottom: 1px;
-}
-</style>
+    </style>
 
-<div class="row">
-  <div class="col-sm-3 col-md-2 sidebar">
-    <button type="button" class="btn" id="provenance">Provenance Capture</button><br/>
-    <button type="button" class="btn" id="status">Status Messages</button><br/>
-    <button type="button" class="btn" id="science">Science Input</button><br/>
-    <button type="button" class="btn" id="nodeList">Node List</button><br/>
-    <button type="button" class="btn" id="heatMap">Heat Map</button><br/>
-    <button type="button" class="btn" id="modelRun">Model Run</button><br/>
-    <button type="button" class="btn" id="nodeSelect">Node Selector</button><br/>
-    <button type="button" class="btn" id="cdat">CDATWeb Analysis</button><br/>
-    <button type="button" class="btn" id="charting">Charting System Status</button><br/>
+  </head>
+  <body>
+  <div id='button_row'>
+    <button type="button" class="btn" id="provenance">Provenance Capture</button>
+    <button type="button" class="btn" id="status">Status Messages</button>
+    <button type="button" class="btn" id="science">Science Input</button>
+    <button type="button" class="btn" id="nodeList">Node List</button>
+    <button type="button" class="btn" id="heatMap">Heat Map</button>
+    <button type="button" class="btn" id="modelRun">Model Run</button>
+    <button type="button" class="btn" id="nodeSelect">Node Selector</button>
+    <button type="button" class="btn" id="cdat">CDATWeb Analysis</button>
+    <button type="button" class="btn" id="charting">Charting System Status</button>
   </div>
-
-  <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-    <div class="gridster" id="grid_holder" style="border: 1px solid black; position: relative;">
-      <ul></ul>
+  <div class="demo">
+    <div class="gridster" id="grid_holder" style="border: 1px solid black; position: relative; margin-left: auto; margin-right: auto;">
+        <ul>
+            
+        </ul>
     </div>
-  </div> 
-</div>
-{% endblock %}
-
+  </div>
+  </body>
+</html>
