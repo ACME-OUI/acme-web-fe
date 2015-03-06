@@ -27,6 +27,7 @@ $('body').ready(function(){
       top: 0,
       left: 0
     };
+    var widgeMargins = 10;
 
 
 
@@ -56,7 +57,7 @@ $('body').ready(function(){
     */
 
   gridster = $(".gridster ul").gridster({
-      widget_margins: [10, 10],
+      widget_margins: [widgeMargins, widgeMargins],
       widget_base_dimensions: [140, 140],
       max_cols: maxCols,
       min_cols: maxCols,
@@ -67,6 +68,8 @@ $('body').ready(function(){
         }
       },
       draggable: {
+        distance: 1,
+        limit: true,
         start: function(e, ui, id) {
           dragStartId = id[0].id;
           var grid = $('#' + dragStartId);
@@ -75,9 +78,9 @@ $('body').ready(function(){
           dragStartY = grid.attr('data-row');
           dragStartSizeX = grid.attr('data-sizex');
           dragStartSizeY = grid.attr('data-sizey');
-          dragStartOffset.top = offset.top;
-          dragStartOffset.left = offset.left;
-          console.log('drag starting at left:' + dragStartOffset.left + ' top:' + dragStartOffset.top);
+          dragStartOffset.top = Math.floor(offset.top);
+          dragStartOffset.left = Math.floor(offset.left)+1;
+          //console.log('drag starting at left:' + dragStartOffset.left + ' top:' + dragStartOffset.top);
         },
         stop: function(e, ui, col, row) {
           dragFixup(e, ui, col, row);
@@ -123,8 +126,8 @@ $('body').ready(function(){
 
   function dragFixup(e, ui, col, row) {
     //$($('.gs-w')[0]).offset({top: 100});
-    console.log("col:" + col + " row:" + row);
-    console.log(idFromLocation(col, row));
+    //console.log("col:" + col + " row:" + row);
+    //console.log(idFromLocation(col, row));
     var targetId = idFromLocation(col, row);
     var targetX = parseInt($('#'+targetId).attr('data-col'));
     var targetY = parseInt($('#'+targetId).attr('data-row'));
@@ -133,7 +136,7 @@ $('body').ready(function(){
     var startGrid = $('#'+dragStartId);
     var targetGrid = $('#'+targetId);
     if(targetId == dragStartId) {
-      console.log('Putting back ' + targetId + ' where it started');
+      //console.log('Putting back ' + targetId + ' where it started');
       gridster.mutate_widget_in_gridmap(
         targetGrid,
         {
@@ -149,17 +152,18 @@ $('body').ready(function(){
           size_y: dragStartSizeY,
         });
       var targetOffset = targetGrid.offset();
-      console.log('placing ' + dragStartId + ' at left:' + dragStartOffset.left + ' top:' + dragStartOffset.top);
-      if(dragStartOffset.left != targetOffset.left && dragStartOffset.top != targetOffset.top) {
-          startGrid.offset({
-            top: dragStartOffset.top,
-            left: dragStartOffset.left
-          });
-        }
+      //console.log('placing ' + dragStartId + ' at left:' + dragStartOffset.left + ' top:' + dragStartOffset.top);
+      startGrid.offset({
+        top: dragStartOffset.top,
+        left: dragStartOffset.left
+      });
     } else {
-      console.log('Switching ' + dragStartId + ' with ' + targetId);
+      //console.log('Switching ' + dragStartId + ' @ row:' + startGrid.attr('data-row') + ' col:' + startGrid.attr('data-col'));
+      //console.log('     with ' + targetId + ' @ row:' + targetGrid.attr('data-row') + ' col:' + targetGrid.attr('data-col'));
       var startOffset = startGrid.offset();
       var targetOffset = targetGrid.offset();
+      //console.log('placing ' + dragStartId + ' at left:' + targetOffset.left + ' top:' + targetOffset.top);
+      //console.log('placing ' + targetId + ' at left:' + (dragStartOffset.left - Math.floor(widgeMargins/2)-2) + ' top:' + dragStartOffset.top);
       gridster.mutate_widget_in_gridmap(
         startGrid,
         {
@@ -188,15 +192,15 @@ $('body').ready(function(){
           size_x: dragStartSizeX,
           size_y: dragStartSizeY,
         });
+      startGrid.offset({
+        top: targetOffset.top,
+        left: targetOffset.left
+      });
+      targetGrid.offset({
+        top: dragStartOffset.top,
+        left: (dragStartOffset.left - Math.floor(widgeMargins/2)-2)
+      }); 
     }
-    console.log('placing ' + dragStartId + ' at left:' + targetOffset.left + ' top:' + targetOffset.top);
-    startGrid.offset({
-      top: targetOffset.top,
-      left: targetOffset.left
-    });
-    
-      
-
   }
 
 
@@ -290,6 +294,7 @@ $('body').ready(function(){
           largetsWidgetIndex = i;
         }
       }
+      //If the largest window found is taller then it is wide
       if(parseInt($(windows[largetsWidgetIndex]).attr('data-sizey')) >= parseInt($(windows[largetsWidgetIndex]).attr('data-sizex'))  ) {
         var newHeight = parseInt($(windows[largetsWidgetIndex]).attr('data-sizey')) / 2;
         if(Math.floor(parseInt($(windows[largetsWidgetIndex]).attr('data-sizey')) / 2) != parseInt($(windows[largetsWidgetIndex]).attr('data-sizey')) / 2) {
@@ -323,7 +328,7 @@ $('body').ready(function(){
             size_x: parseInt($(windows[largetsWidgetIndex]).attr('data-sizex')),
             size_y: newHeight
           });
-      } else {
+      } else { //If the largest window found is wider then it is tall
         var newWidth = parseInt($(windows[largetsWidgetIndex]).attr('data-sizex')) / 2;
         if(Math.floor(parseInt($(windows[largetsWidgetIndex]).attr('data-sizex')) / 2) != parseInt($(windows[largetsWidgetIndex]).attr('data-sizex')) / 2) {
           newWidth = Math.floor(parseInt($(windows[largetsWidgetIndex]).attr('data-sizex')) / 2) + 1;
