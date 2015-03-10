@@ -183,8 +183,9 @@ body {
 }
 
 .panel-body {
-    height: 100%;
-    cursor: default;
+/*    height: 100%;
+*/    cursor: default;
+    margin-bottom: -30px!important;
 }
 
 .panel-heading {

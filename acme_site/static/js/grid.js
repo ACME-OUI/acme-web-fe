@@ -19,9 +19,9 @@ $('body').ready(function(){
     header1 += '    <button type="button" class="btn btn-default remove"  style="float:right;">';
     header1 += '     <span class="fa fa-times" aria-label="Close"></span>';
     header1 += '    </button>';
-    header1 += '     <h1 style="text-align: center">';
+    header1 += '     <h2 style="text-align: center">';
     // Widget Name
-    header2 += '     <h1>';
+    header2 += '     <h2>';
     header2 += '   </div>';
     header2 += '  </div>';
     header2 += ' </div>';
@@ -166,10 +166,14 @@ $('body').ready(function(){
       var wsizex = parseInt($(windows[i]).attr('data-sizex'));
       var wsizey = parseInt($(windows[i]).attr('data-sizey'));
       if((x == wx) || ((x < wx) && (x + sizex - 1 >= wx)) || ((x > wx) && (x <= wx + wsizex - 1))) {
-        adj.push(windows[i]);
+        if(wy + wsizey == y || y + sizey == wy) {
+          adj.push(windows[i]);
+        }
       }
       if((y == wy) || ((y < wy) && (y + sizey - 1 >= wy)) || ((y > wy)  && (y <= wy + wsizey - 1))) {
-        adj.push(windows[i]);
+        if(wx + wsizex == x || x + sizex == wx) {
+          adj.push(windows[i]);
+        }
       }
     };
     console.log(adj);
