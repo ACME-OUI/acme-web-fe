@@ -2174,6 +2174,7 @@
         if (this.options.autogrow_cols) {
             this.drag_api.set_limits(this.cols * this.min_widget_width);
         }
+        
     };
 
 

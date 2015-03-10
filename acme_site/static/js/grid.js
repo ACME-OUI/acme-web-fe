@@ -4,19 +4,36 @@ $('body').ready(function(){
     var maxCols = 6;
     var maxHeight = 4;
     var resize_handle_html = '<span class="gs-resize-handle gs-resize-handle-both"></span>';
-    var header1 = '<div class="panel panel-default">';
-    header1 +=    '   <div class="panel-heading hidden-box">';
-    header1 +=    '    <div class="panel-header-title text-center">';
-    header1 +=    '      <div class="pull-left">';
-    header1 +=    '        <button class="btn btn-default btn-sm" data-toggle="modal" data-target="#widgetRemove">';
-    header1 +=    '          <i class="fa fa-cog fa-spin">Settings</i>';
-    header1 +=    '        </button>';
-    header1 +=    '      </div>';
-    //                    <!-- Widget Name-->
-    var header2 = '      <div class="pull-right">';
-    header2    += '         <button class="btn btn-default " data-toggle="modal" data-target="#widgetConfig">';
-    header2    += '           <span class="glyphicon glyphicon-align-justify"></span>';
-    header2    += '             </button></div></div></div><div class="panel-body"><!-- Panel Body --></div></div>';
+
+    // Define a widget
+    var header1 = ''; 
+    var header2 = '';
+    var header3 = '';
+    var contents = '';
+    header1 += '<div class="panel panel-default">';
+    header1 += ' <div class="panel-heading hidden-box">';
+    header1 += '  <div class="panel-header-title text-center">';
+    header1 += '    <button type="button" class="btn btn-default options" style="float:left;">';
+    header1 += '     <span class="fa fa-cog" aria-label="Options"></span>';
+    header1 += '    </button>';
+    header1 += '    <button type="button" class="btn btn-default remove"  style="float:right;">';
+    header1 += '     <span class="fa fa-times" aria-label="Close"></span>';
+    header1 += '    </button>';
+    header1 += '     <h1 style="text-align: center">';
+    // Widget Name
+    header2 += '     <h1>';
+    header2 += '   </div>';
+    header2 += '  </div>';
+    header2 += ' </div>';
+    header2 += ' <div class="panel-body">';
+    header2 += '  <div class="box">&nbsp</div><br>';
+    // Widget Contents
+    contents += '  The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men.';
+    header3 += ' </div>';
+    header3 += '</div>';
+
+
+
 
     var dragStartX = 0;
     var dragStartY = 0;
@@ -27,46 +44,34 @@ $('body').ready(function(){
       top: 0,
       left: 0
     };
+    var widgetMargins = 1;
+    var resizeStartSizeX = 0;
+    var resizeStartSizeY = 0;
+    var resizeStartX = 0;
+    var resizeStartY = 0;
 
 
-
-    /* Define a widget
-    var widget = '<div class="panel panel-default">';
-    widget += ' <div class="panel-heading hidden-box">';
-    widget += '  <div class="panel-header-title text-center">';
-    widget += '   <div class="pull-left">';
-    widget += '   <button class="btn btn-default btn-xs" data-toggle="modal" data-target="#widgetConfiguration">';
-    widget += '    <span class="glyphicon glyphicon-align-justify"></span>';
-    widget += '   </button>';
-    widget += '   </div>';
-    widget += '   Widget';
-    widget += '   <div class="pull-right">';
-    widget += '    <button class="btn btn-default btn-xs" data-toggle="modal" data-target="#widgetRemove">';
-    widget += '     <span class="glyphicon glyphicon-remove"></span>';
-    widget += '    </button>';
-    widget += '   </div>';
-    widget += '  </div>';
-    widget += ' </div>';
-    widget += ' <div class="panel-body">';
-    widget += '  <div class="box">&nbsp</div>';
-    widget += '  Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
-    widget += '  <input type="text" style="width: 200px" id="i" />';
-    widget += ' </div>';
-    widget += '</div>';
-    */
 
   gridster = $(".gridster ul").gridster({
-      widget_margins: [10, 10],
+      widget_margins: [widgetMargins, widgetMargins],
       widget_base_dimensions: [140, 140],
       max_cols: maxCols,
       min_cols: maxCols,
       resize: {
         enabled: true,
-        stop: function(e, ui, $widget) {
-          //resizeFixup(e, ui);
+        stop: function(e, ui, widget) {
+          resizeFixup(e, ui, widget[0].id);
+        },
+        start: function(e, ui, widget) {
+          resizeStartX = parseInt($('#'+widget[0].id).attr('data-col'));
+          resizeStartY = parseInt($('#'+widget[0].id).attr('data-row'));
+          resizeStartSizeX = parseInt($('#'+widget[0].id).attr('data-sizex'));
+          resizeStartSizeY = parseInt($('#'+widget[0].id).attr('data-sizey'));
         }
       },
       draggable: {
+        distance: 0,
+        limit: true,
         start: function(e, ui, id) {
           dragStartId = id[0].id;
           var grid = $('#' + dragStartId);
@@ -75,9 +80,9 @@ $('body').ready(function(){
           dragStartY = grid.attr('data-row');
           dragStartSizeX = grid.attr('data-sizex');
           dragStartSizeY = grid.attr('data-sizey');
-          dragStartOffset.top = offset.top;
-          dragStartOffset.left = offset.left;
-          console.log('drag starting at left:' + dragStartOffset.left + ' top:' + dragStartOffset.top);
+          dragStartOffset.top = Math.floor(offset.top);
+          dragStartOffset.left = Math.floor(offset.left)+1;
+          //console.log('drag starting at left:' + dragStartOffset.left + ' top:' + dragStartOffset.top);
         },
         stop: function(e, ui, col, row) {
           dragFixup(e, ui, col, row);
@@ -88,8 +93,8 @@ $('body').ready(function(){
       },
   }).data('gridster');
 
-  gridster.set_dom_grid_height(642);
-  //gridster.set_dom_grid_width(maxCols);
+  gridster.set_dom_grid_height(640);
+  //gridster.set_dom_grid_width(2*widgetMargins*maxCols);
 
 
   $('#provenance').click(function(){
@@ -119,28 +124,133 @@ $('body').ready(function(){
   $('#charting').click(function(){
       add_grid('charting');
     });
+
+  /**
+   * Registers call backs for window creation buttons
+   */
+  function add_grid(name){
+    if($('#' + name + '_window').length == 0) {
+      var widget_t = ['<li id=' + name + '_window>' + header1 +''+ name +''+ header2 +''+ contents +''+ header3 +'</li>',1,1];
+      var w = gridster.add_widget.apply(gridster,widget_t);
+      $(w).find('.panel-body').mousedown(function (event) {
+        event.stopPropagation();
+      });
+      $(w).find('.remove').click(function(e) {
+        //send the widget that got clicked to the remove handler
+        removeFixup(e.target.parentElement.parentElement.parentElement.parentElement);
+      });
+      $(w).find('.options').click(function(e) {
+        widgetOptions(e.target.parentElement.parentElement.parentElement.parentElement);
+      });
+      new_window_fixup({id: name + '_window'});
+    }
+  }
+  
+ 
+  /**
+   * Fixes the widget sizes after a remove event
+   * widget -> the widget being removed
+   */
+  function removeFixup(widget){
+    var windows = $('.gs-w');
+    var x = parseInt($(widget).attr('data-col'));
+    var y = parseInt($(widget).attr('data-row'));
+    var sizex = parseInt($(widget).attr('data-sizex'));
+    var sizey = parseInt($(widget).attr('data-sizey'));
+    var adj = [];
+    for (var i = windows.length - 1; i >= 0; i--) {
+      if($(windows[i]).attr('id') == $(widget).attr('id'))
+        continue;
+      var wx = parseInt($(windows[i]).attr('data-col'));
+      var wy = parseInt($(windows[i]).attr('data-row'));
+      var wsizex = parseInt($(windows[i]).attr('data-sizex'));
+      var wsizey = parseInt($(windows[i]).attr('data-sizey'));
+      if((x == wx) || ((x < wx) && (x + sizex - 1 >= wx)) || ((x > wx) && (x <= wx + wsizex - 1))) {
+        adj.push(windows[i]);
+      }
+      if((y == wy) || ((y < wy) && (y + sizey - 1 >= wy)) || ((y > wy)  && (y <= wy + wsizey - 1))) {
+        adj.push(windows[i]);
+      }
+    };
+    console.log(adj);
+  }
+
+  /**
+   * Fixes the widget sizes after a remove event
+   * widget -> the widget requesting its options
+   */
+  function widgetOptions(id){
+
+  }
+
+
+
+
+  //this only works when going up and to the left
+  //  TODO: add the sizex and sizey so it works going down and to the right
+  function idFromLocation(col, row, sizex, sizey) {
+    var windows = $('.gs-w');
+    var id;
+    for (var i = windows.length - 1; i >= 0; i--) {
+      if(parseInt($(windows[i]).attr('data-row')) <= row && row <= ( parseInt($(windows[i]).attr('data-row'))+parseInt($(windows[i]).attr('data-sizey'))-1) )  
+      {
+        if(parseInt($(windows[i]).attr('data-col')) <= col && col <= (parseInt($(windows[i]).attr('data-col'))+parseInt($(windows[i]).attr('data-sizex'))-1) ) 
+        {
+          id = $(windows[i]).attr('id');
+          return id;
+        }
+      }
+      
+    };
+  }
+
+
   
 
+  /**
+  * Computes and sets the size for each window
+  */
+  function resizeFixup(e, ui, id) {
+    var i = 0;
+    var windows = $(".gs-w");
+    for(; i < windows.length; i++) {
+      // var j = 0;
+      // var rowsCols = get_windows({
+      //   id: $(windows[i]).attr('id'),
+      //   x: parseInt($(windows[i]).attr('data-col')),
+      //   y: parseInt($(windows[i]).attr('data-row')),
+      // });
+      // var nodes = get_rows_cols({
+      //   id: $(windows[i]).attr('id'),
+      //   x: parseInt($(windows[i]).attr('data-col')),
+      //   y: parseInt($(windows[i]).attr('data-row')),
+      //   sizex: parseInt($(windows[i]).attr('data-sizex')),
+      //   sizey: parseInt($(windows[i]).attr('data-sizey')),
+      // });
+    }
+  }
+
+  /**
+   * Fixes the window positions after a drag event
+   * col, row -> the ending col and row of the dragged element
+   */
   function dragFixup(e, ui, col, row) {
-    //$($('.gs-w')[0]).offset({top: 100});
-    console.log("col:" + col + " row:" + row);
-    console.log(idFromLocation(col, row));
+    
     var targetId = idFromLocation(col, row);
     var targetX = parseInt($('#'+targetId).attr('data-col'));
     var targetY = parseInt($('#'+targetId).attr('data-row'));
     var targetSizeX = parseInt($('#'+targetId).attr('data-sizex'));
     var targetSizeY = parseInt($('#'+targetId).attr('data-sizey'));
-    var startGrid = $('#'+dragStartId);
     var targetGrid = $('#'+targetId);
+    var startGrid = $('#'+dragStartId);
     if(targetId == dragStartId) {
-      console.log('Putting back ' + targetId + ' where it started');
       gridster.mutate_widget_in_gridmap(
         targetGrid,
         {
-          col: targetGrid.attr('data-col'),
-          row: targetGrid.attr('data-row'),
-          size_x: targetGrid.attr('data-sizex'),
-          size_y: targetGrid.attr('data-sizey'),
+          col: 1,//parseInt(targetGrid.attr('data-col')),
+          row: 1,//parseInt(targetGrid.attr('data-row')),
+          size_x: 1,//parseInt(targetGrid.attr('data-sizex')),
+          size_y: 1,//parseInt(targetGrid.attr('data-sizey')),
         },
         {
           col: dragStartX,
@@ -149,15 +259,11 @@ $('body').ready(function(){
           size_y: dragStartSizeY,
         });
       var targetOffset = targetGrid.offset();
-      console.log('placing ' + dragStartId + ' at left:' + dragStartOffset.left + ' top:' + dragStartOffset.top);
-      if(dragStartOffset.left != targetOffset.left && dragStartOffset.top != targetOffset.top) {
-          startGrid.offset({
-            top: dragStartOffset.top,
-            left: dragStartOffset.left
-          });
-        }
+      startGrid.offset({
+        top: dragStartOffset.top,
+        left: dragStartOffset.left - 1// - Math.floor(widgeMargins/2)-2)
+      });
     } else {
-      console.log('Switching ' + dragStartId + ' with ' + targetId);
       var startOffset = startGrid.offset();
       var targetOffset = targetGrid.offset();
       gridster.mutate_widget_in_gridmap(
@@ -188,73 +294,16 @@ $('body').ready(function(){
           size_x: dragStartSizeX,
           size_y: dragStartSizeY,
         });
-    }
-    console.log('placing ' + dragStartId + ' at left:' + targetOffset.left + ' top:' + targetOffset.top);
-    startGrid.offset({
-      top: targetOffset.top,
-      left: targetOffset.left
-    });
-    
-      
-
-  }
-
-
-  //this only works when going up and to the left
-  //  TODO: add the sizex and sizey so it works going down and to the right
-  function idFromLocation(col, row, sizex, sizey) {
-    var windows = $('.gs-w');
-    var id;
-    for (var i = windows.length - 1; i >= 0; i--) {
-      if(parseInt($(windows[i]).attr('data-row')) <= row && row <= ( parseInt($(windows[i]).attr('data-row'))+parseInt($(windows[i]).attr('data-sizey'))-1) )  
-      {
-        if(parseInt($(windows[i]).attr('data-col')) <= col && col <= (parseInt($(windows[i]).attr('data-col'))+parseInt($(windows[i]).attr('data-sizex'))-1) ) 
-        {
-          id = $(windows[i]).attr('id');
-          return id;
-        }
-      }
-      
-    };
-  }
-
-
-  /**
-   * Registers call backs for window creation buttons
-   */
-  function add_grid(name){
-    var widget = '<p>' + name + '</p>'
-    if($('#' + name + '_window').length == 0) {
-      var widget_t = ['<li id=' + name + '_window>' + widget + '</li>',1,1];
-      gridster.add_widget.apply(gridster,widget_t);
-      //$('#' + name).bind
-      new_window_fixup({id: name + '_window'});
-    }
-  }
-
-  /**
-  * Computes and sets the size for each window
-  */
-  function sizeFixup(e, ui) {
-    var i = 0;
-    var windows = $(".gs-w");
-    for(; i < windows.length; i++) {
-      var j = 0;
-      var rowsCols = get_windows({
-        id: $(windows[i]).attr('id'),
-        x: parseInt($(windows[i]).attr('data-col')),
-        y: parseInt($(windows[i]).attr('data-row')),
+      startGrid.offset({
+        top: targetOffset.top,
+        left: targetOffset.left
       });
-      var nodes = get_rows_cols({
-        id: $(windows[i]).attr('id'),
-        x: parseInt($(windows[i]).attr('data-col')),
-        y: parseInt($(windows[i]).attr('data-row')),
-        sizex: parseInt($(windows[i]).attr('data-sizex')),
-        sizey: parseInt($(windows[i]).attr('data-sizey')),
-      });
+      targetGrid.offset({
+        top: dragStartOffset.top,
+        left: dragStartOffset.left - 1 // - Math.floor(widgeMargins/2)-2
+      }); 
     }
   }
-
 
   /**
    * Recomputes and then places each window in its correct position
@@ -280,7 +329,6 @@ $('body').ready(function(){
     } else {
 
       //find the largest widget
-        //then find the largest widets major axis, cut it in half and place the new widget in the space
       var largetsWidget = 0;
       var largetsWidgetIndex = 0;
       for (var i = windows.length - 1; i >= 0; i--) {
@@ -290,11 +338,14 @@ $('body').ready(function(){
           largetsWidgetIndex = i;
         }
       }
+      //Now find the largest widgets major axis, cut it in half and place the new widget in the space
+        //If the largest window found is taller then it is wide
       if(parseInt($(windows[largetsWidgetIndex]).attr('data-sizey')) >= parseInt($(windows[largetsWidgetIndex]).attr('data-sizex'))  ) {
         var newHeight = parseInt($(windows[largetsWidgetIndex]).attr('data-sizey')) / 2;
         if(Math.floor(parseInt($(windows[largetsWidgetIndex]).attr('data-sizey')) / 2) != parseInt($(windows[largetsWidgetIndex]).attr('data-sizey')) / 2) {
           newHeight = Math.floor(parseInt($(windows[largetsWidgetIndex]).attr('data-sizey')) / 2) + 1;
         }
+        var largetsWidgetRow = parseInt($(windows[largetsWidgetIndex]).attr('data-row'));
         gridster.mutate_widget_in_gridmap(
           $(windows[largetsWidgetIndex]),
           {
@@ -319,11 +370,11 @@ $('body').ready(function(){
           },
           {
             col: parseInt($(windows[largetsWidgetIndex]).attr('data-col')),
-            row: parseInt($(windows[largetsWidgetIndex]).attr('data-row')) + parseInt($(windows[largetsWidgetIndex]).attr('data-sizey')),
+            row: largetsWidgetRow + parseInt($(windows[largetsWidgetIndex]).attr('data-sizey')),
             size_x: parseInt($(windows[largetsWidgetIndex]).attr('data-sizex')),
             size_y: newHeight
           });
-      } else {
+      } else { //If the largest window found is wider then it is tall
         var newWidth = parseInt($(windows[largetsWidgetIndex]).attr('data-sizex')) / 2;
         if(Math.floor(parseInt($(windows[largetsWidgetIndex]).attr('data-sizex')) / 2) != parseInt($(windows[largetsWidgetIndex]).attr('data-sizex')) / 2) {
           newWidth = Math.floor(parseInt($(windows[largetsWidgetIndex]).attr('data-sizex')) / 2) + 1;

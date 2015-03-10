@@ -160,7 +160,7 @@ body {
 }
 
 .gridster {
-    width: 960px;
+    width: 854px;
     margin: 0 auto;
 }
 
@@ -182,20 +182,28 @@ body {
     background: rgba(255,255,255,.2)!important;
 }
 
-.panel {
+.panel-body {
     height: 100%;
+    cursor: default;
 }
+
 .panel-heading {
+    background-color: #4179B5;
+    color: #111;
     cursor: move;
     overflow: hidden;
+    height: 30px;
+    width: 100%;
 }
+/*
 .hidden-box {
     position: absolute;
     z-index: 10;
     display: none;
 }
+*/
 
-.box {
+/*.box {
     position: relative;
     overflow: hidden;
     margin-top: -15px;
@@ -207,4 +215,4 @@ body {
     border: 1px solid transparent;
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
-}
+}*/
