@@ -167,16 +167,19 @@ $('body').ready(function(){
       var wsizey = parseInt($(windows[i]).attr('data-sizey'));
       if((x == wx) || ((x < wx) && (x + sizex - 1 >= wx)) || ((x > wx) && (x <= wx + wsizex - 1))) {
         if(wy + wsizey == y || y + sizey == wy) {
-          adj.push(windows[i]);
+          adj.push($(windows[i]));
         }
       }
       if((y == wy) || ((y < wy) && (y + sizey - 1 >= wy)) || ((y > wy)  && (y <= wy + wsizey - 1))) {
         if(wx + wsizex == x || x + sizex == wx) {
-          adj.push(windows[i]);
+          adj.push($(windows[i]));
         }
       }
     };
-    console.log(adj);
+    gridster.remove_widget($('#'+widget.id), true);
+    // for (var i = adj.length - 1; i >= 0; i--) {
+
+    // };
   }
 
   /**
