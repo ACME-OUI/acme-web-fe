@@ -161,6 +161,11 @@ $('body').ready(function(){
     //remove the window in question
     gridster.remove_widget($(widget), true);
 
+    //resize the adj windows
+    resizeAdj(x, y, sizex, sizey, adj);
+  }
+
+  function resizeAdj(x , y, sizex, sizey, adj) {
     //decide what to do with the other windows to fill in the space
     for (var i = adj.length - 1; i >= 0; i--) {
       var adjx = parseInt(adj[i].attr('data-col'));
