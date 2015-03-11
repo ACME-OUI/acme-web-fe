@@ -152,12 +152,120 @@ $('body').ready(function(){
    * widget -> the widget being removed
    */
   function removeFixup(widget){
-    var windows = $('.gs-w');
     var x = parseInt($(widget).attr('data-col'));
     var y = parseInt($(widget).attr('data-row'));
     var sizex = parseInt($(widget).attr('data-sizex'));
     var sizey = parseInt($(widget).attr('data-sizey'));
+    var adj = findAdj(x, y, sizex, sizey, widget);
+    
+    //remove the window in question
+    gridster.remove_widget($(widget), true);
+
+    //decide what to do with the other windows to fill in the space
+    for (var i = adj.length - 1; i >= 0; i--) {
+      var adjx = parseInt(adj[i].attr('data-col'));
+      var adjy = parseInt(adj[i].attr('data-row'));
+      var adjSizeX = parseInt(adj[i].attr('data-sizex'));
+      var adjSizeY = parseInt(adj[i].attr('data-sizey'));
+      if(adjx == x) {
+        if(adjy > y) {
+          //see if we can expand the adj window into the place of 
+          //the removed window without hitting any other windows
+          if(adjSizeX == sizex) {
+            //the simple case
+            gridster.mutate_widget_in_gridmap(
+              adj[i],
+              {
+                col: adjx,
+                row: adjy,
+                size_x: adjSizeX,
+                size_y: adjSizeY
+              },{
+                col: adjx,
+                row: adjy - sizey,
+                size_x: adjSizeX,
+                size_y: adjSizeY + sizey
+              }
+            );
+            return;
+          } else {
+            //the move complex case
+          }
+        } else {
+          if(adjSizeX == sizex) {
+            //the simple case
+            gridster.mutate_widget_in_gridmap(
+              adj[i],
+              {
+                col: adjx,
+                row: adjy,
+                size_x: adjSizeX,
+                size_y: adjSizeY
+              },{
+                col: adjx,
+                row: adjy,
+                size_x: adjSizeX,
+                size_y: adjSizeY + sizey
+              }
+            );
+            return;
+          } else {
+
+          }
+        }
+      }
+      else if(adjy == y) {
+        if(adjx > x) {
+          if(adjSizeY == sizey){
+            //simple case
+            gridster.mutate_widget_in_gridmap(
+              adj[i],
+              {
+                col: adjx,
+                row: adjy,
+                size_x: adjSizeX,
+                size_y: adjSizeY
+              },{
+                col: adjx - sizex,
+                row: adjy,
+                size_x: adjSizeX + sizex,
+                size_y: adjSizeY
+              }
+            );
+            return;
+          } else {
+
+          }
+        } else {
+          if(adjSizeY == sizey){
+            //simple case
+            gridster.mutate_widget_in_gridmap(
+              adj[i],
+              {
+                col: adjx,
+                row: adjy,
+                size_x: adjSizeX,
+                size_y: adjSizeY
+              },{
+                col: adjx,
+                row: adjy,
+                size_x: adjSizeX + sizex,
+                size_y: adjSizeY
+              }
+            );
+            return;
+          } else {
+            
+          }
+        }
+      } 
+    };
+  }
+
+  function findAdj(x, y, sizex, sizey, widget){
+    var windows = $('.gs-w');
     var adj = [];
+    //find the adjacent windows
     for (var i = windows.length - 1; i >= 0; i--) {
       if($(windows[i]).attr('id') == $(widget).attr('id'))
         continue;
@@ -176,17 +284,7 @@ $('body').ready(function(){
         }
       }
     };
-    // gridster.remove_from_gridmap({
-    //   row: y,
-    //   col: x,
-    //   sizex: sizex,
-    //   sizey: sizey
-    // });
-    gridster.remove_widget($(widget), true);
-
-    // for (var i = adj.length - 1; i >= 0; i--) {
-
-    // };
+    return adj;
   }
 
   /**
