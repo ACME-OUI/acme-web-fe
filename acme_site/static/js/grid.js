@@ -176,14 +176,21 @@ $('body').ready(function(){
         }
       }
     };
-    gridster.remove_widget($('#'+widget.id), true);
+    // gridster.remove_from_gridmap({
+    //   row: y,
+    //   col: x,
+    //   sizex: sizex,
+    //   sizey: sizey
+    // });
+    gridster.remove_widget($(widget), true);
+
     // for (var i = adj.length - 1; i >= 0; i--) {
 
     // };
   }
 
   /**
-   * Fixes the widget sizes after a remove event
+   * Brings up the options for the widget
    * widget -> the widget requesting its options
    */
   function widgetOptions(id){
