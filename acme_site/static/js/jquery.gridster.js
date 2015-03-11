@@ -1387,17 +1387,17 @@
 
         this.remove_from_gridmap(wgd);
 
-        if (occupied_cols.length) {
-            var cols_to_empty = [
-                new_wgd.col, new_wgd.row, new_wgd.size_x, Math.min(old_size_y, new_wgd.size_y), $widget
-            ];
-            this.empty_cells.apply(this, cols_to_empty);
-        }
+        // if (occupied_cols.length) {
+        //     var cols_to_empty = [
+        //         new_wgd.col, new_wgd.row, new_wgd.size_x, Math.min(old_size_y, new_wgd.size_y), $widget
+        //     ];
+        //     this.empty_cells.apply(this, cols_to_empty);
+        // }
 
-        if (occupied_rows.length) {
-            var rows_to_empty = [new_wgd.col, new_wgd.row, new_wgd.size_x, new_wgd.size_y, $widget];
-            this.empty_cells.apply(this, rows_to_empty);
-        }
+        // if (occupied_rows.length) {
+        //     var rows_to_empty = [new_wgd.col, new_wgd.row, new_wgd.size_x, new_wgd.size_y, $widget];
+        //     this.empty_cells.apply(this, rows_to_empty);
+        // }
 
         // not the same that wgd = new_wgd;
         wgd.col = new_wgd.col;
@@ -3040,6 +3040,8 @@
     */
     fn.move_widget_up = function($widget, y_units) {
         var el_grid_data = $widget.coords().grid;
+        if(el_grid_data == null)
+            return;
         var actual_row = el_grid_data.row;
         var moved = [];
         var can_go_up = true;
