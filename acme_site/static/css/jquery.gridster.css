@@ -145,21 +145,92 @@ ul, ol {
 
 * { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
 
+/* Sliding left menu */
+nav.menu {
+    position: fixed;
+    z-index: 20;
+    background-color: #555;
+    overflow: hidden;
+    -webkit-transition: all 0.3s;
+    -moz-transition: all 0.3s;
+    -ms-transition: all 0.3s;
+    -o-transition: all 0.3s;
+    transition: all 0.3s;
+}
+nav.menu ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+nav.menu a {
+    font-weight: 300;
+    color: #fff;
+}
+button.close-menu {
+    background-color: #3184a1;
+    color: #fff;
+}
+button.close-menu:focus {
+    outline: none
+}
 
-/*body {
-    background: #004756;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    font-size: x-small;
-    color: #666666;
-}*/
+nav.slide-menu-left {
+    top: 0;
+    width: 300px;
+    height: 100%;
+}
+nav.slide-menu-left li {
+    display: block;
+    text-align: center;
+    border-bottom: solid 1px #3184a1;
+    border-top: solid 1px #b5dbe9;
+}
+nav.slide-menu-left li:first-child {
+    border-top: none
+}
+nav.slide-menu-left li:last-child {
+    border-bottom: none
+}
+nav.slide-menu-left a {
+    display: block;
+    padding: 10px;
+    font-size: 18px;
+}
+nav.slide-menu-left button.close-menu {
+    margin: 10px 0;
+    padding: 10px 30px;
+    background-color: #3184a1;
+    color: #fff;
+}
+nav.slide-menu-left {
+    left: -300px
+}
+body.sml-open nav.slide-menu-left {
+    left: 0
+}
+
+
+
+
+
 
 
 /* Gridster styles */
 .demo {
     margin: 3em 0;
     padding: 7.5em 0 5.5em;
-    /*background: #004756;*/
+}
+
+#wrapper {
+    position: relative;
+    z-index: 10;
+    top: 0;
+    left: 0;
+    -webkit-transition: all 0.3s;
+    -moz-transition: all 0.3s;
+    -ms-transition: all 0.3s;
+    -o-transition: all 0.3s;
+    transition: all 0.3s;
 }
 
 .gridster {
