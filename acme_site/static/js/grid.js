@@ -11,7 +11,7 @@ $('body').ready(function(){
     var header3 = '';
     var contents = '';
     header1 += '<div class="panel panel-default">';
-    header1 += ' <div class="panel-heading hidden-box">';
+    header1 += ' <div class="panel-heading">';
     header1 += '  <div class="panel-header-title text-center">';
     header1 += '    <button type="button" class="btn btn-default options" style="float:left;">';
     header1 += '     <span class="fa fa-cog" aria-label="Options"></span>';

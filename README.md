@@ -76,6 +76,7 @@ then from your browser you can view the site at
   * *boxname.domain*:8000/admin
   * 127.0.0.1:8000/admin
 
+
 ###Changing HTML
 
     cd acme_site/templates/

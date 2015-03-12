@@ -1,12 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- for recaptcha -->
-    
-    <title> {% block title %} Gridster Demo {% endblock %}</title>
+  {% extends "base.html" %}
+  {% block title %} Gridster Demo {% endblock %}
+  {% block extra_headers %}
+
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
 
@@ -20,17 +15,8 @@
     <link rel="stylesheet" type="text/css" href="static/css/jquery.gridster.css">
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
     <script type="text/javascript" src="static/js/grid.js"></script>
-    <style type="text/css">
-    #button_row {
-      margin-left: auto;
-      margin-right: auto;
-      width: 965px;
-    }
-
-    </style>
-
-  </head>
-  <body>
+  {% endblock %}
+  {% block content %}
   <div id='button_row'>
     <button type="button" class="btn" id="provenance">Provenance Capture</button>
     <button type="button" class="btn" id="status">Status Messages</button>
@@ -49,5 +35,4 @@
         </ul>
     </div>
   </div>
-  </body>
-</html>
+  {% endblock %}
