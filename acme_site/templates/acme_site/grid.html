@@ -15,24 +15,65 @@
     <link rel="stylesheet" type="text/css" href="static/css/jquery.gridster.css">
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
     <script type="text/javascript" src="static/js/grid.js"></script>
+    <style>
+      body {
+          overflow-x: hidden;
+      }
+    </style>
+    <!-- JS for the window menu -->
+    <script>
+    $('body').ready(function(){
+      var body = document.body,
+          mask = document.createElement('div'),
+          toggleSlideLeft = document.querySelector('.toggle-slide-left');
+
+      mask.className = 'mask';
+
+      $(toggleSlideLeft).click(function() {
+        $(body).addClass('sml-open');
+        document.body.appendChild(mask);
+      });
+      /* hide active menu if mask is clicked */
+      $(mask).click(function(){
+        $(body).removeClass('sml-open');
+        document.body.removeChild(mask);
+      });
+      $('.close-menu').click(function(){
+        $(body).removeClass('sml-open');
+        document.body.removeChild(mask);
+      });
+      
+    });
+    </script>
   {% endblock %}
+
   {% block content %}
-  <div id='button_row'>
-    <button type="button" class="btn" id="provenance">Provenance Capture</button>
-    <button type="button" class="btn" id="status">Status Messages</button>
-    <button type="button" class="btn" id="science">Science Input</button>
-    <button type="button" class="btn" id="nodeList">Node List</button>
-    <button type="button" class="btn" id="heatMap">Heat Map</button>
-    <button type="button" class="btn" id="modelRun">Model Run</button>
-    <button type="button" class="btn" id="nodeSelect">Node Selector</button>
-    <button type="button" class="btn" id="cdat">CDATWeb Analysis</button>
-    <button type="button" class="btn" id="charting">Charting System Status</button>
-  </div>
-  <div class="demo">
-    <div class="gridster" id="grid_holder" style="border: 1px solid black; position: relative; margin-left: auto; margin-right: auto;">
-        <ul>
-            
-        </ul>
-    </div>
-  </div>
+  <button class="nav-toggler toggle-slide-left">Slide Menu Left</button>
+
+  <nav class="menu slide-menu-left">
+    <br>
+    <br>
+    <ul>
+      <li><button class="close-menu">&larr; Close</button></li>
+      <li><button type="button" class="btn" id="provenance">Provenance Capture</button></li>
+      <li><button type="button" class="btn" id="status">Status Messages</button></li>
+      <li><button type="button" class="btn" id="science">Science Input</button></li>
+      <li><button type="button" class="btn" id="nodeList">Node List</button></li>
+      <li><button type="button" class="btn" id="heatMap">Heat Map</button></li>
+      <li><button type="button" class="btn" id="modelRun">Model Run</button></li>
+      <li><button type="button" class="btn" id="nodeSelect">Node Selector</button></li>
+      <li><button type="button" class="btn" id="cdat">CDATWeb Analysis</button></li>
+      <li><button type="button" class="btn" id="charting">Charting System Status</button></li>
+    </ul>
+  </nav> <!-- Nav left menu -->
+
+  <div class="wrapper">
+    <div class="demo">
+      <div class="gridster" id="grid_holder" style="border: 1px solid black; position: relative; margin-left: auto; margin-right: auto;">
+          <ul>
+              
+          </ul>
+      </div>
+    </div> <!-- Div demo -->
+  </div> <!-- Wrapper --> 
   {% endblock %}
