@@ -10,18 +10,18 @@ $('body').ready(function(){
     var header2 = '';
     var header3 = '';
     var contents = '';
-    header1 += '<div class="panel panel-default">';
-    header1 += ' <div class="panel-heading">';
+    header1 += '<div class="grid-panel panel-default">';
+    header1 += ' <div class="grid-panel-heading">';
     header1 += '  <div class="panel-header-title text-center">';
-    header1 += '    <button type="button" class="btn btn-default options" style="float:left;">';
+    header1 += '    <button type="button" class="btn btn-default btn-xs options" style="float:left;">';
     header1 += '     <span class="fa fa-cog" aria-label="Options"></span>';
     header1 += '    </button>';
-    header1 += '    <button type="button" class="btn btn-default remove"  style="float:right;">';
+    header1 += '    <button type="button" class="btn btn-default btn-xs remove"  style="float:right;">';
     header1 += '     <span class="fa fa-times" aria-label="Close"></span>';
     header1 += '    </button>';
-    header1 += '     <h2 style="text-align: center">';
+    header1 += '     <p style="text-align: center">';
     // Widget Name
-    header2 += '     <h2>';
+    header2 += '     <p>';
     header2 += '   </div>';
     header2 += '  </div>';
     header2 += ' </div>';

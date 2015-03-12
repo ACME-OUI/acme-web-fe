@@ -185,14 +185,14 @@ ul, ol {
     background: rgba(255,255,255,.2)!important;
 }
 
-.panel-body {
+.grid-panel-body {
 /*    height: 100%;
 */    cursor: default;
     margin-bottom: -30px!important;
 }
 
-.panel-heading {
-    background-color: #4179B5!important;
+.grid-panel-heading {
+    background-color: #4179B5;
     color: #111;
     cursor: move;
     overflow: hidden;
