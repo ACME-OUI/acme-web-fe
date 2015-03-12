@@ -1,6 +1,9 @@
-/*! gridster.js - v0.5.6 - 2014-09-25
-* http://gridster.net/
-* Copyright (c) 2014 ducksboard; Licensed MIT */
+
+#button_row {
+  margin-left: auto;
+  margin-right: auto;
+  width: 1165px;
+}
 
 .gridster {
     position:relative;
@@ -143,20 +146,20 @@ ul, ol {
 * { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
 
 
-body {
+/*body {
     background: #004756;
     font-family: 'Helvetica Neue', Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     font-size: x-small;
     color: #666666;
-}
+}*/
 
 
 /* Gridster styles */
 .demo {
     margin: 3em 0;
     padding: 7.5em 0 5.5em;
-    background: #004756;
+    /*background: #004756;*/
 }
 
 .gridster {
@@ -182,12 +185,13 @@ body {
     background: rgba(255,255,255,.2)!important;
 }
 
-.panel-body {
-    height: 100%;
-    cursor: default;
+.grid-panel-body {
+/*    height: 100%;
+*/    cursor: default;
+    margin-bottom: -30px!important;
 }
 
-.panel-heading {
+.grid-panel-heading {
     background-color: #4179B5;
     color: #111;
     cursor: move;

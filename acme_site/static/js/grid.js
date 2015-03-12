@@ -10,18 +10,18 @@ $('body').ready(function(){
     var header2 = '';
     var header3 = '';
     var contents = '';
-    header1 += '<div class="panel panel-default">';
-    header1 += ' <div class="panel-heading hidden-box">';
+    header1 += '<div class="grid-panel panel-default">';
+    header1 += ' <div class="grid-panel-heading">';
     header1 += '  <div class="panel-header-title text-center">';
-    header1 += '    <button type="button" class="btn btn-default options" style="float:left;">';
+    header1 += '    <button type="button" class="btn btn-default btn-xs options" style="float:left;">';
     header1 += '     <span class="fa fa-cog" aria-label="Options"></span>';
     header1 += '    </button>';
-    header1 += '    <button type="button" class="btn btn-default remove"  style="float:right;">';
+    header1 += '    <button type="button" class="btn btn-default btn-xs remove"  style="float:right;">';
     header1 += '     <span class="fa fa-times" aria-label="Close"></span>';
     header1 += '    </button>';
-    header1 += '     <h1 style="text-align: center">';
+    header1 += '     <p style="text-align: center">';
     // Widget Name
-    header2 += '     <h1>';
+    header2 += '     <p>';
     header2 += '   </div>';
     header2 += '  </div>';
     header2 += ' </div>';
@@ -152,12 +152,125 @@ $('body').ready(function(){
    * widget -> the widget being removed
    */
   function removeFixup(widget){
-    var windows = $('.gs-w');
     var x = parseInt($(widget).attr('data-col'));
     var y = parseInt($(widget).attr('data-row'));
     var sizex = parseInt($(widget).attr('data-sizex'));
     var sizey = parseInt($(widget).attr('data-sizey'));
+    var adj = findAdj(x, y, sizex, sizey, widget);
+    
+    //remove the window in question
+    gridster.remove_widget($(widget), true);
+
+    //resize the adj windows
+    resizeAdj(x, y, sizex, sizey, adj);
+  }
+
+  function resizeAdj(x , y, sizex, sizey, adj) {
+    //decide what to do with the other windows to fill in the space
+    for (var i = adj.length - 1; i >= 0; i--) {
+      var adjx = parseInt(adj[i].attr('data-col'));
+      var adjy = parseInt(adj[i].attr('data-row'));
+      var adjSizeX = parseInt(adj[i].attr('data-sizex'));
+      var adjSizeY = parseInt(adj[i].attr('data-sizey'));
+      if(adjx == x) {
+        if(adjy > y) {
+          //see if we can expand the adj window into the place of 
+          //the removed window without hitting any other windows
+          if(adjSizeX == sizex) {
+            //the simple case
+            gridster.mutate_widget_in_gridmap(
+              adj[i],
+              {
+                col: adjx,
+                row: adjy,
+                size_x: adjSizeX,
+                size_y: adjSizeY
+              },{
+                col: adjx,
+                row: adjy - sizey,
+                size_x: adjSizeX,
+                size_y: adjSizeY + sizey
+              }
+            );
+            return;
+          } else {
+            //the move complex case
+          }
+        } else {
+          if(adjSizeX == sizex) {
+            //the simple case
+            gridster.mutate_widget_in_gridmap(
+              adj[i],
+              {
+                col: adjx,
+                row: adjy,
+                size_x: adjSizeX,
+                size_y: adjSizeY
+              },{
+                col: adjx,
+                row: adjy,
+                size_x: adjSizeX,
+                size_y: adjSizeY + sizey
+              }
+            );
+            return;
+          } else {
+
+          }
+        }
+      }
+      else if(adjy == y) {
+        if(adjx > x) {
+          if(adjSizeY == sizey){
+            //simple case
+            gridster.mutate_widget_in_gridmap(
+              adj[i],
+              {
+                col: adjx,
+                row: adjy,
+                size_x: adjSizeX,
+                size_y: adjSizeY
+              },{
+                col: adjx - sizex,
+                row: adjy,
+                size_x: adjSizeX + sizex,
+                size_y: adjSizeY
+              }
+            );
+            return;
+          } else {
+
+          }
+        } else {
+          if(adjSizeY == sizey){
+            //simple case
+            gridster.mutate_widget_in_gridmap(
+              adj[i],
+              {
+                col: adjx,
+                row: adjy,
+                size_x: adjSizeX,
+                size_y: adjSizeY
+              },{
+                col: adjx,
+                row: adjy,
+                size_x: adjSizeX + sizex,
+                size_y: adjSizeY
+              }
+            );
+            return;
+          } else {
+            
+          }
+        }
+      } 
+    };
+  }
+
+  function findAdj(x, y, sizex, sizey, widget){
+    var windows = $('.gs-w');
     var adj = [];
+    //find the adjacent windows
     for (var i = windows.length - 1; i >= 0; i--) {
       if($(windows[i]).attr('id') == $(widget).attr('id'))
         continue;
@@ -166,17 +279,21 @@ $('body').ready(function(){
       var wsizex = parseInt($(windows[i]).attr('data-sizex'));
       var wsizey = parseInt($(windows[i]).attr('data-sizey'));
       if((x == wx) || ((x < wx) && (x + sizex - 1 >= wx)) || ((x > wx) && (x <= wx + wsizex - 1))) {
-        adj.push(windows[i]);
+        if(wy + wsizey == y || y + sizey == wy) {
+          adj.push($(windows[i]));
+        }
       }
       if((y == wy) || ((y < wy) && (y + sizey - 1 >= wy)) || ((y > wy)  && (y <= wy + wsizey - 1))) {
-        adj.push(windows[i]);
+        if(wx + wsizex == x || x + sizex == wx) {
+          adj.push($(windows[i]));
+        }
       }
     };
-    console.log(adj);
+    return adj;
   }
 
   /**
-   * Fixes the widget sizes after a remove event
+   * Brings up the options for the widget
    * widget -> the widget requesting its options
    */
   function widgetOptions(id){
