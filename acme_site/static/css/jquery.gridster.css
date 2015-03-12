@@ -167,7 +167,7 @@ nav.menu a {
     color: #fff;
 }
 button.close-menu {
-    background-color: #555;
+    background-color: #19802C;
     color: #fff;
 }
 button.close-menu:focus {
@@ -199,7 +199,7 @@ nav.slide-menu-left a {
 nav.slide-menu-left button.close-menu {
     margin: 10px 0;
     padding: 10px 30px;
-    background-color: #555;
+    background-color: #146322;
     color: #fff;
 }
 nav.slide-menu-left {
