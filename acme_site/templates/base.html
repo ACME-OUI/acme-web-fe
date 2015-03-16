@@ -27,6 +27,20 @@
       .footer{
         padding: 25px 25px 25px 25px;
       }
+      .navbar-nav {
+        width: 100%;
+        text-align: center;
+      }
+      .navbar-nav > li {
+        float: none;
+        display: inline-block;
+      }
+      .navbar-nav > li.navbar-right {
+        float: right !important;
+      }
+      .navbar-nav > li.navbar-left {
+        float: left !important;
+      }
     </style>
 
     <!-- <link=href="https://raw.github.com/ehynds/jquery-ui-multiselect-widget/1.13/jquery.multiselect.css" rel="stylesheet">-->
@@ -43,30 +57,38 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
+            {% block nav_new_button %}
+
+            {% endblock %}
           </button>
-          <a class="navbar-brand" href="/acme">ACME</a>
+          <!-- <a class="navbar-brand" href="/acme">ACME</a>  -->
         </div>
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
+            {% block new_button_left_link %}
+
+            {% endblock %}
+            <li><a href="/acme">ACME</a></li>
             <li><a href="/acme/jspanel">jsPanel</a></li>
             <li><a href="/acme/grid">gridster</a></li>
             <li><a href="http://uvcdat.llnl.gov">UV-CDAT</a></li>
             <li><a href="https://acme.globus.org">Globus</a></li>
             <li><a href="#">Classic Viewer</a></li>
             <li><a href="#">CDATWEB</a></li>
-          </ul>
-          <ul class="nav navbar-nav navbar-right">
             {% if user.is_authenticated %}
-            <li><a href="/acme"> Welcome {{ user.username }}</a></li>
-            <li><a href="logout">Log Out</a></li>
+            <li class="navbar-right"><a href="/acme"> Welcome {{ user.username }}</a></li>
+            <li class="navbar-right"><a href="logout">Log Out</a></li>
             {% else %}
-            <li><a href="login?next={% url 'index' %}">Welcome Guest</a></li>
-            <li><a href="login?next={% url 'index' %}">Log In</a></li>
+            <li class="navbar-right"><a href="login?next={% url 'index' %}">Welcome Guest</a></li>
+            <li class="navbar-right"><a href="login?next={% url 'index' %}">Log In</a></li>
             {% endif %}
           </ul>
+          
         </div><!--/.nav-collapse -->
       </div>
     </div>
+    {% block dropmenu %}
+    {% endblock %}
     <div class="container theme-showcase" role="main">
       {% block content %}   
 
