@@ -1,25 +1,59 @@
-  {% extends "base.html" %}
-  {% block title %} Gridster Demo {% endblock %}
-  {% block extra_headers %}
+{% extends "base.html" %}
+{% block title %} Gridster Demo {% endblock %}
+{% block extra_headers %}
 
-    <!-- CSS resources for this page -->
-    <link rel="stylesheet" type="text/css" href="static/css/jquery.gridster.css">
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="static/css/MetroJs.css">
+  <!-- CSS resources for this page -->
+  <link rel="stylesheet" type="text/css" href="static/css/jquery.gridster.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" href="static/css/MetroJs.css">
+  <link rel="stylesheet" type="text/css" href="static/css/grid_custom.css">
 
-    <!-- JS resources for this page -->
-    <script type="text/javascript" src="static/js/grid.js"></script>
-    <script type="text/javascript" src="static/js/menu.js"></script>
-    <script type="text/javascript" src="static/js/MetroJs.js"></script>
-    <script type="text/javascript" src="static/js/jquery.gridster.js"></script>
-    
-  {% endblock %}
+  <!-- JS resources for this page -->
+  <script type="text/javascript" src="static/js/grid.js"></script>
+  <script type="text/javascript" src="static/js/menu.js"></script>
+  <script type="text/javascript" src="static/js/MetroJs.js"></script>
+  <script type="text/javascript" src="static/js/jquery.gridster.js"></script>
 
-  {% block content %}
-  <div style="position: fixed; top: 60px; left: 50px;">
-    <button class="btn toggle-slide-left">Slide Menu Left</button>
-  </div>
+  <script type="text/javascript">
+  $('body').ready(function(){
+    $('#drop-down-tab').click(function(e)
+    {
+      $('#drop-down-menu').slideToggle('fast');
+    });
+  });
+  </script>
   
+{% endblock %}
+
+{% block nav_new_button%}
+<!--   <span class="icon-bar"></span> -->
+{% endblock %}
+
+{% block new_button_left_link%}
+    <li class="navbar-left toggle-slide-left" style="left: -270px;"><a href="#">Window Menu</a></li>
+    <li class="navbar-left" id="drop-down-tab" style="left: -270px;"><a style="color: #000;" href="#">Dropdown Menu</a></li>
+{% endblock %}
+
+{% block dropmenu %}
+  <!-- Hidden node menu-->
+  <div id="drop-down-menu" style="display: none;">
+    <div class="container">
+      <div class="row">
+        <div class="span12">
+          <p style="color: #000;">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut facilisis purus condimentum faucibus placerat. In non sem arcu. In molestie dignissim mauris, sit amet ultrices purus maximus a. Morbi eu eleifend dolor. Morbi congue nibh nibh, vel efficitur mauris convallis malesuada. Donec tempus massa justo, condimentum vulputate neque ultricies vel. Nulla pretium nibh a dolor congue efficitur.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div><!-- end node menu -->
+{% endblock %}
+
+{% block content %}
+  <!-- <div style="position: fixed; top: 60px; left: 50px;">
+    <button class="btn toggle-slide-left">Slide Menu Left</button>
+  </div> -->
+
   <nav class="menu slide-menu-left">
     <br>
     <br>
@@ -46,4 +80,4 @@
       </div>
     </div> <!-- Div demo -->
   </div> <!-- Wrapper --> 
-  {% endblock %}
+{% endblock %}

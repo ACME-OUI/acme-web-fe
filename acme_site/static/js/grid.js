@@ -10,6 +10,7 @@ $('body').ready(function(){
     var header2 = '';
     var header3 = '';
     var contents = '';
+    var optionContents = '';
     header1 += '<div class="grid-panel panel-default">';
     header1 += ' <div class="grid-panel-heading">';
     header1 += '  <div class="panel-header-title text-center">';
@@ -25,10 +26,10 @@ $('body').ready(function(){
     header2 += '   </div>';
     header2 += '  </div>';
     header2 += ' </div>';
-    header2 += ' <div class="panel-body">';
-    header2 += '  <div class="box">&nbsp</div><br>';
+    header2 += ' <div class="panel-body live-tile blue" data-direction="horizontal" data-mode="slid">';
+    //header2 += '  <div class="box">&nbsp</div><br>';
     // Widget Contents
-    contents += '  The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men.';
+    contents += '  <p>The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men.</p>';
     header3 += ' </div>';
     header3 += '</div>';
 
@@ -50,8 +51,8 @@ $('body').ready(function(){
     var resizeStartX = 0;
     var resizeStartY = 0;
 
-
-
+  
+  //Setup the gridster object
   gridster = $(".gridster ul").gridster({
       widget_margins: [widgetMargins, widgetMargins],
       widget_base_dimensions: [140, 140],
@@ -129,9 +130,23 @@ $('body').ready(function(){
    * Registers call backs for window creation buttons
    */
   function add_grid(name){
+    optionContents = '<select>';
+    optionContents+= ' <option value="alpha">Alpha<option>';
+    optionContents+= ' <option value="beta">Beta<option>';
+    optionContents+= ' <option value="charlie">Charlie<option>';
+    optionContents+= ' <option value="delta">Delta<option>';
+    optionContents+= '</select>';
+    optionContents+= '<form oninput="x.value=parseInt(a.value)+parseInt(b.value)">0';
+    optionContents+= ' <input type="range" id="a" value="50">100';
+    optionContents+= ' +<input type="number" id="b" value="50">';
+    optionContents+= ' =<output name="x" for="a b"></output>';
+    optionContents+= '</form>';
     if($('#' + name + '_window').length == 0) {
-      var widget_t = ['<li id=' + name + '_window>' + header1 +''+ name +''+ header2 +''+ contents +''+ header3 +'</li>',1,1];
+      var widget_t = ['<li id=' + name + '_window>' + header1 + name + header2 +/* '<div>' + optionContents + '</div><div>' + contents + '</div>' */+ header3 +'</li>',1,1];
       var w = gridster.add_widget.apply(gridster,widget_t);
+      //Setup the live tile for the options menu
+      $(w).find('.live-tile').liveTile({ direction:'horizontal' });
+      //Stop the body from being able to drag
       $(w).find('.panel-body').mousedown(function (event) {
         event.stopPropagation();
       });
@@ -140,7 +155,8 @@ $('body').ready(function(){
         removeFixup(e.target.parentElement.parentElement.parentElement.parentElement);
       });
       $(w).find('.options').click(function(e) {
-        widgetOptions(e.target.parentElement.parentElement.parentElement.parentElement);
+        $(w).find('.live-tile').liveTile('play', 0);
+        //widgetOptions(e.target.parentElement.parentElement.parentElement.parentElement);
       });
       new_window_fixup({id: name + '_window'});
     }
