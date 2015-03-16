@@ -156,7 +156,11 @@ $('body').ready(function(){
     var y = parseInt($(widget).attr('data-row'));
     var sizex = parseInt($(widget).attr('data-sizex'));
     var sizey = parseInt($(widget).attr('data-sizey'));
-    var adj = findAdj(x, y, sizex, sizey, widget);
+
+    //push the closing window to the back of the canvas
+    $(widget).css('z-index', 1);
+
+    var adj = findAdj(x, y, sizex, sizey, $(widget).attr('id'));
     
     //remove the window in question
     gridster.remove_widget($(widget), true);
@@ -165,6 +169,11 @@ $('body').ready(function(){
     resizeAdj(x, y, sizex, sizey, adj);
   }
 
+  /**
+   * Resises the appropriate adjacent windows to the window that is closing
+   * x, y, sizex, sizey, the col row sizex and sizey of the window being closed
+   * adj, an array of all windows adjacent to the window being closed
+   */
   function resizeAdj(x , y, sizex, sizey, adj) {
     //decide what to do with the other windows to fill in the space
     for (var i = adj.length - 1; i >= 0; i--) {
@@ -267,12 +276,18 @@ $('body').ready(function(){
     };
   }
 
-  function findAdj(x, y, sizex, sizey, widget){
+
+  /**
+   * Finds all windows adjacent to the window specified
+   * x, y, sizex, sizey are the col, row, sizex and sizey of the given window
+   * id, the id of the window being closed
+   */
+  function findAdj(x, y, sizex, sizey, id){
     var windows = $('.gs-w');
     var adj = [];
     //find the adjacent windows
     for (var i = windows.length - 1; i >= 0; i--) {
-      if($(windows[i]).attr('id') == $(widget).attr('id'))
+      if($(windows[i]).attr('id') == id)
         continue;
       var wx = parseInt($(windows[i]).attr('data-col'));
       var wy = parseInt($(windows[i]).attr('data-row'));
