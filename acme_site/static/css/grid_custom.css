@@ -33,8 +33,6 @@ body {
 #drop-down-tab {
 	background-color: #005dab !important;
 	color: #222 !important;
-	/*position: absolute; 
-	right: -15px;*/ 
 	-webkit-border-radius: 20px 20px 0 0;
 	-moz-border-radius: 20px 20px 0 0;
 	border-radius: 20px 20px 0 0;
