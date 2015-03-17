@@ -1,8 +1,12 @@
 $('body').ready(function(){
     
     var gridster;
-    var maxCols = 6;
-    var maxHeight = 4;
+    var docWidth = $(document).width();
+    var docHeight = $(document).height();
+    var widgetWidth = 140;
+    var widgetHeight = 140;
+    var maxCols = Math.floor(docWidth/widgetWidth) -1 ;
+    var maxHeight = Math.floor(docHeight/widgetHeight) -1 ;
     var resize_handle_html = '<span class="gs-resize-handle gs-resize-handle-both"></span>';
 
     // Define a widget
@@ -35,7 +39,6 @@ $('body').ready(function(){
 
 
 
-
     var dragStartX = 0;
     var dragStartY = 0;
     var dragStartSizeX = 0;
@@ -51,11 +54,11 @@ $('body').ready(function(){
     var resizeStartX = 0;
     var resizeStartY = 0;
 
-  
+
   //Setup the gridster object
   gridster = $(".gridster ul").gridster({
       widget_margins: [widgetMargins, widgetMargins],
-      widget_base_dimensions: [140, 140],
+      widget_base_dimensions: [widgetWidth, widgetHeight],
       max_cols: maxCols,
       min_cols: maxCols,
       resize: {
@@ -83,7 +86,6 @@ $('body').ready(function(){
           dragStartSizeY = grid.attr('data-sizey');
           dragStartOffset.top = Math.floor(offset.top);
           dragStartOffset.left = Math.floor(offset.left)+1;
-          //console.log('drag starting at left:' + dragStartOffset.left + ' top:' + dragStartOffset.top);
         },
         stop: function(e, ui, col, row) {
           dragFixup(e, ui, col, row);
@@ -94,8 +96,8 @@ $('body').ready(function(){
       },
   }).data('gridster');
 
-  gridster.set_dom_grid_height(640);
-  //gridster.set_dom_grid_width(2*widgetMargins*maxCols);
+  gridster.set_dom_grid_height(docHeight-100);
+  gridster.set_dom_grid_width(docWidth-100);
 
 
   $('#provenance').click(function(){
