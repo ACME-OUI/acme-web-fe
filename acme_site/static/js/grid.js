@@ -84,7 +84,7 @@ $('body').ready(function(){
           dragStartY = grid.attr('data-row');
           dragStartSizeX = grid.attr('data-sizex');
           dragStartSizeY = grid.attr('data-sizey');
-          dragStartOffset.top = Math.floor(offset.top);
+          dragStartOffset.top = Math.floor(offset.top)+1;
           dragStartOffset.left = Math.floor(offset.left)+1;
         },
         stop: function(e, ui, col, row) {
@@ -408,10 +408,10 @@ $('body').ready(function(){
           size_x: dragStartSizeX,
           size_y: dragStartSizeY,
         });
-      var targetOffset = targetGrid.offset();
+      //var targetOffset = targetGrid.offset();
       startGrid.offset({
-        top: dragStartOffset.top,
-        left: dragStartOffset.left - 1// - Math.floor(widgeMargins/2)-2)
+        top: dragStartOffset.top ,
+        left: dragStartOffset.left - 7// - Math.floor(widgeMargins/2)-2)
       });
     } else {
       var startOffset = startGrid.offset();
@@ -450,7 +450,7 @@ $('body').ready(function(){
       });
       targetGrid.offset({
         top: dragStartOffset.top,
-        left: dragStartOffset.left - 1 // - Math.floor(widgeMargins/2)-2
+        left: dragStartOffset.left - 7// - Math.floor(widgeMargins/2)-2
       }); 
     }
   }

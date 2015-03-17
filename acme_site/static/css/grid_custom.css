@@ -47,6 +47,14 @@ body {
    Sliding left menu 
   ============================================================================*/
 
+#slide-menu-left {
+    height: 100%;
+    display: none;
+}
+
+#toggle-slide-left {
+    width: 116px;
+}
 
 nav.menu {
     position: fixed;
