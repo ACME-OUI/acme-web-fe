@@ -128,24 +128,14 @@ ul, ol {
 }
 
 .demo {
-    margin: 3em 0;
-    padding: 7.5em 0 5.5em;
+    /*margin: 3em 0;*/
+    padding: 1em 0 0em;
+    width:95%!important;
 }
 
-#wrapper {
-    position: relative;
-    z-index: 10;
-    top: 0;
-    left: 0;
-    -webkit-transition: all 0.3s;
-    -moz-transition: all 0.3s;
-    -ms-transition: all 0.3s;
-    -o-transition: all 0.3s;
-    transition: all 0.3s;
-}
 
 .gridster {
-    width: 854px;
+    width: 95%;
     margin: 0 auto;
 }
 
@@ -180,3 +170,4 @@ ul, ol {
     height: 30px;
     width: 100%;
 }
+

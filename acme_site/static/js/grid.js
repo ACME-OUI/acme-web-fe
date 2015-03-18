@@ -1,8 +1,12 @@
 $('body').ready(function(){
     
     var gridster;
-    var maxCols = 6;
-    var maxHeight = 4;
+    var docWidth = $(document).width();
+    var docHeight = $(document).height();
+    var widgetWidth = 140;
+    var widgetHeight = 140;
+    var maxCols = Math.floor(docWidth/widgetWidth) - 1;
+    var maxHeight = Math.floor(docHeight/widgetHeight);
     var resize_handle_html = '<span class="gs-resize-handle gs-resize-handle-both"></span>';
 
     // Define a widget
@@ -35,7 +39,6 @@ $('body').ready(function(){
 
 
 
-
     var dragStartX = 0;
     var dragStartY = 0;
     var dragStartSizeX = 0;
@@ -51,13 +54,14 @@ $('body').ready(function(){
     var resizeStartX = 0;
     var resizeStartY = 0;
 
-  
+
   //Setup the gridster object
   gridster = $(".gridster ul").gridster({
       widget_margins: [widgetMargins, widgetMargins],
-      widget_base_dimensions: [140, 140],
+      widget_base_dimensions: [widgetWidth, widgetHeight],
       max_cols: maxCols,
       min_cols: maxCols,
+      min_rows: maxHeight,
       resize: {
         enabled: true,
         stop: function(e, ui, widget) {
@@ -81,9 +85,8 @@ $('body').ready(function(){
           dragStartY = grid.attr('data-row');
           dragStartSizeX = grid.attr('data-sizex');
           dragStartSizeY = grid.attr('data-sizey');
-          dragStartOffset.top = Math.floor(offset.top);
+          dragStartOffset.top = Math.floor(offset.top)+1;
           dragStartOffset.left = Math.floor(offset.left)+1;
-          //console.log('drag starting at left:' + dragStartOffset.left + ' top:' + dragStartOffset.top);
         },
         stop: function(e, ui, col, row) {
           dragFixup(e, ui, col, row);
@@ -94,8 +97,8 @@ $('body').ready(function(){
       },
   }).data('gridster');
 
-  gridster.set_dom_grid_height(640);
-  //gridster.set_dom_grid_width(2*widgetMargins*maxCols);
+  gridster.set_dom_grid_height(docHeight-100);
+  //gridster.set_dom_grid_width(docWidth-100);
 
 
   $('#provenance').click(function(){
@@ -144,20 +147,25 @@ $('body').ready(function(){
     if($('#' + name + '_window').length == 0) {
       var widget_t = ['<li id=' + name + '_window>' + header1 + name + header2 +/* '<div>' + optionContents + '</div><div>' + contents + '</div>' */+ header3 +'</li>',1,1];
       var w = gridster.add_widget.apply(gridster,widget_t);
+
       //Setup the live tile for the options menu
       $(w).find('.live-tile').liveTile({ direction:'horizontal' });
+
       //Stop the body from being able to drag
       $(w).find('.panel-body').mousedown(function (event) {
         event.stopPropagation();
       });
+
       $(w).find('.remove').click(function(e) {
         //send the widget that got clicked to the remove handler
         removeFixup(e.target.parentElement.parentElement.parentElement.parentElement);
       });
+
       $(w).find('.options').click(function(e) {
         $(w).find('.live-tile').liveTile('play', 0);
         //widgetOptions(e.target.parentElement.parentElement.parentElement.parentElement);
       });
+
       new_window_fixup({id: name + '_window'});
     }
   }
@@ -406,10 +414,10 @@ $('body').ready(function(){
           size_x: dragStartSizeX,
           size_y: dragStartSizeY,
         });
-      var targetOffset = targetGrid.offset();
+      //var targetOffset = targetGrid.offset();
       startGrid.offset({
-        top: dragStartOffset.top,
-        left: dragStartOffset.left - 1// - Math.floor(widgeMargins/2)-2)
+        top: dragStartOffset.top ,
+        left: dragStartOffset.left - 7// - Math.floor(widgeMargins/2)-2)
       });
     } else {
       var startOffset = startGrid.offset();
@@ -448,7 +456,7 @@ $('body').ready(function(){
       });
       targetGrid.offset({
         top: dragStartOffset.top,
-        left: dragStartOffset.left - 1 // - Math.floor(widgeMargins/2)-2
+        left: dragStartOffset.left// - Math.floor(widgeMargins/2)-2
       }); 
     }
   }

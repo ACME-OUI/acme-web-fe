@@ -16,27 +16,32 @@
 
   <script type="text/javascript">
   $('body').ready(function(){
-    $('#drop-down-tab').click(function(e)
-    {
+    $('#drop-down-tab').click(function(e){
       $('#drop-down-menu').slideToggle('fast');
+    });
+
+    $('#toggle-slide-left').click(function(e){
+      $('#slide-menu-left').animate({width: 'toggle'}, 500, 'linear');
+      if( $('#toggle-left-a').text() == 'Window Menu') {
+        $('#toggle-left-a').text('Close Menu');
+      } else {
+        $('#toggle-left-a').text('Window Menu');
+      }
     });
   });
   </script>
   
 {% endblock %}
 
-{% block nav_new_button%}
-<!--   <span class="icon-bar"></span> -->
-{% endblock %}
 
 {% block new_button_left_link%}
-    <li class="navbar-left toggle-slide-left" style="left: -270px;"><a href="#">Window Menu</a></li>
+    <li class="navbar-left" id="toggle-slide-left" style="left: -270px;"><a id="toggle-left-a" href="#">Window Menu</a></li>
     <li class="navbar-left" id="drop-down-tab" style="left: -270px;"><a style="color: #000;" href="#">Dropdown Menu</a></li>
 {% endblock %}
 
 {% block dropmenu %}
   <!-- Hidden node menu-->
-  <div id="drop-down-menu" style="display: none;">
+  <div id="drop-down-menu" style="display: none; z-index: 20;">
     <div class="container">
       <div class="row">
         <div class="span12">
@@ -47,18 +52,10 @@
       </div>
     </div>
   </div><!-- end node menu -->
-{% endblock %}
 
-{% block content %}
-  <!-- <div style="position: fixed; top: 60px; left: 50px;">
-    <button class="btn toggle-slide-left">Slide Menu Left</button>
-  </div> -->
-
-  <nav class="menu slide-menu-left">
-    <br>
+  <nav class="menu" id="slide-menu-left">
     <br>
     <ul>
-      <li><button class="close-menu">&larr; Close</button></li>
       <li><button type="button" class="btn menu-btn" id="provenance">Provenance Capture</button></li>
       <li><button type="button" class="btn menu-btn" id="status">Status Messages</button></li>
       <li><button type="button" class="btn menu-btn" id="science">Science Input</button></li>
@@ -69,15 +66,34 @@
       <li><button type="button" class="btn menu-btn" id="cdat">CDATWeb Analysis</button></li>
       <li><button type="button" class="btn menu-btn" id="charting">Charting System Status</button></li>
     </ul>
+    <br>
+    <form>
+      <label for="LayoutStyle" style="color: #000;">Layout Style</label>
+      <select name="LayoutStyle" id="LayoutStyle">
+        <option value="balanced">Balanced</option>
+        <option value="left-weighted">Left Weighted</option>
+        <option value="right-weighted">Right Weighted</option>
+      </select>
+    </form>    
   </nav> <!-- Nav left menu -->
-
+  
   <div class="wrapper">
     <div class="demo">
-      <div class="gridster" id="grid_holder" style="border: 1px solid black; position: relative; margin-left: auto; margin-right: auto;">
+      <div class="gridster" id="grid_holder" style="border: 1px solid black; margin: 0 auto 0 auto;">
           <ul>
-              
           </ul>
       </div>
     </div> <!-- Div demo -->
-  </div> <!-- Wrapper --> 
+  </div> <!-- Wrapper -->
+  
+{% endblock %}
+
+{% block content %}
+  <!-- <div style="position: fixed; top: 60px; left: 50px;">
+    <button class="btn toggle-slide-left">Slide Menu Left</button>
+  </div> -->
+
+
+ 
+  
 {% endblock %}
