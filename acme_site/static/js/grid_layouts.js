@@ -837,50 +837,230 @@ function returnBalanced(canvasSizeX, canvasSizeY){
 			}
 		}],
 		[{ //9 grids
-			row:
-			col:
-			sizex:
-			sizey:
+			row:1, //top left
+			col:1,
+			sizex:function(canvasSizeX){ 
+				if(canvasSizeX%3 != 0){
+					return Math.floor(canvasSizeX/3);
+				} else {
+					return canvasSizeX/3;
+				}
+			},
+			sizey:function(canvasSizeY){
+				if(canvasSizeY%3 != 0){
+					return Math.floor(canvasSizeY/3);
+				} else {
+					return canvasSizeY/3;
+				}
+			}
 		},{
-			row:
-			col:
-			sizex:
-			sizey:
+			row:1, //top middle
+			col:function(canvasSizeY){
+				if(canvasSizeY%3 != 0){
+					return Math.floor(canvasSizeY/3);
+				} else {
+					return canvasSizeY/3;
+				}
+			},
+			sizex:function(canvasSizeX){ 
+				if(canvasSizeX%3 != 0){
+					return Math.floor(canvasSizeX/3);
+				} else {
+					return canvasSizeX/3;
+				}
+			},
+			sizey:function(canvasSizeY){
+				if(canvasSizeY%3 != 0){
+					return Math.floor(canvasSizeY/3);
+				} else {
+					return canvasSizeY/3;
+				}
+			}
 		},{
-			row:
-			col:
-			sizex:
-			sizey:
+			row:1, //top right
+			col:function(canvasSizeY){
+				if(canvasSizeY%3 != 0){
+					return Math.floor(2*canvasSizeY/3);
+				} else {
+					return 2*canvasSizeY/3;
+				}
+			},
+			sizex:function(canvasSizeX){ 
+				if(canvasSizeX%3 != 0){
+					return Math.floor(canvasSizeX/3)+canvasSizeX%3;
+				} else {
+					return canvasSizeX/3;
+				}
+			},
+			sizey:function(canvasSizeY){
+				if(canvasSizeY%3 != 0){
+					return Math.floor(canvasSizeY/3);
+				} else {
+					return canvasSizeY/3;
+				}
+			}
 		},{
-			row:
-			col:
-			sizex:
-			sizey:
+			row:function(canvasSizeY){ // middle left
+				if(canvasSizeY%3 != 0){
+					return Math.floor(canvasSizeY/3);
+				} else {
+					return canvasSizeY/3;
+				}
+			}
+			col:1,
+			sizex:function(canvasSizeX){ 
+				if(canvasSizeX%3 != 0){
+					return Math.floor(canvasSizeX/3)+canvasSizeX%3;
+				} else {
+					return canvasSizeX/3;
+				}
+			},
+			sizey:function(canvasSizeY){
+				if(canvasSizeY%3 != 0){
+					return Math.floor(canvasSizeY/3);
+				} else {
+					return canvasSizeY/3;
+				}
+			}
 		},{
-			row:
-			col:
-			sizex:
-			sizey:
+			row:function(canvasSizeY){ // middle middle
+				if(canvasSizeY%3 != 0){
+					return Math.floor(canvasSizeY/3);
+				} else {
+					return canvasSizeY/3;
+				}
+			}
+			col:function(canvasSizeY){
+				if(canvasSizeY%3 != 0){
+					return Math.floor(2*canvasSizeY/3);
+				} else {
+					return 2*canvasSizeY/3;
+				}
+			},
+			sizex:function(canvasSizeX){ 
+				if(canvasSizeX%3 != 0){
+					return Math.floor(canvasSizeX/3);
+				} else {
+					return canvasSizeX/3;
+				}
+			},
+			sizey:function(canvasSizeY){
+				if(canvasSizeY%3 != 0){
+					return Math.floor(canvasSizeY/3);
+				} else {
+					return canvasSizeY/3;
+				}
+			}
 		},{
-			row:
-			col:
-			sizex:
-			sizey:
+			row:function(canvasSizeY){ // middle right
+				if(canvasSizeY%3 != 0){
+					return Math.floor(canvasSizeY/3);
+				} else {
+					return canvasSizeY/3;
+				}
+			},
+			col:function(canvasSizeY){
+				if(canvasSizeY%3 != 0){
+					return Math.floor(2*canvasSizeY/3);
+				} else {
+					return 2*canvasSizeY/3;
+				}
+			},
+			sizex:function(canvasSizeX){ 
+				if(canvasSizeX%3 != 0){
+					return Math.floor(canvasSizeX/3)+canvasSizeX%3;
+				} else {
+					return canvasSizeX/3;
+				}
+			},
+			sizey:function(canvasSizeY){
+				if(canvasSizeY%3 != 0){
+					return Math.floor(canvasSizeY/3);
+				} else {
+					return canvasSizeY/3;
+				}
+			}
 		},{
-			row:
-			col:
-			sizex:
-			sizey:
+			row:function(canvasSizeY){ // bottom left
+				if(canvasSizeY%3 != 0){
+					return Math.floor(2*canvasSizeY/3);
+				} else {
+					return 2*canvasSizeY/3;
+				}
+			}
+			col:1,
+			sizex:function(canvasSizeX){ 
+				if(canvasSizeX%3 != 0){
+					return Math.floor(canvasSizeX/3)+canvasSizeX%3;
+				} else {
+					return canvasSizeX/3;
+				}
+			},
+			sizey:function(canvasSizeY){
+				if(canvasSizeY%3 != 0){
+					return Math.floor(canvasSizeY/3)+canvasSizeY%3;
+				} else {
+					return canvasSizeY/3;
+				}
+			}
 		},{
-			row:
-			col:
-			sizex:
-			sizey:
+			row:function(canvasSizeY){ // bottom middle
+				if(canvasSizeY%3 != 0){
+					return Math.floor(2*canvasSizeY/3);
+				} else {
+					return 2*canvasSizeY/3;
+				}
+			}
+			col:function(canvasSizeY){
+				if(canvasSizeY%3 != 0){
+					return Math.floor(canvasSizeY/3);
+				} else {
+					return canvasSizeY/3;
+				}
+			},
+			sizex:function(canvasSizeX){ 
+				if(canvasSizeX%3 != 0){
+					return Math.floor(canvasSizeX/3);
+				} else {
+					return canvasSizeX/3;
+				}
+			},
+			sizey:function(canvasSizeY){
+				if(canvasSizeY%3 != 0){
+					return Math.floor(canvasSizeY/3)+canvasSizeY%3;
+				} else {
+					return canvasSizeY/3;
+				}
+			}
 		},{
-			row:
-			col:
-			sizex:
-			sizey:
+			row:function(canvasSizeY){ // bottom right
+				if(canvasSizeY%3 != 0){
+					return Math.floor(2*canvasSizeY/3);
+				} else {
+					return 2*canvasSizeY/3;
+				}
+			},
+			col:function(canvasSizeY){
+				if(canvasSizeY%3 != 0){
+					return Math.floor(2*canvasSizeY/3);
+				} else {
+					return 2*canvasSizeY/3;
+				}
+			},
+			sizex:function(canvasSizeX){ 
+				if(canvasSizeX%3 != 0){
+					return Math.floor(canvasSizeX/3)+canvasSizeX%3;
+				} else {
+					return canvasSizeX/3;
+				}
+			},
+			sizey:function(canvasSizeY){
+				if(canvasSizeY%3 != 0){
+					return Math.floor(canvasSizeY/3)+canvasSizeY%3;
+				} else {
+					return canvasSizeY/3;
+				}
+			}
 		}]
 	];
 }
