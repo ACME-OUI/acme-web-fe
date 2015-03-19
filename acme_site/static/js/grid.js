@@ -186,167 +186,6 @@ $('body').ready(function(){
     }
   }
   
-
-  /**
-   * Fixes the widget sizes after a remove event
-   * widget -> the widget being removed
-   */
-   function removeFixup(widget){
-    var x = parseInt($(widget).attr('data-col'));
-    var y = parseInt($(widget).attr('data-row'));
-    var sizex = parseInt($(widget).attr('data-sizex'));
-    var sizey = parseInt($(widget).attr('data-sizey'));
-
-    //push the closing window to the back of the canvas
-    $(widget).css('z-index', 1);
-
-    var adj = findAdj(x, y, sizex, sizey, $(widget).attr('id'));
-    
-    //remove the window in question
-    gridster.remove_widget($(widget), true);
-
-    //resize the adj windows
-    resizeAdj(x, y, sizex, sizey, adj);
-  }
-
-  /**
-   * Resises the appropriate adjacent windows to the window that is closing
-   * x, y, sizex, sizey, the col row sizex and sizey of the window being closed
-   * adj, an array of all windows adjacent to the window being closed
-   */
-   function resizeAdj(x , y, sizex, sizey, adj) {
-    //decide what to do with the other windows to fill in the space
-    for (var i = adj.length - 1; i >= 0; i--) {
-      var adjx = parseInt(adj[i].attr('data-col'));
-      var adjy = parseInt(adj[i].attr('data-row'));
-      var adjSizeX = parseInt(adj[i].attr('data-sizex'));
-      var adjSizeY = parseInt(adj[i].attr('data-sizey'));
-      if(adjx == x) {
-        if(adjy > y) {
-          //see if we can expand the adj window into the place of 
-          //the removed window without hitting any other windows
-          if(adjSizeX == sizex) {
-            //the simple case
-            gridster.mutate_widget_in_gridmap(
-              adj[i],
-              {
-                col: adjx,
-                row: adjy,
-                size_x: adjSizeX,
-                size_y: adjSizeY
-              },{
-                col: adjx,
-                row: adjy - sizey,
-                size_x: adjSizeX,
-                size_y: adjSizeY + sizey
-              }
-              );
-            return;
-          } else {
-            //the move complex case
-          }
-        } else {
-          if(adjSizeX == sizex) {
-            //the simple case
-            gridster.mutate_widget_in_gridmap(
-              adj[i],
-              {
-                col: adjx,
-                row: adjy,
-                size_x: adjSizeX,
-                size_y: adjSizeY
-              },{
-                col: adjx,
-                row: adjy,
-                size_x: adjSizeX,
-                size_y: adjSizeY + sizey
-              }
-              );
-            return;
-          } else {
-
-          }
-        }
-      }
-      else if(adjy == y) {
-        if(adjx > x) {
-          if(adjSizeY == sizey){
-            //simple case
-            gridster.mutate_widget_in_gridmap(
-              adj[i],
-              {
-                col: adjx,
-                row: adjy,
-                size_x: adjSizeX,
-                size_y: adjSizeY
-              },{
-                col: adjx - sizex,
-                row: adjy,
-                size_x: adjSizeX + sizex,
-                size_y: adjSizeY
-              }
-              );
-            return;
-          } else {
-
-          }
-        } else {
-          if(adjSizeY == sizey){
-            //simple case
-            gridster.mutate_widget_in_gridmap(
-              adj[i],
-              {
-                col: adjx,
-                row: adjy,
-                size_x: adjSizeX,
-                size_y: adjSizeY
-              },{
-                col: adjx,
-                row: adjy,
-                size_x: adjSizeX + sizex,
-                size_y: adjSizeY
-              }
-              );
-            return;
-          } else {
-
-          }
-        }
-      } 
-    };
-  }
-
-
-  /**
-   * Finds all windows adjacent to the window specified
-   * x, y, sizex, sizey are the col, row, sizex and sizey of the given window
-   * id, the id of the window being closed
-   */
-   function findAdj(x, y, sizex, sizey, id){
-    var windows = $('.gs-w');
-    var adj = [];
-    //find the adjacent windows
-    for (var i = windows.length - 1; i >= 0; i--) {
-      if($(windows[i]).attr('id') == id)
-        continue;
-      var wx = parseInt($(windows[i]).attr('data-col'));
-      var wy = parseInt($(windows[i]).attr('data-row'));
-      var wsizex = parseInt($(windows[i]).attr('data-sizex'));
-      var wsizey = parseInt($(windows[i]).attr('data-sizey'));
-      if((x == wx) || ((x < wx) && (x + sizex - 1 >= wx)) || ((x > wx) && (x <= wx + wsizex - 1))) {
-        if(wy + wsizey == y || y + sizey == wy) {
-          adj.push($(windows[i]));
-        }
-      }
-      if((y == wy) || ((y < wy) && (y + sizey - 1 >= wy)) || ((y > wy)  && (y <= wy + wsizey - 1))) {
-        if(wx + wsizex == x || x + sizex == wx) {
-          adj.push($(windows[i]));
-        }
-      }
-    };
-    return adj;
-  }
-
   /**
    * Brings up the options for the widget
    * widget -> the widget requesting its options
@@ -354,9 +193,6 @@ $('body').ready(function(){
    function widgetOptions(id){
 
    }
-
-
-
 
   //this only works when going up and to the left
   //  TODO: add the sizex and sizey so it works going down and to the right
@@ -386,21 +222,9 @@ $('body').ready(function(){
     var i = 0;
     var windows = $(".gs-w");
     for(; i < windows.length; i++) {
-      // var j = 0;
-      // var rowsCols = get_windows({
-      //   id: $(windows[i]).attr('id'),
-      //   x: parseInt($(windows[i]).attr('data-col')),
-      //   y: parseInt($(windows[i]).attr('data-row')),
-      // });
-      // var nodes = get_rows_cols({
-      //   id: $(windows[i]).attr('id'),
-      //   x: parseInt($(windows[i]).attr('data-col')),
-      //   y: parseInt($(windows[i]).attr('data-row')),
-      //   sizex: parseInt($(windows[i]).attr('data-sizex')),
-      //   sizey: parseInt($(windows[i]).attr('data-sizey')),
-      // });
-}
-}
+
+    }
+  }
 
   /**
    * Fixes the window positions after a drag event
@@ -504,91 +328,6 @@ $('body').ready(function(){
     gridster.set_dom_grid_height();
     gridster.set_dom_grid_width();
   }
-
-  /**
-   * returns the number unique windows to the left, right, above, and below the given widget
-   * widget -> x, y, id
-   */
-   function get_windows(widget) {
-    var nodesInCol = 1;
-    var nodesInRow = 1;
-    var windows = $('.gs-w');
-    for(var j = 0; j < windows.length; j++) { 
-      if (widget.id != $(windows[j]).attr('id')) {
-        if( widget.y == parseInt($(windows[j]).attr('data-row')) 
-          || ( parseInt($(windows[j]).attr('data-row')) <= widget.y 
-            && widget.y <= ( parseInt($(windows[j]).attr('data-row'))+parseInt($(windows[j]).attr('data-sizey'))-1) ) ) 
-        {
-          //console.log($(windows[i]).attr('id') + " is in the same row as " + $(windows[j]).attr('id'));
-          nodesInRow++;
-        }
-        if(widget.x == parseInt($(windows[j]).attr('data-col'))
-          || ( parseInt($(windows[j]).attr('data-col')) <= widget.x 
-            && widget.x <= (parseInt($(windows[j]).attr('data-col'))+parseInt($(windows[j]).attr('data-sizex'))-1) ) )
-        {
-          //console.log($(windows[i]).attr('id') + " is in the same col as " + $(windows[j]).attr('id'));
-          nodesInCol++;
-        }
-      }
-    }
-    var newHTML = '<div><p>' + widget.id + '</p><p>nodesInRow:' + nodesInRow + '</p><p>nodesInCol:' + nodesInCol + '</p></div>';
-    $('#'+widget.id).html(newHTML);
-    return {
-      row: nodesInRow,
-      col: nodesInCol
-    };
-  }
-
-
-  /**
-   * returns the number of widgets to the left, right, above, and below the requested widget
-   * left = left of *any* of the widget of interest cells
-   * widget -> x, y, sizex, sizey
-
-   * TODO: Make sure it scans to the left no only from the origin of the node, but to the left
-          of each grid it extends down, and like wise for right, down, up
-          */
-          function get_rows_cols(widget) {
-            var nodes = {
-              left: 0,
-              right: 0,
-      up: 0, //above the widget on the page, lower row number
-      down: 0 //below the widget on the page, higher row number
-    };
-    var windows = $('.gs-w');
-    var highestRow = 1;
-    for( var i = 0; i < windows.length; i++) {
-      if(parseInt($(windows[i]).attr('data-row')) + parseInt($(windows[i]).attr('data-sizey')) > highestRow ) {
-        highestRow = parseInt($(windows[i]).attr('data-row')) + parseInt($(windows[i]).attr('data-sizey'));
-      }
-    }
-    for( var j = 1; j < widget.x; j++) { //scan to the left of the widget.x position
-      if( gridster.is_widget(j, widget.y)) {
-        nodes.left++;
-      }
-    }
-    for(j = widget.x + widget.sizex; j <= maxCols; j++) {
-      if( gridster.is_widget(j, widget.y)) {
-        nodes.right++;
-      }
-    }
-    for(j = widget.y-1 ; j > 0; j--) {
-      if( gridster.is_widget(widget.x, j)) {
-        nodes.up++;
-      }
-    }
-    for(j = widget.y + widget.sizey; j < highestRow; j++) {
-      if( gridster.is_widget(widget.x, j)) {
-        nodes.down++;
-      }
-    }
-    var newHTML = $('#'+widget.id).html() + '<p>Up:' + nodes.up + '</p><p>Right:' + nodes.right + '</p><p>Down:' + nodes.down + '</p><p>Left:' + nodes.left + '</p>' + resize_handle_html;
-    $('#'+widget.id).html(newHTML);
-    return nodes;
-  }
-
-
-  
 
 /**
  * returns the layout specifications for a balanced layout
