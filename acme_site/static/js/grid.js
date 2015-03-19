@@ -1,12 +1,26 @@
 $('body').ready(function(){
-    
-    var gridster;
-    var docWidth = $(document).width();
-    var docHeight = $(document).height();
-    var widgetWidth = 140;
-    var widgetHeight = 140;
-    var maxCols = Math.floor(docWidth/widgetWidth) - 1;
-    var maxHeight = Math.floor(docHeight/widgetHeight);
+
+
+  var gridster;
+  var docWidth = $(document).width();
+  var docHeight = $(document).height();
+  var widgetWidth = 140;
+  var widgetHeight = 140;
+  var maxCols = Math.floor(docWidth/widgetWidth) - 1;
+  var maxHeight = Math.floor(docHeight/widgetHeight);
+  var layout = returnBalanced(maxCols, maxHeight);
+    // console.log(layout);
+    // testLayout(layout);
+
+    // function testLayout(layout) {
+    //   for (var i = layout.length - 1; i >= 0; i--) {
+    //     for (var j = layout[i].length - 1; j >= 0; j--) {
+    //       console.log(i + ' ' + j + ' ' + layout[i][j].row(maxHeight) + ' ' + layout[i][j].col(maxCols) + ' ' + layout[i][j].sizex(maxCols) + ' ' + layout[i][j].sizey(maxHeight));
+    //     };
+    //   };
+    // }
+
+
     var resize_handle_html = '<span class="gs-resize-handle gs-resize-handle-both"></span>';
 
     // Define a widget
@@ -57,82 +71,82 @@ $('body').ready(function(){
 
   //Setup the gridster object
   gridster = $(".gridster ul").gridster({
-      widget_margins: [widgetMargins, widgetMargins],
-      widget_base_dimensions: [widgetWidth, widgetHeight],
-      max_cols: maxCols,
-      min_cols: maxCols,
-      min_rows: maxHeight,
-      resize: {
-        enabled: true,
-        stop: function(e, ui, widget) {
-          resizeFixup(e, ui, widget[0].id);
-        },
-        start: function(e, ui, widget) {
-          resizeStartX = parseInt($('#'+widget[0].id).attr('data-col'));
-          resizeStartY = parseInt($('#'+widget[0].id).attr('data-row'));
-          resizeStartSizeX = parseInt($('#'+widget[0].id).attr('data-sizex'));
-          resizeStartSizeY = parseInt($('#'+widget[0].id).attr('data-sizey'));
-        }
+    widget_margins: [widgetMargins, widgetMargins],
+    widget_base_dimensions: [widgetWidth, widgetHeight],
+    max_cols: maxCols,
+    min_cols: maxCols,
+    min_rows: maxHeight,
+    resize: {
+      enabled: true,
+      stop: function(e, ui, widget) {
+        resizeFixup(e, ui, widget[0].id);
       },
-      draggable: {
-        distance: 0,
-        limit: true,
-        start: function(e, ui, id) {
-          dragStartId = id[0].id;
-          var grid = $('#' + dragStartId);
-          var offset = grid.offset();
-          dragStartX = grid.attr('data-col');
-          dragStartY = grid.attr('data-row');
-          dragStartSizeX = grid.attr('data-sizex');
-          dragStartSizeY = grid.attr('data-sizey');
-          dragStartOffset.top = Math.floor(offset.top)+1;
-          dragStartOffset.left = Math.floor(offset.left)+1;
-        },
-        stop: function(e, ui, col, row) {
-          dragFixup(e, ui, col, row);
-        },
-        drag: function(e, ui, id) {
+      start: function(e, ui, widget) {
+        resizeStartX = parseInt($('#'+widget[0].id).attr('data-col'));
+        resizeStartY = parseInt($('#'+widget[0].id).attr('data-row'));
+        resizeStartSizeX = parseInt($('#'+widget[0].id).attr('data-sizex'));
+        resizeStartSizeY = parseInt($('#'+widget[0].id).attr('data-sizey'));
+      }
+    },
+    draggable: {
+      distance: 0,
+      limit: true,
+      start: function(e, ui, id) {
+        dragStartId = id[0].id;
+        var grid = $('#' + dragStartId);
+        var offset = grid.offset();
+        dragStartX = grid.attr('data-col');
+        dragStartY = grid.attr('data-row');
+        dragStartSizeX = grid.attr('data-sizex');
+        dragStartSizeY = grid.attr('data-sizey');
+        dragStartOffset.top = Math.floor(offset.top)+1;
+        dragStartOffset.left = Math.floor(offset.left)+1;
+      },
+      stop: function(e, ui, col, row) {
+        dragFixup(e, ui, col, row);
+      },
+      drag: function(e, ui, id) {
           //dragFixup(e, ui, id);
         }
       },
-  }).data('gridster');
+    }).data('gridster');
 
-  gridster.set_dom_grid_height(docHeight-100);
+gridster.set_dom_grid_height(docHeight-100);
   //gridster.set_dom_grid_width(docWidth-100);
 
 
   $('#provenance').click(function(){
-      add_grid('provenance');
-    });
+    add_grid('provenance');
+  });
   $('#status').click(function(){
-      add_grid('status');
-    });
+    add_grid('status');
+  });
   $('#science').click(function(){
-      add_grid('science');
-    });
+    add_grid('science');
+  });
   $('#nodeList').click(function(){
-      add_grid('nodeList');
-    });
+    add_grid('nodeList');
+  });
   $('#heatMap').click(function(){
-      add_grid('heatMap');
-    });
+    add_grid('heatMap');
+  });
   $('#modelRun').click(function(){
-      add_grid('modelRun');
-    });
+    add_grid('modelRun');
+  });
   $('#nodeSelect').click(function(){
-      add_grid('nodeSelect');
-    });
+    add_grid('nodeSelect');
+  });
   $('#cdat').click(function(){
-      add_grid('cdat');
-    });
+    add_grid('cdat');
+  });
   $('#charting').click(function(){
-      add_grid('charting');
-    });
+    add_grid('charting');
+  });
 
   /**
    * Registers call backs for window creation buttons
    */
-  function add_grid(name){
+   function add_grid(name){
     optionContents = '<select>';
     optionContents+= ' <option value="alpha">Alpha<option>';
     optionContents+= ' <option value="beta">Beta<option>';
@@ -170,12 +184,12 @@ $('body').ready(function(){
     }
   }
   
- 
+
   /**
    * Fixes the widget sizes after a remove event
    * widget -> the widget being removed
    */
-  function removeFixup(widget){
+   function removeFixup(widget){
     var x = parseInt($(widget).attr('data-col'));
     var y = parseInt($(widget).attr('data-row'));
     var sizex = parseInt($(widget).attr('data-sizex'));
@@ -198,7 +212,7 @@ $('body').ready(function(){
    * x, y, sizex, sizey, the col row sizex and sizey of the window being closed
    * adj, an array of all windows adjacent to the window being closed
    */
-  function resizeAdj(x , y, sizex, sizey, adj) {
+   function resizeAdj(x , y, sizex, sizey, adj) {
     //decide what to do with the other windows to fill in the space
     for (var i = adj.length - 1; i >= 0; i--) {
       var adjx = parseInt(adj[i].attr('data-col'));
@@ -224,7 +238,7 @@ $('body').ready(function(){
                 size_x: adjSizeX,
                 size_y: adjSizeY + sizey
               }
-            );
+              );
             return;
           } else {
             //the move complex case
@@ -245,7 +259,7 @@ $('body').ready(function(){
                 size_x: adjSizeX,
                 size_y: adjSizeY + sizey
               }
-            );
+              );
             return;
           } else {
 
@@ -269,7 +283,7 @@ $('body').ready(function(){
                 size_x: adjSizeX + sizex,
                 size_y: adjSizeY
               }
-            );
+              );
             return;
           } else {
 
@@ -290,10 +304,10 @@ $('body').ready(function(){
                 size_x: adjSizeX + sizex,
                 size_y: adjSizeY
               }
-            );
+              );
             return;
           } else {
-            
+
           }
         }
       } 
@@ -306,7 +320,7 @@ $('body').ready(function(){
    * x, y, sizex, sizey are the col, row, sizex and sizey of the given window
    * id, the id of the window being closed
    */
-  function findAdj(x, y, sizex, sizey, id){
+   function findAdj(x, y, sizex, sizey, id){
     var windows = $('.gs-w');
     var adj = [];
     //find the adjacent windows
@@ -335,9 +349,9 @@ $('body').ready(function(){
    * Brings up the options for the widget
    * widget -> the widget requesting its options
    */
-  function widgetOptions(id){
+   function widgetOptions(id){
 
-  }
+   }
 
 
 
@@ -383,15 +397,15 @@ $('body').ready(function(){
       //   sizex: parseInt($(windows[i]).attr('data-sizex')),
       //   sizey: parseInt($(windows[i]).attr('data-sizey')),
       // });
-    }
-  }
+}
+}
 
   /**
    * Fixes the window positions after a drag event
    * col, row -> the ending col and row of the dragged element
    */
-  function dragFixup(e, ui, col, row) {
-    
+   function dragFixup(e, ui, col, row) {
+
     var targetId = idFromLocation(col, row);
     var targetX = parseInt($('#'+targetId).attr('data-col'));
     var targetY = parseInt($('#'+targetId).attr('data-row'));
@@ -418,7 +432,7 @@ $('body').ready(function(){
       startGrid.offset({
         top: dragStartOffset.top ,
         left: dragStartOffset.left - 7// - Math.floor(widgeMargins/2)-2)
-      });
+    });
     } else {
       var startOffset = startGrid.offset();
       var targetOffset = targetGrid.offset();
@@ -465,109 +479,26 @@ $('body').ready(function(){
    * Recomputes and then places each window in its correct position
    * widget -> x, y, id
    */
-  function new_window_fixup(widget) {
+   function new_window_fixup(widget) {
     var windows = $('.gs-w');
-    if (windows.length == 1) {
+    for (var i = windows.length - 1; i >= 0; i--) {
       gridster.mutate_widget_in_gridmap(
-        $(windows[0]),
+        $(windows[i]),
         {
-          col: 1,
-          row: 1,
-          size_x: 1,
-          size_y: 1
+          row:1, 
+          col:1, 
+          size_x:1, 
+          size_y:1
         },
         {
-          col: 1,
-          row: 1,
-          size_x: maxCols,
-          size_y: maxHeight
+          row:layout[windows.length-1][i].row(maxHeight), 
+          col:layout[windows.length-1][i].col(maxCols), 
+          size_x:layout[windows.length-1][i].sizex(maxCols), 
+          size_y:layout[windows.length-1][i].sizey(maxHeight)
         });
-    } else {
-
-      //find the largest widget
-      var largetsWidget = 0;
-      var largetsWidgetIndex = 0;
-      for (var i = windows.length - 1; i >= 0; i--) {
-        var currentWidget = parseInt($(windows[i]).attr('data-sizex')) * parseInt($(windows[i]).attr('data-sizey'));
-        if( currentWidget > largetsWidget ) {
-          largetsWidget = currentWidget;
-          largetsWidgetIndex = i;
-        }
-      }
-      //Now find the largest widgets major axis, cut it in half and place the new widget in the space
-        //If the largest window found is taller then it is wide
-      if(parseInt($(windows[largetsWidgetIndex]).attr('data-sizey')) >= parseInt($(windows[largetsWidgetIndex]).attr('data-sizex'))  ) {
-        var newHeight = parseInt($(windows[largetsWidgetIndex]).attr('data-sizey')) / 2;
-        if(Math.floor(parseInt($(windows[largetsWidgetIndex]).attr('data-sizey')) / 2) != parseInt($(windows[largetsWidgetIndex]).attr('data-sizey')) / 2) {
-          newHeight = Math.floor(parseInt($(windows[largetsWidgetIndex]).attr('data-sizey')) / 2) + 1;
-        }
-        var largetsWidgetRow = parseInt($(windows[largetsWidgetIndex]).attr('data-row'));
-        gridster.mutate_widget_in_gridmap(
-          $(windows[largetsWidgetIndex]),
-          {
-            col: parseInt($(windows[largetsWidgetIndex]).attr('data-col')),
-            row: parseInt($(windows[largetsWidgetIndex]).attr('data-row')),
-            size_x: parseInt($(windows[largetsWidgetIndex]).attr('data-sizex')),
-            size_y: parseInt($(windows[largetsWidgetIndex]).attr('data-sizey'))
-          },
-          {
-            col: parseInt($(windows[largetsWidgetIndex]).attr('data-col')),
-            row: parseInt($(windows[largetsWidgetIndex]).attr('data-row')),
-            size_x: parseInt($(windows[largetsWidgetIndex]).attr('data-sizex')),
-            size_y: Math.floor(parseInt($(windows[largetsWidgetIndex]).attr('data-sizey')) / 2)
-          });
-        gridster.mutate_widget_in_gridmap(
-          $('#' + widget.id),
-          {
-            col: parseInt($('#' + widget.id).attr('data-col')),
-            row: parseInt($('#' + widget.id).attr('data-row')),
-            size_x: parseInt($('#' + widget.id).attr('data-sizex')),
-            size_y: parseInt($('#' + widget.id).attr('data-sizey'))
-          },
-          {
-            col: parseInt($(windows[largetsWidgetIndex]).attr('data-col')),
-            row: largetsWidgetRow + parseInt($(windows[largetsWidgetIndex]).attr('data-sizey')),
-            size_x: parseInt($(windows[largetsWidgetIndex]).attr('data-sizex')),
-            size_y: newHeight
-          });
-      } else { //If the largest window found is wider then it is tall
-        var newWidth = parseInt($(windows[largetsWidgetIndex]).attr('data-sizex')) / 2;
-        if(Math.floor(parseInt($(windows[largetsWidgetIndex]).attr('data-sizex')) / 2) != parseInt($(windows[largetsWidgetIndex]).attr('data-sizex')) / 2) {
-          newWidth = Math.floor(parseInt($(windows[largetsWidgetIndex]).attr('data-sizex')) / 2) + 1;
-        }
-        gridster.mutate_widget_in_gridmap(
-          $(windows[largetsWidgetIndex]),
-          {
-            col: parseInt($(windows[largetsWidgetIndex]).attr('data-col')),
-            row: parseInt($(windows[largetsWidgetIndex]).attr('data-row')),
-            size_x: parseInt($(windows[largetsWidgetIndex]).attr('data-sizex')),
-            size_y: parseInt($(windows[largetsWidgetIndex]).attr('data-sizey'))
-          },
-          {
-            col: parseInt($(windows[largetsWidgetIndex]).attr('data-col')),
-            row: parseInt($(windows[largetsWidgetIndex]).attr('data-row')),
-            size_x: Math.floor(parseInt($(windows[largetsWidgetIndex]).attr('data-sizex'))/2),
-            size_y: parseInt($(windows[largetsWidgetIndex]).attr('data-sizey'))
-          });
-
-        gridster.mutate_widget_in_gridmap(
-          $('#' + widget.id),
-          {
-            col: parseInt($('#' + widget.id).attr('data-col')),
-            row: parseInt($('#' + widget.id).attr('data-row')),
-            size_x: parseInt($('#' + widget.id).attr('data-sizex')),
-            size_y: parseInt($('#' + widget.id).attr('data-sizey'))
-          },
-          {
-            col: (parseInt($(windows[largetsWidgetIndex]).attr('data-col')) + parseInt($(windows[largetsWidgetIndex]).attr('data-sizex'))),
-            row: parseInt($(windows[largetsWidgetIndex]).attr('data-row')),
-            size_x: newWidth,
-            size_y: parseInt($(windows[largetsWidgetIndex]).attr('data-sizey'))
-          });
-        console.log('moving ' + widget.id + ' to x:' + (parseInt($(windows[largetsWidgetIndex]).attr('data-col')) + parseInt($(windows[largetsWidgetIndex]).attr('data-sizex'))) + ' y:' + parseInt($(windows[largetsWidgetIndex]).attr('data-row')));
-        
-      }    
-    }
+      console.log('maxHeight:' + maxHeight + ' maxCols:' + maxCols + ' i:' + (windows.length-1) + ' j:'+ i);
+      console.log('row:' + layout[windows.length-1][i].row(maxHeight) + ' col:' + layout[windows.length-1][i].col(maxCols) + ' sizex:' + layout[windows.length-1][i].sizex(maxCols) + ' sizey:'+ layout[windows.length-1][i].sizey(maxHeight))
+    };
     gridster.set_dom_grid_height();
     gridster.set_dom_grid_width();
   }
@@ -576,22 +507,22 @@ $('body').ready(function(){
    * returns the number unique windows to the left, right, above, and below the given widget
    * widget -> x, y, id
    */
-  function get_windows(widget) {
+   function get_windows(widget) {
     var nodesInCol = 1;
     var nodesInRow = 1;
     var windows = $('.gs-w');
     for(var j = 0; j < windows.length; j++) { 
       if (widget.id != $(windows[j]).attr('id')) {
         if( widget.y == parseInt($(windows[j]).attr('data-row')) 
-            || ( parseInt($(windows[j]).attr('data-row')) <= widget.y 
-                && widget.y <= ( parseInt($(windows[j]).attr('data-row'))+parseInt($(windows[j]).attr('data-sizey'))-1) ) ) 
+          || ( parseInt($(windows[j]).attr('data-row')) <= widget.y 
+            && widget.y <= ( parseInt($(windows[j]).attr('data-row'))+parseInt($(windows[j]).attr('data-sizey'))-1) ) ) 
         {
           //console.log($(windows[i]).attr('id') + " is in the same row as " + $(windows[j]).attr('id'));
           nodesInRow++;
         }
         if(widget.x == parseInt($(windows[j]).attr('data-col'))
-            || ( parseInt($(windows[j]).attr('data-col')) <= widget.x 
-                && widget.x <= (parseInt($(windows[j]).attr('data-col'))+parseInt($(windows[j]).attr('data-sizex'))-1) ) )
+          || ( parseInt($(windows[j]).attr('data-col')) <= widget.x 
+            && widget.x <= (parseInt($(windows[j]).attr('data-col'))+parseInt($(windows[j]).attr('data-sizex'))-1) ) )
         {
           //console.log($(windows[i]).attr('id') + " is in the same col as " + $(windows[j]).attr('id'));
           nodesInCol++;
@@ -614,11 +545,11 @@ $('body').ready(function(){
 
    * TODO: Make sure it scans to the left no only from the origin of the node, but to the left
           of each grid it extends down, and like wise for right, down, up
-   */
-  function get_rows_cols(widget) {
-    var nodes = {
-      left: 0,
-      right: 0,
+          */
+          function get_rows_cols(widget) {
+            var nodes = {
+              left: 0,
+              right: 0,
       up: 0, //above the widget on the page, lower row number
       down: 0 //below the widget on the page, higher row number
     };
@@ -654,6 +585,1164 @@ $('body').ready(function(){
     return nodes;
   }
 
-});
 
+  
+
+/**
+ * returns the layout specifications for a balanced layout
+ * canvasSizeX, canvasSizeY are the size of the grid canvas
+ * --> Im only doing this for 9 grids right now until I get the names for the next 3
+ */
+ function returnBalanced(canvasSizeX, canvasSizeY){
+
+  return [
+    [{ //1 grid
+      row:function(canvasSizeY){
+        return 1;
+      },
+      col:function(canvasSizeY){
+        return 1;
+      },
+      sizex:function(canvasSizeY){
+        return canvasSizeX;
+      },
+      sizey:function(canvasSizeY){
+        return canvasSizeY;
+      },
+    }],
+    [{ //2 grids
+      row:function(canvasSizeY){
+        return 1;
+      },
+      col:function(canvasSizeY){
+        return 1;
+      },
+      sizex:function(canvasSizeX){
+        if(canvasSizeX%2 != 0){
+          return Math.floor(canvasSizeX/2);
+        } else {
+          return canvasSizeX/2;
+        }
+      },
+      sizey:function(canvasSizeY){
+        return canvasSizeY;
+      },
+    },{
+      row:function(canvasSizeY){
+        return 1;
+      },
+      col:function(canvasSizeX){
+        if(canvasSizeX%2 != 0){
+          return Math.floor(canvasSizeX/2)+1;
+        } else {
+          return canvasSizeX/2+1;
+        }
+      },
+      sizex:function(canvasSizeX){
+        if(canvasSizeX%2 != 0){
+          return Math.floor(canvasSizeX/2)+1;
+        } else {
+          return canvasSizeX/2;
+        }
+      },
+      sizey:function(canvasSizeY){
+        return canvasSizeY;
+      },
+    }],
+    [{ //3 grids
+      row:function(canvasSizeY){
+        return 1;
+      }, //top
+      col:function(canvasSizeY){
+        return 1;
+      },
+      sizex:function(canvasSizeY){
+        return canvasSizeX;
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2);
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },{
+      row:function(canvasSizeY){ //bottom left
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2+1;
+        }
+      },
+      col:function(canvasSizeY){
+        return 1;
+      },
+      sizex:function(canvasSizeX){
+        if(canvasSizeX%2 != 0){
+          return Math.floor(canvasSizeX/2);
+        } else {
+          return canvasSizeX/2;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },{
+      row:function(canvasSizeY){ //bottom right
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2+1;
+        }
+      },
+      col:function(canvasSizeX){
+        if(canvasSizeX%2 != 0){
+          return Math.floor(canvasSizeX/2)+1;
+        } else {
+          return canvasSizeX/2+1;
+        }
+      },
+      sizex:function(canvasSizeX){
+        if(canvasSizeX%2 != 0){
+          return Math.floor(canvasSizeX/2)+1;
+        } else {
+          return canvasSizeX/2;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    }],
+    [{ //4 grids
+      row:function(canvasSizeY){
+        return 1;
+      }, //top left
+      col:function(canvasSizeY){
+        return 1;
+      },
+      sizex:function(canvasSizeX){
+        if(canvasSizeX%2 != 0){
+          return Math.floor(canvasSizeX/2);
+        } else {
+          return canvasSizeX/2;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2);
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },{
+      row:function(canvasSizeY){
+        return 1;
+      }, //top right
+      col:function(canvasSizeX){
+        if(canvasSizeX%2 != 0){
+          return Math.floor(canvasSizeX/2)+1;
+        } else {
+          return canvasSizeX/2+1;
+        }
+      },
+      sizex:function(canvasSizeX){
+        if(canvasSizeX%2 != 0){
+          return Math.floor(canvasSizeX/2)+1;
+        } else {
+          return canvasSizeX/2;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2);
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },{
+      row:function(canvasSizeY){ //bottom left
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2+1;
+        }
+      },
+      col:function(canvasSizeY){
+        return 1;
+      },
+      sizex:function(canvasSizeX){
+        if(canvasSizeX%2 != 0){
+          return Math.floor(canvasSizeX/2);
+        } else {
+          return canvasSizeX/2;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },{
+      row:function(canvasSizeY){ // bottom right
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2+1;
+        }
+      },
+      col:function(canvasSizeX){
+        if(canvasSizeX%2 != 0){
+          return Math.floor(canvasSizeX/2)+1;
+        } else {
+          return canvasSizeX/2+1;
+        }
+      },
+      sizex:function(canvasSizeX){
+        if(canvasSizeX%2 != 0){
+          return Math.floor(canvasSizeX/2)+1;
+        } else {
+          return canvasSizeX/2;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    }],
+    [{ //5 grids
+      row:function(canvasSizeY){
+        return 1;
+      }, //top left
+      col:function(canvasSizeY){
+        return 1;
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%2 != 0){
+          return Math.floor(canvasSizeX/2);
+        } else {
+          return canvasSizeX/2;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2);
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },{
+      row:function(canvasSizeY){
+        return 1;
+      }, //top right
+      col:function(canvasSizeX){ 
+        if(canvasSizeX%2 != 0){
+          return Math.floor(canvasSizeX/2)+1;
+        } else {
+          return canvasSizeX/2+1;
+        }
+      },
+      sizex:function(canvasSizeX){
+        if(canvasSizeX%2 != 0){
+          return Math.floor(canvasSizeX/2)+1;
+        } else {
+          return canvasSizeX/2;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2);
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },{
+      row:function(canvasSizeY){ //bottom left
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2+1;
+        }
+      },
+      col:function(canvasSizeY){
+        return 1;
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3);
+        } else {
+          return canvasSizeX/3;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },{
+      row:function(canvasSizeY){ //bottom middle
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2+1;
+        }
+      },
+      col:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3)+1;
+        } else {
+          return canvasSizeX/3+1;
+        }
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3);
+        } else {
+          return canvasSizeX/3;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },{
+      row:function(canvasSizeY){ //bottom right
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2+1;
+        }
+      },
+      col:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3)*2+1;
+        } else {
+          return 2*canvasSizeX/3+1;
+        }
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3)+canvasSizeX%3;
+        } else {
+          return canvasSizeX/3;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2);
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    }],
+    [{ //6 grids
+      row:function(canvasSizeY){
+        return 1;
+      }, //top left
+      col:function(canvasSizeY){
+        return 1;
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3);
+        } else {
+          return canvasSizeX/3;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2);
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },{
+      row:function(canvasSizeY){
+        return 1;
+      }, // top middle
+      col:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3)+1;
+        } else {
+          return canvasSizeX/3+1;
+        }
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3);
+        } else {
+          return canvasSizeX/3;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2);
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },{
+      row:function(canvasSizeY){
+        return 1;
+      }, //top right
+      col:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(2*canvasSizeX/3);
+        } else {
+          return 2*canvasSizeX/3+1;
+        }
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3)+canvasSizeX%3;
+        } else {
+          return canvasSizeX/3;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2);
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },{
+      row:function(canvasSizeY){ //bottom left
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2+1;
+        }
+      },
+      col:function(canvasSizeY){
+        return 1;
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3);
+        } else {
+          return canvasSizeX/3;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },{
+      row:function(canvasSizeY){ //bottom middle
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2+1;
+        }
+      },
+      col:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3)+1;
+        } else {
+          return canvasSizeX/3+1;
+        }
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3);
+        } else {
+          return canvasSizeX/3;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2);
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },{
+      row:function(canvasSizeY){ //bottom right
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2+1;
+        }
+      },
+      col:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3)*2+1;
+        } else {
+          return 2*canvasSizeX/3+1;
+        }
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3)+canvasSizeX%3;
+        } else {
+          return canvasSizeX/3;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    }],
+    [{ //7 grids
+      row:function(canvasSizeX){
+        return 1;
+      }, //top left
+      col:function(canvasSizeX){
+        return 1;
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%4 != 0){
+          return Math.floor(canvasSizeX/4);
+        } else {
+          return canvasSizeX/4;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2);
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },{
+      row:function(canvasSizeX){
+        return 1;
+      }, // top middle left
+      col:function(canvasSizeX){ 
+        if(canvasSizeX%4 != 0){
+          return Math.floor(canvasSizeX/4)+1;
+        } else {
+          return canvasSizeX/4+1;
+        }
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%4 != 0){
+          return Math.floor(canvasSizeX/4);
+        } else {
+          return canvasSizeX/4;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2);
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },
+    {
+      row:function(canvasSizeX){
+        return 1;
+      }, // top middle right
+      col:function(canvasSizeX){ 
+        if(canvasSizeX%4 != 0){
+          return Math.floor(canvasSizeX/4)*2+1;
+        } else {
+          return 2*canvasSizeX/4+1;
+        }
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%4 != 0){
+          return Math.floor(canvasSizeX/4);
+        } else {
+          return canvasSizeX/4;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2);
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },
+    {
+      row:function(canvasSizeX){
+        return 1;
+      }, //top right
+      col:function(canvasSizeX){ 
+        if(canvasSizeX%4 != 0){
+          return Math.floor(canvasSizeX/4)*3+1;
+        } else {
+          return 3*canvasSizeX/4+1;
+        }
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%4 != 0){
+          return Math.floor(canvasSizeX/4)+canvasSizeX%4;
+        } else {
+          return canvasSizeX/4;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2);
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },
+    {
+      row:function(canvasSizeY){//bottom left
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2+1;
+        }
+      },
+      col:function(canvasSizeX){
+        return 1;
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3);
+        } else {
+          return canvasSizeX/3;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },
+    {
+      row:function(canvasSizeY){//bottom middle
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2+1;
+        }
+      },
+      col:function(canvasSizeX){//bottom middle
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3)+1;
+        } else {
+          return canvasSizeX/3+1;
+        }
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3);
+        } else {
+          return canvasSizeX/3;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },
+    {
+      row:function(canvasSizeY){//bottom right
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2+1;
+        }
+      },
+      col:function(canvasSizeX){
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3)*2+1;
+        } else {
+          return 2*canvasSizeX/3+1;
+        }
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3)+canvasSizeX%3;
+        } else {
+          return canvasSizeX/3;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    }],
+    [{ //8 grids
+      row:function(canvasSizeX){
+        return 1
+      }, //top left
+      col:function(canvasSizeX){
+        return 1
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%4 != 0){
+          return Math.floor(canvasSizeX/4);
+        } else {
+          return canvasSizeX/4;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2);
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },{
+      row:function(canvasSizeX){
+        return 1
+      }, //top middle left
+      col:function(canvasSizeX){//bottom middle
+        if(canvasSizeX%4 != 0){
+          return Math.floor(canvasSizeX/4)+1;
+        } else {
+          return canvasSizeX/4+1;
+        }
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%4 != 0){
+          return Math.floor(canvasSizeX/4);
+        } else {
+          return canvasSizeX/4;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2);
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },{
+      row:function(canvasSizeX){
+        return 1
+      }, //top middle right
+      col:function(canvasSizeX){
+        if(canvasSizeX%4 != 0){
+          return Math.floor(canvasSizeX/4)*2+1;
+        } else {
+          return 2*canvasSizeX/4+1;
+        }
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%4 != 0){
+          return Math.floor(canvasSizeX/4);
+        } else {
+          return canvasSizeX/4;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2);
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },{
+      row:function(canvasSizeX){
+        return 1
+      }, // top right
+      col:function(canvasSizeY){
+        if(canvasSizeY%4 != 0){
+          return Math.floor(canvasSizeY/4)*3+1;
+        } else {
+          return 3*canvasSizeY/4+1;
+        }
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%4 != 0){
+          return Math.floor(canvasSizeX/4)+canvasSizeX%4;
+        } else {
+          return canvasSizeX/4;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2);
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },{
+      row:function(canvasSizeY){ //bottom left
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2+1;
+        }
+      },
+      col:function(canvasSizeX){
+        return 1
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%4 != 0){
+          return Math.floor(canvasSizeX/4);
+        } else {
+          return canvasSizeX/4;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },{
+      row:function(canvasSizeY){ //bottom middle left
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2+1;
+        }
+      },
+      col:function(canvasSizeX){
+        if(canvasSizeX%4 != 0){
+          return Math.floor(canvasSizeX/4)+1;
+        } else {
+          return canvasSizeX/4+1;
+        }
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%4 != 0){
+          return Math.floor(canvasSizeX/4);
+        } else {
+          return canvasSizeX/4;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },{
+      row:function(canvasSizeY){ //bottom middle right
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2+1;
+        }
+      },
+      col:function(canvasSizeX){
+        if(canvasSizeX%4 != 0){
+          return Math.floor(canvasSizeX/4)*2+1;
+        } else {
+          return 2*canvasSizeX/4+1;
+        }
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%4 != 0){
+          return Math.floor(canvasSizeX/4);
+        } else {
+          return canvasSizeX/4;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    },{
+      row:function(canvasSizeY){ //bottom right
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2+1;
+        }
+      },
+      col:function(canvasSizeX){
+        if(canvasSizeX%4 != 0){
+          return Math.floor(canvasSizeX/4)*3+1;
+        } else {
+          return 3*canvasSizeX/4+1;
+        }
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%4 != 0){
+          return Math.floor(canvasSizeX/4)+canvasSizeX%4;
+        } else {
+          return canvasSizeX/4;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%2 != 0){
+          return Math.floor(canvasSizeY/2)+1;
+        } else {
+          return canvasSizeY/2;
+        }
+      }
+    }],
+    [{ //9 grids
+      row:function(canvasSizeY){ //top left
+        return 1
+      }, 
+      col:function(canvasSizeX){
+        return 1
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3);
+        } else {
+          return canvasSizeX/3;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%3 != 0){
+          return Math.floor(canvasSizeY/3);
+        } else {
+          return canvasSizeY/3;
+        }
+      }
+    },{
+      row:function(canvasSizeY){ //top middle
+        return 1
+      }, 
+      col:function(canvasSizeX){
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3)+1
+        } else {
+          return canvasSizeX/3+1;
+        }
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3);
+        } else {
+          return canvasSizeX/3;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%3 != 0){
+          return Math.floor(canvasSizeY/3);
+        } else {
+          return canvasSizeY/3;
+        }
+      }
+    },{
+      row:function(canvasSizeY){ //top right
+        return 1
+      }, 
+      col:function(canvasSizeX){
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3)*2+1;
+        } else {
+          return 2*canvasSizeX/3+1;
+        }
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3)+canvasSizeX%3;
+        } else {
+          return canvasSizeX/3;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%3 != 0){
+          return Math.floor(canvasSizeY/3);
+        } else {
+          return canvasSizeY/3;
+        }
+      }
+    },{
+      row:function(canvasSizeY){ // middle left
+        if(canvasSizeY%3 != 0){
+          return Math.floor(canvasSizeY/3)+1;
+        } else {
+          return canvasSizeY/3+1;
+        }
+      },
+      col:function(canvasSizeX){
+        return 1
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3);
+        } else {
+          return canvasSizeX/3;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%3 != 0){
+          return Math.floor(canvasSizeY/3);
+        } else {
+          return canvasSizeY/3;
+        }
+      }
+    },{
+      row:function(canvasSizeY){ // middle middle
+        if(canvasSizeY%3 != 0){
+          return Math.floor(canvasSizeY/3)+1;
+        } else {
+          return canvasSizeY/3+1;
+        }
+      },
+      col:function(canvasSizeX){
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3)+1;
+        } else {
+          return canvasSizeX/3+1;
+        }
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3);
+        } else {
+          return canvasSizeX/3;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%3 != 0){
+          return Math.floor(canvasSizeY/3);
+        } else {
+          return canvasSizeY/3;
+        }
+      }
+    },{
+      row:function(canvasSizeY){ // middle right
+        if(canvasSizeY%3 != 0){
+          return Math.floor(canvasSizeY/3)+1;
+        } else {
+          return canvasSizeY/3+1;
+        }
+      },
+      col:function(canvasSizeX){
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3)*2+1;
+        } else {
+          return 2*canvasSizeX/3+1;
+        }
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3)+canvasSizeX%3;
+        } else {
+          return canvasSizeX/3;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%3 != 0){
+          return Math.floor(canvasSizeY/3);
+        } else {
+          return canvasSizeY/3;
+        }
+      }
+    },{
+      row:function(canvasSizeY){ // bottom left
+        if(canvasSizeY%3 != 0){
+          return Math.floor(canvasSizeY/3)*2+1;
+        } else {
+          return 2*canvasSizeY/3+1;
+        }
+      },
+      col:function(canvasSizeX){
+        return 1
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3);
+        } else {
+          return canvasSizeX/3;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%3 != 0){
+          return Math.floor(canvasSizeY/3)+canvasSizeY%3;
+        } else {
+          return canvasSizeY/3;
+        }
+      }
+    },{
+      row:function(canvasSizeY){ // bottom middle
+        if(canvasSizeY%3 != 0){
+          return Math.floor(canvasSizeY/3)*2+1;
+        } else {
+          return 2*canvasSizeY/3+1;
+        }
+      },
+      col:function(canvasSizeX){
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3)+1;
+        } else {
+          return canvasSizeX/3+1;
+        }
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3);
+        } else {
+          return canvasSizeX/3;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%3 != 0){
+          return Math.floor(canvasSizeY/3)+canvasSizeY%3;
+        } else {
+          return canvasSizeY/3;
+        }
+      }
+    },{
+      row:function(canvasSizeY){ // bottom right
+        if(canvasSizeY%3 != 0){
+          return Math.floor(canvasSizeY/3)*2+1;
+        } else {
+          return 2*canvasSizeY/3+1;
+        }
+      },
+      col:function(canvasSizeX){
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3)*2+1;
+        } else {
+          return 2*canvasSizeX/3+1;
+        }
+      },
+      sizex:function(canvasSizeX){ 
+        if(canvasSizeX%3 != 0){
+          return Math.floor(canvasSizeX/3)+canvasSizeX%3;
+        } else {
+          return canvasSizeX/3;
+        }
+      },
+      sizey:function(canvasSizeY){
+        if(canvasSizeY%3 != 0){
+          return Math.floor(canvasSizeY/3)+canvasSizeY%3;
+        } else {
+          return canvasSizeY/3;
+        }
+      }
+    }]
+    ];
+  }
+
+
+
+});
 
