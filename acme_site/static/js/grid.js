@@ -111,8 +111,7 @@ $('body').ready(function(){
       },
     }).data('gridster');
 
-gridster.set_dom_grid_height(docHeight-100);
-  //gridster.set_dom_grid_width(docWidth-100);
+  gridster.set_dom_grid_height(docHeight-100);
 
 
   $('#provenance').click(function(){
@@ -171,8 +170,11 @@ gridster.set_dom_grid_height(docHeight-100);
       });
 
       $(w).find('.remove').click(function(e) {
+        gridster.remove_widget($(w), true);
+        setTimeout(function(){ new_window_fixup(); }, 600);
+        
         //send the widget that got clicked to the remove handler
-        removeFixup(e.target.parentElement.parentElement.parentElement.parentElement);
+        //removeFixup(e.target.parentElement.parentElement.parentElement.parentElement);
       });
 
       $(w).find('.options').click(function(e) {
@@ -180,7 +182,7 @@ gridster.set_dom_grid_height(docHeight-100);
         //widgetOptions(e.target.parentElement.parentElement.parentElement.parentElement);
       });
 
-      new_window_fixup({id: name + '_window'});
+      new_window_fixup();
     }
   }
   
@@ -479,7 +481,7 @@ gridster.set_dom_grid_height(docHeight-100);
    * Recomputes and then places each window in its correct position
    * widget -> x, y, id
    */
-   function new_window_fixup(widget) {
+   function new_window_fixup() {
     var windows = $('.gs-w');
     for (var i = windows.length - 1; i >= 0; i--) {
       gridster.mutate_widget_in_gridmap(
