@@ -91,72 +91,36 @@ $('body').ready(function(){
     draggable: {
       distance: 0,
       limit: true,
-      start: function(e, ui, id) {
-        dragStartId = id[0].id;
-        var grid = $('#' + dragStartId);
-        var offset = grid.offset();
-        dragStartX = grid.attr('data-col');
-        dragStartY = grid.attr('data-row');
-        dragStartSizeX = grid.attr('data-sizex');
-        dragStartSizeY = grid.attr('data-sizey');
-        dragStartOffset.top = Math.floor(offset.top)+1;
-        dragStartOffset.left = Math.floor(offset.left)+1;
-      },
       stop: function(e, ui, col, row) {
         dragFixup(e, ui, col, row);
       },
-      drag: function(e, ui, id) {
-          //dragFixup(e, ui, id);
-        }
-      },
-    }).data('gridster');
+    }
+  }).data('gridster');
 
-  gridster.set_dom_grid_height(docHeight-100);
+  gridster.set_dom_grid_height(maxHeight*widgetHeight);
 
+  $('.slide-btn').each(function(){
+    $(this).click(function(){
+      add_grid($(this).attr('id'));
+    });
+  });
 
-  $('#provenance').click(function(){
-    add_grid('provenance');
-  });
-  $('#status').click(function(){
-    add_grid('status');
-  });
-  $('#science').click(function(){
-    add_grid('science');
-  });
-  $('#nodeList').click(function(){
-    add_grid('nodeList');
-  });
-  $('#heatMap').click(function(){
-    add_grid('heatMap');
-  });
-  $('#modelRun').click(function(){
-    add_grid('modelRun');
-  });
-  $('#nodeSelect').click(function(){
-    add_grid('nodeSelect');
-  });
-  $('#cdat').click(function(){
-    add_grid('cdat');
-  });
-  $('#charting').click(function(){
-    add_grid('charting');
-  });
 
   /**
    * Registers call backs for window creation buttons
    */
    function add_grid(name){
-    optionContents = '<select>';
-    optionContents+= ' <option value="alpha">Alpha<option>';
-    optionContents+= ' <option value="beta">Beta<option>';
-    optionContents+= ' <option value="charlie">Charlie<option>';
-    optionContents+= ' <option value="delta">Delta<option>';
-    optionContents+= '</select>';
-    optionContents+= '<form oninput="x.value=parseInt(a.value)+parseInt(b.value)">0';
-    optionContents+= ' <input type="range" id="a" value="50">100';
-    optionContents+= ' +<input type="number" id="b" value="50">';
-    optionContents+= ' =<output name="x" for="a b"></output>';
-    optionContents+= '</form>';
+    // optionContents = '<select>';
+    // optionContents+= ' <option value="alpha">Alpha<option>';
+    // optionContents+= ' <option value="beta">Beta<option>';
+    // optionContents+= ' <option value="charlie">Charlie<option>';
+    // optionContents+= ' <option value="delta">Delta<option>';
+    // optionContents+= '</select>';
+    // optionContents+= '<form oninput="x.value=parseInt(a.value)+parseInt(b.value)">0';
+    // optionContents+= ' <input type="range" id="a" value="50">100';
+    // optionContents+= ' +<input type="number" id="b" value="50">';
+    // optionContents+= ' =<output name="x" for="a b"></output>';
+    // optionContents+= '</form>';
     if($('#' + name + '_window').length == 0) {
       var widget_t = ['<li id=' + name + '_window>' + header1 + name + header2 +/* '<div>' + optionContents + '</div><div>' + contents + '</div>' */+ header3 +'</li>',1,1];
       var w = gridster.add_widget.apply(gridster,widget_t);
@@ -169,12 +133,20 @@ $('body').ready(function(){
         event.stopPropagation();
       });
 
+      $(w).find('.grid-panel-heading').mousedown(function(event){
+        dragStartId = w[0].id;
+        var grid = $('#' + dragStartId);
+        dragStartX = grid.attr('data-col');
+        dragStartY = grid.attr('data-row');
+        dragStartSizeX = grid.attr('data-sizex');
+        dragStartSizeY = grid.attr('data-sizey');
+        dragStartOffset = grid.offset();
+        // dragStartOffset.left -= 6;
+      });
+
       $(w).find('.remove').click(function(e) {
         gridster.remove_widget($(w), true);
         setTimeout(function(){ new_window_fixup(); }, 600);
-        
-        //send the widget that got clicked to the remove handler
-        //removeFixup(e.target.parentElement.parentElement.parentElement.parentElement);
       });
 
       $(w).find('.options').click(function(e) {
@@ -216,14 +188,32 @@ $('body').ready(function(){
   
 
   /**
-  * Computes and sets the size for each window
+  * Computes and sets the size for each window after a resize event
   */
-  function resizeFixup(e, ui, id) {
-    var i = 0;
-    var windows = $(".gs-w");
-    for(; i < windows.length; i++) {
+  // function resizeFixup(e, ui, id) {
+  //   var i = 0;
+  //   var windows = $(".gs-w");
+  //   for(; i < windows.length; i++) {
 
-    }
+  //   }
+  // }
+
+  function move_grid($widget, new_wgd){
+    $widget.removeClass('player-revert');
+    //update coords instance attributes
+    $widget.data('coords').update({
+        width: (new_wgd.size_x * gridster.options.widget_base_dimensions[0] +
+            ((new_wgd.size_x - 1) * gridster.options.widget_margins[0]) * 2),
+        height: (new_wgd.size_y * gridster.options.widget_base_dimensions[1] +
+            ((new_wgd.size_y - 1) * gridster.options.widget_margins[1]) * 2)
+    });
+
+    $widget.attr({
+        'data-col': new_wgd.col,
+        'data-row': new_wgd.row,
+        'data-sizex': new_wgd.size_x,
+        'data-sizey': new_wgd.size_y
+    });
   }
 
   /**
@@ -240,64 +230,36 @@ $('body').ready(function(){
     var targetGrid = $('#'+targetId);
     var startGrid = $('#'+dragStartId);
     if(targetId == dragStartId) {
-      gridster.mutate_widget_in_gridmap(
-        targetGrid,
-        {
-          col: 1,//parseInt(targetGrid.attr('data-col')),
-          row: 1,//parseInt(targetGrid.attr('data-row')),
-          size_x: 1,//parseInt(targetGrid.attr('data-sizex')),
-          size_y: 1,//parseInt(targetGrid.attr('data-sizey')),
-        },
-        {
-          col: dragStartX,
-          row: dragStartY,
-          size_x: dragStartSizeX,
-          size_y: dragStartSizeY,
-        });
-      //var targetOffset = targetGrid.offset();
       startGrid.offset({
         top: dragStartOffset.top ,
-        left: dragStartOffset.left - 7// - Math.floor(widgeMargins/2)-2)
-    });
+        left: dragStartOffset.left
+      });
     } else {
       var startOffset = startGrid.offset();
       var targetOffset = targetGrid.offset();
-      gridster.mutate_widget_in_gridmap(
-        startGrid,
-        {
-          col: startGrid.attr('data-col'),
-          row: startGrid.attr('data-row'),
-          size_x: startGrid.attr('data-sizex'),
-          size_y: startGrid.attr('data-sizey'),
-        },
-        {
-          col: targetGrid.attr('data-col'),
-          row: targetGrid.attr('data-row'),
-          size_x: targetGrid.attr('data-sizex'),
-          size_y: targetGrid.attr('data-sizey'),
-        });
-      gridster.mutate_widget_in_gridmap(
-        targetGrid,
-        {
-          col: targetGrid.attr('data-col'),
-          row: targetGrid.attr('data-row'),
-          size_x: targetGrid.attr('data-sizex'),
-          size_y: targetGrid.attr('data-sizey'),
-        },
-        {
-          col: dragStartX,
-          row: dragStartY,
-          size_x: dragStartSizeX,
-          size_y: dragStartSizeY,
-        });
+      startGrid.attr({
+        'data-col': targetGrid.attr('data-col'),
+        'data-row': targetGrid.attr('data-row'),
+        'data-sizex': targetGrid.attr('data-sizex'),
+        'data-sizey': targetGrid.attr('data-sizey')
+      });
       startGrid.offset({
         top: targetOffset.top,
         left: targetOffset.left
       });
-      targetGrid.offset({
-        top: dragStartOffset.top,
-        left: dragStartOffset.left// - Math.floor(widgeMargins/2)-2
-      }); 
+      targetGrid.attr({
+        'data-col': dragStartX,
+        'data-row': dragStartY,
+        'data-sizex': dragStartSizeX,
+        'data-sizey': dragStartSizeY
+      });
+      setTimeout(function(){
+        targetGrid.offset({
+          top: dragStartOffset.top,
+          left: dragStartOffset.left
+        });
+      }, 200);
+       
     }
   }
 
@@ -307,23 +269,13 @@ $('body').ready(function(){
    */
    function new_window_fixup() {
     var windows = $('.gs-w');
-    for (var i = windows.length - 1; i >= 0; i--) {
-      gridster.mutate_widget_in_gridmap(
-        $(windows[i]),
-        {
-          row:1, 
-          col:1, 
-          size_x:1, 
-          size_y:1
-        },
-        {
-          row:layout[windows.length-1][i].row(maxHeight), 
-          col:layout[windows.length-1][i].col(maxCols), 
-          size_x:layout[windows.length-1][i].sizex(maxCols), 
-          size_y:layout[windows.length-1][i].sizey(maxHeight)
-        });
-      console.log('maxHeight:' + maxHeight + ' maxCols:' + maxCols + ' i:' + (windows.length-1) + ' j:'+ i);
-      console.log('row:' + layout[windows.length-1][i].row(maxHeight) + ' col:' + layout[windows.length-1][i].col(maxCols) + ' sizex:' + layout[windows.length-1][i].sizex(maxCols) + ' sizey:'+ layout[windows.length-1][i].sizey(maxHeight))
+    for (var i = 0; i < windows.length; i++) {
+      $(windows[i]).attr({
+        'data-col': layout[windows.length-1][i].col(maxCols),
+        'data-row': layout[windows.length-1][i].row(maxHeight),
+        'data-sizex': layout[windows.length-1][i].sizex(maxCols),
+        'data-sizey': layout[windows.length-1][i].sizey(maxHeight)
+      });
     };
     gridster.set_dom_grid_height();
     gridster.set_dom_grid_width();

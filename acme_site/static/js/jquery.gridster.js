@@ -2008,11 +2008,9 @@
 
         ui.position.left = ui.position.left + this.baseX;
         ui.position.top = ui.position.top + this.baseY;
-        this.colliders_data = this.collision_api.get_closest_colliders(
-            ui.position);
+        
+/*       
 
-       
-/*
         this.on_overlapped_column_change(
             this.on_start_overlapping_column,
             this.on_stop_overlapping_column
@@ -2026,8 +2024,11 @@
         );
 */
 
-//console.log("start over col:" + this.get_targeted_columns(this.colliders_data[0].el.data.col));
+        //console.log("start over col:" + this.get_targeted_columns(this.colliders_data[0].el.data.col));
         //console.log("start over row:" + this.get_targeted_rows(this.colliders_data[0].el.data.row));
+        this.colliders_data = this.collision_api.get_closest_colliders(
+            ui.position);
+
         var startCollideCol = this.get_targeted_columns(this.colliders_data[0].el.data.col);
         var startCollideRow = this.get_targeted_rows(this.colliders_data[0].el.data.row);
         if (this.options.draggable.stop) {
