@@ -35,8 +35,8 @@
 
 
 {% block new_button_left_link%}
-    <li class="navbar-left" id="toggle-slide-left" style="left: -270px;"><a id="toggle-left-a" href="#">Window Menu</a></li>
-    <li class="navbar-left" id="drop-down-tab" style="left: -270px;"><a style="color: #000;" href="#">Dropdown Menu</a></li>
+    <li class="navbar-left" id="toggle-slide-left" style="position: fixed; left: 10px;"><a id="toggle-left-a" href="#">Window Menu</a></li>
+    <li class="navbar-left" id="drop-down-tab" style="position: fixed; left: 80px;"><a style="color: #000;" href="#">Dropdown Menu</a></li>
 {% endblock %}
 
 {% block dropmenu %}
@@ -77,9 +77,9 @@
     </form>    
   </nav> <!-- Nav left menu -->
   
-  <div class="wrapper">
-    <div class="demo">
-      <div class="gridster" id="grid_holder" style="border: 1px solid black; margin: 0 auto 0 auto;">
+  <div class="wrapper" >
+    <div class="demo" style=" margin: 0 auto 0 auto;">
+      <div class="gridster" id="grid_holder">
           <ul>
           </ul>
       </div>
@@ -88,12 +88,5 @@
   
 {% endblock %}
 
-{% block content %}
-  <!-- <div style="position: fixed; top: 60px; left: 50px;">
-    <button class="btn toggle-slide-left">Slide Menu Left</button>
-  </div> -->
-
-
- 
-  
+{% block content %}  
 {% endblock %}
