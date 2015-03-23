@@ -141,6 +141,7 @@ $('body').ready(function(){
         dragStartSizeX = grid.attr('data-sizex');
         dragStartSizeY = grid.attr('data-sizey');
         dragStartOffset = grid.offset();
+        console.log(dragStartId + " drag starting at " + dragStartOffset.left);
         // dragStartOffset.left -= 6;
       });
 
@@ -231,9 +232,14 @@ $('body').ready(function(){
     var startGrid = $('#'+dragStartId);
     if(targetId == dragStartId) {
       startGrid.offset({
-        top: dragStartOffset.top ,
-        left: dragStartOffset.left
+        top: dragStartOffset.top
       });
+      setTimeout(function(){
+        startGrid.offset({
+          left: dragStartOffset.left
+        });
+      },500);
+      
     } else {
       var startOffset = startGrid.offset();
       var targetOffset = targetGrid.offset();
