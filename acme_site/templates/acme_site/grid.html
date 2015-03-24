@@ -7,12 +7,15 @@
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
   <link rel="stylesheet" type="text/css" href="static/css/MetroJs.css">
   <link rel="stylesheet" type="text/css" href="static/css/grid_custom.css">
+  <link rel="stylesheet" type="text/css" href="static/css/tile.css">
 
   <!-- JS resources for this page -->
-  <script type="text/javascript" src="static/js/grid.js"></script>
+  <!--<script type="text/javascript" src="static/js/grid.js"></script>-->
   <script type="text/javascript" src="static/js/menu.js"></script>
   <script type="text/javascript" src="static/js/MetroJs.js"></script>
-  <script type="text/javascript" src="static/js/jquery.gridster.js"></script>
+  <!-- <script type="text/javascript" src="static/js/jquery.gridster.js"></script> -->
+  <script type="text/javascript" src="static/js/grid_layouts.js"></script>
+  <script type="text/javascript" src="static/js/tile.js"></script>
 
   <script type="text/javascript">
   $('body').ready(function(){
@@ -58,12 +61,12 @@
     <ul>
       <li><button type="button" class="btn menu-btn slide-btn" id="provenance">Provenance Capture</button></li>
       <li><button type="button" class="btn menu-btn slide-btn" id="status">Status Messages</button></li>
-      <li><button type="button" class="btn menu-btn slide-btn slide-btn slide-btn slide-btn slide-btn slide-btn slide-btn" id="science">Science Input</button></li>
-      <li><button type="button" class="btn menu-btn slide-btn slide-btn slide-btn slide-btn slide-btn slide-btn" id="nodeList">Node List</button></li>
-      <li><button type="button" class="btn menu-btn slide-btn slide-btn slide-btn slide-btn slide-btn" id="heatMap">Heat Map</button></li>
-      <li><button type="button" class="btn menu-btn slide-btn slide-btn slide-btn slide-btn" id="modelRun">Model Run</button></li>
-      <li><button type="button" class="btn menu-btn slide-btn slide-btn slide-btn" id="nodeSelect">Node Selector</button></li>
-      <li><button type="button" class="btn menu-btn slide-btn slide-btn" id="cdat">CDATWeb Analysis</button></li>
+      <li><button type="button" class="btn menu-btn slide-btn" id="science">Science Input</button></li>
+      <li><button type="button" class="btn menu-btn slide-btn" id="nodeList">Node List</button></li>
+      <li><button type="button" class="btn menu-btn slide-btn" id="heatMap">Heat Map</button></li>
+      <li><button type="button" class="btn menu-btn slide-btn" id="modelRun">Model Run</button></li>
+      <li><button type="button" class="btn menu-btn slide-btn" id="nodeSelect">Node Selector</button></li>
+      <li><button type="button" class="btn menu-btn slide-btn" id="cdat">CDATWeb Analysis</button></li>
       <li><button type="button" class="btn menu-btn slide-btn" id="charting">Charting System Status</button></li>
     </ul>
     <br>
@@ -77,11 +80,10 @@
     </form>    
   </nav> <!-- Nav left menu -->
   
-  <div class="wrapper" >
-    <div class="demo" style=" margin: 0 auto 0 auto;">
-      <div class="gridster" id="grid_holder">
-          <ul>
-          </ul>
+  <div class="wrapper">
+    <div class="tile-board">
+        <ul class="tile-holder">
+        </ul>
       </div>
     </div> <!-- Div demo -->
   </div> <!-- Wrapper -->

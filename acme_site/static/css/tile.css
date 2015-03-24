@@ -1,0 +1,46 @@
+/***********************************
+	Tile 
+***********************************/
+
+.tile-panel-body {
+    cursor: default;
+    margin-bottom: -30px!important;
+    height:calc(100% - 30px);
+    height: -o-calc(100% - 30px); /* opera */
+	height: -webkit-calc(100% - 30px); /* google, safari */
+	height: -moz-calc(100% - 30px); /* firefox */
+}
+
+.tile-panel-heading {
+    background-color: #4179B5;
+    color: #111;
+    cursor: move;
+    overflow: hidden;
+    height: 30px;
+    width: 100%;
+}
+
+.tile {
+    border: 1px solid;
+    list-style: none;
+    position: absolute;
+    -webkit-transition: all 0.5s ease-in-out;
+    -moz-transition: all 0.5s ease-in-out;
+    -o-transition: all 0.5s ease-in-out;
+    -ms-transition: all 0.5s ease-in-out;
+    transition: all 0.5s ease-in-out;
+    z-index: 1;
+}
+
+.tile-board {
+	margin: 0 auto 0 auto;
+	height: 100%;
+}
+
+.wrapper {
+    height: 80vh;
+    width:100%;
+    margin-left: 10px
+}
+
+
