@@ -89,6 +89,29 @@ $(document).ready(function(){
 			stop: function(event, ui){
 				var pos = grid_from_offset(ui.position);
 				dragFixup(pos.col, pos.row);
+				$(ui.helper).css({
+					'opacity':'1.0',
+					'z-index':1
+				});
+			},
+			start: function(event, ui){
+				// $(ui.helper).css({
+				// 	'opacity':'0.5',
+				// 	'z-index':10,
+				// 	'width':'30%',
+				// 	'height':'30%',
+				// 	'left':event.clientX-100,
+				// });
+				$(ui.helper).animate({
+					'opacity':'0.5',
+					'z-index':10,
+					'width':'30%',
+					'height':'30%',
+					'left':event.clientX-100,
+				});
+			},
+			drag: function(event, ui){
+				ui.position.left = event.clientX-100;
 			}
 		});
 		tiles.push($(w).attr('id'));
@@ -199,11 +222,13 @@ $(document).ready(function(){
 	      var targetOffset = offset_from_location(row,col);
 	      $('#'+targetId).css({
 	      	'top':dragStartOffset.top,
-	      	'left':dragStartOffset.left
+	      	'left':dragStartOffset.left,
+	      	'height':dragStartSizeY*tileHeight,
+	      	'width':dragStartSizeX*tileWidth
 	      });
 	    } else {
 	      var startOffset = offset_from_location(dragStartSizeY, dragStartSizeX);
-	      var targetOffset = offset_from_location(targetX, targetY);
+	      var targetOffset = offset_from_location(targetY, targetX);
 	      startGrid.attr({
 	        'col': targetGrid.attr('col'),
 	        'row': targetGrid.attr('row'),

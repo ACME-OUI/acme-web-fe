@@ -5,10 +5,12 @@
 .tile-panel-body {
     cursor: default;
     margin-bottom: -30px!important;
+    opacity: 1.0;
     height:calc(100% - 30px);
     height: -o-calc(100% - 30px); /* opera */
 	height: -webkit-calc(100% - 30px); /* google, safari */
 	height: -moz-calc(100% - 30px); /* firefox */
+	background-color: #fff;
 }
 
 .tile-panel-heading {
