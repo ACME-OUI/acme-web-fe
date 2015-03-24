@@ -95,20 +95,12 @@ $(document).ready(function(){
 				});
 			},
 			start: function(event, ui){
-				// $(ui.helper).css({
-				// 	'opacity':'0.5',
-				// 	'z-index':10,
-				// 	'width':'30%',
-				// 	'height':'30%',
-				// 	'left':event.clientX-100,
-				// });
 				$(ui.helper).animate({
 					'opacity':'0.5',
 					'z-index':10,
-					'width':'30%',
+					'width':'20%',
 					'height':'30%',
-					'left':event.clientX-100,
-				});
+				}, 'fast', 'easeOutQuint',function(){ui.position.left = event.clientX-100});
 			},
 			drag: function(event, ui){
 				ui.position.left = event.clientX-100;
