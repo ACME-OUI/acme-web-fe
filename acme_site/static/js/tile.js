@@ -52,6 +52,7 @@ $(document).ready(function(){
     var resizeStartSizeY = 0;
     var resizeStartX = 0;
     var resizeStartY = 0;
+    var resizeDir = '';
 
 	//i = cols, j = rows
 	var board = new Array(maxCols);
@@ -83,9 +84,20 @@ $(document).ready(function(){
 	function add_tile(html, id){
 		$('.tile-holder').append(html);
 		var w = $('#'+id);
-		$(w).css("display", "none");
+		$(w).css('display', 'none');
 		$(w).draggable({
-			containment: ".wrapper",
+			containment: '.wrapper',
+			start: function(event, ui){
+				$(ui.helper).animate({
+					'opacity':'0.5',
+					'z-index':10,
+					'width':'20%',
+					'height':'30%',
+				}, 'fast', 'linear',function(){ui.position.left = event.clientX-100});
+			},
+			drag: function(event, ui){
+				ui.position.left = event.clientX-100;
+			},
 			stop: function(event, ui){
 				var pos = grid_from_offset(ui.position);
 				dragFixup(pos.col, pos.row);
@@ -93,26 +105,52 @@ $(document).ready(function(){
 					'opacity':'1.0',
 					'z-index':1
 				});
-			},
-			start: function(event, ui){
-				$(ui.helper).animate({
-					'opacity':'0.5',
-					'z-index':10,
-					'width':'20%',
-					'height':'30%',
-				}, 'fast', 'easeOutQuint',function(){ui.position.left = event.clientX-100});
-			},
-			drag: function(event, ui){
-				ui.position.left = event.clientX-100;
 			}
 		});
+
+		$(w).resizable({
+			handles: 'n, w, e, s', 
+			animate: true,
+			animateDuration: 'fast',
+			animateEasing: 'easeOutQuint',
+			// containment: '.tile-holder',
+			helper: 'ui-resizable-helper',
+			grid: [tileWidth, tileHeight],
+			start: function(event, ui){
+				resizeStartX = parseInt(ui.element.attr('col'));
+				resizeStartSizeX = parseInt(ui.element.attr('sizex'));
+				resizeStartY = parseInt(ui.element.attr('row'));
+				resizeStartSizeY = parseInt(ui.element.attr('sizey'));
+			},
+			resize: function(event, ui){
+
+			},
+			stop: function(event, ui){
+				resizeFixup(ui);
+				$('.ui-resizable-helper').remove();
+			}
+		});
+
+		$(w).find('.ui-resizable-n').mousedown(function(){
+			resizeDir = 'n';
+		});
+		$(w).find('.ui-resizable-s').mousedown(function(){
+			resizeDir = 's';
+		});
+		$(w).find('.ui-resizable-e').mousedown(function(){
+			resizeDir = 'e';
+		});
+		$(w).find('.ui-resizable-w').mousedown(function(){
+			resizeDir = 'w';
+		});
+
 		tiles.push($(w).attr('id'));
 
 	 	//Setup the live tile for the options menu
 	 	$(w).find('.live-tile').liveTile({ direction:'horizontal' });
 
 		//Stop the body from being able to drag
-		$(w).find('.panel-body').mousedown(function (event) {
+		$(w).find('.tile-panel-body').mousedown(function (event) {
 			event.stopPropagation();
 		});
 
@@ -146,6 +184,126 @@ $(document).ready(function(){
 		$(w).fadeIn();
 		return w;
 	};
+
+	/**
+	 * Fixes the position of adjacent tiles after a resize event
+	 * ui -> the ui element from the resize event
+	 */
+
+
+	 //TODO: if the n handle of the top element is pulled, move it back. same for w of left, s of bottom, e of right
+	 function resizeFixup(ui){
+	 	//which direction did it resize?
+	 	if(resizeDir == 'n'){
+	 		var virt_adj = new Set();
+	 		for (var i = resizeStartX; i < resizeStartX + resizeStartSizeX; i++) {
+				 virt_adj.add(board[i-1][resizeStartY-2].tile);
+			};
+	 		//did it go up or down?
+	 		var diff = virtical_location(ui.originalPosition.top, 0) - virtical_location(ui.helper.position().top, 0);
+	 		if(diff < 0){
+	 			//it moved down
+	 			virt_adj.forEach(function(item){
+	 				var t = $('#'+item);
+	 				t.attr({
+	 					'sizey':parseInt(t.attr('sizey'))-diff
+	 				});
+	 				t.css({
+	 					'height':parseInt(t.attr('sizey'))*tileHeight
+	 				});
+	 				update_board(item);
+	 			});
+	 		} 
+	 		else if(diff > 0){
+	 			//it moved up
+	 			virt_adj.forEach(function(item){
+	 				var t = $('#'+item);
+	 				t.attr({
+	 					'sizey':parseInt(t.attr('sizey'))-diff
+	 				});
+	 				t.css({
+	 					'height':parseInt(t.attr('sizey'))*tileHeight
+	 				});
+	 				update_board(item);
+ 					if(parseInt(t.attr('sizey')) <= 0){
+	 					$.when($('#'+item).fadeOut()).then(function(){
+		 					$('#'+item).remove();
+		 				});
+	 				}
+	 				for (var i = tiles.length - 1; i >= 0; i--) {
+						if(tiles[i] == item){
+							tiles.splice(i, 1);
+							break;
+						}
+					};
+	 			});
+
+	 		} else {
+	 			//it didnt move
+	 			//TODO: the right and bottom sides are being set to size-2 for some reason
+	 			ui.element.css({
+	 				'top': ui.originalPosition.top,
+	 				'left': ui.originalPosition.left,
+	 				'width': ui.originalSize.width,
+	 				'height': ui.originalSize.height
+	 			});
+	 		}
+	 	}
+	 	if(resizeDir == 's'){
+	 		var virt_adj = new Set();
+	 		for (var i = resizeStartX; i < resizeStartX + resizeStartSizeX; i++) {
+				 virt_adj.add(board[i-1][resizeStartY + resizeStartSizeY - 1].tile);
+			};
+	 		//did it go up or down?
+	 		var diff = virtical_location(ui.originalPosition.top, ui.originalSize.height) - virtical_location(ui.helper.position().top, ui.helper.height());
+	 		if( diff < 0){
+	 			//it moved down
+	 			alert('moved down');
+	 		} 
+	 		else if(diff > 0){
+	 			//it moved up
+	 			alert('moved up');
+	 		} else {
+	 			//it didnt move
+	 		}
+	 	} 
+	 	if(resizeDir == 'e'){
+	 		var horz_adj = new Set();
+	 		for (var i = resizeStartY; i < resizeStartY + resizeStartSizeY; i++) {
+				 horz_adj.add(board[resizeStartX + resizeStartSizeX - 2][i-1].tile);
+			};
+			//did it go right or left?
+			var diff = horizontal_location(ui.originalPosition.left, ui.originalSize.width) - horizontal_location(ui.helper.position().left, ui.helper.width());
+	 		if( diff < 0){
+	 			//it moved right
+	 			alert('moved right');
+	 		} 
+	 		else if(diff > 0){
+	 			//it moved left
+	 			alert('moved left');
+	 		} else {
+	 			//it didnt move
+	 		}
+	 	} 
+	 	if(resizeDir == 'w'){
+	 		var horz_adj = new Set();
+	 		for (var i = resizeStartY; i < resizeStartY + resizeStartSizeY; i++) {
+				 horz_adj.add(board[resizeStartX - 2][i-1].tile);
+			};
+	 		//did it go right or left?
+	 		var diff = horizontal_location(ui.originalPosition.left,0) - horizontal_location(ui.helper.position().left, 0)
+	 		if( diff < 0){
+	 			//it moved right
+	 			alert('moved right');
+	 		} 
+	 		else if(diff > 0){
+	 			//it moved left
+	 			alert('moved left');
+	 		} else {
+	 			//it didnt move
+	 		}
+	 	}
+	 }
 
 	/**
 	* Fixes the positions for all windows
@@ -198,10 +356,10 @@ $(document).ready(function(){
 	}
 
 	/**
-   * Fixes the window positions after a drag event
-   * col, row -> the ending col and row of the dragged element
-   */
-   function dragFixup(col, row) {
+	* Fixes the window positions after a drag event
+	* col, row -> the ending col and row of the dragged element
+	*/
+	function dragFixup(col, row) {
 
 	    var targetId = board[col-1][row-1].tile;
 	    var targetX = parseInt($('#'+targetId).attr('col'));
@@ -262,6 +420,32 @@ $(document).ready(function(){
 			row: Math.floor(pos.top/tileHeight) + 1
 		}
 		return location;
+	}
+
+	/**
+	 * Returns the col from the position and size of an element
+	 * x -> the horizontal position of the object
+	 * sizex -> the horizontal size of the object
+	 */
+	function horizontal_location(x, sizex){
+		if(((x+sizex)/tileWidth)%1 >= 0.5){
+			return Math.ceil((x+sizex)/tileWidth)+1;
+		} else {
+			return Math.floor((x+sizex)/tileWidth)+1;
+		}
+	}
+
+	/**
+	 * Returns the row from the position and size of an element
+	 * y -> the horizontal position of the object
+	 * sizey -> the horizontal size of the object
+	 */
+	function virtical_location(y, sizey){
+		if(((y+sizey)/tileHeight)%1 >= 0.5){
+			return Math.ceil((y+sizey)/tileHeight)+1
+		} else {
+			return Math.floor((y+sizey)/tileHeight)+1;
+		}
 	}
 });
 

@@ -17,23 +17,6 @@
   <script type="text/javascript" src="static/js/grid_layouts.js"></script>
   <script type="text/javascript" src="static/js/tile.js"></script>
 
-  <script type="text/javascript">
-  $('body').ready(function(){
-    $('#drop-down-tab').click(function(e){
-      $('#drop-down-menu').slideToggle('fast');
-    });
-
-    $('#toggle-slide-left').click(function(e){
-      $('#slide-menu-left').animate({width: 'toggle'}, 500, 'linear');
-      if( $('#toggle-left-a').text() == 'Window Menu') {
-        $('#toggle-left-a').text('Close Menu');
-      } else {
-        $('#toggle-left-a').text('Window Menu');
-      }
-    });
-  });
-  </script>
-  
 {% endblock %}
 
 
