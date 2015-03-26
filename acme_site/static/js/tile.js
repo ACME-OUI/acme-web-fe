@@ -9,6 +9,7 @@ $(document).ready(function(){
 	var tileWidth = 100;
 	var tileHeight = 100;
 	var maxCols = Math.floor(docWidth/tileWidth);
+	$(".wrapper").width(maxCols*tileWidth);
 	var maxHeight = Math.floor(docHeight/tileHeight);
 	var tiles = [];
 	var resize_handle_html = '<span class="gs-resize-handle gs-resize-handle-both"></span>';
@@ -88,12 +89,13 @@ $(document).ready(function(){
 		$(w).draggable({
 			containment: '.wrapper',
 			start: function(event, ui){
+				ui.position.left = event.clientX-100;
 				$(ui.helper).animate({
 					'opacity':'0.5',
 					'z-index':10,
 					'width':'20%',
 					'height':'30%',
-				}, 'fast', 'linear',function(){ui.position.left = event.clientX-100});
+				}, 'fast', 'swing');
 			},
 			drag: function(event, ui){
 				ui.position.left = event.clientX-100;
@@ -182,17 +184,98 @@ $(document).ready(function(){
 		positionFixup();
 		
 		$(w).fadeIn();
+		if($('body').attr('class') == 'night'){
+			$(w).find('.tile-panel-body').css({
+	          'background-color': '#051451;',
+	          'border-color': '#00f;'
+	        });
+		}
 		return w;
 	};
+
+
+	/**
+	 * A recursive function to fix windows adjacent to windows being dragged up
+	 * moved -> an set of windows already moved
+	 * dir -> the direction it moved. up, down, right, left
+	 * diff -> the amount of grid spaces the window resized
+	 * side -> the side of the window being resized. n, s, e, w
+	 * id -> the id of the window this call should resize
+	 */
+	 function recursiveResize(moved, dir, diff, side, id){
+	 	var curWindow = $('#'+id);
+	 	var x = curWindow.attr('col');
+	 	var y = curWindow.attr('row');
+	 	var sizex = curWindow.attr('sizex');
+	 	var sizey = curWindow.attr('sizey');
+	 	if(dir == 'up'){
+	 		if(side = 'n'){
+
+	 		}
+	 		else if(side ='s'){
+	 			var adj = new Set();
+		 		for (var i = x; i < x + sizex; i++) {
+					 adj.add(board[i-1][y + sizey - 1].tile);
+				};
+				//check the base case-> all windows have been moved
+				var done = true;
+				adj.forEach(function(item){
+					
+				}, moved);
+	 		} else {
+	 			//error
+	 			return
+	 		}
+	 	}
+	 	else if(dir == 'down'){
+	 		if(side = 'n'){
+
+	 		}
+	 		else if(side ='s'){
+
+	 		} else {
+	 			//error
+	 			return
+	 		}
+	 	}
+	 	else if(dir == 'right'){
+			if(side = 'e'){
+
+	 		}
+	 		else if(side ='w'){
+
+	 		} else {
+	 			//error
+	 			return
+	 		}
+	 	}
+	 	else if(dir == 'left'){
+	 		if(side = 'e'){
+
+	 		}
+	 		else if(side ='w'){
+
+	 		} else {
+	 			//error
+	 			return
+	 		}
+	 	} else {
+	 		//error
+	 		return
+	 	}
+	 }
+
+
+
+
 
 	/**
 	 * Fixes the position of adjacent tiles after a resize event
 	 * ui -> the ui element from the resize event
 	 */
-
-
 	 //TODO: if the n handle of the top element is pulled, move it back. same for w of left, s of bottom, e of right
 	 function resizeFixup(ui){
+	 	var resizeId = ui.element.attr('id');
 	 	//which direction did it resize?
 	 	if(resizeDir == 'n'){
 	 		var virt_adj = new Set();
@@ -201,6 +284,10 @@ $(document).ready(function(){
 			};
 	 		//did it go up or down?
 	 		var diff = virtical_location(ui.originalPosition.top, 0) - virtical_location(ui.helper.position().top, 0);
+	 		$(ui.element).attr({
+	 			'row':parseInt(ui.element.attr('row'))-diff,
+	 			'sizey':parseInt(ui.element.attr('sizey'))+diff
+	 		});
 	 		if(diff < 0){
 	 			//it moved down
 	 			virt_adj.forEach(function(item){
@@ -216,7 +303,16 @@ $(document).ready(function(){
 	 		} 
 	 		else if(diff > 0){
 	 			//it moved up
+	 			var test = ui;
 	 			virt_adj.forEach(function(item){
+	 				var ui = this;
+	 				var pullUp = new Set();
+	 				for (var i = parseInt($('#'+item).attr('col')); i < parseInt($('#'+item).attr('col')) + parseInt($('#'+item).attr('sizex')); i++) {
+						var adjElm = board[i-1][parseInt($('#'+item).attr('row')) + parseInt($('#'+item).attr('sizey')) - 1].tile;
+						if(adjElm != resizeId){
+							pullUp.add(adjElm);
+						}
+					};
 	 				var t = $('#'+item);
 	 				t.attr({
 	 					'sizey':parseInt(t.attr('sizey'))-diff
@@ -225,18 +321,35 @@ $(document).ready(function(){
 	 					'height':parseInt(t.attr('sizey'))*tileHeight
 	 				});
 	 				update_board(item);
+	 				
+	 				//pull up items below the item being pushed up
+
+	 				pullUp.forEach(function(otherItem){
+	 					var tt = $('#'+otherItem);
+		 				tt.attr({
+		 					'row':parseInt(tt.attr('row'))-diff,
+		 					'sizey':parseInt(tt.attr('sizey'))+diff
+		 				});
+		 				tt.css({
+		 					'top':parseInt(tt.attr('row'))*tileHeight-40,
+		 					'height':parseInt(tt.attr('sizey'))*tileHeight
+		 				});
+		 				update_board(otherItem);
+	 				});
+
+	 				//is the window being completely obscured?
  					if(parseInt(t.attr('sizey')) <= 0){
 	 					$.when($('#'+item).fadeOut()).then(function(){
 		 					$('#'+item).remove();
 		 				});
+		 				for (var i = tiles.length - 1; i >= 0; i--) {
+							if(tiles[i] == item){
+								tiles.splice(i, 1);
+								break;
+							}
+						};
 	 				}
-	 				for (var i = tiles.length - 1; i >= 0; i--) {
-						if(tiles[i] == item){
-							tiles.splice(i, 1);
-							break;
-						}
-					};
-	 			});
+	 			}, ui);
 
 	 		} else {
 	 			//it didnt move
@@ -247,6 +360,7 @@ $(document).ready(function(){
 	 				'width': ui.originalSize.width,
 	 				'height': ui.originalSize.height
 	 			});
+	 			return;
 	 		}
 	 	}
 	 	if(resizeDir == 's'){
@@ -342,6 +456,7 @@ $(document).ready(function(){
 			};
 		};
 	}
+
 
 	/**
 	* Gives the offset of the tile from row and col

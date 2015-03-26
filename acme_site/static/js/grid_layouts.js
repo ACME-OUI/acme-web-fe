@@ -406,7 +406,7 @@ sizey:function(canvasSizeY){
 }, //top right
 col:function(canvasSizeX){ 
 	if(canvasSizeX%3 != 0){
-		return Math.floor(2*canvasSizeX/3);
+		return Math.floor(2*canvasSizeX/3)+1;
 	} else {
 		return 2*canvasSizeX/3+1;
 	}

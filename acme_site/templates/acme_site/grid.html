@@ -9,6 +9,7 @@
   <link rel="stylesheet" type="text/css" href="static/css/grid_custom.css">
   <link rel="stylesheet" type="text/css" href="static/css/tile.css">
 
+
   <!-- JS resources for this page -->
   <!--<script type="text/javascript" src="static/js/grid.js"></script>-->
   <script type="text/javascript" src="static/js/menu.js"></script>
@@ -16,12 +17,17 @@
   <!-- <script type="text/javascript" src="static/js/jquery.gridster.js"></script> -->
   <script type="text/javascript" src="static/js/grid_layouts.js"></script>
   <script type="text/javascript" src="static/js/tile.js"></script>
+  <script>
+    $(document).ready(function(){
+      $('.theme-showcase').remove();
+    });
+  </script>
 
 {% endblock %}
 
 
 {% block new_button_left_link%}
-    <li class="navbar-left" id="toggle-slide-left" style="position: fixed; left: 10px;"><a id="toggle-left-a" href="#">Window Menu</a></li>
+    <li class="navbar-left" id="toggle-slide-left" style="position: fixed; left: 10px;"><a id="toggle-left-a" href="#">Open Menu</a></li>
     <li class="navbar-left" id="drop-down-tab" style="position: fixed; left: 80px;"><a style="color: #000;" href="#">Dropdown Menu</a></li>
 {% endblock %}
 
@@ -40,7 +46,6 @@
   </div><!-- end node menu -->
 
   <nav class="menu" id="slide-menu-left">
-    <br>
     <ul>
       <li><button type="button" class="btn menu-btn slide-btn" id="provenance">Provenance Capture</button></li>
       <li><button type="button" class="btn menu-btn slide-btn" id="status">Status Messages</button></li>
@@ -60,10 +65,11 @@
         <option value="left-weighted">Left Weighted</option>
         <option value="right-weighted">Right Weighted</option>
       </select>
-    </form>    
+    </form>
+    <button type="button" class="btn menu-btn" id="dark-mode-toggle">Dark mode is off</button>    
   </nav> <!-- Nav left menu -->
   
-  <div class="wrapper">
+  <div class="wrapper" id="wrapper">
     <div class="tile-board">
         <ul class="tile-holder">
         </ul>

@@ -37,13 +37,16 @@
 .tile-board {
 	margin: 0 auto 0 auto;
 	height: 100%;
+    webkit-transition: background-color 0.5s,color 0.5s,border-color 0.5s;
+    transition: background-color 0.5s,color 0.5s,border-color 0.5s;
 }
 
 .wrapper {
     height: 80vh;
     width:100%;
-    margin-left: 10px
+    margin-left: 10px;
 }
+
 
 .ui-resizable-helper {
 	border: 1px dotted #00f;
