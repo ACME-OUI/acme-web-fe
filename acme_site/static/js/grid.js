@@ -45,7 +45,6 @@ $('body').ready(function(){
     header2 += '  </div>';
     header2 += ' </div>';
     header2 += ' <div class="panel-body live-tile blue" data-direction="horizontal" data-mode="slid">';
-    //header2 += '  <div class="box">&nbsp</div><br>';
     // Widget Contents
     contents += '  <p>The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men.</p>';
     header3 += ' </div>';
@@ -141,8 +140,6 @@ $('body').ready(function(){
         dragStartSizeX = grid.attr('data-sizex');
         dragStartSizeY = grid.attr('data-sizey');
         dragStartOffset = grid.offset();
-        console.log(dragStartId + " drag starting at " + dragStartOffset.left);
-        // dragStartOffset.left -= 6;
       });
 
       $(w).find('.remove').click(function(e) {
@@ -151,8 +148,7 @@ $('body').ready(function(){
       });
 
       $(w).find('.options').click(function(e) {
-        $(w).find('.live-tile').liveTile('play', 0);
-        //widgetOptions(e.target.parentElement.parentElement.parentElement.parentElement);
+
       });
 
       new_window_fixup();
@@ -231,14 +227,15 @@ $('body').ready(function(){
     var targetGrid = $('#'+targetId);
     var startGrid = $('#'+dragStartId);
     if(targetId == dragStartId) {
-      startGrid.offset({
-        top: dragStartOffset.top
-      });
-      setTimeout(function(){
-        startGrid.offset({
-          left: dragStartOffset.left
-        });
-      },500);
+      // startGrid.offset({
+      //   top: dragStartOffset.top
+      // });
+      // setTimeout(function(){
+      //   startGrid.offset({
+      //     left: dragStartOffset.left
+      //   });
+      // },500);
+      // startGrid.removeClass('player');
       
     } else {
       var startOffset = startGrid.offset();
