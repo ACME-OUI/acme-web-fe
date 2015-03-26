@@ -43,7 +43,8 @@ $('body').ready(function(){
       $('.tile-panel-body').each(function(){
         $(this).css({
           'background-color': '#051451!;',
-          'border-color': '#00f;'
+          'border-color': '#00f;',
+          'color': '#fff'
         });
       });
       $(body).attr({

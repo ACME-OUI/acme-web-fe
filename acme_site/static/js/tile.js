@@ -187,7 +187,8 @@ $(document).ready(function(){
 		if($('body').attr('class') == 'night'){
 			$(w).find('.tile-panel-body').css({
 	          'background-color': '#051451;',
-	          'border-color': '#00f;'
+	          'border-color': '#00f;',
+	          'color': '#fff'
 	        });
 		}
 		return w;
