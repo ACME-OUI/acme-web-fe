@@ -87,18 +87,15 @@ $(document).ready(function(){
 		var w = $('#'+id);
 		$(w).css('display', 'none');
 		$(w).draggable({
-			containment: '.wrapper',
+			//containment: '.tile-board',
+			helper: 'clone',
 			start: function(event, ui){
-				ui.position.left = event.clientX-100;
-				$(ui.helper).animate({
+				ui.helper.animate({
 					'opacity':'0.5',
 					'z-index':10,
-					'width':'20%',
-					'height':'30%',
-				}, 'fast', 'swing');
-			},
-			drag: function(event, ui){
-				ui.position.left = event.clientX-100;
+					'width':'400',
+					'height':'300',
+				});
 			},
 			stop: function(event, ui){
 				var pos = grid_from_offset(ui.position);
@@ -107,6 +104,10 @@ $(document).ready(function(){
 					'opacity':'1.0',
 					'z-index':1
 				});
+			},
+			cursorAt: {
+				left:200, 
+				top:15
 			}
 		});
 
@@ -182,15 +183,15 @@ $(document).ready(function(){
 		});
 		
 		positionFixup();
-		
-		$(w).fadeIn();
 		if($('body').attr('class') == 'night'){
 			$(w).find('.tile-panel-body').css({
-	          'background-color': '#051451;',
+	          'background-color': '#0C1021;',
 	          'border-color': '#00f;',
 	          'color': '#fff'
 	        });
 		}
+		$(w).fadeIn();
+		
 		return w;
 	};
 
@@ -200,50 +201,178 @@ $(document).ready(function(){
 	 * moved -> an set of windows already moved
 	 * dir -> the direction it moved. up, down, right, left
 	 * diff -> the amount of grid spaces the window resized
-	 * side -> the side of the window being resized. n, s, e, w
+	 * side -> the side of the window being resized. n, s, e, w (the side this call should resize, not the original window)
 	 * id -> the id of the window this call should resize
 	 */
 	 function recursiveResize(moved, dir, diff, side, id){
 	 	var curWindow = $('#'+id);
-	 	var x = curWindow.attr('col');
-	 	var y = curWindow.attr('row');
-	 	var sizex = curWindow.attr('sizex');
-	 	var sizey = curWindow.attr('sizey');
+	 	var x = parseInt(curWindow.attr('col'));
+	 	var y = parseInt(curWindow.attr('row'));
+	 	var sizex = parseInt(curWindow.attr('sizex'));
+	 	var sizey = parseInt(curWindow.attr('sizey'));
 	 	if(dir == 'up'){
-	 		if(side = 'n'){
-
+	 		if(side == 'n'){
+	 			var adj = new Set();
+		 		for (var i = x; i < x + sizex; i++) {
+					 adj.add(board[i-1][y - 2].tile);
+				};
+				//check the base case-> all windows have been moved
+				var done = true;
+				moved.add(id);
+				adj.forEach(function(item){
+					if(!moved.has(item)){
+						done = false;
+					}
+				}, moved);
+				curWindow.attr({
+					'row':parseInt(curWindow.attr('row'))-diff,
+					'sizey':parseInt(curWindow.attr('sizey'))+diff
+				});
+				curWindow.css({
+					'top':parseInt(curWindow.attr('row'))*tileHeight-40,
+					'height':parseInt(curWindow.attr('sizey'))*tileHeight
+				});
+				update_board(id);
+				if(done == true){
+					//base case, done resizing
+					return;
+				} else {
+					//we need to keep resizing
+					
+					recursiveResize(moved, 'up', diff, 's', adj.values().next().value);
+				}
 	 		}
-	 		else if(side ='s'){
+	 		else if(side =='s'){
 	 			var adj = new Set();
 		 		for (var i = x; i < x + sizex; i++) {
 					 adj.add(board[i-1][y + sizey - 1].tile);
 				};
 				//check the base case-> all windows have been moved
+				moved.add(id);
 				var done = true;
 				adj.forEach(function(item){
-					
+					if(!moved.has(item)){
+						done = false;
+					} else {
+						adj.delete(item);
+					}
 				}, moved);
+				curWindow.attr({
+					'sizey':parseInt(curWindow.attr('sizey'))-diff
+				});
+				curWindow.css({
+					'height':parseInt(curWindow.attr('sizey'))*tileHeight
+				});
+				update_board(id);
+				//is the window being completely obscured?
+				if(parseInt(curWindow.attr('sizey')) <= 0){
+					$.when(curWindow.fadeOut()).then(function(){
+ 						curWindow.remove();
+	 				});
+	 				for (var i = tiles.length - 1; i >= 0; i--) {
+						if(tiles[i] == id){
+							tiles.splice(i, 1);
+							break;
+						}
+					};
+				}
+				if(done == true){
+					//base case, all windows have been resized
+					return; 
+				} else {
+					//we need to keep resizeing 
+					
+					recursiveResize(moved, 'up', diff, 'n', adj.values().next().value);
+				}
 	 		} else {
 	 			//error
 	 			return
 	 		}
 	 	}
 	 	else if(dir == 'down'){
-	 		if(side = 'n'){
-
+	 		if(side == 'n'){
+	 			var adj = new Set();
+		 		for (var i = x; i < x + sizex; i++) {
+					 adj.add(board[i-1][y - 2].tile);
+				};
+				//check the base case-> all windows have been moved
+				var done = true;
+				moved.add(id);
+				adj.forEach(function(item){
+					if(!moved.has(item)){
+						done = false;
+					}
+				}, moved);
+				curWindow.attr({
+					'row':parseInt(curWindow.attr('row'))-diff,
+					'sizey':parseInt(curWindow.attr('sizey'))+diff
+				});
+				curWindow.css({
+					'top':parseInt(curWindow.attr('row'))*tileHeight-40,
+					'height':parseInt(curWindow.attr('sizey'))*tileHeight
+				});
+				update_board(id);
+				if(done == true){
+					//base case, done resizing
+					return;
+				} else {
+					//we need to keep resizing
+					
+					recursiveResize(moved, 'down', diff, 's', adj.values().next().value);
+				}
 	 		}
-	 		else if(side ='s'){
-
+	 		else if(side =='s'){
+	 			var adj = new Set();
+		 		for (var i = x; i < x + sizex; i++) {
+					 adj.add(board[i-1][y + sizey - 1].tile);
+				};
+				//check the base case-> all windows have been moved
+				var done = true;
+				moved.add(id);
+				adj.forEach(function(item){
+					if(!moved.has(item)){
+						done = false;
+					} else {
+						adj.delete(item);
+					}
+				}, moved);
+				curWindow.attr({
+					'sizey':parseInt(curWindow.attr('sizey'))-diff
+				});
+				curWindow.css({
+					'height':parseInt(curWindow.attr('sizey'))*tileHeight
+				});
+				update_board(id);
+				//is the window being completely obscured?
+				if(parseInt(curWindow.attr('sizey')) <= 0){
+					$.when(curWindow.fadeOut()).then(function(){
+ 						curWindow.remove();
+	 				});
+	 				for (var i = tiles.length - 1; i >= 0; i--) {
+						if(tiles[i] == id){
+							tiles.splice(i, 1);
+							break;
+						}
+					};
+				}
+				if(done == true){
+					//base case, all windows have been resized
+					return; 
+				} else {
+					//we need to keep resizeing 
+					
+					recursiveResize(moved, 'down', diff, 'n', adj.values().next().value);
+				}
 	 		} else {
 	 			//error
 	 			return
 	 		}
 	 	}
 	 	else if(dir == 'right'){
-			if(side = 'e'){
+			if(side == 'e'){
 
 	 		}
-	 		else if(side ='w'){
+	 		else if(side =='w'){
 
 	 		} else {
 	 			//error
@@ -251,10 +380,10 @@ $(document).ready(function(){
 	 		}
 	 	}
 	 	else if(dir == 'left'){
-	 		if(side = 'e'){
+	 		if(side == 'e'){
 
 	 		}
-	 		else if(side ='w'){
+	 		else if(side =='w'){
 
 	 		} else {
 	 			//error
@@ -289,69 +418,15 @@ $(document).ready(function(){
 	 			'row':parseInt(ui.element.attr('row'))-diff,
 	 			'sizey':parseInt(ui.element.attr('sizey'))+diff
 	 		});
+	 		var moved = new Set();
+	 		moved.add(resizeId);
 	 		if(diff < 0){
 	 			//it moved down
-	 			virt_adj.forEach(function(item){
-	 				var t = $('#'+item);
-	 				t.attr({
-	 					'sizey':parseInt(t.attr('sizey'))-diff
-	 				});
-	 				t.css({
-	 					'height':parseInt(t.attr('sizey'))*tileHeight
-	 				});
-	 				update_board(item);
-	 			});
+	 			recursiveResize(moved, 'down', diff, 's', virt_adj.values().next().value);
 	 		} 
 	 		else if(diff > 0){
 	 			//it moved up
-	 			var test = ui;
-	 			virt_adj.forEach(function(item){
-	 				var ui = this;
-	 				var pullUp = new Set();
-	 				for (var i = parseInt($('#'+item).attr('col')); i < parseInt($('#'+item).attr('col')) + parseInt($('#'+item).attr('sizex')); i++) {
-						var adjElm = board[i-1][parseInt($('#'+item).attr('row')) + parseInt($('#'+item).attr('sizey')) - 1].tile;
-						if(adjElm != resizeId){
-							pullUp.add(adjElm);
-						}
-					};
-	 				var t = $('#'+item);
-	 				t.attr({
-	 					'sizey':parseInt(t.attr('sizey'))-diff
-	 				});
-	 				t.css({
-	 					'height':parseInt(t.attr('sizey'))*tileHeight
-	 				});
-	 				update_board(item);
-	 				
-	 				//pull up items below the item being pushed up
-
-	 				pullUp.forEach(function(otherItem){
-	 					var tt = $('#'+otherItem);
-		 				tt.attr({
-		 					'row':parseInt(tt.attr('row'))-diff,
-		 					'sizey':parseInt(tt.attr('sizey'))+diff
-		 				});
-		 				tt.css({
-		 					'top':parseInt(tt.attr('row'))*tileHeight-40,
-		 					'height':parseInt(tt.attr('sizey'))*tileHeight
-		 				});
-		 				update_board(otherItem);
-	 				});
-
-	 				//is the window being completely obscured?
- 					if(parseInt(t.attr('sizey')) <= 0){
-	 					$.when($('#'+item).fadeOut()).then(function(){
-		 					$('#'+item).remove();
-		 				});
-		 				for (var i = tiles.length - 1; i >= 0; i--) {
-							if(tiles[i] == item){
-								tiles.splice(i, 1);
-								break;
-							}
-						};
-	 				}
-	 			}, ui);
-
+	 			recursiveResize(moved, 'up', diff, 's', virt_adj.values().next().value);
 	 		} else {
 	 			//it didnt move
 	 			//TODO: the right and bottom sides are being set to size-2 for some reason

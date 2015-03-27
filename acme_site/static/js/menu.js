@@ -25,8 +25,9 @@ $('body').ready(function(){
   });
 
   $('#toggle-slide-left').click(function(e){
-    $('#slide-menu-left').toggle('slide','linear', 500);
-    // $('#slide-menu-left').animate({width: 'toggle'}, 'slow', 'linear');
+    $('#slide-menu-left').toggle('slide',{
+      direction: 'left',
+      easing: 'easeOutCubic'}, 500);
     if( $('#toggle-left-a').text() == 'Open Menu') {
       $('#toggle-left-a').text('Close Menu');
     } else {
@@ -42,7 +43,7 @@ $('body').ready(function(){
       });
       $('.tile-panel-body').each(function(){
         $(this).css({
-          'background-color': '#051451!;',
+          'background-color': '#0C1021;',
           'border-color': '#00f;',
           'color': '#fff'
         });
