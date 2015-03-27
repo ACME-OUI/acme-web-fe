@@ -130,7 +130,6 @@ $(document).ready(function(){
 			},
 			stop: function(event, ui){
 				resizeFixup(ui);
-				$('.ui-resizable-helper').remove();
 			}
 		});
 
@@ -238,7 +237,6 @@ $(document).ready(function(){
 					return;
 				} else {
 					//we need to keep resizing
-					
 					recursiveResize(moved, 'up', diff, 's', adj.values().next().value);
 				}
 	 		}
@@ -281,7 +279,6 @@ $(document).ready(function(){
 					return; 
 				} else {
 					//we need to keep resizeing 
-					
 					recursiveResize(moved, 'up', diff, 'n', adj.values().next().value);
 				}
 	 		} else {
@@ -317,7 +314,6 @@ $(document).ready(function(){
 					return;
 				} else {
 					//we need to keep resizing
-					
 					recursiveResize(moved, 'down', diff, 's', adj.values().next().value);
 				}
 	 		}
@@ -446,13 +442,15 @@ $(document).ready(function(){
 			};
 	 		//did it go up or down?
 	 		var diff = virtical_location(ui.originalPosition.top, ui.originalSize.height) - virtical_location(ui.helper.position().top, ui.helper.height());
+	 		var moved = new Set();
+	 		moved.add(resizeId);
 	 		if( diff < 0){
 	 			//it moved down
-	 			alert('moved down');
+	 			recursiveResize(moved, 'down', diff, 'n', virt_adj.values().next().value);
 	 		} 
 	 		else if(diff > 0){
 	 			//it moved up
-	 			alert('moved up');
+	 			recursiveResize(moved, 'up', diff, 'n', virt_adj.values().next().value);
 	 		} else {
 	 			//it didnt move
 	 		}
