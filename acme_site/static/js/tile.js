@@ -82,7 +82,16 @@ $(document).ready(function(){
 	    });
 	});
 
-	function add_tile(html, id){
+
+
+
+	/**
+	 * Creates a new tile window and rearranges all the other tiles to make room 
+	 * html-> the content of the tile
+	 * id-> the name for the new tile to take
+	 * callback-> an optional function to pass that will be called with add_tile is done
+	 */
+	function add_tile(html, id, callback){
 		$('.tile-holder').append(html);
 		var w = $('#'+id);
 		$(w).css({'display': 'none'});
@@ -96,8 +105,8 @@ $(document).ready(function(){
 				ui.helper.animate({
 					'opacity':'0.5',
 					'z-index':10,
-					'width':'400',
-					'height':'300',
+					'width':'20%',
+					'height':'20%',
 				});
 			},
 			stop: function(event, ui){
@@ -113,9 +122,6 @@ $(document).ready(function(){
 				left:200, 
 				top:15
 			}, 
-			drag: function(){
-				console.log('blar');
-			}
 		});
 
 		$(w).resizable({
@@ -197,7 +203,8 @@ $(document).ready(function(){
 	        });
 		}
 		$(w).fadeIn();
-		
+		if(callback != null)
+			callback();
 		return w;
 	};
 
@@ -232,12 +239,12 @@ $(document).ready(function(){
 					}
 				}, moved);
 				curWindow.attr({
-					'row':parseInt(curWindow.attr('row'))-diff,
-					'sizey':parseInt(curWindow.attr('sizey'))+diff
+					'row':y-diff,
+					'sizey':sizey+diff
 				});
 				curWindow.css({
-					'top':parseInt(curWindow.attr('row'))*tileHeight-40,
-					'height':parseInt(curWindow.attr('sizey'))*tileHeight
+					'top':(y-diff)*tileHeight-40,
+					'height':(sizey+diff)*tileHeight
 				});
 				update_board(id);
 				if(done == true){
@@ -264,10 +271,10 @@ $(document).ready(function(){
 					}
 				}, moved);
 				curWindow.attr({
-					'sizey':parseInt(curWindow.attr('sizey'))-diff
+					'sizey':sizey-diff
 				});
 				curWindow.css({
-					'height':parseInt(curWindow.attr('sizey'))*tileHeight
+					'height':(sizey-diff)*tileHeight
 				});
 				update_board(id);
 				//is the window being completely obscured?
@@ -309,12 +316,12 @@ $(document).ready(function(){
 					}
 				}, moved);
 				curWindow.attr({
-					'row':parseInt(curWindow.attr('row'))-diff,
-					'sizey':parseInt(curWindow.attr('sizey'))+diff
+					'row':y-diff,
+					'sizey':sizey+diff
 				});
 				curWindow.css({
-					'top':parseInt(curWindow.attr('row'))*tileHeight-40,
-					'height':parseInt(curWindow.attr('sizey'))*tileHeight
+					'top':(y-diff)*tileHeight-40,
+					'height':(sizey+diff)*tileHeight
 				});
 				update_board(id);
 				if(done == true){
@@ -341,10 +348,10 @@ $(document).ready(function(){
 					}
 				}, moved);
 				curWindow.attr({
-					'sizey':parseInt(curWindow.attr('sizey'))-diff
+					'sizey':sizey-diff
 				});
 				curWindow.css({
-					'height':parseInt(curWindow.attr('sizey'))*tileHeight
+					'height':(sizey-diff)*tileHeight
 				});
 				update_board(id);
 				//is the window being completely obscured?
@@ -364,7 +371,6 @@ $(document).ready(function(){
 					return; 
 				} else {
 					//we need to keep resizeing 
-					
 					recursiveResize(moved, 'down', diff, 'n', adj.values().next().value);
 				}
 	 		} else {
@@ -374,14 +380,86 @@ $(document).ready(function(){
 	 	}
 	 	else if(dir == 'right'){
 			if(side == 'e'){
-				
+				var adj = new Set();
+		 		for (var i = y; i < y + sizey; i++) {
+					 adj.add(board[x + sizex - 1][i - 1].tile);
+				};
+				var done = true;
+				adj.forEach(function(item){
+					if(!moved.has(item)){
+						done = false;
+					} else {
+						adj.delete(item);
+					}
+				}, moved);
+				curWindow.attr({
+					'sizex':sizex-diff
+				});
+				curWindow.css({
+					'width':(sizex-diff)*tileWidth,
+				});
+				update_board(id);
+				//is the window being completely obscured?
+				if(parseInt(curWindow.attr('sizex')) <= 0){
+					$.when(curWindow.fadeOut()).then(function(){
+ 						curWindow.remove();
+	 				});
+	 				for (var i = tiles.length - 1; i >= 0; i--) {
+						if(tiles[i] == id){
+							tiles.splice(i, 1);
+							break;
+						}
+					};
+				}
+				if(done == true){
+					//base case, all windows have been resized
+					return; 
+				} else {
+					//we need to keep resizeing 
+					recursiveResize(moved, 'right', diff, 'w', adj.values().next().value);
+				}
 	 		}
 	 		else if(side =='w'){
 	 			var adj = new Set();
-		 		for (var i = x; i < x + sizex; i++) {
+		 		for (var i = y; i < y + sizey; i++) {
 					 adj.add(board[x - 2][i - 1].tile);
 				};
-				console.log(adj);
+				var done = true;
+				adj.forEach(function(item){
+					if(!moved.has(item)){
+						done = false;
+					} else {
+						adj.delete(item);
+					}
+				}, moved);
+				curWindow.attr({
+					'col':x-diff,
+					'sizex':sizex+diff
+				});
+				curWindow.css({
+					'width':(sizex+diff)*tileWidth,
+					'left':(x-diff)*tileWidth-92
+				});
+				update_board(id);
+				//is the window being completely obscured?
+				if(parseInt(curWindow.attr('sizex')) <= 0){
+					$.when(curWindow.fadeOut()).then(function(){
+ 						curWindow.remove();
+	 				});
+	 				for (var i = tiles.length - 1; i >= 0; i--) {
+						if(tiles[i] == id){
+							tiles.splice(i, 1);
+							break;
+						}
+					};
+				}
+				if(done == true){
+					//base case, all windows have been resized
+					return; 
+				} else {
+					//we need to keep resizeing 
+					recursiveResize(moved, 'right', diff, 'e', adj.values().next().value);
+				}
 	 		} else {
 	 			//error
 	 			return
@@ -490,21 +568,23 @@ $(document).ready(function(){
 	 	if(resizeDir == 'e'){
 	 		var horz_adj = new Set();
 	 		for (var i = resizeStartY; i < resizeStartY + resizeStartSizeY; i++) {
-				if(board[resizeStartX + resizeStartSizeX - 2][i-1].tile != resizeId){
-					horz_adj.add(board[resizeStartX + resizeStartSizeX - 2][i-1].tile);
+				if(board[resizeStartX + resizeStartSizeX - 1][i-1].tile != resizeId){
+					horz_adj.add(board[resizeStartX + resizeStartSizeX - 1][i-1].tile);
 				}
 			};
 			//did it go right or left?
 			var diff = horizontal_location(ui.originalPosition.left, ui.originalSize.width) - horizontal_location(ui.helper.position().left, ui.helper.width());
+			var moved = new Set();
+			moved.add(resizeId);
 	 		if( diff < 0){
 	 			//it moved right
-	 			virt_adj.forEach(function(item){
+	 			horz_adj.forEach(function(item){
 	 				recursiveResize(moved, 'right', diff, 'w', item);
 	 			});
 	 		} 
 	 		else if(diff > 0){
 	 			//it moved left
-	 			virt_adj.forEach(function(item){
+	 			horz_adj.forEach(function(item){
 	 				recursiveResize(moved, 'left', diff, 'w', item);
 	 			});
 	 		} else {
@@ -522,11 +602,15 @@ $(document).ready(function(){
 	 		var diff = horizontal_location(ui.originalPosition.left,0) - horizontal_location(ui.helper.position().left, 0)
 	 		if( diff < 0){
 	 			//it moved right
-	 			alert('moved right');
+	 			horz_adj.forEach(function(item){
+	 				recursiveResize(moved, 'right', diff, 'e', item);
+	 			});
 	 		} 
 	 		else if(diff > 0){
 	 			//it moved left
-	 			alert('moved left');
+	 			horz_adj.forEach(function(item){
+	 				recursiveResize(moved, 'left', diff, 'e', item);
+	 			});
 	 		} else {
 	 			//it didnt move
 	 		}
@@ -590,6 +674,10 @@ $(document).ready(function(){
 	*/
 	function dragFixup(col, row) {
 
+		if(col < 0 || col > maxCols || row < 0 || row > maxHeight){
+			$('.ui-draggable-dragging').remove();
+	    	return;
+		}
 	    var targetId = board[col-1][row-1].tile;
 	    var targetX = parseInt($('#'+targetId).attr('col'));
 	    var targetY = parseInt($('#'+targetId).attr('row'));
