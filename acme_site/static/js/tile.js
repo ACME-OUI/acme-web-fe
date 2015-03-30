@@ -85,20 +85,14 @@ $(document).ready(function(){
 	function add_tile(html, id){
 		$('.tile-holder').append(html);
 		var w = $('#'+id);
-		$(w).css('display', 'none');
+		$(w).css({'display': 'none'});
+
 		$(w).draggable({
 			//containment: '.tile-board',
 			helper: 'clone',
 			start: function(event, ui){
 
-				ui.helper.css({
-					'-webkit-transition':'',
-					'-moz-transition':'',
-				    '-o-transition': '',
-				    '-ms-transition': '',
-				    'transition': ''
-				});
-
+				ui.helper.addClass('ui-draggable-dragging-no-transition');
 				ui.helper.animate({
 					'opacity':'0.5',
 					'z-index':10,
@@ -107,13 +101,7 @@ $(document).ready(function(){
 				});
 			},
 			stop: function(event, ui){
-				ui.helper.css({
-					'-webkit-transition':'all 0.5s ease-in-out',
-					'-moz-transition':'all 0.5s ease-in-out',
-				    '-o-transition': 'all 0.5s ease-in-out',
-				    '-ms-transition': 'all 0.5s ease-in-out',
-				    'transition': 'all 0.5s ease-in-out'
-				});
+				
 				var pos = grid_from_offset(ui.position);
 				dragFixup(pos.col, pos.row);
 				$(ui.helper).css({
@@ -124,6 +112,9 @@ $(document).ready(function(){
 			cursorAt: {
 				left:200, 
 				top:15
+			}, 
+			drag: function(){
+				console.log('blar');
 			}
 		});
 
