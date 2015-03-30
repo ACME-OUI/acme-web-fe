@@ -11,6 +11,11 @@
 	height: -webkit-calc(100% - 30px); /* google, safari */
 	height: -moz-calc(100% - 30px); /* firefox */
 	background-color: #fff;
+    -webkit-transition: all 0.5s ease-in-out;
+    -moz-transition: all 0.5s ease-in-out;
+    -o-transition: all 0.5s ease-in-out;
+    -ms-transition: all 0.5s ease-in-out;
+    transition: all 0.5s ease-in-out;
 }
 
 .tile-panel-heading {
@@ -37,13 +42,16 @@
 .tile-board {
 	margin: 0 auto 0 auto;
 	height: 100%;
+    webkit-transition: background-color 0.5s,color 0.5s,border-color 0.5s;
+    transition: background-color 0.5s,color 0.5s,border-color 0.5s;
 }
 
 .wrapper {
     height: 80vh;
     width:100%;
-    margin-left: 10px
+    margin-left: 10px;
 }
+
 
 .ui-resizable-helper {
 	border: 1px dotted #00f;

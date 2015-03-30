@@ -25,11 +25,51 @@ $('body').ready(function(){
   });
 
   $('#toggle-slide-left').click(function(e){
-    $('#slide-menu-left').animate({width: 'toggle'}, 500, 'linear');
-    if( $('#toggle-left-a').text() == 'Window Menu') {
+    $('#slide-menu-left').toggle('slide',{
+      direction: 'left',
+      easing: 'easeOutCubic'}, 500);
+    if( $('#toggle-left-a').text() == 'Open Menu') {
       $('#toggle-left-a').text('Close Menu');
     } else {
-      $('#toggle-left-a').text('Window Menu');
+      $('#toggle-left-a').text('Open Menu');
+    }
+  });
+
+  $('#dark-mode-toggle').click(function(e){
+    if($('body').attr('class') == 'day'){
+      //turn dark
+      $('body').attr({
+        'class':'night'
+      });
+      $('.tile-panel-body').each(function(){
+        $(this).css({
+          'background-color': '#0C1021;',
+          'border-color': '#00f;',
+          'color': '#fff'
+        });
+      });
+      $(body).attr({
+        'background-color':'#051451!important',
+        'color':'#aaa!important'
+      });
+      $('#dark-mode-toggle').text('Dark mode is on');
+    } else {
+      //turn light
+      $('body').attr({
+        'class':'day'
+      });
+      $('.tile-panel-body').each(function(){
+        $(this).css({
+          'background-color': '#fff;',
+          'color': '#111;',
+          'border-color': '#000;'
+        });
+      });
+      $(body).attr({
+        'background-color':'#fff',
+        'color':'#000'
+      });
+      $('#dark-mode-toggle').text('Dark mode is off');
     }
   });
 
