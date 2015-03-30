@@ -90,6 +90,15 @@ $(document).ready(function(){
 			//containment: '.tile-board',
 			helper: 'clone',
 			start: function(event, ui){
+
+				ui.helper.css({
+					'-webkit-transition':'',
+					'-moz-transition':'',
+				    '-o-transition': '',
+				    '-ms-transition': '',
+				    'transition': ''
+				});
+
 				ui.helper.animate({
 					'opacity':'0.5',
 					'z-index':10,
@@ -98,6 +107,13 @@ $(document).ready(function(){
 				});
 			},
 			stop: function(event, ui){
+				ui.helper.css({
+					'-webkit-transition':'all 0.5s ease-in-out',
+					'-moz-transition':'all 0.5s ease-in-out',
+				    '-o-transition': 'all 0.5s ease-in-out',
+				    '-ms-transition': 'all 0.5s ease-in-out',
+				    'transition': 'all 0.5s ease-in-out'
+				});
 				var pos = grid_from_offset(ui.position);
 				dragFixup(pos.col, pos.row);
 				$(ui.helper).css({
@@ -203,6 +219,7 @@ $(document).ready(function(){
 	 * side -> the side of the window being resized. n, s, e, w (the side this call should resize, not the original window)
 	 * id -> the id of the window this call should resize
 	 */
+
 	 function recursiveResize(moved, dir, diff, side, id){
 	 	var curWindow = $('#'+id);
 	 	var x = parseInt(curWindow.attr('col'));
@@ -366,10 +383,14 @@ $(document).ready(function(){
 	 	}
 	 	else if(dir == 'right'){
 			if(side == 'e'){
-
+				
 	 		}
 	 		else if(side =='w'){
-
+	 			var adj = new Set();
+		 		for (var i = x; i < x + sizex; i++) {
+					 adj.add(board[x - 2][i - 1].tile);
+				};
+				console.log(adj);
 	 		} else {
 	 			//error
 	 			return
@@ -406,7 +427,9 @@ $(document).ready(function(){
 	 	if(resizeDir == 'n'){
 	 		var virt_adj = new Set();
 	 		for (var i = resizeStartX; i < resizeStartX + resizeStartSizeX; i++) {
-				 virt_adj.add(board[i-1][resizeStartY-2].tile);
+				if(board[i-1][resizeStartY-2].tile != resizeId){
+					virt_adj.add(board[i-1][resizeStartY-2].tile);
+				}
 			};
 	 		//did it go up or down?
 	 		var diff = virtical_location(ui.originalPosition.top, 0) - virtical_location(ui.helper.position().top, 0);
@@ -418,11 +441,15 @@ $(document).ready(function(){
 	 		moved.add(resizeId);
 	 		if(diff < 0){
 	 			//it moved down
-	 			recursiveResize(moved, 'down', diff, 's', virt_adj.values().next().value);
+	 			virt_adj.forEach(function(item){
+					recursiveResize(moved, 'down', diff, 's', item);
+	 			});
 	 		} 
 	 		else if(diff > 0){
 	 			//it moved up
-	 			recursiveResize(moved, 'up', diff, 's', virt_adj.values().next().value);
+	 			virt_adj.forEach(function(item){
+	 				recursiveResize(moved, 'up', diff, 's', item);
+	 			});
 	 		} else {
 	 			//it didnt move
 	 			//TODO: the right and bottom sides are being set to size-2 for some reason
@@ -438,7 +465,9 @@ $(document).ready(function(){
 	 	if(resizeDir == 's'){
 	 		var virt_adj = new Set();
 	 		for (var i = resizeStartX; i < resizeStartX + resizeStartSizeX; i++) {
-				 virt_adj.add(board[i-1][resizeStartY + resizeStartSizeY - 1].tile);
+				if(board[i-1][resizeStartY + resizeStartSizeY - 1].tile != resizeId){
+					virt_adj.add(board[i-1][resizeStartY + resizeStartSizeY].tile);
+				}
 			};
 	 		//did it go up or down?
 	 		var diff = virtical_location(ui.originalPosition.top, ui.originalSize.height) - virtical_location(ui.helper.position().top, ui.helper.height());
@@ -446,29 +475,47 @@ $(document).ready(function(){
 	 		moved.add(resizeId);
 	 		if( diff < 0){
 	 			//it moved down
-	 			recursiveResize(moved, 'down', diff, 'n', virt_adj.values().next().value);
+	 			virt_adj.forEach(function(item){
+	 				recursiveResize(moved, 'down', diff, 'n', item);
+	 			});
 	 		} 
 	 		else if(diff > 0){
 	 			//it moved up
-	 			recursiveResize(moved, 'up', diff, 'n', virt_adj.values().next().value);
+	 			virt_adj.forEach(function(item){
+	 				recursiveResize(moved, 'up', diff, 'n', item);
+	 			});
 	 		} else {
 	 			//it didnt move
+	 			ui.element.css({
+	 				'top': ui.originalPosition.top,
+	 				'left': ui.originalPosition.left,
+	 				'width': ui.originalSize.width,
+	 				'height': ui.originalSize.height
+	 			});
+	 			return;
+
 	 		}
 	 	} 
 	 	if(resizeDir == 'e'){
 	 		var horz_adj = new Set();
 	 		for (var i = resizeStartY; i < resizeStartY + resizeStartSizeY; i++) {
-				 horz_adj.add(board[resizeStartX + resizeStartSizeX - 2][i-1].tile);
+				if(board[resizeStartX + resizeStartSizeX - 2][i-1].tile != resizeId){
+					horz_adj.add(board[resizeStartX + resizeStartSizeX - 2][i-1].tile);
+				}
 			};
 			//did it go right or left?
 			var diff = horizontal_location(ui.originalPosition.left, ui.originalSize.width) - horizontal_location(ui.helper.position().left, ui.helper.width());
 	 		if( diff < 0){
 	 			//it moved right
-	 			alert('moved right');
+	 			virt_adj.forEach(function(item){
+	 				recursiveResize(moved, 'right', diff, 'w', item);
+	 			});
 	 		} 
 	 		else if(diff > 0){
 	 			//it moved left
-	 			alert('moved left');
+	 			virt_adj.forEach(function(item){
+	 				recursiveResize(moved, 'left', diff, 'w', item);
+	 			});
 	 		} else {
 	 			//it didnt move
 	 		}
@@ -476,7 +523,9 @@ $(document).ready(function(){
 	 	if(resizeDir == 'w'){
 	 		var horz_adj = new Set();
 	 		for (var i = resizeStartY; i < resizeStartY + resizeStartSizeY; i++) {
-				 horz_adj.add(board[resizeStartX - 2][i-1].tile);
+				if(board[resizeStartX - 2][i-1].tile != resizeId){
+					horz_adj.add(board[resizeStartX - 2][i-1].tile);
+				}
 			};
 	 		//did it go right or left?
 	 		var diff = horizontal_location(ui.originalPosition.left,0) - horizontal_location(ui.helper.position().left, 0)
@@ -523,8 +572,8 @@ $(document).ready(function(){
 	 */
 	function update_board(id){
 		var t = $('#'+id);
-		for (var k = parseInt(t.attr('col'))-1; k < (parseInt(t.attr('col'))+parseInt(t.attr('sizex'))-1); k++) {
-			for (var j = parseInt(t.attr('row'))-1; j < (parseInt(t.attr('row'))+parseInt(t.attr('sizey'))-1); j++) {
+		for (var k = parseInt(t.attr('col'))-1; k < parseInt(t.attr('col'))+parseInt(t.attr('sizex'))-1; k++) {
+			for (var j = parseInt(t.attr('row'))-1; j < parseInt(t.attr('row'))+parseInt(t.attr('sizey'))-1; j++) {
 				board[k][j].occupied = 1;
 				board[k][j].tile = id;
 			};
