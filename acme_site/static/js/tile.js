@@ -9,8 +9,9 @@ $(document).ready(function(){
 	var tileWidth = 100;
 	var tileHeight = 100;
 	var maxCols = Math.floor(docWidth/tileWidth);
-	$(".wrapper").width(maxCols*tileWidth);
 	var maxHeight = Math.floor(docHeight/tileHeight);
+	$('.wrapper').width(maxCols*tileWidth);
+	$('.tile-board').css({'height':maxHeight*tileHeight});
 	var tiles = [];
 	var resize_handle_html = '<span class="gs-resize-handle gs-resize-handle-both"></span>';
 		// Define a widget
@@ -145,21 +146,33 @@ $(document).ready(function(){
 				resizeFixup(ui);
 				var el = ui.element;
 				setTimeout(function(el){
-					if(resizeDir == 'n' && el.attr('row') == 1){
+					if(resizeDir == 'n' && parseInt(el.attr('row')) == 1){
 						el.css({
-							'top':parseInt($('.tile-board').offset().top),
+							'top':$('.tile-board').offset().top,
 							'height':tileHeight*parseInt(el.attr('sizey')),
 							'width':tileWidth*parseInt(el.attr('sizex'))
 						});
 					}
 					else if(resizeDir == 's'){
-
+						el.css({
+							'height':tileHeight*parseInt(el.attr('sizey')),
+							'width':tileWidth*parseInt(el.attr('sizex'))
+						});
 					}
 					else if(resizeDir == 'e'){
+						el.css({
+							'left': tileWidth*(parseInt(el.attr('col'))-1)+10,
+							'width': tileWidth*parseInt(el.attr('sizex')),
+							'height':tileWidth*parseInt(el.attr('sizey'))
+						});
 
 					}
 					else if(resizeDir == 'w'){
-
+						el.css({
+							'width':tileWidth*parseInt(el.attr('sizex')),
+							'height':tileWidth*parseInt(el.attr('sizey')),
+							'left':$('.tile-board').offset().left
+						});
 					}
 				}, 500, el);
 			}
@@ -514,10 +527,8 @@ $(document).ready(function(){
 	 	//which direction did it resize?
 	 	if(resizeDir == 'n'){
 	 		var diff = virtical_location(ui.originalPosition.top, 0) - virtical_location(ui.helper.position().top, 0);
-	 		if(diff <= 0 && ui.element.attr('row') <= 1){
-	 			// ui.element.css({
-	 			// 	'top':parseInt(ui.element.attr('row'))*tileHeight-30
-	 			// });
+	 		if(diff <= 0 && parseInt(ui.element.attr('row')) <= 1){
+	 			//the tile is at the top
 	 			return;
 		 	}
 	 		var virt_adj = new Set();
@@ -557,6 +568,11 @@ $(document).ready(function(){
 	 		}
 	 	}
 	 	if(resizeDir == 's'){
+	 		var diff = virtical_location(ui.originalPosition.top, ui.originalSize.height) - virtical_location(ui.helper.position().top, ui.helper.height());
+	 		if(parseInt(ui.element.attr('row'))+parseInt(ui.element.attr('sizey'))-1 == maxHeight ){
+	 			//the tile is at the bottom
+	 			return;
+	 		}
 	 		var virt_adj = new Set();
 	 		for (var i = resizeStartX; i < resizeStartX + resizeStartSizeX; i++) {
 				if(board[i-1][resizeStartY + resizeStartSizeY - 1].tile != resizeId){
@@ -564,7 +580,6 @@ $(document).ready(function(){
 				}
 			};
 	 		//did it go up or down?
-	 		var diff = virtical_location(ui.originalPosition.top, ui.originalSize.height) - virtical_location(ui.helper.position().top, ui.helper.height());
 	 		var moved = new Set();
 	 		moved.add(resizeId);
 	 		if( diff < 0){
@@ -591,6 +606,10 @@ $(document).ready(function(){
 	 		}
 	 	} 
 	 	if(resizeDir == 'e'){
+	 		if(parseInt(ui.element.attr('col'))+parseInt(ui.element.attr('sizex'))-1 == maxCols){
+	 			//the element is on the right of the board
+	 			return;
+	 		}
 	 		var horz_adj = new Set();
 	 		for (var i = resizeStartY; i < resizeStartY + resizeStartSizeY; i++) {
 				if(board[resizeStartX + resizeStartSizeX - 1][i-1].tile != resizeId){
@@ -617,6 +636,10 @@ $(document).ready(function(){
 	 		}
 	 	} 
 	 	if(resizeDir == 'w'){
+	 		if(parseInt(ui.element.attr('col')) == 1){
+	 			//the element is on the left side of the board
+	 			return;
+	 		}
 	 		var horz_adj = new Set();
 	 		for (var i = resizeStartY; i < resizeStartY + resizeStartSizeY; i++) {
 				if(board[resizeStartX - 2][i-1].tile != resizeId){
