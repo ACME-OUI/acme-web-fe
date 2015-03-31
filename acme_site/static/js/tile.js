@@ -4,8 +4,8 @@ $(document).ready(function(){
 /****************************************
  	Setup variables
  ***************************************/
-	var docWidth = $(".wrapper").width();
-	var docHeight = $(".wrapper").height();
+	var docWidth = $(".tile-board").width();
+	var docHeight = $(".tile-board").height();
 	var tileWidth = 100;
 	var tileHeight = 100;
 	var maxCols = Math.floor(docWidth/tileWidth);
@@ -129,7 +129,7 @@ $(document).ready(function(){
 			animate: true,
 			animateDuration: 'fast',
 			animateEasing: 'easeOutQuint',
-			// containment: '.tile-holder',
+			containment: '.tile-board',
 			helper: 'ui-resizable-helper',
 			grid: [tileWidth, tileHeight],
 			start: function(event, ui){
@@ -143,6 +143,25 @@ $(document).ready(function(){
 			},
 			stop: function(event, ui){
 				resizeFixup(ui);
+				var el = ui.element;
+				setTimeout(function(el){
+					if(resizeDir == 'n' && el.attr('row') == 1){
+						el.css({
+							'top':parseInt($('.tile-board').offset().top),
+							'height':tileHeight*parseInt(el.attr('sizey')),
+							'width':tileWidth*parseInt(el.attr('sizex'))
+						});
+					}
+					else if(resizeDir == 's'){
+
+					}
+					else if(resizeDir == 'e'){
+
+					}
+					else if(resizeDir == 'w'){
+
+					}
+				}, 500, el);
 			}
 		});
 
@@ -494,6 +513,13 @@ $(document).ready(function(){
 	 	var resizeId = ui.element.attr('id');
 	 	//which direction did it resize?
 	 	if(resizeDir == 'n'){
+	 		var diff = virtical_location(ui.originalPosition.top, 0) - virtical_location(ui.helper.position().top, 0);
+	 		if(diff <= 0 && ui.element.attr('row') <= 1){
+	 			// ui.element.css({
+	 			// 	'top':parseInt(ui.element.attr('row'))*tileHeight-30
+	 			// });
+	 			return;
+		 	}
 	 		var virt_adj = new Set();
 	 		for (var i = resizeStartX; i < resizeStartX + resizeStartSizeX; i++) {
 				if(board[i-1][resizeStartY-2].tile != resizeId){
@@ -501,7 +527,6 @@ $(document).ready(function(){
 				}
 			};
 	 		//did it go up or down?
-	 		var diff = virtical_location(ui.originalPosition.top, 0) - virtical_location(ui.helper.position().top, 0);
 	 		$(ui.element).attr({
 	 			'row':parseInt(ui.element.attr('row'))-diff,
 	 			'sizey':parseInt(ui.element.attr('sizey'))+diff
