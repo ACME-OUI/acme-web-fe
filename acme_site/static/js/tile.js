@@ -173,6 +173,12 @@ $(document).ready(function(){
 							'height':tileWidth*parseInt(el.attr('sizey')),
 							'left':$('.tile-board').offset().left
 						});
+					}
+					else{
+						el.css({
+							'height':parseInt(el.attr('sizey'))*tileHeight,
+							'width':parseInt(el.attr('sizex'))*tileWidth
+						});
 					} 
 				}, 500, el);
 			}
@@ -557,13 +563,6 @@ $(document).ready(function(){
 	 			});
 	 		} else {
 	 			//it didnt move
-	 			//TODO: the right and bottom sides are being set to size-2 for some reason
-	 			ui.element.css({
-	 				'top': ui.originalPosition.top,
-	 				'left': ui.originalPosition.left,
-	 				'width': ui.originalSize.width,
-	 				'height': ui.originalSize.height
-	 			});
 	 			return;
 	 		}
 	 	}
@@ -595,12 +594,6 @@ $(document).ready(function(){
 	 			});
 	 		} else {
 	 			//it didnt move
-	 			ui.element.css({
-	 				'top': ui.originalPosition.top,
-	 				'left': ui.originalPosition.left,
-	 				'width': ui.originalSize.width,
-	 				'height': ui.originalSize.height
-	 			});
 	 			return;
 
 	 		}
@@ -647,7 +640,9 @@ $(document).ready(function(){
 				}
 			};
 	 		//did it go right or left?
-	 		var diff = horizontal_location(ui.originalPosition.left,0) - horizontal_location(ui.helper.position().left, 0)
+	 		var diff = horizontal_location(ui.originalPosition.left,0) - horizontal_location(ui.helper.position().left, 0);
+	 		var moved = new Set();
+	 		moved.add(resizeId);
 	 		if( diff < 0){
 	 			//it moved right
 	 			horz_adj.forEach(function(item){
