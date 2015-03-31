@@ -159,7 +159,7 @@ $(document).ready(function(){
 							'width':tileWidth*parseInt(el.attr('sizex'))
 						});
 					}
-					else if(resizeDir == 'e'){
+					else if(resizeDir == 'e' && parseInt(el.attr('col'))+parseInt(el.attr('sizex'))-1 == maxCols){
 						el.css({
 							'left': tileWidth*(parseInt(el.attr('col'))-1)+10,
 							'width': tileWidth*parseInt(el.attr('sizex')),
@@ -167,13 +167,13 @@ $(document).ready(function(){
 						});
 
 					}
-					else if(resizeDir == 'w'){
+					else if(resizeDir == 'w' && parseInt(el.attr('col')) == 1){
 						el.css({
 							'width':tileWidth*parseInt(el.attr('sizex')),
 							'height':tileWidth*parseInt(el.attr('sizey')),
 							'left':$('.tile-board').offset().left
 						});
-					}
+					} 
 				}, 500, el);
 			}
 		});
