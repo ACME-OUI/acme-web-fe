@@ -272,15 +272,7 @@ $(document).ready(function(){
 		 		for (var i = x; i < x + sizex; i++) {
 					 adj.add(board[i-1][y - 2].tile);
 				};
-				//check the base case-> all windows have been moved
-				var done = true;
-				adj.forEach(function(item){
-					if(!moved.has(item)){
-						done = false;
-					} else {
-						adj.delete(item);
-					}
-				}, moved);
+				var helperReturn = adjHelper(adj, moved);
 				curWindow.attr({
 					'row':y-diff,
 					'sizey':sizey+diff
@@ -291,12 +283,13 @@ $(document).ready(function(){
 				});
 				update_board(id);
 				moved.add(id);
-				if(done == true){
+				removeHelper(curWindow);
+				if(helperReturn.finished == true){
 					//base case, done resizing
 					return;
 				} else {
 					//we need to keep resizing
-					recursiveResize(moved, dir, diff, 's', adj.values().next().value);
+					recursiveResize(moved, dir, diff, 's', helperReturn.adj.values().next().value);
 				}
 	 		}
 	 		else if(side =='s'){
@@ -304,15 +297,7 @@ $(document).ready(function(){
 		 		for (var i = x; i < x + sizex; i++) {
 					 adj.add(board[i-1][y + sizey - 1].tile);
 				};
-				//check the base case-> all windows have been moved
-				var done = true;
-				adj.forEach(function(item){
-					if(!moved.has(item)){
-						done = false;
-					} else {
-						adj.delete(item);
-					}
-				}, moved);
+				var helperReturn = adjHelper(adj, moved);
 				curWindow.attr({
 					'sizey':sizey-diff
 				});
@@ -321,24 +306,13 @@ $(document).ready(function(){
 				});
 				update_board(id);
 				moved.add(id);
-				//is the window being completely obscured?
-				if(parseInt(curWindow.attr('sizey')) <= 0){
-					$.when(curWindow.fadeOut()).then(function(){
- 						curWindow.remove();
-	 				});
-	 				for (var i = tiles.length - 1; i >= 0; i--) {
-						if(tiles[i] == id){
-							tiles.splice(i, 1);
-							break;
-						}
-					};
-				}
-				if(done == true){
+				removeHelper(curWindow);
+				if(helperReturn.finished == true){
 					//base case, all windows have been resized
 					return; 
 				} else {
 					//we need to keep resizeing 
-					recursiveResize(moved, dir, diff, 'n', adj.values().next().value);
+					recursiveResize(moved, dir, diff, 'n', helperReturn.adj.values().next().value);
 				}
 	 		} else {
 	 			//error
@@ -352,15 +326,8 @@ $(document).ready(function(){
 					 adj.add(board[i-1][y - 2].tile);
 				};
 				//check the base case-> all windows have been moved
-				var done = true;
 				moved.add(id);
-				adj.forEach(function(item){
-					if(!moved.has(item)){
-						done = false;
-					} else {
-						adj.delete(item);
-					}
-				}, moved);
+				var helperReturn = adjHelper(adj, moved);
 				curWindow.attr({
 					'row':y-diff,
 					'sizey':sizey+diff
@@ -371,12 +338,13 @@ $(document).ready(function(){
 				});
 				update_board(id);
 				moved.add(id);
-				if(done == true){
+				removeHelper(curWindow);
+				if(helperReturn.finished == true){
 					//base case, done resizing
 					return;
 				} else {
 					//we need to keep resizing
-					recursiveResize(moved, dir, diff, 's', adj.values().next().value);
+					recursiveResize(moved, dir, diff, 's', helperReturn.adj.values().next().value);
 				}
 	 		}
 	 		else if(side =='s'){
@@ -385,15 +353,8 @@ $(document).ready(function(){
 					 adj.add(board[i-1][y + sizey - 1].tile);
 				};
 				//check the base case-> all windows have been moved
-				var done = true;
 				moved.add(id);
-				adj.forEach(function(item){
-					if(!moved.has(item)){
-						done = false;
-					} else {
-						adj.delete(item);
-					}
-				}, moved);
+				var helperReturn = adjHelper(adj, moved);
 				curWindow.attr({
 					'sizey':sizey-diff
 				});
@@ -402,24 +363,13 @@ $(document).ready(function(){
 				});
 				update_board(id);
 				moved.add(id);
-				//is the window being completely obscured?
-				if(parseInt(curWindow.attr('sizey')) <= 0){
-					$.when(curWindow.fadeOut()).then(function(){
- 						curWindow.remove();
-	 				});
-	 				for (var i = tiles.length - 1; i >= 0; i--) {
-						if(tiles[i] == id){
-							tiles.splice(i, 1);
-							break;
-						}
-					};
-				}
-				if(done == true){
+				removeHelper(curWindow);
+				if(helperReturn.finished == true){
 					//base case, all windows have been resized
 					return; 
 				} else {
 					//we need to keep resizeing 
-					recursiveResize(moved, dir, diff, 'n', adj.values().next().value);
+					recursiveResize(moved, dir, diff, 'n', helperReturn.adj.values().next().value);
 				}
 	 		} else {
 	 			//error
@@ -432,14 +382,7 @@ $(document).ready(function(){
 		 		for (var i = y; i < y + sizey; i++) {
 					 adj.add(board[x + sizex - 1][i - 1].tile);
 				};
-				var done = true;
-				adj.forEach(function(item){
-					if(!moved.has(item)){
-						done = false;
-					} else {
-						adj.delete(item);
-					}
-				}, moved);
+				var helperReturn = adjHelper(adj, moved);
 				curWindow.attr({
 					'sizex':sizex-diff
 				});
@@ -448,24 +391,13 @@ $(document).ready(function(){
 				});
 				update_board(id);
 				moved.add(id);
-				//is the window being completely obscured?
-				if(parseInt(curWindow.attr('sizex')) <= 0){
-					$.when(curWindow.fadeOut()).then(function(){
- 						curWindow.remove();
-	 				});
-	 				for (var i = tiles.length - 1; i >= 0; i--) {
-						if(tiles[i] == id){
-							tiles.splice(i, 1);
-							break;
-						}
-					};
-				}
-				if(done == true){
+				removeHelper(curWindow);
+				if(helperReturn.finished == true){
 					//base case, all windows have been resized
 					return; 
 				} else {
 					//we need to keep resizeing 
-					recursiveResize(moved, dir, diff, 'w', adj.values().next().value);
+					recursiveResize(moved, dir, diff, 'w', helperReturn.adj.values().next().value);
 				}
 	 		}
 	 		else if(side =='w'){
@@ -473,14 +405,7 @@ $(document).ready(function(){
 		 		for (var i = y; i < y + sizey; i++) {
 					 adj.add(board[x - 2][i - 1].tile);
 				};
-				var done = true;
-				adj.forEach(function(item){
-					if(!moved.has(item)){
-						done = false;
-					} else {
-						adj.delete(item);
-					}
-				}, moved);
+				var helperReturn = adjHelper(adj, moved);
 				curWindow.attr({
 					'col':x-diff,
 					'sizex':sizex+diff
@@ -491,24 +416,13 @@ $(document).ready(function(){
 				});
 				update_board(id);
 				moved.add(id);
-				//is the window being completely obscured?
-				if(parseInt(curWindow.attr('sizex')) <= 0){
-					$.when(curWindow.fadeOut()).then(function(){
- 						curWindow.remove();
-	 				});
-	 				for (var i = tiles.length - 1; i >= 0; i--) {
-						if(tiles[i] == id){
-							tiles.splice(i, 1);
-							break;
-						}
-					};
-				}
-				if(done == true){
+				removeHelper(curWindow);
+				if(helperReturn.finished == true){
 					//base case, all windows have been resized
 					return; 
 				} else {
 					//we need to keep resizeing 
-					recursiveResize(moved, dir, diff, 'e', adj.values().next().value);
+					recursiveResize(moved, dir, diff, 'e', helperReturn.adj.values().next().value);
 				}
 	 		} else {
 	 			//error
@@ -521,14 +435,7 @@ $(document).ready(function(){
 		 		for (var i = y; i < y + sizey; i++) {
 					 adj.add(board[x + sizex - 1][i - 1].tile);
 				};
-				var done = true;
-				adj.forEach(function(item){
-					if(!moved.has(item)){
-						done = false;
-					} else {
-						adj.delete(item);
-					}
-				}, moved);
+				var helperReturn = adjHelper(adj, moved);
 				curWindow.attr({
 					'sizex':sizex-diff
 				});
@@ -537,24 +444,13 @@ $(document).ready(function(){
 				});
 				update_board(id);
 				moved.add(id);
-				//is the window being completely obscured?
-				if(parseInt(curWindow.attr('sizex')) <= 0){
-					$.when(curWindow.fadeOut()).then(function(){
- 						curWindow.remove();
-	 				});
-	 				for (var i = tiles.length - 1; i >= 0; i--) {
-						if(tiles[i] == id){
-							tiles.splice(i, 1);
-							break;
-						}
-					};
-				}
-				if(done == true){
+				removeHelper(curWindow);
+				if(helperReturn.finished == true){
 					//base case, all windows have been resized
 					return; 
 				} else {
 					//we need to keep resizeing 
-					recursiveResize(moved, dir, diff, 'w', adj.values().next().value);
+					recursiveResize(moved, dir, diff, 'w', helperReturn.adj.values().next().value);
 				}
 	 		}
 	 		else if(side =='w'){
@@ -562,14 +458,7 @@ $(document).ready(function(){
 		 		for (var i = y; i < y + sizey; i++) {
 					 adj.add(board[x - 2][i - 1].tile);
 				};
-				var done = true;
-				adj.forEach(function(item){
-					if(!moved.has(item)){
-						done = false;
-					} else {
-						adj.delete(item);
-					}
-				}, moved);
+				var helperReturn = adjHelper(adj, moved);
 				curWindow.attr({
 					'col':x-diff,
 					'sizex':sizex+diff
@@ -580,34 +469,61 @@ $(document).ready(function(){
 				});
 				update_board(id);
 				moved.add(id);
-				//is the window being completely obscured?
-				if(parseInt(curWindow.attr('sizex')) <= 0){
-					$.when(curWindow.fadeOut()).then(function(){
- 						curWindow.remove();
-	 				});
-	 				for (var i = tiles.length - 1; i >= 0; i--) {
-						if(tiles[i] == id){
-							tiles.splice(i, 1);
-							break;
-						}
-					};
-				}
-				if(done == true){
+				removeHelper(curWindow);
+				if(helperReturn.finshed == true){
 					//base case, all windows have been resized
 					return; 
 				} else {
 					//we need to keep resizeing 
-					recursiveResize(moved, dir, diff, 'e', adj.values().next().value);
+					recursiveResize(moved, dir, diff, 'e', helperReturn.adj.values().next().value);
 				}
 	 		} else {
 	 			//error
-	 			return
+	 			return;
 	 		}
 	 	} else {
 	 		//error
-	 		return
+	 		return;
 	 	}
 	 }
+
+	 /**
+	  * Helper to handle checking window adjacency
+	  * adj -> Set of adjacent windows
+	  * moved -> Set of moved windows
+	  * returns if the recurcive function is done, and the new adj
+	  */
+	  function adjHelper(adj, moved) {
+	  	var done = true;
+		adj.forEach(function(item){
+			if(!moved.has(item)){
+				done = false;
+			} else {
+				adj.delete(item);
+			}
+		}, moved);
+
+		return {'finished':done, 'adj':adj};
+	  }
+
+
+	  /**
+	   * Helper to handle removing an occluded tile from the list of tiles
+	   * tile -> the tile to check if it should be removed
+	   */
+	   function removeHelper(tile){
+	   		if(parseInt(tile.attr('sizex')) <= 0){
+				$.when(tile.fadeOut()).then(function(){
+						tile.remove();
+ 				});
+ 				for (var i = tiles.length - 1; i >= 0; i--) {
+					if(tiles[i] == id){
+						tiles.splice(i, 1);
+						break;
+					}
+				};
+			}
+	   }
 
 
 
