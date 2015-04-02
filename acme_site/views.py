@@ -15,7 +15,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
 #from acme_site.filters import
-#from acme_site.models import
+from acme_site.models import models as m
 #from acme_site.forms import
 
 import json
@@ -121,6 +121,31 @@ def jspanel(request):
 @login_required(login_url='login')
 def grid(request):
     return HttpResponse(render_template(request, "acme_site/grid.html", {}))
+
+def save_layout(request):
+    if request.method == 'POST':
+        try:
+            with json.loads(request.body) as data:
+                layout = m.TileLayout(user_name=data['user_name'], board_layout=data['layout'])
+                layout.save()
+                return HttpResponse(status=200)
+        except:
+            print "Error handling layout save request"
+            return HttpResponseServerError()
+
+
+def load_layout(request):
+    if request.method == 'POST':
+        try:
+            with json.loads(request.body) as data:
+                response_data = {}
+                layout['user_name'] = TileLayout.objects.filter(user_name=data['user_name'])
+                response_data['user_name'] = layout['user_name']
+                response_data['board_layout'] = layout['board_layout']
+                return HttpResponse(json.dumps(response_data))
+        except:
+            print 'Loading error'
+
 
 @login_required(login_url='login')
 def config(request):

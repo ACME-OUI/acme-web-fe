@@ -2,27 +2,8 @@ $('body').ready(function(){
 /***********************************
         Left slide menu
 ***********************************/
-  var body = document.body,
-      mask = document.createElement('div'),
-      toggleSlideLeft = document.querySelector('.toggle-slide-left');
+  var body = document.body;
 
-  mask.className = 'mask';
-
-  $(toggleSlideLeft).click(function() {
-    $(body).addClass('sml-open');
-    document.body.appendChild(mask);
-  });
-
-  /* hide active menu if mask is clicked */
-  $(mask).click(function(){
-    $(body).removeClass('sml-open');
-    document.body.removeChild(mask);
-  });
-
-  $('.close-menu').click(function(){
-    $(body).removeClass('sml-open');
-    document.body.removeChild(mask);
-  });
 
   $('#toggle-slide-left').click(function(e){
     $('#slide-menu-left').toggle('slide',{
@@ -34,6 +15,57 @@ $('body').ready(function(){
       $('#toggle-left-a').text('Open Menu');
     }
   });
+
+  $('#save-layout').click(function(){
+    $(this).prop('disabled', true);
+    var mask = document.createElement('div');
+    $(mask).addClass('mask');
+    $(mask).attr({'id':'mask'});
+    $(mask).click(function(){
+      $(this).fadeOut().queue(function(){
+        $(this).remove();
+        $('.save-layout').remove();
+        $('#save-layout').prop('disabled', false);
+      });
+      
+    });
+    $('body').append(mask);
+    
+    var saveMenu = document.createElement('div');
+    $(saveMenu).addClass('bvc');
+    $(saveMenu).addClass('save-layout');
+    var saveMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
+    saveMenuHtml += '<form name="save-layout-form" id="save-form">'; 
+    saveMenuHtml += 'Layout Name:<br><input type="text" name="layout-name">';
+    saveMenuHtml += '<input type="submit" value="Save">';
+    saveMenuHtml += '</form></div><div class="bevel bl br"></div>';
+    $(saveMenu).html(saveMenuHtml);
+    $('body').append(saveMenu);
+    $(mask).fadeIn();
+  });
+
+
+  $('#load-layout').click(function(){
+    $(this).prop('disabled', true);
+    var mask = document.createElement('div');
+    $(mask).addClass('mask');
+    $(mask).attr({'id':'mask'});
+    $(mask).click(function(){
+      $(this).fadeOut().queue(function(){
+        $(this).remove();
+        $('.load-layout').remove();
+        $('#load-layout').prop('disabled', false);
+      });
+    });
+    $('body').append(mask);
+    /*
+
+    Do some stuff
+
+    */
+  });
+
+
 
   $('#dark-mode-toggle').click(function(e){
     if($('body').attr('class') == 'day'){

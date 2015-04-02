@@ -512,12 +512,12 @@ $(document).ready(function(){
 	   * tile -> the tile to check if it should be removed
 	   */
 	   function removeHelper(tile){
-	   		if(parseInt(tile.attr('sizex')) <= 0){
+	   		if(parseInt(tile.attr('sizex')) <= 0 || parseInt(tile.attr('sizey')) <= 0){
 				$.when(tile.fadeOut()).then(function(){
 						tile.remove();
  				});
  				for (var i = tiles.length - 1; i >= 0; i--) {
-					if(tiles[i] == id){
+					if(tiles[i] == tile.attr('id')){
 						tiles.splice(i, 1);
 						break;
 					}
@@ -579,7 +579,7 @@ $(document).ready(function(){
 	 		var virt_adj = new Set();
 	 		for (var i = resizeStartX; i < resizeStartX + resizeStartSizeX; i++) {
 				if(board[i-1][resizeStartY + resizeStartSizeY - 1].tile != resizeId){
-					virt_adj.add(board[i-1][resizeStartY + resizeStartSizeY].tile);
+					virt_adj.add(board[i-1][resizeStartY + resizeStartSizeY - 1].tile);
 				}
 			};
 	 		//did it go up or down?
