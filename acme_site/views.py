@@ -27,6 +27,7 @@ import base64
 import time
 import datetime
 
+
 ##### General
 def render_template(request, template, context):
     template = loader.get_template(template)

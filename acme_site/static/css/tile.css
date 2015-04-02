@@ -18,6 +18,14 @@
     transition: all 0.5s ease-in-out;
 }
 
+.ui-draggable-dragging-no-transition {
+    -webkit-transition: none!important;
+    -moz-transition: none!important;
+    -o-transition: none!important;
+    -ms-transition: none!important;
+    transition: none!important;
+}
+
 .tile-panel-heading {
     background-color: #4179B5;
     color: #111;
@@ -36,7 +44,7 @@
     -o-transition: all 0.5s ease-in-out;
     -ms-transition: all 0.5s ease-in-out;
     transition: all 0.5s ease-in-out;
-    z-index: 1;
+    z-index: 2;
 }
 
 .tile-board {
