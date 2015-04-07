@@ -5,9 +5,9 @@ $('body').ready(function(){
   var body = document.body;
 
   function leftMenuToggle(){
-    $('#slide-menu-left').toggle('slide',{
-      direction: 'left',
-      easing: 'easeOutCubic'}, 500);
+    $('#slide-menu-left').animate({
+      width: '200px'
+    });
     if( $('#toggle-left-a').text() == 'Open Menu') {
       $('#toggle-left-a').text('Close Menu');
     } else {
@@ -29,7 +29,6 @@ $('body').ready(function(){
         $(this).remove();
         $('.save-layout').remove();
       });
-      
     });
     $('body').append(mask);
     

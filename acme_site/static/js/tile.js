@@ -90,9 +90,10 @@ $(document).ready(function(){
 	 * Creates a new tile window and rearranges all the other tiles to make room 
 	 * html-> the content of the tile
 	 * id-> the name for the new tile to take
+	 * options-> whatever new options i decided to add, right now a x,y,sizex,sizey to handle window sizes
 	 * callback-> an optional function to pass that will be called with add_tile is done
 	 */
-	function add_tile(html, id, callback){
+	function add_tile(html, id, options, callback){
 		$('.tile-holder').append(html);
 		var w = $('#'+id);
 		$(w).css({
@@ -235,8 +236,23 @@ $(document).ready(function(){
 		$(w).find('.options').click(function(e) {
 
 		});
-		
-		positionFixup();
+		if(options != null){
+			$(w).attr({
+      		'row': options.y,
+      		'col': options.x,
+      		'sizex': options.sizex,
+      		'sizey': options.sizey
+	      	});
+	      	$(w).css({
+	      		'top': options.y*tileHeight,
+	      		'left': (options.x -1)*tileWidth + $('.tile-holder').offset().left,
+	      		'width': options.sizex*tileWidth,
+	      		'height': options.sizey*tileHeight
+	      	});
+		} else {
+			positionFixup();
+		}
+
 		if($('body').attr('class') == 'night'){
 			$(w).find('.tile-panel-body').css({
 	          'background-color': '#0C1021;',
@@ -244,7 +260,7 @@ $(document).ready(function(){
 	          'color': '#fff'
 	        });
 		}
-		$(w).fadeIn()
+		$(w).fadeIn();
 		if(callback != null)
 			callback();
 		return $(w);
@@ -874,6 +890,10 @@ $(document).ready(function(){
 
 
     */
+    $('.tile').each(function(){
+  		$(this).remove();
+  	});
+  	tiles = [];
     var options = [{ //placeholder
       name : 'science',
       mode: 'day',
@@ -941,33 +961,46 @@ $(document).ready(function(){
 
 	function layoutFix(layout){
 		for (var i = layout.layout.length - 1; i >= 0; i--) {
-			if(layout.layout[i].x.indexOf('max') != -1){
-				if(layout.layout[i].x.indexOf('max') != 1){
-					layout.layout[i].x = parseInt(layout.layout[i].x.substr(0, layout.layout[i].x.indexOf('max')-1))-maxCols;
+			var x = layout.layout[i].x.indexOf('max');
+			var y = layout.layout[i].y.indexOf('max');
+			var sizex = layout.layout[i].sizex.indexOf('max');
+			var sizey = layout.layout[i].sizey.indexOf('max');
+
+			if(x != -1){
+				if(layout.layout[i].x.length != 3){
+					layout.layout[i].x = maxCols - parseInt(layout.layout[i].x.substr(x+4)); 
 				} else {
 					layout.layout[i].x = maxCols;
 				}
+			} else {
+				layout.layout[i].x = parseInt(layout.layout[i].x);
 			}
-			else if(layout.layout[i].y.indexOf('max') != -1){
-				if(layout.layout[i].y.indexOf('max') != 1){
-					layout.layout[i].y = parseInt(layout.layout[i].y.substr(0, layout.layout[i].y.indexOf('max')-1))-maxHeight;
+			if(y != -1){
+				if(layout.layout[i].y.length != 3){
+					layout.layout[i].y = maxHeight - parseInt(layout.layout[i].y.substr(y+4));
 				} else {
 					layout.layout[i].y = maxHeight;
 				}
+			} else {
+				layout.layout[i].y = parseInt(layout.layout[i].y);
 			}
-			else if(layout.layout[i].sizex.indexOf('max') != -1){
-				if(layout.layout[i].sizex.indexOf('max') != 1){
-					layout.layout[i].sizex = parseInt(layout.layout[i].sizex.substr(0, layout.layout[i].sizex.indexOf('max')-1))-maxCols;
+			if(sizex != -1){
+				if(layout.layout[i].sizex.length != 3){
+					layout.layout[i].sizex = maxCols - parseInt(layout.layout[i].sizex.substr(sizex+4));
 				} else {
 					layout.layout[i].sizex = maxCols;
 				}
+			} else {
+				layout.layout[i].sizex = parseInt(layout.layout[i].sizex);
 			}
-			else if(layout.layout[i].sizey.indexOf('max') != -1){
-				if(layout.layout[i].sizey.indexOf('max') != 1){
-					layout.layout[i].sizey = parseInt(layout.layout[i].sizey.substr(0, layout.layout[i].sizey.indexOf('max')-1))-maxHeight;
+			if(sizey != -1){
+				if(layout.layout[i].sizey.length != 3){
+					layout.layout[i].sizey = parseInt(layout.layout[i].sizey.substr(sizey+4));
 				} else {
 					layout.layout[i].sizey = maxHeight;
 				}
+			} else {
+				layout.layout[i].sizey = parseInt(layout.layout[i].sizey);
 			}
 		}
 		return layout;
@@ -975,9 +1008,6 @@ $(document).ready(function(){
 
   function loadLayout(layout){
   	fadeOutMask();
-  	$('.tile').each(function(){
-  		$(this).remove();
-  	})
     if(layout.mode == 'day'){
       setDay();
     }
@@ -988,20 +1018,12 @@ $(document).ready(function(){
     for(var i = 0; i < layout.layout.length; i++){
     	var name = layout.layout[i].tileName;
     	var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + contents + header3 +'</li>';
-      	var t = add_tile(new_tile, name+'_window', function(){
-      		$(t).attr({
-      		'row': layout.layout[i].y,
-      		'col': layout.layout[i].x,
-      		'sizex':layout.layout[i].sizex,
-      		'sizey':layout.layout[i].sizey
-	      	});
-	      	$(t).css({
-	      		'top':layout.layout[i].y*tileHeight,
-	      		'left':layout.layout[i].x*tileWidth,
-	      		'width':layout.layout[i].sizex*tileWidth,
-	      		'height':layout.layout[i].sizey*tileHeight
-	      	});
-      	})[0];
+      	add_tile(new_tile, name+'_window', {
+      		x: layout.layout[i].x,
+      		y: layout.layout[i].y,
+      		sizex: layout.layout[i].sizex,
+      		sizey: layout.layout[i].sizey
+      	});
       	
 
     }
