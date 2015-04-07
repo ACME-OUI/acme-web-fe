@@ -247,7 +247,7 @@ $(document).ready(function(){
 		$(w).fadeIn()
 		if(callback != null)
 			callback();
-		return w;
+		return $(w);
 	};
 
 
@@ -817,5 +817,275 @@ $(document).ready(function(){
 			return Math.floor((y+sizey)/tileHeight)+1;
 		}
 	}
+
+
+	/***********************************
+        Left slide menu
+***********************************/
+  var body = document.body;
+
+  function leftMenuToggle(){
+    $('#slide-menu-left').toggle('slide',{
+      direction: 'left',
+      easing: 'easeOutCubic'}, 500);
+    if( $('#toggle-left-a').text() == 'Open Menu') {
+      $('#toggle-left-a').text('Close Menu');
+    } else {
+      $('#toggle-left-a').text('Open Menu');
+    }
+  }
+
+  $('#toggle-slide-left').click(function(e){
+    leftMenuToggle();
+  });
+
+  $('#save-layout').click(function(){
+    leftMenuToggle();
+    var mask = document.createElement('div');
+    $(mask).addClass('mask');
+    $(mask).attr({'id':'mask'});
+    $(mask).click(function(){
+      $(this).fadeOut().queue(function(){
+        $(this).remove();
+        $('.save-layout').remove();
+      });
+      
+    });
+    $('body').append(mask);
+    
+    var saveMenu = document.createElement('div');
+    $(saveMenu).addClass('bvc');
+    $(saveMenu).addClass('save-layout');
+    var saveMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
+    saveMenuHtml += '<form name="save-layout-form" id="save-form">'; 
+    saveMenuHtml += 'Layout Name:<br><input type="text" name="layout-name">';
+    saveMenuHtml += '<input type="submit" value="Save">';
+    saveMenuHtml += '</form></div><div class="bevel bl br"></div>';
+    $(saveMenu).html(saveMenuHtml);
+    $('body').append(saveMenu);
+    $(mask).fadeIn();
+  });
+
+
+  $('#load-layout').click(function(){
+    /*
+
+      Get drop down menu contents from the django backend
+
+
+    */
+    var options = [{ //placeholder
+      name : 'science',
+      mode: 'day',
+      style: 'balanced',
+      layout: 
+        [{ 
+          tileName:'science',
+          x:'1',
+          y:'1',
+          sizex:'max',
+          sizey:'max'
+        }]
+      },{
+      name:'run',
+      mode: 'night',
+      style: 'balanced',
+      layout:
+        [{
+          tileName:'status',
+          x:'1',
+          y:'1',
+          sizex:'3',
+          sizey:'max'
+        },{
+          tileName:'modelRun',
+          x:'4',
+          y:'1',
+          sizex:'max-3',
+          sizey:'max'
+        }] 
+      }
+    ]; 
+    leftMenuToggle();
+    var mask = document.createElement('div');
+    $(mask).addClass('mask');
+    $(mask).attr({'id':'mask'});
+    $(mask).click(function(){
+      fadeOutMask();
+    });
+    $('body').append(mask);
+    var loadMenu = document.createElement('div');
+    $(loadMenu).addClass('bvc');
+    $(loadMenu).addClass('save-layout');
+    var loadMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
+    loadMenuHtml += '<form name="load-layout-form" id="save-form">'; 
+    loadMenuHtml += 'Select Layout:<br><select id="select-layout">';
+    for (var i = options.length - 1; i >= 0; i--) {
+      loadMenuHtml += '<option value="' + options[i].name + '">' + options[i].name + '</option>';
+    }
+    loadMenuHtml += '</select><input type="submit" value="Load" id="load-button">';
+    loadMenuHtml += '</form></div><div class="bevel bl br"></div>';
+    $(loadMenu).html(loadMenuHtml);
+    $('body').append(loadMenu);
+    $(mask).fadeIn();
+    $('#load-button').click(function(){
+      var name = document.forms['load-layout-form'].elements[0].options[document.forms['load-layout-form'].elements[0].selectedIndex].text;
+      for(var i = 0; i < options.length; i++){
+        if(name == options[i].name){
+        	var fixedLayout = layoutFix(options[i]);
+          	loadLayout(fixedLayout);
+        }
+      }
+    });
+  });
+
+	function layoutFix(layout){
+		for (var i = layout.layout.length - 1; i >= 0; i--) {
+			if(layout.layout[i].x.indexOf('max') != -1){
+				if(layout.layout[i].x.indexOf('max') != 1){
+					layout.layout[i].x = parseInt(layout.layout[i].x.substr(0, layout.layout[i].x.indexOf('max')-1))-maxCols;
+				} else {
+					layout.layout[i].x = maxCols;
+				}
+			}
+			else if(layout.layout[i].y.indexOf('max') != -1){
+				if(layout.layout[i].y.indexOf('max') != 1){
+					layout.layout[i].y = parseInt(layout.layout[i].y.substr(0, layout.layout[i].y.indexOf('max')-1))-maxHeight;
+				} else {
+					layout.layout[i].y = maxHeight;
+				}
+			}
+			else if(layout.layout[i].sizex.indexOf('max') != -1){
+				if(layout.layout[i].sizex.indexOf('max') != 1){
+					layout.layout[i].sizex = parseInt(layout.layout[i].sizex.substr(0, layout.layout[i].sizex.indexOf('max')-1))-maxCols;
+				} else {
+					layout.layout[i].sizex = maxCols;
+				}
+			}
+			else if(layout.layout[i].sizey.indexOf('max') != -1){
+				if(layout.layout[i].sizey.indexOf('max') != 1){
+					layout.layout[i].sizey = parseInt(layout.layout[i].sizey.substr(0, layout.layout[i].sizey.indexOf('max')-1))-maxHeight;
+				} else {
+					layout.layout[i].sizey = maxHeight;
+				}
+			}
+		}
+		return layout;
+	}
+
+  function loadLayout(layout){
+  	fadeOutMask();
+  	$('.tile').each(function(){
+  		$(this).remove();
+  	})
+    if(layout.mode == 'day'){
+      setDay();
+    }
+    else if(layout.mode == 'night'){
+      setNight();
+    }
+
+    for(var i = 0; i < layout.layout.length; i++){
+    	var name = layout.layout[i].tileName;
+    	var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + contents + header3 +'</li>';
+      	var t = add_tile(new_tile, name+'_window', function(){
+      		$(t).attr({
+      		'row': layout.layout[i].y,
+      		'col': layout.layout[i].x,
+      		'sizex':layout.layout[i].sizex,
+      		'sizey':layout.layout[i].sizey
+	      	});
+	      	$(t).css({
+	      		'top':layout.layout[i].y*tileHeight,
+	      		'left':layout.layout[i].x*tileWidth,
+	      		'width':layout.layout[i].sizex*tileWidth,
+	      		'height':layout.layout[i].sizey*tileHeight
+	      	});
+      	})[0];
+      	
+
+    }
+  }
+
+  function fadeOutMask(){
+  	$('#mask').fadeOut().queue(function(){
+        $('#mask').remove();
+        $('.save-layout').remove();
+      });
+  }
+
+  function setNight(){
+    $('body').attr({
+        'class':'night'
+      });
+      $('.tile-panel-body').each(function(){
+        $(this).css({
+          'background-color': '#0C1021;',
+          'border-color': '#00f;',
+          'color': '#fff'
+        });
+      });
+      $(body).attr({
+        'background-color':'#051451!important',
+        'color':'#aaa!important'
+      });
+      $('#dark-mode-toggle').text('Dark mode is on');
+  }
+
+  function setDay(){
+    $('body').attr({
+        'class':'day'
+      });
+      $('.tile-panel-body').each(function(){
+        $(this).css({
+          'background-color': '#fff;',
+          'color': '#111;',
+          'border-color': '#000;'
+        });
+      });
+      $(body).attr({
+        'background-color':'#fff',
+        'color':'#000'
+      });
+      $('#dark-mode-toggle').text('Dark mode is off');
+  }
+
+
+  $('#dark-mode-toggle').click(function(e){
+    if($('body').attr('class') == 'day'){
+      //turn dark
+      setNight();
+    } else {
+      //turn light
+      setDay();
+    }
+  });
+
+	/**********************************
+	       Top slide down menu
+	**********************************/
+
+	$('#drop-down-tab').click(function(e){
+		var menuHeight = parseInt($('#drop-down-menu').css('height'));
+		if($('#drop-down-menu').css('display') == 'none'){
+		  $('.tile').each(function(){
+		    $(this).css({
+		      'top':parseInt($(this).css('top'))+menuHeight
+		    });
+		  });
+		} else {
+		  $('.tile').each(function(){
+		    $(this).css({
+		      'top':parseInt($(this).css('top'))-menuHeight
+		    });
+		  });
+		}
+		$('#drop-down-menu').slideToggle('normal');
+	});
+
+
+
+
+
 });
 

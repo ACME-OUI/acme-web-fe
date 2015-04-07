@@ -4,8 +4,7 @@ $('body').ready(function(){
 ***********************************/
   var body = document.body;
 
-
-  $('#toggle-slide-left').click(function(e){
+  function leftMenuToggle(){
     $('#slide-menu-left').toggle('slide',{
       direction: 'left',
       easing: 'easeOutCubic'}, 500);
@@ -14,10 +13,14 @@ $('body').ready(function(){
     } else {
       $('#toggle-left-a').text('Open Menu');
     }
+  }
+
+  $('#toggle-slide-left').click(function(e){
+    leftMenuToggle();
   });
 
   $('#save-layout').click(function(){
-    $(this).prop('disabled', true);
+    leftMenuToggle();
     var mask = document.createElement('div');
     $(mask).addClass('mask');
     $(mask).attr({'id':'mask'});
@@ -25,7 +28,6 @@ $('body').ready(function(){
       $(this).fadeOut().queue(function(){
         $(this).remove();
         $('.save-layout').remove();
-        $('#save-layout').prop('disabled', false);
       });
       
     });
@@ -46,31 +48,96 @@ $('body').ready(function(){
 
 
   $('#load-layout').click(function(){
-    $(this).prop('disabled', true);
+    /*
+
+      Get drop down menu contents from the django backend
+
+
+    */
+    var options = [{ //placeholder
+      name : 'science',
+      mode: 'day',
+      style: 'balanced',
+      layout: 
+        [{ 
+          tileName:'scince_window',
+          x:'1',
+          y:'1',
+          sizex:'max',
+          sizey:'max'
+        }]
+      },{
+      name:'run',
+      mode: 'night',
+      style: 'balanced',
+      layout:
+        [{
+          tileName:'status_window',
+          x:'1',
+          y:'1',
+          sizex:'3',
+          sizey:'max'
+        },{
+          tileName:'modelRun_window',
+          x:'4',
+          y:'1',
+          sizex:'max-3',
+          sizey:'max'
+        }] 
+      }
+    ]; 
+    leftMenuToggle();
     var mask = document.createElement('div');
     $(mask).addClass('mask');
     $(mask).attr({'id':'mask'});
     $(mask).click(function(){
       $(this).fadeOut().queue(function(){
         $(this).remove();
-        $('.load-layout').remove();
-        $('#load-layout').prop('disabled', false);
+        $('.save-layout').remove();
       });
     });
     $('body').append(mask);
-    /*
-
-    Do some stuff
-
-    */
+    var loadMenu = document.createElement('div');
+    $(loadMenu).addClass('bvc');
+    $(loadMenu).addClass('save-layout');
+    var loadMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
+    loadMenuHtml += '<form name="load-layout-form" id="save-form">'; 
+    loadMenuHtml += 'Select Layout:<br><select id="select-layout">';
+    for (var i = options.length - 1; i >= 0; i--) {
+      loadMenuHtml += '<option value="' + options[i].name + '">' + options[i].name + '</option>';
+    }
+    loadMenuHtml += '</select><input type="submit" value="Load" id="load-button">';
+    loadMenuHtml += '</form></div><div class="bevel bl br"></div>';
+    $(loadMenu).html(loadMenuHtml);
+    $('body').append(loadMenu);
+    $(mask).fadeIn();
+    $('#load-button').click(function(){
+      var name = document.forms['load-layout-form'].elements[0].options[document.forms['load-layout-form'].elements[0].selectedIndex].text;
+      for(var i = 0; i < options.length; i++){
+        if(name == options[i].name){
+          loadLayout(options[i]);
+        }
+      }
+    });
   });
 
+  function loadLayout(layout){
+    if(layout.mode == 'day'){
+      setDay();
+    }
+    else if(layout.mode == 'night'){
+      setNight();
+    }
+
+    for(var i = 0; i < layout.layout.length; i++){
+      var t = add_tile(layout.layout[i].tileName);
+    }
 
 
-  $('#dark-mode-toggle').click(function(e){
-    if($('body').attr('class') == 'day'){
-      //turn dark
-      $('body').attr({
+  }
+
+  function setNight(){
+    $('body').attr({
         'class':'night'
       });
       $('.tile-panel-body').each(function(){
@@ -85,9 +152,10 @@ $('body').ready(function(){
         'color':'#aaa!important'
       });
       $('#dark-mode-toggle').text('Dark mode is on');
-    } else {
-      //turn light
-      $('body').attr({
+  }
+
+  function setDay(){
+    $('body').attr({
         'class':'day'
       });
       $('.tile-panel-body').each(function(){
@@ -102,6 +170,16 @@ $('body').ready(function(){
         'color':'#000'
       });
       $('#dark-mode-toggle').text('Dark mode is off');
+  }
+
+
+  $('#dark-mode-toggle').click(function(e){
+    if($('body').attr('class') == 'day'){
+      //turn dark
+      setNight();
+    } else {
+      //turn light
+      setDay();
     }
   });
 
