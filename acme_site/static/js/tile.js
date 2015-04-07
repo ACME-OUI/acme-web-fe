@@ -252,7 +252,7 @@ $(document).ready(function(){
 		} else {
 			positionFixup();
 		}
-
+		update_board(id);
 		if($('body').attr('class') == 'night'){
 			$(w).find('.tile-panel-body').css({
 	          'background-color': '#0C1021;',
