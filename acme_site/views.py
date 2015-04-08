@@ -128,10 +128,12 @@ def save_layout(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            print request.user
-            layout = TileLayout(user_name=request.user, layout_name=data['name'], board_layout=data['layout'])
-            layout.save()
-            return HttpResponse(status=200)
+            if( len(TileLayout.objects.filter(layout_name=data['name'])) == 0):
+                layout = TileLayout(user_name=request.user, layout_name=data['name'], board_layout=data['layout'])
+                layout.save()
+                return HttpResponse(status=200)
+            else:
+                return HttpResponse(status=422)
         except Exception as e:
             print "Unexpected error:", repr(e)
             return HttpResponse(status=500)
@@ -139,19 +141,22 @@ def save_layout(request):
 def load_layout(request):
     if request.method == 'POST':
         try:
-            with json.loads(request.body) as data:
-                response_data = {}
-                layout['user_name'] = TileLayout.objects.filter(user_name=data['user_name'])
-                response_data['user_name'] = layout['user_name']
-                response_data['board_layout'] = layout['board_layout']
-                return HttpResponse(json.dumps(response_data))
+            data = json.loads(request.body)
+        
+            response_data = {}
+            layout['user_name'] = TileLayout.objects.filter(user_name=data['user_name'])
+            response_data['user_name'] = layout['user_name']
+            response_data['board_layout'] = layout['board_layout']
+            return HttpResponse(json.dumps(response_data))
         except:
             print 'Loading error'
     elif request.method == 'GET':
-        all_layouts = TileLayout.objects.all()
-        names = ''
+        all_layouts = TileLayout.objects.filter(user_name=request.user)
+        layouts = {}
         for layout in all_layouts:
-            names += layout.name
+            layouts[layout.id] = layout.layout_name
+        print layouts
+        return HttpResponse(json.dumps(layouts))
 
 
 @login_required(login_url='login')

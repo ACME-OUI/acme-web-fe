@@ -838,92 +838,143 @@ $(document).ready(function(){
 /***********************************
         Left slide menu
 ***********************************/
-  var body = document.body;
+	var body = document.body;
 
-  function leftMenuToggle(){
-    $('#slide-menu-left').toggle('slide',{
-      direction: 'left',
-      easing: 'easeOutCubic'}, 500);
-    if( $('#toggle-left-a').text() == 'Open Menu') {
-      $('#toggle-left-a').text('Close Menu');
-    } else {
-      $('#toggle-left-a').text('Open Menu');
-    }
-  }
+	function leftMenuToggle(){
+		$('#slide-menu-left').toggle('slide',{
+			direction: 'left',
+			easing: 'easeOutCubic'}, 500);
+		if( $('#toggle-left-a').text() == 'Open Menu') {
+			$('#toggle-left-a').text('Close Menu');
+		} else {
+			$('#toggle-left-a').text('Open Menu');
+		}
+	}
 
-  $('#toggle-slide-left').click(function(e){
-    leftMenuToggle();
-  });
+	$('#toggle-slide-left').click(function(e){
+		leftMenuToggle();
+	});
 
-  $('#save-layout').click(function(){
-    leftMenuToggle();
-    var mask = document.createElement('div');
-    $(mask).addClass('mask');
-    $(mask).attr({'id':'mask'});
-    $(mask).click(function(){
-      $(this).fadeOut().queue(function(){
-        $(this).remove();
-        $('.save-layout').remove();
-      });
-      
-    });
-    $('body').append(mask);
-    
-    var saveMenu = document.createElement('div');
-    $(saveMenu).addClass('bvc');
-    $(saveMenu).addClass('save-layout');
-    var saveMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
-    saveMenuHtml += '<form name="save-layout-form" id="save-form">'; 
-    saveMenuHtml += 'Layout Name:<br><input type="text" id="layout-name">';
-    saveMenuHtml += '<input type="submit" value="Save" id="save-btn">';
-    saveMenuHtml += '</form></div><div class="bevel bl br"></div>';
-    $(saveMenu).html(saveMenuHtml);
-    $('body').append(saveMenu);
-    $(mask).fadeIn();
-    $('#save-btn').click(function(){
-    	var layout_name = document.getElementById('layout-name').value;
-    	var layout = [];
-    	$('.tile').each(function(){
-    		layout.push({
-    			tileName: $(this).attr('id').substr(0, $(this).attr('id').indexOf('_')),
-    			x: $(this).attr('col'),
-    			y: $(this).attr('row'),
-    			sizex:'max-'+(maxCols-parseInt($(this).attr('sizex'))),
-    			sizey:'max-'+(maxHeight-parseInt($(this).attr('sizey')))
-    		});
-    	});
-    	if($('body').hasClass('night')){
-    		var mode = 'night';
-    	} else {
-    		mode = 'day'
-    	}
-    	var data = {
-    			name: layout_name,
-    			mode: mode,
-    			style: 'balanced',
-    			layout: layout,
-    		};
+	$('#save-layout').click(function(){
+		leftMenuToggle();
+		var mask = document.createElement('div');
+		$(mask).addClass('mask');
+		$(mask).attr({'id':'mask'});
+		$(mask).click(function(){
+			$(this).fadeOut().queue(function(){
+				$(this).remove();
+				$('.save-layout').remove();
+			});
+		  
+		});
+		$('body').append(mask);
 
-    	data = JSON.stringify(data);
-    	var csrfToken = getCookie('csrftoken');
-    	$.ajaxSetup({
-    		beforeSend: function(xhr){
-    			xhr.setRequestHeader('X-CSRFToken', csrfToken);
-    		}
-    	});
-    	$.ajax({
-    		url:'save_layout/',
-    		type: 'POST',
-    		data: data,
-    		dataType: 'json',
-    		async: true,
-    		cache: false
-    	});
-    });
-  });
+		var saveMenu = document.createElement('div');
+		$(saveMenu).addClass('bvc');
+		$(saveMenu).addClass('save-layout');
+		$(saveMenu).attr({'id':'save-menu'});
+		var saveMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
+		saveMenuHtml += '<form name="save-layout-form" id="save-form">'; 
+		saveMenuHtml += 'Layout Name:<br><input type="text" id="layout-name">';
+		saveMenuHtml += '<input type="submit" value="Save" id="save-btn">';
+		saveMenuHtml += '</form></div><div class="bevel bl br"></div>';
+		$(saveMenu).html(saveMenuHtml);
+		$('body').append(saveMenu);
+		$(mask).fadeIn();
+		$('#save-btn').click(function(){
+			var layout_name = document.getElementById('layout-name').value;
+			var layout = [];
+			$('.tile').each(function(){
+				layout.push({
+					tileName: $(this).attr('id').substr(0, $(this).attr('id').indexOf('_')),
+					x: $(this).attr('col'),
+					y: $(this).attr('row'),
+					sizex:'max-'+(maxCols-parseInt($(this).attr('sizex'))),
+					sizey:'max-'+(maxHeight-parseInt($(this).attr('sizey')))
+				});
+			});
+			if($('body').hasClass('night')){
+				var mode = 'night';
+			} else {
+				mode = 'day'
+			}
+			var data = {
+					name: layout_name,
+					mode: mode,
+					style: 'balanced',
+					layout: layout,
+				};
+
+			data = JSON.stringify(data);
+			var csrfToken = getCookie('csrftoken');
+			$.ajaxSetup({
+				beforeSend: function(xhr){
+					xhr.setRequestHeader('X-CSRFToken', csrfToken);
+				}
+			});
+			$.ajax({
+				url:'save_layout/',
+				type: 'POST',
+				data: data,
+				dataType: 'json',
+				async: true,
+				cache: false,
+				statusCode: {
+					422: function(){
+						alert('Invalid Layout Name');
+					},
+					500: function(){
+						alert('Server Error')
+					}
+
+				}
+			});
+			$('.mask').remove();
+			$('.save-layout').remove();
+		});
+	});
 
 
   $('#load-layout').click(function(){
+
+  	var options = {};
+  	$.ajax({
+  		url: 'load_layout/',
+  		type: 'GET',
+  		success: function(request){
+  			options = jQuery.parseJSON(request);
+  			var mask = document.createElement('div');
+		    $(mask).addClass('mask');
+		    $(mask).attr({'id':'mask'});
+		    $(mask).click(function(){
+		      fadeOutMask();
+		    });
+		    $('body').append(mask);
+		    var loadMenu = document.createElement('div');
+		    $(loadMenu).addClass('bvc');
+		    $(loadMenu).addClass('save-layout');
+		    var loadMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
+		    loadMenuHtml += '<form name="load-layout-form" id="save-form">'; 
+		    loadMenuHtml += 'Select Layout:<br><select id="select-layout">';
+		    $.each(options, function(k, v){
+		    	loadMenuHtml += '<option value="' + v + '">' + v + '</option>';
+		    });
+		    loadMenuHtml += '</select><input type="submit" value="Load" id="load-button">';
+		    loadMenuHtml += '</form></div><div class="bevel bl br"></div>';
+		    $(loadMenu).html(loadMenuHtml);
+		    $('body').append(loadMenu);
+		    $(mask).fadeIn();
+		    $('#load-button').click(function(){
+		      var name = document.forms['load-layout-form'].elements[0].options[document.forms['load-layout-form'].elements[0].selectedIndex].text;
+		      for(var i = 0; i < options.length; i++){
+		        if(name == options[i].name){
+		        	var fixedLayout = layoutFix(options[i]);
+		          	loadLayout(fixedLayout);
+		        }
+		      }
+		    });
+  		}
+  	});
     /*
 
       Get drop down menu contents from the django backend
@@ -934,69 +985,7 @@ $(document).ready(function(){
   		$(this).remove();
   	});
   	tiles = [];
-    var options = [{ //placeholder
-      name : 'science',
-      mode: 'day',
-      style: 'balanced',
-      layout: 
-        [{ 
-          tileName:'science',
-          x:'1',
-          y:'1',
-          sizex:'max',
-          sizey:'max'
-        }]
-      },{
-      name:'run',
-      mode: 'night',
-      style: 'balanced',
-      layout:
-        [{
-          tileName:'status',
-          x:'1',
-          y:'1',
-          sizex:'3',
-          sizey:'max'
-        },{
-          tileName:'modelRun',
-          x:'4',
-          y:'1',
-          sizex:'max-3',
-          sizey:'max'
-        }] 
-      }
-    ]; 
     leftMenuToggle();
-    var mask = document.createElement('div');
-    $(mask).addClass('mask');
-    $(mask).attr({'id':'mask'});
-    $(mask).click(function(){
-      fadeOutMask();
-    });
-    $('body').append(mask);
-    var loadMenu = document.createElement('div');
-    $(loadMenu).addClass('bvc');
-    $(loadMenu).addClass('save-layout');
-    var loadMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
-    loadMenuHtml += '<form name="load-layout-form" id="save-form">'; 
-    loadMenuHtml += 'Select Layout:<br><select id="select-layout">';
-    for (var i = options.length - 1; i >= 0; i--) {
-      loadMenuHtml += '<option value="' + options[i].name + '">' + options[i].name + '</option>';
-    }
-    loadMenuHtml += '</select><input type="submit" value="Load" id="load-button">';
-    loadMenuHtml += '</form></div><div class="bevel bl br"></div>';
-    $(loadMenu).html(loadMenuHtml);
-    $('body').append(loadMenu);
-    $(mask).fadeIn();
-    $('#load-button').click(function(){
-      var name = document.forms['load-layout-form'].elements[0].options[document.forms['load-layout-form'].elements[0].selectedIndex].text;
-      for(var i = 0; i < options.length; i++){
-        if(name == options[i].name){
-        	var fixedLayout = layoutFix(options[i]);
-          	loadLayout(fixedLayout);
-        }
-      }
-    });
   });
 
 	function layoutFix(layout){
