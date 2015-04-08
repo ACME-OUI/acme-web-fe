@@ -983,7 +983,7 @@ $(document).ready(function(){
 			      		$.each(request.board_layout, function(k, v){
 			      			layout.push(layoutFix(v));
 			      		});
-			      		loadLayout(layout);
+			      		loadLayout(layout, request.mode);
 			      	}
 		      });
 		    });
@@ -1044,12 +1044,12 @@ $(document).ready(function(){
 		return layout;
 	}
 
-  function loadLayout(layout){
+  function loadLayout(layout, mode){
   	fadeOutMask();
-    if(layout.mode == 'day'){
+    if(mode == 'day'){
       setDay();
     }
-    else if(layout.mode == 'night'){
+    else if(mode == 'night'){
       setNight();
     }
 

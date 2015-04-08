@@ -131,7 +131,7 @@ def save_layout(request):
         try:
             data = json.loads(request.body)
             if( len(TileLayout.objects.filter(layout_name=data['name'])) == 0):
-                layout = TileLayout(user_name=request.user, layout_name=data['name'], board_layout=json.dumps(data['layout']))
+                layout = TileLayout(user_name=request.user, layout_name=data['name'], board_layout=json.dumps(data['layout']), mode=data['mode'])
                 layout.save()
                 return HttpResponse(status=200)
             else:
@@ -150,6 +150,7 @@ def load_layout(request):
             j = {}
             for i in layout:
                 j['board_layout'] = json.loads(i.board_layout)
+                j['mode'] = i.mode
                 print json.dumps(j)
                 return HttpResponse(json.dumps(j), status=200, content_type="application/json")
         except Exception as e:
