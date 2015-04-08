@@ -2,8 +2,9 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django import forms
 from captcha.fields import ReCaptchaField
-
-
+from django.forms.models import modelform_factory 
+from acme_site.models import Issues
+IssuesForm = modelform_factory(Issues)
 
 class UserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput())
@@ -22,3 +23,4 @@ class UserCreationForm(UserCreationForm):
 	class Meta:
 		model = User
 		fields = ("username", "email", "first_name", "last_name")
+

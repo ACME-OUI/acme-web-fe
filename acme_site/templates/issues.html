@@ -2,6 +2,19 @@
 {% block title %} Issues{% endblock %}
 
 {% block content %}
+
+<br/>
+
+{% for field in form %}
+  <div class="form-group">
+    <label>{{ field.label_tag }}</label> {{ field }}
+  </div>
+  <br/>
+{% endfor %}
+
+<!--
+<hr>
+
 <br/>
 <form>
 <select id="mySelect" class="form-control" onchange="issues()">
@@ -32,7 +45,7 @@
 <button type="submit" class="btn btn-default">Submit</button>
 </div>
 </form>
-
+-->
 <script>
 function issues(){
   var org = document.getElementById("mySelect").value;

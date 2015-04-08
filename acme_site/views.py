@@ -10,6 +10,7 @@ from django.core.files import File
 
 ##### For user registration
 from forms import UserCreationForm
+from forms import IssuesForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -44,7 +45,9 @@ def index(request):
 ##### Issues
 #@login_required(login_url='login')
 def issues(request):
-    return HttpResponse(render_template(request, "issues.html", {}))
+    form = IssuesForm()
+
+    return HttpResponse(render_template(request, "issues.html", {"form":form}))
 
 ##### Login
 def user_login(request):
