@@ -90,9 +90,10 @@ $(document).ready(function(){
 	 * Creates a new tile window and rearranges all the other tiles to make room 
 	 * html-> the content of the tile
 	 * id-> the name for the new tile to take
+	 * options-> whatever new options i decided to add, right now a x,y,sizex,sizey to handle window sizes
 	 * callback-> an optional function to pass that will be called with add_tile is done
 	 */
-	function add_tile(html, id, callback){
+	function add_tile(html, id, options, callback){
 		$('.tile-holder').append(html);
 		var w = $('#'+id);
 		$(w).css({
@@ -235,8 +236,23 @@ $(document).ready(function(){
 		$(w).find('.options').click(function(e) {
 
 		});
-		
-		positionFixup();
+		if(options != null){
+			$(w).attr({
+      		'row': options.y,
+      		'col': options.x,
+      		'sizex': options.sizex,
+      		'sizey': options.sizey
+	      	});
+	      	$(w).css({
+	      		'top': options.y*tileHeight,
+	      		'left': (options.x -1)*tileWidth + $('.tile-holder').offset().left,
+	      		'width': options.sizex*tileWidth,
+	      		'height': options.sizey*tileHeight
+	      	});
+		} else {
+			positionFixup();
+		}
+		update_board(id);
 		if($('body').attr('class') == 'night'){
 			$(w).find('.tile-panel-body').css({
 	          'background-color': '#0C1021;',
@@ -244,10 +260,10 @@ $(document).ready(function(){
 	          'color': '#fff'
 	        });
 		}
-		$(w).fadeIn()
+		$(w).fadeIn();
 		if(callback != null)
 			callback();
-		return w;
+		return $(w);
 	};
 
 
@@ -512,12 +528,12 @@ $(document).ready(function(){
 	   * tile -> the tile to check if it should be removed
 	   */
 	   function removeHelper(tile){
-	   		if(parseInt(tile.attr('sizex')) <= 0){
+	   		if(parseInt(tile.attr('sizex')) <= 0 || parseInt(tile.attr('sizey')) <= 0){
 				$.when(tile.fadeOut()).then(function(){
 						tile.remove();
  				});
  				for (var i = tiles.length - 1; i >= 0; i--) {
-					if(tiles[i] == id){
+					if(tiles[i] == tile.attr('id')){
 						tiles.splice(i, 1);
 						break;
 					}
@@ -579,7 +595,7 @@ $(document).ready(function(){
 	 		var virt_adj = new Set();
 	 		for (var i = resizeStartX; i < resizeStartX + resizeStartSizeX; i++) {
 				if(board[i-1][resizeStartY + resizeStartSizeY - 1].tile != resizeId){
-					virt_adj.add(board[i-1][resizeStartY + resizeStartSizeY].tile);
+					virt_adj.add(board[i-1][resizeStartY + resizeStartSizeY - 1].tile);
 				}
 			};
 	 		//did it go up or down?
@@ -817,5 +833,334 @@ $(document).ready(function(){
 			return Math.floor((y+sizey)/tileHeight)+1;
 		}
 	}
+
+
+/***********************************
+        Left slide menu
+***********************************/
+	var body = document.body;
+
+	function leftMenuToggle(){
+		$('#slide-menu-left').toggle('slide',{
+			direction: 'left',
+			easing: 'easeOutCubic'}, 500);
+		if( $('#toggle-left-a').text() == 'Open Menu') {
+			$('#toggle-left-a').text('Close Menu');
+		} else {
+			$('#toggle-left-a').text('Open Menu');
+		}
+	}
+
+	$('#toggle-slide-left').click(function(e){
+		leftMenuToggle();
+	});
+
+	$('#save-layout').click(function(){
+		leftMenuToggle();
+		var mask = document.createElement('div');
+		$(mask).addClass('mask');
+		$(mask).attr({'id':'mask'});
+		$(mask).click(function(){
+			$(this).fadeOut().queue(function(){
+				$(this).remove();
+				$('.save-layout').remove();
+			});
+		  
+		});
+		$('body').append(mask);
+
+		var saveMenu = document.createElement('div');
+		$(saveMenu).addClass('bvc');
+		$(saveMenu).addClass('save-layout');
+		$(saveMenu).attr({'id':'save-menu'});
+		var saveMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
+		saveMenuHtml += '<form name="save-layout-form" id="save-form">'; 
+		saveMenuHtml += 'Layout Name:<br><input type="text" id="layout-name">';
+		saveMenuHtml += '<input type="submit" value="Save" id="save-btn">';
+		saveMenuHtml += '</form></div><div class="bevel bl br"></div>';
+		$(saveMenu).html(saveMenuHtml);
+		$('body').append(saveMenu);
+		$(mask).fadeIn();
+		$('#save-btn').click(function(){
+			var layout_name = document.getElementById('layout-name').value;
+			var layout = [];
+			$('.tile').each(function(){
+				layout.push({
+					tileName: $(this).attr('id').substr(0, $(this).attr('id').indexOf('_')),
+					x: $(this).attr('col'),
+					y: $(this).attr('row'),
+					sizex:'max-'+(maxCols-parseInt($(this).attr('sizex'))),
+					sizey:'max-'+(maxHeight-parseInt($(this).attr('sizey')))
+				});
+			});
+			if($('body').hasClass('night')){
+				var mode = 'night';
+			} else {
+				mode = 'day'
+			}
+			var data = {
+					name: layout_name,
+					mode: mode,
+					style: 'balanced',
+					layout: layout,
+				};
+
+			data = JSON.stringify(data);
+			var csrfToken = getCookie('csrftoken');
+			$.ajaxSetup({
+				beforeSend: function(xhr){
+					xhr.setRequestHeader('X-CSRFToken', csrfToken);
+				}
+			});
+			$.ajax({
+				url:'save_layout/',
+				type: 'POST',
+				data: data,
+				dataType: 'json',
+				async: true,
+				cache: false,
+				statusCode: {
+					422: function(){
+						alert('Invalid Layout Name');
+					},
+					500: function(){
+						alert('Server Error')
+					}
+
+				}
+			});
+			$('.mask').remove();
+			$('.save-layout').remove();
+		});
+	});
+
+
+  $('#load-layout').click(function(){
+  	var options = {};
+  	$.ajax({
+  		url: 'load_layout/',
+  		type: 'GET',
+  		success: function(request){
+  			options = jQuery.parseJSON(request);
+  			var mask = document.createElement('div');
+		    $(mask).addClass('mask');
+		    $(mask).attr({'id':'mask'});
+		    $(mask).click(function(){
+		      fadeOutMask();
+		    });
+		    $('body').append(mask);
+		    var loadMenu = document.createElement('div');
+		    $(loadMenu).addClass('bvc');
+		    $(loadMenu).addClass('save-layout');
+		    var loadMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
+		    loadMenuHtml += '<form name="load-layout-form" id="save-form">'; 
+		    loadMenuHtml += 'Select Layout:<br><select id="select-layout">';
+		    $.each(options, function(k, v){
+		    	loadMenuHtml += '<option value="' + v + '">' + v + '</option>';
+		    });
+		    loadMenuHtml += '</select><input type="submit" value="Load" id="load-button">';
+		    loadMenuHtml += '</form></div><div class="bevel bl br"></div>';
+		    $(loadMenu).html(loadMenuHtml);
+		    $('body').append(loadMenu);
+		    $(mask).fadeIn();
+		    $('#load-button').click(function(){
+				var name = document.forms['load-layout-form'].elements[0].options[document.forms['load-layout-form'].elements[0].selectedIndex].text;
+				var csrfToken = getCookie('csrftoken');
+				$.ajaxSetup({
+					beforeSend: function(xhr){
+						xhr.setRequestHeader('X-CSRFToken', csrfToken);
+					}
+				});
+				var data = {'layout_name':name};
+				data = JSON.stringify(data);
+		     	$.ajax({
+			      	url: 'load_layout/',
+			      	type: 'POST',
+			      	data: data,
+			      	dataType: 'json',
+			      	success: function(request){
+						layout = []
+			      		$.each(request.board_layout, function(k, v){
+			      			layout.push(layoutFix(v));
+			      		});
+			      		loadLayout(layout, request.mode);
+			      	}
+		      });
+		    });
+  		}
+  	});
+
+    $('.tile').each(function(){
+  		$(this).remove();
+  	});
+  	tiles = [];
+    leftMenuToggle();
+  });
+
+	function layoutFix(layout){
+
+		var x = layout.x.indexOf('max');
+		var y = layout.y.indexOf('max');
+		var sizex = layout.sizex.indexOf('max');
+		var sizey = layout.sizey.indexOf('max');
+
+		if(x != -1){
+			if(layout.x.length != 3){
+				layout.x = maxCols - parseInt(layout.x.substr(x+4)); 
+			} else {
+				layout.x = maxCols;
+			}
+		} else {
+			layout.x = parseInt(layout.x);
+		}
+		if(y != -1){
+			if(layout.y.length != 3){
+				layout.y = maxHeight - parseInt(layout.y.substr(y+4));
+			} else {
+				layout.y = maxHeight;
+			}
+		} else {
+			layout.y = parseInt(layout.y);
+		}
+		if(sizex != -1){
+			if(layout.sizex.length != 3){
+				layout.sizex = maxCols - parseInt(layout.sizex.substr(sizex+4));
+			} else {
+				layout.sizex = maxCols;
+			}
+		} else {
+			layout.sizex = parseInt(layout.sizex);
+		}
+		if(sizey != -1){
+			if(layout.sizey.length != 3){
+				layout.sizey = parseInt(layout.sizey.substr(sizey+4));
+			} else {
+				layout.sizey = maxHeight;
+			}
+		} else {
+			layout.sizey = parseInt(layout.sizey);
+		}
+		
+		return layout;
+	}
+
+  function loadLayout(layout, mode){
+  	fadeOutMask();
+    if(mode == 'day'){
+      setDay();
+    }
+    else if(mode == 'night'){
+      setNight();
+    }
+
+    for(var i = 0; i < layout.length; i++){
+    	var name = layout[i].tileName;
+    	var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + contents + header3 +'</li>';
+      	add_tile(new_tile, name+'_window', {
+      		x: layout[i].x,
+      		y: layout[i].y,
+      		sizex: layout[i].sizex,
+      		sizey: layout[i].sizey
+      	});
+      	
+
+    }
+  }
+
+  function fadeOutMask(){
+  	$('#mask').fadeOut().queue(function(){
+        $('#mask').remove();
+        $('.save-layout').remove();
+      });
+  }
+
+  function setNight(){
+    $('body').attr({
+        'class':'night'
+      });
+      $('.tile-panel-body').each(function(){
+        $(this).css({
+          'background-color': '#0C1021;',
+          'border-color': '#00f;',
+          'color': '#fff'
+        });
+      });
+      $(body).attr({
+        'background-color':'#051451!important',
+        'color':'#aaa!important'
+      });
+      $('#dark-mode-toggle').text('Dark mode is on');
+  }
+
+  function setDay(){
+    $('body').attr({
+        'class':'day'
+      });
+      $('.tile-panel-body').each(function(){
+        $(this).css({
+          'background-color': '#fff;',
+          'color': '#111;',
+          'border-color': '#000;'
+        });
+      });
+      $(body).attr({
+        'background-color':'#fff',
+        'color':'#000'
+      });
+      $('#dark-mode-toggle').text('Dark mode is off');
+  }
+
+
+  $('#dark-mode-toggle').click(function(e){
+    if($('body').attr('class') == 'day'){
+      //turn dark
+      setNight();
+    } else {
+      //turn light
+      setDay();
+    }
+  });
+
+	/**********************************
+	       Top slide down menu
+	**********************************/
+
+	$('#drop-down-tab').click(function(e){
+		var menuHeight = parseInt($('#drop-down-menu').css('height'));
+		if($('#drop-down-menu').css('display') == 'none'){
+		  $('.tile').each(function(){
+		    $(this).css({
+		      'top':parseInt($(this).css('top'))+menuHeight
+		    });
+		  });
+		} else {
+		  $('.tile').each(function(){
+		    $(this).css({
+		      'top':parseInt($(this).css('top'))-menuHeight
+		    });
+		  });
+		}
+		$('#drop-down-menu').slideToggle('normal');
+	});
+
+	function getCookie(name) {
+	    var cookieValue = null;
+	    if (document.cookie && document.cookie != '') {
+	        var cookies = document.cookie.split(';');
+	        for (var i = 0; i < cookies.length; i++) {
+	            var cookie = jQuery.trim(cookies[i]);
+	            // Does this cookie string begin with the name we want?
+	            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+	                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+	                break;
+	            }
+	        }
+	    }
+	    return cookieValue;
+	}
+
+
+
+
 });
 

@@ -12,14 +12,23 @@
 
   <!-- JS resources for this page -->
   <!--<script type="text/javascript" src="static/js/grid.js"></script>-->
-  <script type="text/javascript" src="static/js/menu.js"></script>
   <script type="text/javascript" src="static/js/MetroJs.js"></script>
   <!-- <script type="text/javascript" src="static/js/jquery.gridster.js"></script> -->
   <script type="text/javascript" src="static/js/grid_layouts.js"></script>
   <script type="text/javascript" src="static/js/tile.js"></script>
+
+  <!--<script type="text/javascript" src="static/js/menu.js"></script>-->
+
+  <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
   <script>
     $(document).ready(function(){
+
       $('.theme-showcase').remove();
+
+      $('#tabs a:first').tab('show');
+      $('#tabs a:last').tab();
+
     });
   </script>
 
@@ -67,15 +76,52 @@
       </select>
     </form>
     <button type="button" class="btn menu-btn" id="dark-mode-toggle">Dark mode is off</button>    
+    <button type="button" class="btn menu-btn" id="save-layout">Store Current Layout</button>   
+    <button type="button" class="btn menu-btn" id="load-layout">Load Previous Layout</button>   
   </nav> <!-- Nav left menu -->
-  
+
+
   <div class="wrapper" id="wrapper">
     <div class="tile-board">
-        <ul class="tile-holder">
-        </ul>
+      <ul class="tile-holder">
+      </ul>
+    </div>
+  </div> 
+  <!-- <div roll="tabbable">
+    <ul class="nav nav-tabs">
+      <li roll="presentation" class="active">
+        <a href="#tab1" roll="tab" data-toggle="tab">Tab 1</a>
+      </li>
+      <li roll="presentation">
+        <a href="#tab2" roll="tab" data-toggle="tab">Tab 2</a>  
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <div role="tabpanel" class="tab-pane fade active" id="tab1">
+        <div class="wrapper" id="wrapper">
+          <div class="tile-board">
+              <ul class="tile-holder">
+              </ul>
+            </div>
+          </div> 
+        </div> 
       </div>
-    </div> <!-- Div demo -->
-  </div> <!-- Wrapper -->
+      <div role="tabpanel" class="tab-pane fade" id="tab2">
+        <div class="wrapper1" id="wrapper1">
+          <div class="tile-board1">
+              <ul class="tile-holder1">
+              </ul>
+            </div>
+          </div> 
+        </div> 
+      </div>
+    </div>
+  </div> -->
+
+  
+  
+  
   
 {% endblock %}
 

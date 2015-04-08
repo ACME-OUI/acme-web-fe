@@ -7,6 +7,7 @@ from django.forms.util import ErrorList
 from django.core.context_processors import csrf
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files import File
+import sys
 
 ##### For user registration
 from forms import UserCreationForm
@@ -16,7 +17,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
 #from acme_site.filters import
-#from acme_site.models import
+from acme_site.models import TileLayout
 #from acme_site.forms import
 
 import json
@@ -118,6 +119,49 @@ def jspanel(request):
 @login_required(login_url='login')
 def grid(request):
     return HttpResponse(render_template(request, "acme_site/grid.html", {}))
+
+
+@login_required(login_url='login')
+def save_layout(request):
+    print 'got a save request'
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            if( len(TileLayout.objects.filter(layout_name=data['name'])) == 0):
+                layout = TileLayout(user_name=request.user, layout_name=data['name'], board_layout=json.dumps(data['layout']), mode=data['mode'])
+                layout.save()
+                return HttpResponse(status=200)
+            else:
+                return HttpResponse(status=422)
+        except Exception as e:
+            print "Unexpected error:", repr(e)
+            return HttpResponse(status=500)
+
+
+@login_required(login_url='login')
+def load_layout(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            layout = TileLayout.objects.filter(layout_name=data['layout_name'])
+            j = {}
+            for i in layout:
+                j['board_layout'] = json.loads(i.board_layout)
+                j['mode'] = i.mode
+                print json.dumps(j)
+                return HttpResponse(json.dumps(j), status=200, content_type="application/json")
+        except Exception as e:
+            print "Unexpected error:", repr(e)
+            return HttpResponse(status=500)
+    elif request.method == 'GET':
+        all_layouts = TileLayout.objects.filter(user_name=request.user)
+        layouts = {}
+        for layout in all_layouts:
+            layouts[layout.id] = layout.layout_name
+        print json.dumps(layouts)
+        return HttpResponse(json.dumps(layouts))
+
+
 
 @login_required(login_url='login')
 def config(request):
