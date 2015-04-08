@@ -835,7 +835,7 @@ $(document).ready(function(){
 	}
 
 
-	/***********************************
+/***********************************
         Left slide menu
 ***********************************/
   var body = document.body;
@@ -874,12 +874,52 @@ $(document).ready(function(){
     $(saveMenu).addClass('save-layout');
     var saveMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
     saveMenuHtml += '<form name="save-layout-form" id="save-form">'; 
-    saveMenuHtml += 'Layout Name:<br><input type="text" name="layout-name">';
-    saveMenuHtml += '<input type="submit" value="Save">';
+    saveMenuHtml += 'Layout Name:<br><input type="text" id="layout-name">';
+    saveMenuHtml += '<input type="submit" value="Save" id="save-btn">';
     saveMenuHtml += '</form></div><div class="bevel bl br"></div>';
     $(saveMenu).html(saveMenuHtml);
     $('body').append(saveMenu);
     $(mask).fadeIn();
+    $('#save-btn').click(function(){
+    	var layout_name = document.getElementById('layout-name').value;
+    	var layout = [];
+    	$('.tile').each(function(){
+    		layout.push({
+    			tileName: $(this).attr('id').substr(0, $(this).attr('id').indexOf('_')),
+    			x: $(this).attr('col'),
+    			y: $(this).attr('row'),
+    			sizex:'max-'+(maxCols-parseInt($(this).attr('sizex'))),
+    			sizey:'max-'+(maxHeight-parseInt($(this).attr('sizey')))
+    		});
+    	});
+    	if($('body').hasClass('night')){
+    		var mode = 'night';
+    	} else {
+    		mode = 'day'
+    	}
+    	var data = {
+    			name: layout_name,
+    			mode: mode,
+    			style: 'balanced',
+    			layout: layout,
+    		};
+
+    	data = JSON.stringify(data);
+    	var csrfToken = getCookie('csrftoken');
+    	$.ajaxSetup({
+    		beforeSend: function(xhr){
+    			xhr.setRequestHeader('X-CSRFToken', csrfToken);
+    		}
+    	});
+    	$.ajax({
+    		url:'save_layout/',
+    		type: 'POST',
+    		data: data,
+    		dataType: 'json',
+    		async: true,
+    		cache: false
+    	});
+    });
   });
 
 
@@ -1105,6 +1145,21 @@ $(document).ready(function(){
 		$('#drop-down-menu').slideToggle('normal');
 	});
 
+	function getCookie(name) {
+	    var cookieValue = null;
+	    if (document.cookie && document.cookie != '') {
+	        var cookies = document.cookie.split(';');
+	        for (var i = 0; i < cookies.length; i++) {
+	            var cookie = jQuery.trim(cookies[i]);
+	            // Does this cookie string begin with the name we want?
+	            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+	                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+	                break;
+	            }
+	        }
+	    }
+	    return cookieValue;
+	}
 
 
 

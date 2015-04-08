@@ -7,6 +7,7 @@ from django.forms.util import ErrorList
 from django.core.context_processors import csrf
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files import File
+import sys
 
 ##### For user registration
 from forms import UserCreationForm
@@ -15,7 +16,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
 #from acme_site.filters import
-from acme_site.models import models as m
+from acme_site.models import TileLayout
 #from acme_site.forms import
 
 import json
@@ -123,16 +124,17 @@ def grid(request):
     return HttpResponse(render_template(request, "acme_site/grid.html", {}))
 
 def save_layout(request):
+    print 'got a save request'
     if request.method == 'POST':
         try:
-            with json.loads(request.body) as data:
-                layout = m.TileLayout(user_name=data['user_name'], board_layout=data['layout'])
-                layout.save()
-                return HttpResponse(status=200)
-        except:
-            print "Error handling layout save request"
-            return HttpResponseServerError()
-
+            data = json.loads(request.body)
+            print request.user
+            layout = TileLayout(user_name=request.user, layout_name=data['name'], board_layout=data['layout'])
+            layout.save()
+            return HttpResponse(status=200)
+        except Exception as e:
+            print "Unexpected error:", repr(e)
+            return HttpResponse(status=500)
 
 def load_layout(request):
     if request.method == 'POST':
@@ -145,6 +147,11 @@ def load_layout(request):
                 return HttpResponse(json.dumps(response_data))
         except:
             print 'Loading error'
+    elif request.method == 'GET':
+        all_layouts = TileLayout.objects.all()
+        names = ''
+        for layout in all_layouts:
+            names += layout.name
 
 
 @login_required(login_url='login')

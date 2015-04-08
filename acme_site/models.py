@@ -3,7 +3,8 @@ import json
 
 class TileLayout(models.Model):
 	user_name = models.CharField(max_length=100)
-	board_layout = models.CharField(max_length=500)
+	layout_name = models.CharField(max_length=100, default='layout1')
+	board_layout = models.CharField(max_length=2000)
 
 	def save_layout(self, layout):
 		self.board_layout = json.dumps(layout)
