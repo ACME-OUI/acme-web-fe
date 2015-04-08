@@ -936,7 +936,6 @@ $(document).ready(function(){
 
 
   $('#load-layout').click(function(){
-
   	var options = {};
   	$.ajax({
   		url: 'load_layout/',
@@ -965,22 +964,32 @@ $(document).ready(function(){
 		    $('body').append(loadMenu);
 		    $(mask).fadeIn();
 		    $('#load-button').click(function(){
-		      var name = document.forms['load-layout-form'].elements[0].options[document.forms['load-layout-form'].elements[0].selectedIndex].text;
-		      for(var i = 0; i < options.length; i++){
-		        if(name == options[i].name){
-		        	var fixedLayout = layoutFix(options[i]);
-		          	loadLayout(fixedLayout);
-		        }
-		      }
+				var name = document.forms['load-layout-form'].elements[0].options[document.forms['load-layout-form'].elements[0].selectedIndex].text;
+				var csrfToken = getCookie('csrftoken');
+				$.ajaxSetup({
+					beforeSend: function(xhr){
+						xhr.setRequestHeader('X-CSRFToken', csrfToken);
+					}
+				});
+				var data = {'layout_name':name};
+				data = JSON.stringify(data);
+		     	$.ajax({
+			      	url: 'load_layout/',
+			      	type: 'POST',
+			      	data: data,
+			      	dataType: 'json',
+			      	success: function(request){
+						layout = []
+			      		$.each(request.board_layout, function(k, v){
+			      			layout.push(layoutFix(v));
+			      		});
+			      		loadLayout(layout);
+			      	}
+		      });
 		    });
   		}
   	});
-    /*
 
-      Get drop down menu contents from the django backend
-
-
-    */
     $('.tile').each(function(){
   		$(this).remove();
   	});
@@ -989,49 +998,49 @@ $(document).ready(function(){
   });
 
 	function layoutFix(layout){
-		for (var i = layout.layout.length - 1; i >= 0; i--) {
-			var x = layout.layout[i].x.indexOf('max');
-			var y = layout.layout[i].y.indexOf('max');
-			var sizex = layout.layout[i].sizex.indexOf('max');
-			var sizey = layout.layout[i].sizey.indexOf('max');
 
-			if(x != -1){
-				if(layout.layout[i].x.length != 3){
-					layout.layout[i].x = maxCols - parseInt(layout.layout[i].x.substr(x+4)); 
-				} else {
-					layout.layout[i].x = maxCols;
-				}
+		var x = layout.x.indexOf('max');
+		var y = layout.y.indexOf('max');
+		var sizex = layout.sizex.indexOf('max');
+		var sizey = layout.sizey.indexOf('max');
+
+		if(x != -1){
+			if(layout.x.length != 3){
+				layout.x = maxCols - parseInt(layout.x.substr(x+4)); 
 			} else {
-				layout.layout[i].x = parseInt(layout.layout[i].x);
+				layout.x = maxCols;
 			}
-			if(y != -1){
-				if(layout.layout[i].y.length != 3){
-					layout.layout[i].y = maxHeight - parseInt(layout.layout[i].y.substr(y+4));
-				} else {
-					layout.layout[i].y = maxHeight;
-				}
-			} else {
-				layout.layout[i].y = parseInt(layout.layout[i].y);
-			}
-			if(sizex != -1){
-				if(layout.layout[i].sizex.length != 3){
-					layout.layout[i].sizex = maxCols - parseInt(layout.layout[i].sizex.substr(sizex+4));
-				} else {
-					layout.layout[i].sizex = maxCols;
-				}
-			} else {
-				layout.layout[i].sizex = parseInt(layout.layout[i].sizex);
-			}
-			if(sizey != -1){
-				if(layout.layout[i].sizey.length != 3){
-					layout.layout[i].sizey = parseInt(layout.layout[i].sizey.substr(sizey+4));
-				} else {
-					layout.layout[i].sizey = maxHeight;
-				}
-			} else {
-				layout.layout[i].sizey = parseInt(layout.layout[i].sizey);
-			}
+		} else {
+			layout.x = parseInt(layout.x);
 		}
+		if(y != -1){
+			if(layout.y.length != 3){
+				layout.y = maxHeight - parseInt(layout.y.substr(y+4));
+			} else {
+				layout.y = maxHeight;
+			}
+		} else {
+			layout.y = parseInt(layout.y);
+		}
+		if(sizex != -1){
+			if(layout.sizex.length != 3){
+				layout.sizex = maxCols - parseInt(layout.sizex.substr(sizex+4));
+			} else {
+				layout.sizex = maxCols;
+			}
+		} else {
+			layout.sizex = parseInt(layout.sizex);
+		}
+		if(sizey != -1){
+			if(layout.sizey.length != 3){
+				layout.sizey = parseInt(layout.sizey.substr(sizey+4));
+			} else {
+				layout.sizey = maxHeight;
+			}
+		} else {
+			layout.sizey = parseInt(layout.sizey);
+		}
+		
 		return layout;
 	}
 
@@ -1044,14 +1053,14 @@ $(document).ready(function(){
       setNight();
     }
 
-    for(var i = 0; i < layout.layout.length; i++){
-    	var name = layout.layout[i].tileName;
+    for(var i = 0; i < layout.length; i++){
+    	var name = layout[i].tileName;
     	var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + contents + header3 +'</li>';
       	add_tile(new_tile, name+'_window', {
-      		x: layout.layout[i].x,
-      		y: layout.layout[i].y,
-      		sizex: layout.layout[i].sizex,
-      		sizey: layout.layout[i].sizey
+      		x: layout[i].x,
+      		y: layout[i].y,
+      		sizex: layout[i].sizex,
+      		sizey: layout[i].sizey
       	});
       	
 

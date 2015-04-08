@@ -123,13 +123,15 @@ def jspanel(request):
 def grid(request):
     return HttpResponse(render_template(request, "acme_site/grid.html", {}))
 
+
+@login_required(login_url='login')
 def save_layout(request):
     print 'got a save request'
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             if( len(TileLayout.objects.filter(layout_name=data['name'])) == 0):
-                layout = TileLayout(user_name=request.user, layout_name=data['name'], board_layout=data['layout'])
+                layout = TileLayout(user_name=request.user, layout_name=data['name'], board_layout=json.dumps(data['layout']))
                 layout.save()
                 return HttpResponse(status=200)
             else:
@@ -138,25 +140,29 @@ def save_layout(request):
             print "Unexpected error:", repr(e)
             return HttpResponse(status=500)
 
+
+@login_required(login_url='login')
 def load_layout(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-        
-            response_data = {}
-            layout['user_name'] = TileLayout.objects.filter(user_name=data['user_name'])
-            response_data['user_name'] = layout['user_name']
-            response_data['board_layout'] = layout['board_layout']
-            return HttpResponse(json.dumps(response_data))
-        except:
-            print 'Loading error'
+            layout = TileLayout.objects.filter(layout_name=data['layout_name'])
+            j = {}
+            for i in layout:
+                j['board_layout'] = json.loads(i.board_layout)
+                print json.dumps(j)
+                return HttpResponse(json.dumps(j), status=200, content_type="application/json")
+        except Exception as e:
+            print "Unexpected error:", repr(e)
+            return HttpResponse(status=500)
     elif request.method == 'GET':
         all_layouts = TileLayout.objects.filter(user_name=request.user)
         layouts = {}
         for layout in all_layouts:
             layouts[layout.id] = layout.layout_name
-        print layouts
+        print json.dumps(layouts)
         return HttpResponse(json.dumps(layouts))
+
 
 
 @login_required(login_url='login')
