@@ -44,7 +44,7 @@ def index(request):
     return HttpResponse(render_template(request, "home.html", {}))
 
 ##### Issues
-#@login_required(login_url='login')
+@login_required(login_url='login')
 def issues(request):
     form = IssuesForm()
 
