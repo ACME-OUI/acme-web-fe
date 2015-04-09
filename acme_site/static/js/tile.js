@@ -3,58 +3,58 @@ $(document).ready(function(){
 
 /****************************************
  	Setup variables
- ***************************************/
-	var docWidth = $(".tile-board").width();
-	var docHeight = $(".tile-board").height();
-	var tileWidth = 100;
-	var tileHeight = 100;
-	var maxCols = Math.floor(docWidth/tileWidth);
-	var maxHeight = Math.floor(docHeight/tileHeight);
-	$('.wrapper').width(maxCols*tileWidth);
-	$('.tile-board').css({'height':maxHeight*tileHeight});
-	var tiles = [];
-	var resize_handle_html = '<span class="gs-resize-handle gs-resize-handle-both"></span>';
+ 	***************************************/
+ 	var docWidth = $(".tile-board").width();
+ 	var docHeight = $(".tile-board").height();
+ 	var tileWidth = 100;
+ 	var tileHeight = 100;
+ 	var maxCols = Math.floor(docWidth/tileWidth);
+ 	var maxHeight = Math.floor(docHeight/tileHeight);
+ 	$('.wrapper').width(maxCols*tileWidth);
+ 	$('.tile-board').css({'height':maxHeight*tileHeight});
+ 	var tiles = [];
+ 	var resize_handle_html = '<span class="gs-resize-handle gs-resize-handle-both"></span>';
 		// Define a widget
-	var header1 = ''; 
-	var header2 = '';
-	var header3 = '';
-	var contents = '';
-	var optionContents = '';
-	header1 += '<div class="tile-panel panel-default">';
-	header1 += ' <div class="tile-panel-heading">';
-	header1 += '  <div class="panel-header-title text-center">';
-	header1 += '    <button type="button" class="btn btn-default btn-xs options" style="float:left;">';
-	header1 += '     <span class="fa fa-cog" aria-label="Options"></span>';
-	header1 += '    </button>';
-	header1 += '    <button type="button" class="btn btn-default btn-xs remove"  style="float:right;">';
-	header1 += '     <span class="fa fa-times" aria-label="Close"></span>';
-	header1 += '    </button>';
-	header1 += '     <p style="text-align: center">';
+		var header1 = ''; 
+		var header2 = '';
+		var header3 = '';
+		var contents = '';
+		var optionContents = '';
+		header1 += '<div class="tile-panel panel-default">';
+		header1 += ' <div class="tile-panel-heading">';
+		header1 += '  <div class="panel-header-title text-center">';
+		header1 += '    <button type="button" class="btn btn-default btn-xs options" style="float:left;">';
+		header1 += '     <span class="fa fa-cog" aria-label="Options"></span>';
+		header1 += '    </button>';
+		header1 += '    <button type="button" class="btn btn-default btn-xs remove"  style="float:right;">';
+		header1 += '     <span class="fa fa-times" aria-label="Close"></span>';
+		header1 += '    </button>';
+		header1 += '     <p style="text-align: center">';
 		// Widget Name
-	header2 += '     <p>';
-	header2 += '   </div>';
-	header2 += '  </div>';
-	header2 += ' </div>';
-	header2 += ' <div class="tile-panel-body" data-direction="horizontal" data-mode="slid">';
+		header2 += '     <p>';
+		header2 += '   </div>';
+		header2 += '  </div>';
+		header2 += ' </div>';
+		header2 += ' <div class="tile-panel-body" data-direction="horizontal" data-mode="slid">';
 		// Widget Contents
-	contents += '  <p>The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men.</p>';
-	header3 += ' </div>';
-	header3 += '</div>';
-	var dragStartX = 0;
-    var dragStartY = 0;
-    var dragStartSizeX = 0;
-    var dragStartSizeY = 0;
-    var dragStartId = '';
-    var dragStartOffset = {
-      top: 0,
-      left: 0
-    };
-    var widgetMargins = 1;
-    var resizeStartSizeX = 0;
-    var resizeStartSizeY = 0;
-    var resizeStartX = 0;
-    var resizeStartY = 0;
-    var resizeDir = '';
+		contents += '  <p>The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men.</p>';
+		header3 += ' </div>';
+		header3 += '</div>';
+		var dragStartX = 0;
+		var dragStartY = 0;
+		var dragStartSizeX = 0;
+		var dragStartSizeY = 0;
+		var dragStartId = '';
+		var dragStartOffset = {
+			top: 0,
+			left: 0
+		};
+		var widgetMargins = 1;
+		var resizeStartSizeX = 0;
+		var resizeStartSizeY = 0;
+		var resizeStartX = 0;
+		var resizeStartY = 0;
+		var resizeDir = '';
 
 	//i = cols, j = rows
 	var board = new Array(maxCols);
@@ -70,17 +70,46 @@ $(document).ready(function(){
 	}
 /****************************************
  	End setup variables
- ***************************************/
-	
+ 	***************************************/
+
+ 	//find if the user has a default layout, if so load it
+ 	function loadDefaultLayout(){
+
+ 		$.ajax({
+ 			url: 'load_layout/',
+ 			type: 'GET',
+ 			success: function(request){
+ 				options = jQuery.parseJSON(request);
+ 				console.log(options);
+ 				$.each(options, function(k, v){
+ 					if(v.default == true){
+ 						for(var i = 0; i < v.layout.length; i++){
+ 							v.layout[i] = layoutFix(v.layout[i]);
+ 						}
+ 						loadLayout(v.layout, v.mode);
+ 					}
+ 				});
+ 			}
+ 		});
+ 	}
+ 	
+ 	loadDefaultLayout();
+
+
+
+
+
+
+
 	//set the window creation buttons
 	$('.slide-btn').each(function(){
-	    $(this).click(function(){
-	    	var name = $(this).attr('id');
-	      	if($('#' + name + '_window').length == 0) {
+		$(this).click(function(){
+			var name = $(this).attr('id');
+			if($('#' + name + '_window').length == 0) {
 				var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + contents + header3 +'</li>';
 				add_tile(new_tile, name+'_window');
 			}
-	    });
+		});
 	});
 
 
@@ -93,15 +122,15 @@ $(document).ready(function(){
 	 * options-> whatever new options i decided to add, right now a x,y,sizex,sizey to handle window sizes
 	 * callback-> an optional function to pass that will be called with add_tile is done
 	 */
-	function add_tile(html, id, options, callback){
-		$('.tile-holder').append(html);
-		var w = $('#'+id);
-		$(w).css({
-			'display': 'none',
-			'z-index': 1
-		});
+	 function add_tile(html, id, options, callback){
+	 	$('.tile-holder').append(html);
+	 	var w = $('#'+id);
+	 	$(w).css({
+	 		'display': 'none',
+	 		'z-index': 1
+	 	});
 
-		$(w).draggable({
+	 	$(w).draggable({
 			//containment: '.tile-board',
 			helper: 'clone',
 			start: function(event, ui){
@@ -129,11 +158,11 @@ $(document).ready(function(){
 			}, 
 		});
 
-		$(w).resizable({
-			handles: 'n, w, e, s', 
-			animate: true,
-			animateDuration: 'fast',
-			animateEasing: 'easeOutQuint',
+	 	$(w).resizable({
+	 		handles: 'n, w, e, s', 
+	 		animate: true,
+	 		animateDuration: 'fast',
+	 		animateEasing: 'easeOutQuint',
 			// containment: '.wrapper',
 			helper: 'ui-resizable-helper',
 			grid: [tileWidth, tileHeight],
@@ -186,23 +215,23 @@ $(document).ready(function(){
 						});
 					} 
 				}, 500, el);
-			}
-		});
+}
+});
 
-		$(w).find('.ui-resizable-n').mousedown(function(){
-			resizeDir = 'n';
-		});
-		$(w).find('.ui-resizable-s').mousedown(function(){
-			resizeDir = 's';
-		});
-		$(w).find('.ui-resizable-e').mousedown(function(){
-			resizeDir = 'e';
-		});
-		$(w).find('.ui-resizable-w').mousedown(function(){
-			resizeDir = 'w';
-		});
+$(w).find('.ui-resizable-n').mousedown(function(){
+	resizeDir = 'n';
+});
+$(w).find('.ui-resizable-s').mousedown(function(){
+	resizeDir = 's';
+});
+$(w).find('.ui-resizable-e').mousedown(function(){
+	resizeDir = 'e';
+});
+$(w).find('.ui-resizable-w').mousedown(function(){
+	resizeDir = 'w';
+});
 
-		tiles.push($(w).attr('id'));
+tiles.push($(w).attr('id'));
 
 	 	//Setup the live tile for the options menu
 	 	$(w).find('.live-tile').liveTile({ direction:'horizontal' });
@@ -238,27 +267,27 @@ $(document).ready(function(){
 		});
 		if(options != null){
 			$(w).attr({
-      		'row': options.y,
-      		'col': options.x,
-      		'sizex': options.sizex,
-      		'sizey': options.sizey
-	      	});
-	      	$(w).css({
-	      		'top': options.y*tileHeight,
-	      		'left': (options.x -1)*tileWidth + $('.tile-holder').offset().left,
-	      		'width': options.sizex*tileWidth,
-	      		'height': options.sizey*tileHeight
-	      	});
+				'row': options.y,
+				'col': options.x,
+				'sizex': options.sizex,
+				'sizey': options.sizey
+			});
+			$(w).css({
+				'top': options.y*tileHeight,
+				'left': (options.x -1)*tileWidth + $('.tile-holder').offset().left,
+				'width': options.sizex*tileWidth,
+				'height': options.sizey*tileHeight
+			});
 		} else {
 			positionFixup();
 		}
 		update_board(id);
 		if($('body').attr('class') == 'night'){
 			$(w).find('.tile-panel-body').css({
-	          'background-color': '#0C1021;',
-	          'border-color': '#00f;',
-	          'color': '#fff'
-	        });
+				'background-color': '#0C1021;',
+				'border-color': '#00f;',
+				'color': '#fff'
+			});
 		}
 		$(w).fadeIn();
 		if(callback != null)
@@ -285,33 +314,33 @@ $(document).ready(function(){
 	 	if(dir == 'up'){
 	 		if(side == 'n'){
 	 			var adj = new Set();
-		 		for (var i = x; i < x + sizex; i++) {
-					 adj.add(board[i-1][y - 2].tile);
-				};
-				var helperReturn = adjHelper(adj, moved);
-				curWindow.attr({
-					'row':y-diff,
-					'sizey':sizey+diff
-				});
-				curWindow.css({
-					'top':(y-diff)*tileHeight-40,
-					'height':(sizey+diff)*tileHeight
-				});
-				update_board(id);
-				moved.add(id);
-				removeHelper(curWindow);
-				if(helperReturn.finished == true){
+	 			for (var i = x; i < x + sizex; i++) {
+	 				adj.add(board[i-1][y - 2].tile);
+	 			};
+	 			var helperReturn = adjHelper(adj, moved);
+	 			curWindow.attr({
+	 				'row':y-diff,
+	 				'sizey':sizey+diff
+	 			});
+	 			curWindow.css({
+	 				'top':(y-diff)*tileHeight-40,
+	 				'height':(sizey+diff)*tileHeight
+	 			});
+	 			update_board(id);
+	 			moved.add(id);
+	 			removeHelper(curWindow);
+	 			if(helperReturn.finished == true){
 					//base case, done resizing
 					return;
 				} else {
 					//we need to keep resizing
 					recursiveResize(moved, dir, diff, 's', helperReturn.adj.values().next().value);
 				}
-	 		}
-	 		else if(side =='s'){
-	 			var adj = new Set();
-		 		for (var i = x; i < x + sizex; i++) {
-					 adj.add(board[i-1][y + sizey - 1].tile);
+			}
+			else if(side =='s'){
+				var adj = new Set();
+				for (var i = x; i < x + sizex; i++) {
+					adj.add(board[i-1][y + sizey - 1].tile);
 				};
 				var helperReturn = adjHelper(adj, moved);
 				curWindow.attr({
@@ -330,7 +359,7 @@ $(document).ready(function(){
 					//we need to keep resizeing 
 					recursiveResize(moved, dir, diff, 'n', helperReturn.adj.values().next().value);
 				}
-	 		} else {
+			} else {
 	 			//error
 	 			return
 	 		}
@@ -338,9 +367,9 @@ $(document).ready(function(){
 	 	else if(dir == 'down'){
 	 		if(side == 'n'){
 	 			var adj = new Set();
-		 		for (var i = x; i < x + sizex; i++) {
-					 adj.add(board[i-1][y - 2].tile);
-				};
+	 			for (var i = x; i < x + sizex; i++) {
+	 				adj.add(board[i-1][y - 2].tile);
+	 			};
 				//check the base case-> all windows have been moved
 				moved.add(id);
 				var helperReturn = adjHelper(adj, moved);
@@ -362,11 +391,11 @@ $(document).ready(function(){
 					//we need to keep resizing
 					recursiveResize(moved, dir, diff, 's', helperReturn.adj.values().next().value);
 				}
-	 		}
-	 		else if(side =='s'){
-	 			var adj = new Set();
-		 		for (var i = x; i < x + sizex; i++) {
-					 adj.add(board[i-1][y + sizey - 1].tile);
+			}
+			else if(side =='s'){
+				var adj = new Set();
+				for (var i = x; i < x + sizex; i++) {
+					adj.add(board[i-1][y + sizey - 1].tile);
 				};
 				//check the base case-> all windows have been moved
 				moved.add(id);
@@ -387,39 +416,39 @@ $(document).ready(function(){
 					//we need to keep resizeing 
 					recursiveResize(moved, dir, diff, 'n', helperReturn.adj.values().next().value);
 				}
-	 		} else {
+			} else {
 	 			//error
 	 			return
 	 		}
 	 	}
 	 	else if(dir == 'right'){
-			if(side == 'e'){
-				var adj = new Set();
-		 		for (var i = y; i < y + sizey; i++) {
-					 adj.add(board[x + sizex - 1][i - 1].tile);
-				};
-				var helperReturn = adjHelper(adj, moved);
-				curWindow.attr({
-					'sizex':sizex-diff
-				});
-				curWindow.css({
-					'width':(sizex-diff)*tileWidth,
-				});
-				update_board(id);
-				moved.add(id);
-				removeHelper(curWindow);
-				if(helperReturn.finished == true){
+	 		if(side == 'e'){
+	 			var adj = new Set();
+	 			for (var i = y; i < y + sizey; i++) {
+	 				adj.add(board[x + sizex - 1][i - 1].tile);
+	 			};
+	 			var helperReturn = adjHelper(adj, moved);
+	 			curWindow.attr({
+	 				'sizex':sizex-diff
+	 			});
+	 			curWindow.css({
+	 				'width':(sizex-diff)*tileWidth,
+	 			});
+	 			update_board(id);
+	 			moved.add(id);
+	 			removeHelper(curWindow);
+	 			if(helperReturn.finished == true){
 					//base case, all windows have been resized
 					return; 
 				} else {
 					//we need to keep resizeing 
 					recursiveResize(moved, dir, diff, 'w', helperReturn.adj.values().next().value);
 				}
-	 		}
-	 		else if(side =='w'){
-	 			var adj = new Set();
-		 		for (var i = y; i < y + sizey; i++) {
-					 adj.add(board[x - 2][i - 1].tile);
+			}
+			else if(side =='w'){
+				var adj = new Set();
+				for (var i = y; i < y + sizey; i++) {
+					adj.add(board[x - 2][i - 1].tile);
 				};
 				var helperReturn = adjHelper(adj, moved);
 				curWindow.attr({
@@ -440,39 +469,39 @@ $(document).ready(function(){
 					//we need to keep resizeing 
 					recursiveResize(moved, dir, diff, 'e', helperReturn.adj.values().next().value);
 				}
-	 		} else {
+			} else {
 	 			//error
 	 			return
 	 		}
 	 	}
 	 	else if(dir == 'left'){
 	 		if(side == 'e'){
-				var adj = new Set();
-		 		for (var i = y; i < y + sizey; i++) {
-					 adj.add(board[x + sizex - 1][i - 1].tile);
-				};
-				var helperReturn = adjHelper(adj, moved);
-				curWindow.attr({
-					'sizex':sizex-diff
-				});
-				curWindow.css({
-					'width':(sizex-diff)*tileWidth,
-				});
-				update_board(id);
-				moved.add(id);
-				removeHelper(curWindow);
-				if(helperReturn.finished == true){
+	 			var adj = new Set();
+	 			for (var i = y; i < y + sizey; i++) {
+	 				adj.add(board[x + sizex - 1][i - 1].tile);
+	 			};
+	 			var helperReturn = adjHelper(adj, moved);
+	 			curWindow.attr({
+	 				'sizex':sizex-diff
+	 			});
+	 			curWindow.css({
+	 				'width':(sizex-diff)*tileWidth,
+	 			});
+	 			update_board(id);
+	 			moved.add(id);
+	 			removeHelper(curWindow);
+	 			if(helperReturn.finished == true){
 					//base case, all windows have been resized
 					return; 
 				} else {
 					//we need to keep resizeing 
 					recursiveResize(moved, dir, diff, 'w', helperReturn.adj.values().next().value);
 				}
-	 		}
-	 		else if(side =='w'){
-	 			var adj = new Set();
-		 		for (var i = y; i < y + sizey; i++) {
-					 adj.add(board[x - 2][i - 1].tile);
+			}
+			else if(side =='w'){
+				var adj = new Set();
+				for (var i = y; i < y + sizey; i++) {
+					adj.add(board[x - 2][i - 1].tile);
 				};
 				var helperReturn = adjHelper(adj, moved);
 				curWindow.attr({
@@ -493,7 +522,7 @@ $(document).ready(function(){
 					//we need to keep resizeing 
 					recursiveResize(moved, dir, diff, 'e', helperReturn.adj.values().next().value);
 				}
-	 		} else {
+			} else {
 	 			//error
 	 			return;
 	 		}
@@ -511,15 +540,15 @@ $(document).ready(function(){
 	  */
 	  function adjHelper(adj, moved) {
 	  	var done = true;
-		adj.forEach(function(item){
-			if(!moved.has(item)){
-				done = false;
-			} else {
-				adj.delete(item);
-			}
-		}, moved);
+	  	adj.forEach(function(item){
+	  		if(!moved.has(item)){
+	  			done = false;
+	  		} else {
+	  			adj.delete(item);
+	  		}
+	  	}, moved);
 
-		return {'finished':done, 'adj':adj};
+	  	return {'finished':done, 'adj':adj};
 	  }
 
 
@@ -528,17 +557,17 @@ $(document).ready(function(){
 	   * tile -> the tile to check if it should be removed
 	   */
 	   function removeHelper(tile){
-	   		if(parseInt(tile.attr('sizex')) <= 0 || parseInt(tile.attr('sizey')) <= 0){
-				$.when(tile.fadeOut()).then(function(){
-						tile.remove();
- 				});
- 				for (var i = tiles.length - 1; i >= 0; i--) {
-					if(tiles[i] == tile.attr('id')){
-						tiles.splice(i, 1);
-						break;
-					}
-				};
-			}
+	   	if(parseInt(tile.attr('sizex')) <= 0 || parseInt(tile.attr('sizey')) <= 0){
+	   		$.when(tile.fadeOut()).then(function(){
+	   			tile.remove();
+	   		});
+	   		for (var i = tiles.length - 1; i >= 0; i--) {
+	   			if(tiles[i] == tile.attr('id')){
+	   				tiles.splice(i, 1);
+	   				break;
+	   			}
+	   		};
+	   	}
 	   }
 
 
@@ -558,13 +587,13 @@ $(document).ready(function(){
 	 		if(diff <= 0 && parseInt(ui.element.attr('row')) <= 1){
 	 			//the tile is at the top
 	 			return;
-		 	}
+	 		}
 	 		var virt_adj = new Set();
 	 		for (var i = resizeStartX; i < resizeStartX + resizeStartSizeX; i++) {
-				if(board[i-1][resizeStartY-2].tile != resizeId){
-					virt_adj.add(board[i-1][resizeStartY-2].tile);
-				}
-			};
+	 			if(board[i-1][resizeStartY-2].tile != resizeId){
+	 				virt_adj.add(board[i-1][resizeStartY-2].tile);
+	 			}
+	 		};
 	 		//did it go up or down?
 	 		$(ui.element).attr({
 	 			'row':parseInt(ui.element.attr('row'))-diff,
@@ -576,7 +605,7 @@ $(document).ready(function(){
 	 		if(diff < 0){
 	 			//it moved down
 	 			virt_adj.forEach(function(item){
-					recursiveResize(moved, 'down', diff, 's', item);
+	 				recursiveResize(moved, 'down', diff, 's', item);
 	 			});
 	 		} 
 	 		else if(diff > 0){
@@ -594,10 +623,10 @@ $(document).ready(function(){
 	 		}
 	 		var virt_adj = new Set();
 	 		for (var i = resizeStartX; i < resizeStartX + resizeStartSizeX; i++) {
-				if(board[i-1][resizeStartY + resizeStartSizeY - 1].tile != resizeId){
-					virt_adj.add(board[i-1][resizeStartY + resizeStartSizeY - 1].tile);
-				}
-			};
+	 			if(board[i-1][resizeStartY + resizeStartSizeY - 1].tile != resizeId){
+	 				virt_adj.add(board[i-1][resizeStartY + resizeStartSizeY - 1].tile);
+	 			}
+	 		};
 	 		//did it go up or down?
 	 		$(ui.element).attr({
 	 			'sizey':parseInt(ui.element.attr('sizey'))-diff
@@ -625,19 +654,19 @@ $(document).ready(function(){
 	 		}
 	 		var horz_adj = new Set();
 	 		for (var i = resizeStartY; i < resizeStartY + resizeStartSizeY; i++) {
-				if(board[resizeStartX + resizeStartSizeX - 1][i-1].tile != resizeId){
-					horz_adj.add(board[resizeStartX + resizeStartSizeX - 1][i-1].tile);
-				}
-			};
+	 			if(board[resizeStartX + resizeStartSizeX - 1][i-1].tile != resizeId){
+	 				horz_adj.add(board[resizeStartX + resizeStartSizeX - 1][i-1].tile);
+	 			}
+	 		};
 			//did it go right or left?
 			var diff = horizontal_location(ui.originalPosition.left, ui.originalSize.width) - horizontal_location(ui.helper.position().left, ui.helper.width());
 			ui.element.attr({
-	 			'sizex':parseInt(ui.element.attr('sizex'))-diff
-	 		});
+				'sizex':parseInt(ui.element.attr('sizex'))-diff
+			});
 			update_board(resizeId);
 			var moved = new Set();
 			moved.add(resizeId);
-	 		if( diff < 0){
+			if( diff < 0){
 	 			//it moved right
 	 			horz_adj.forEach(function(item){
 	 				recursiveResize(moved, 'right', diff, 'w', item);
@@ -657,10 +686,10 @@ $(document).ready(function(){
 	 		}
 	 		var horz_adj = new Set();
 	 		for (var i = resizeStartY; i < resizeStartY + resizeStartSizeY; i++) {
-				if(board[resizeStartX - 2][i-1].tile != resizeId){
-					horz_adj.add(board[resizeStartX - 2][i-1].tile);
-				}
-			};
+	 			if(board[resizeStartX - 2][i-1].tile != resizeId){
+	 				horz_adj.add(board[resizeStartX - 2][i-1].tile);
+	 			}
+	 		};
 	 		//did it go right or left?
 	 		var diff = horizontal_location(ui.originalPosition.left,0) - horizontal_location(ui.helper.position().left, 0);
 	 		ui.element.attr({
@@ -714,15 +743,15 @@ $(document).ready(function(){
 	 * Updates the board to match the tile
 	 * id -> the id of the tile to update the board info for
 	 */
-	function update_board(id){
-		var t = $('#'+id);
-		for (var k = parseInt(t.attr('col'))-1; k < parseInt(t.attr('col'))+parseInt(t.attr('sizex'))-1; k++) {
-			for (var j = parseInt(t.attr('row'))-1; j < parseInt(t.attr('row'))+parseInt(t.attr('sizey'))-1; j++) {
-				board[k][j].occupied = 1;
-				board[k][j].tile = id;
-			};
-		};
-	}
+	 function update_board(id){
+	 	var t = $('#'+id);
+	 	for (var k = parseInt(t.attr('col'))-1; k < parseInt(t.attr('col'))+parseInt(t.attr('sizex'))-1; k++) {
+	 		for (var j = parseInt(t.attr('row'))-1; j < parseInt(t.attr('row'))+parseInt(t.attr('sizey'))-1; j++) {
+	 			board[k][j].occupied = 1;
+	 			board[k][j].tile = id;
+	 		};
+	 	};
+	 }
 
 
 	/**
@@ -745,54 +774,54 @@ $(document).ready(function(){
 
 		if(col < 0 || col > maxCols || row < 0 || row > maxHeight){
 			$('.ui-draggable-dragging').remove();
-	    	return;
+			return;
 		}
-	    var targetId = board[col-1][row-1].tile;
-	    var targetX = parseInt($('#'+targetId).attr('col'));
-	    var targetY = parseInt($('#'+targetId).attr('row'));
-	    var targetSizeX = parseInt($('#'+targetId).attr('sizex'));
-	    var targetSizeY = parseInt($('#'+targetId).attr('sizey'));
-	    var targetGrid = $('#'+targetId);
-	    var startGrid = $('#'+dragStartId);
-	    if(targetId == dragStartId) {
-	      var targetOffset = offset_from_location(row,col);
-	      $('#'+targetId).css({
-	      	'top':dragStartOffset.top,
-	      	'left':dragStartOffset.left,
-	      	'height':dragStartSizeY*tileHeight,
-	      	'width':dragStartSizeX*tileWidth
-	      });
-	    } else {
-	      var startOffset = offset_from_location(dragStartSizeY, dragStartSizeX);
-	      var targetOffset = offset_from_location(targetY, targetX);
-	      startGrid.attr({
-	        'col': targetGrid.attr('col'),
-	        'row': targetGrid.attr('row'),
-	        'sizex': targetGrid.attr('sizex'),
-	        'sizey': targetGrid.attr('sizey')
-	      });
-	      startGrid.css({
-	      	'top':targetOffset.top,
-	      	'left':targetOffset.left,
-	      	'width':parseInt(startGrid.attr('sizex'))*tileWidth,
-	      	'height':parseInt(startGrid.attr('sizey'))*tileHeight
-	      });
-	      update_board(dragStartId);
+		var targetId = board[col-1][row-1].tile;
+		var targetX = parseInt($('#'+targetId).attr('col'));
+		var targetY = parseInt($('#'+targetId).attr('row'));
+		var targetSizeX = parseInt($('#'+targetId).attr('sizex'));
+		var targetSizeY = parseInt($('#'+targetId).attr('sizey'));
+		var targetGrid = $('#'+targetId);
+		var startGrid = $('#'+dragStartId);
+		if(targetId == dragStartId) {
+			var targetOffset = offset_from_location(row,col);
+			$('#'+targetId).css({
+				'top':dragStartOffset.top,
+				'left':dragStartOffset.left,
+				'height':dragStartSizeY*tileHeight,
+				'width':dragStartSizeX*tileWidth
+			});
+		} else {
+			var startOffset = offset_from_location(dragStartSizeY, dragStartSizeX);
+			var targetOffset = offset_from_location(targetY, targetX);
+			startGrid.attr({
+				'col': targetGrid.attr('col'),
+				'row': targetGrid.attr('row'),
+				'sizex': targetGrid.attr('sizex'),
+				'sizey': targetGrid.attr('sizey')
+			});
+			startGrid.css({
+				'top':targetOffset.top,
+				'left':targetOffset.left,
+				'width':parseInt(startGrid.attr('sizex'))*tileWidth,
+				'height':parseInt(startGrid.attr('sizey'))*tileHeight
+			});
+			update_board(dragStartId);
 
-	      targetGrid.attr({
-	        'col': dragStartX,
-	        'row': dragStartY,
-	        'sizex': dragStartSizeX,
-	        'sizey': dragStartSizeY
-	      });
-	      targetGrid.css({
-	      	'top':dragStartOffset.top,
-	      	'left':dragStartOffset.left,
-	      	'width':parseInt(targetGrid.attr('sizex'))*tileWidth,
-	      	'height':parseInt(targetGrid.attr('sizey'))*tileHeight
-	      });
-	      update_board(targetId);
-	    }
+			targetGrid.attr({
+				'col': dragStartX,
+				'row': dragStartY,
+				'sizex': dragStartSizeX,
+				'sizey': dragStartSizeY
+			});
+			targetGrid.css({
+				'top':dragStartOffset.top,
+				'left':dragStartOffset.left,
+				'width':parseInt(targetGrid.attr('sizex'))*tileWidth,
+				'height':parseInt(targetGrid.attr('sizey'))*tileHeight
+			});
+			update_board(targetId);
+		}
 	}
 
 
@@ -800,203 +829,211 @@ $(document).ready(function(){
 	 * Returns the row and col of an element from its offset
 	 * pos -> the position of the object
 	 */
-	function grid_from_offset(pos){
-		var location = {
-			col: Math.floor(pos.left/tileWidth) + 1,
-			row: Math.floor(pos.top/tileHeight) + 1
-		}
-		return location;
-	}
+	 function grid_from_offset(pos){
+	 	var location = {
+	 		col: Math.floor(pos.left/tileWidth) + 1,
+	 		row: Math.floor(pos.top/tileHeight) + 1
+	 	}
+	 	return location;
+	 }
 
 	/**
 	 * Returns the col from the position and size of an element
 	 * x -> the horizontal position of the object
 	 * sizex -> the horizontal size of the object
 	 */
-	function horizontal_location(x, sizex){
-		if(((x+sizex)/tileWidth)%1 >= 0.5){
-			return Math.ceil((x+sizex)/tileWidth)+1;
-		} else {
-			return Math.floor((x+sizex)/tileWidth)+1;
-		}
-	}
+	 function horizontal_location(x, sizex){
+	 	if(((x+sizex)/tileWidth)%1 >= 0.5){
+	 		return Math.ceil((x+sizex)/tileWidth)+1;
+	 	} else {
+	 		return Math.floor((x+sizex)/tileWidth)+1;
+	 	}
+	 }
 
 	/**
 	 * Returns the row from the position and size of an element
 	 * y -> the horizontal position of the object
 	 * sizey -> the horizontal size of the object
 	 */
-	function virtical_location(y, sizey){
-		if(((y+sizey)/tileHeight)%1 >= 0.5){
-			return Math.ceil((y+sizey)/tileHeight)+1
-		} else {
-			return Math.floor((y+sizey)/tileHeight)+1;
-		}
-	}
+	 function virtical_location(y, sizey){
+	 	if(((y+sizey)/tileHeight)%1 >= 0.5){
+	 		return Math.ceil((y+sizey)/tileHeight)+1
+	 	} else {
+	 		return Math.floor((y+sizey)/tileHeight)+1;
+	 	}
+	 }
 
 
 /***********************************
-        Left slide menu
+Left slide menu
 ***********************************/
-	var body = document.body;
+    var body = document.body;
 
-	function leftMenuToggle(){
-		$('#slide-menu-left').toggle('slide',{
-			direction: 'left',
-			easing: 'easeOutCubic'}, 500);
-		if( $('#toggle-left-a').text() == 'Open Menu') {
-			$('#toggle-left-a').text('Close Menu');
-		} else {
-			$('#toggle-left-a').text('Open Menu');
-		}
-	}
+    function leftMenuToggle(){
+    	$('#slide-menu-left').toggle('slide',{
+    		direction: 'left',
+    		easing: 'easeOutCubic'}, 500);
+    	if( $('#toggle-left-a').text() == 'Open Menu') {
+    		$('#toggle-left-a').text('Close Menu');
+    	} else {
+    		$('#toggle-left-a').text('Open Menu');
+    	}
+    }
 
-	$('#toggle-slide-left').click(function(e){
-		leftMenuToggle();
+    $('#toggle-slide-left').click(function(e){
+    	leftMenuToggle();
+    });
+
+    $('#save-layout').click(function(){
+    	leftMenuToggle();
+    	var mask = document.createElement('div');
+    	$(mask).addClass('mask');
+    	$(mask).attr({'id':'mask'});
+    	$(mask).click(function(){
+    		$(this).fadeOut().queue(function(){
+    			$(this).remove();
+    			$('.save-layout').remove();
+    		});
+
+    	});
+    	$('body').append(mask);
+
+    	var saveMenu = document.createElement('div');
+    	$(saveMenu).addClass('bvc');
+    	$(saveMenu).addClass('save-layout');
+    	$(saveMenu).attr({'id':'save-menu'});
+    	var saveMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
+    	saveMenuHtml += '<form name="save-layout-form" id="save-form">'; 
+    	saveMenuHtml += 'Layout Name:<br><input type="text" id="layout-name">';
+    	saveMenuHtml += '<input type="submit" value="Save" id="save-btn"><br>';
+    	saveMenuHtml += '<input type="checkbox" name="default" value="default" id="default">Default Layout';
+    	saveMenuHtml += '</form></div><div class="bevel bl br"></div>';
+    	$(saveMenu).html(saveMenuHtml);
+    	$('body').append(saveMenu);
+    	$(mask).fadeIn();
+    	$('#save-btn').click(function(event){
+    		event.preventDefault();
+    		var layout_name = document.getElementById('layout-name').value;
+    		var layout = [];
+    		$('.tile').each(function(){
+    			layout.push({
+    				tileName: $(this).attr('id').substr(0, $(this).attr('id').indexOf('_')),
+    				x: $(this).attr('col'),
+    				y: $(this).attr('row'),
+    				sizex:'max-'+(maxCols-parseInt($(this).attr('sizex'))),
+    				sizey:'max-'+(maxHeight-parseInt($(this).attr('sizey')))
+    			});
+    		});
+    		if($('body').hasClass('night')){
+    			var mode = 'night';
+    		} else {
+    			mode = 'day'
+    		}
+    		var data = {
+    			name: layout_name,
+    			mode: mode,
+    			style: 'balanced',
+    			layout: layout,
+    			default_layout: document.getElementById('default').checked
+    		};
+
+    		data = JSON.stringify(data);
+    		var csrfToken = getCookie('csrftoken');
+    		$.ajaxSetup({
+    			beforeSend: function(xhr){
+    				xhr.setRequestHeader('X-CSRFToken', csrfToken);
+    			}
+    		});
+    		$.ajax({
+    			url:'save_layout/',
+    			type: 'POST',
+    			data: data,
+    			dataType: 'json',
+    			async: true,
+    			cache: false,
+    			statusCode: {
+    				422: function(){
+    					alert('Invalid Layout Name');
+    				},
+    				500: function(){
+    					alert('Server Error')
+    				}
+
+    			}
+    		});
+    		$('.mask').remove();
+    		$('.save-layout').remove();
+    	});
 	});
 
-	$('#save-layout').click(function(){
-		leftMenuToggle();
-		var mask = document.createElement('div');
-		$(mask).addClass('mask');
-		$(mask).attr({'id':'mask'});
-		$(mask).click(function(){
-			$(this).fadeOut().queue(function(){
-				$(this).remove();
-				$('.save-layout').remove();
-			});
-		  
-		});
-		$('body').append(mask);
 
-		var saveMenu = document.createElement('div');
-		$(saveMenu).addClass('bvc');
-		$(saveMenu).addClass('save-layout');
-		$(saveMenu).attr({'id':'save-menu'});
-		var saveMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
-		saveMenuHtml += '<form name="save-layout-form" id="save-form">'; 
-		saveMenuHtml += 'Layout Name:<br><input type="text" id="layout-name">';
-		saveMenuHtml += '<input type="submit" value="Save" id="save-btn">';
-		saveMenuHtml += '</form></div><div class="bevel bl br"></div>';
-		$(saveMenu).html(saveMenuHtml);
-		$('body').append(saveMenu);
-		$(mask).fadeIn();
-		$('#save-btn').click(function(){
-			var layout_name = document.getElementById('layout-name').value;
-			var layout = [];
-			$('.tile').each(function(){
-				layout.push({
-					tileName: $(this).attr('id').substr(0, $(this).attr('id').indexOf('_')),
-					x: $(this).attr('col'),
-					y: $(this).attr('row'),
-					sizex:'max-'+(maxCols-parseInt($(this).attr('sizex'))),
-					sizey:'max-'+(maxHeight-parseInt($(this).attr('sizey')))
+	$('#load-layout').click(function(){
+		var options = {};
+		$.ajax({
+			url: 'load_layout/',
+			type: 'GET',
+			success: function(request){
+				options = jQuery.parseJSON(request);
+				var mask = document.createElement('div');
+				$(mask).addClass('mask');
+				$(mask).attr({'id':'mask'});
+				$(mask).click(function(){
+					fadeOutMask();
 				});
-			});
-			if($('body').hasClass('night')){
-				var mode = 'night';
-			} else {
-				mode = 'day'
+				$('body').append(mask);
+				var loadMenu = document.createElement('div');
+				$(loadMenu).addClass('bvc');
+				$(loadMenu).addClass('save-layout');
+				var loadMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
+				loadMenuHtml += '<form name="load-layout-form" id="save-form">'; 
+				loadMenuHtml += 'Select Layout:<br><select id="select-layout">';
+				$.each(options, function(k, v){
+					loadMenuHtml += '<option value="' + v + '">' + v + '</option>';
+				});
+				loadMenuHtml += '</select><input type="submit" value="Load" id="load-button">';
+				loadMenuHtml += '</form></div><div class="bevel bl br"></div>';
+				$(loadMenu).html(loadMenuHtml);
+				$('body').append(loadMenu);
+				$(mask).fadeIn();
+				$('#load-button').click(function(){
+					var name = document.forms['load-layout-form'].elements[0].options[document.forms['load-layout-form'].elements[0].selectedIndex].text;
+					var csrfToken = getCookie('csrftoken');
+					$.ajaxSetup({
+						beforeSend: function(xhr){
+							xhr.setRequestHeader('X-CSRFToken', csrfToken);
+						}
+					});
+					var data = {'layout_name':name};
+					data = JSON.stringify(data);
+					$.ajax({
+						url: 'load_layout/',
+						type: 'POST',
+						data: data,
+						dataType: 'json',
+						success: function(request){
+							layout = []
+							$.each(request.board_layout, function(k, v){
+								layout.push(layoutFix(v));
+							});
+							loadLayout(layout, request.mode);
+						}
+					});
+				});
 			}
-			var data = {
-					name: layout_name,
-					mode: mode,
-					style: 'balanced',
-					layout: layout,
-				};
-
-			data = JSON.stringify(data);
-			var csrfToken = getCookie('csrftoken');
-			$.ajaxSetup({
-				beforeSend: function(xhr){
-					xhr.setRequestHeader('X-CSRFToken', csrfToken);
-				}
-			});
-			$.ajax({
-				url:'save_layout/',
-				type: 'POST',
-				data: data,
-				dataType: 'json',
-				async: true,
-				cache: false,
-				statusCode: {
-					422: function(){
-						alert('Invalid Layout Name');
-					},
-					500: function(){
-						alert('Server Error')
-					}
-
-				}
-			});
-			$('.mask').remove();
-			$('.save-layout').remove();
 		});
+
+	$('.tile').each(function(){
+		$(this).remove();
+	});
+	tiles = [];
+	leftMenuToggle();
 	});
 
 
-  $('#load-layout').click(function(){
-  	var options = {};
-  	$.ajax({
-  		url: 'load_layout/',
-  		type: 'GET',
-  		success: function(request){
-  			options = jQuery.parseJSON(request);
-  			var mask = document.createElement('div');
-		    $(mask).addClass('mask');
-		    $(mask).attr({'id':'mask'});
-		    $(mask).click(function(){
-		      fadeOutMask();
-		    });
-		    $('body').append(mask);
-		    var loadMenu = document.createElement('div');
-		    $(loadMenu).addClass('bvc');
-		    $(loadMenu).addClass('save-layout');
-		    var loadMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
-		    loadMenuHtml += '<form name="load-layout-form" id="save-form">'; 
-		    loadMenuHtml += 'Select Layout:<br><select id="select-layout">';
-		    $.each(options, function(k, v){
-		    	loadMenuHtml += '<option value="' + v + '">' + v + '</option>';
-		    });
-		    loadMenuHtml += '</select><input type="submit" value="Load" id="load-button">';
-		    loadMenuHtml += '</form></div><div class="bevel bl br"></div>';
-		    $(loadMenu).html(loadMenuHtml);
-		    $('body').append(loadMenu);
-		    $(mask).fadeIn();
-		    $('#load-button').click(function(){
-				var name = document.forms['load-layout-form'].elements[0].options[document.forms['load-layout-form'].elements[0].selectedIndex].text;
-				var csrfToken = getCookie('csrftoken');
-				$.ajaxSetup({
-					beforeSend: function(xhr){
-						xhr.setRequestHeader('X-CSRFToken', csrfToken);
-					}
-				});
-				var data = {'layout_name':name};
-				data = JSON.stringify(data);
-		     	$.ajax({
-			      	url: 'load_layout/',
-			      	type: 'POST',
-			      	data: data,
-			      	dataType: 'json',
-			      	success: function(request){
-						layout = []
-			      		$.each(request.board_layout, function(k, v){
-			      			layout.push(layoutFix(v));
-			      		});
-			      		loadLayout(layout, request.mode);
-			      	}
-		      });
-		    });
-  		}
-  	});
-
-    $('.tile').each(function(){
-  		$(this).remove();
-  	});
-  	tiles = [];
-    leftMenuToggle();
-  });
-
+	/**
+	 * Resolves the size of the layout to match the current page
+	 * layout -> the layout for one tile at a time
+	 */
 	function layoutFix(layout){
 
 		var x = layout.x.indexOf('max');
@@ -1040,123 +1077,129 @@ $(document).ready(function(){
 		} else {
 			layout.sizey = parseInt(layout.sizey);
 		}
-		
+
 		return layout;
 	}
 
-  function loadLayout(layout, mode){
-  	fadeOutMask();
-    if(mode == 'day'){
-      setDay();
-    }
-    else if(mode == 'night'){
-      setNight();
-    }
 
-    for(var i = 0; i < layout.length; i++){
-    	var name = layout[i].tileName;
-    	var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + contents + header3 +'</li>';
-      	add_tile(new_tile, name+'_window', {
-      		x: layout[i].x,
-      		y: layout[i].y,
-      		sizex: layout[i].sizex,
-      		sizey: layout[i].sizey
-      	});
-      	
+	/**
+	 * loads a layout onto the page
+	 * layout -> a full layout with all the tiles 
+	 * mode -> the day/night mode of the layout
+	 */
+	function loadLayout(layout, mode){
+		fadeOutMask();
+		if(mode == 'day'){
+			setDay();
+		}
+		else if(mode == 'night'){
+			setNight();
+		}
 
-    }
-  }
-
-  function fadeOutMask(){
-  	$('#mask').fadeOut().queue(function(){
-        $('#mask').remove();
-        $('.save-layout').remove();
-      });
-  }
-
-  function setNight(){
-    $('body').attr({
-        'class':'night'
-      });
-      $('.tile-panel-body').each(function(){
-        $(this).css({
-          'background-color': '#0C1021;',
-          'border-color': '#00f;',
-          'color': '#fff'
-        });
-      });
-      $(body).attr({
-        'background-color':'#051451!important',
-        'color':'#aaa!important'
-      });
-      $('#dark-mode-toggle').text('Dark mode is on');
-  }
-
-  function setDay(){
-    $('body').attr({
-        'class':'day'
-      });
-      $('.tile-panel-body').each(function(){
-        $(this).css({
-          'background-color': '#fff;',
-          'color': '#111;',
-          'border-color': '#000;'
-        });
-      });
-      $(body).attr({
-        'background-color':'#fff',
-        'color':'#000'
-      });
-      $('#dark-mode-toggle').text('Dark mode is off');
-  }
+		for(var i = 0; i < layout.length; i++){
+			var name = layout[i].tileName;
+			var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + contents + header3 +'</li>';
+			add_tile(new_tile, name+'_window', {
+				x: layout[i].x,
+				y: layout[i].y,
+				sizex: layout[i].sizex,
+				sizey: layout[i].sizey
+			});
 
 
-  $('#dark-mode-toggle').click(function(e){
-    if($('body').attr('class') == 'day'){
-      //turn dark
-      setNight();
-    } else {
-      //turn light
-      setDay();
-    }
-  });
+		}
+	}
+
+	function fadeOutMask(){
+		$('#mask').fadeOut().queue(function(){
+			$('#mask').remove();
+			$('.save-layout').remove();
+		});
+	}
+
+	function setNight(){
+		$('body').attr({
+			'class':'night'
+		});
+		$('.tile-panel-body').each(function(){
+			$(this).css({
+				'background-color': '#0C1021;',
+				'border-color': '#00f;',
+				'color': '#fff'
+			});
+		});
+		$(body).attr({
+			'background-color':'#051451!important',
+			'color':'#aaa!important'
+		});
+		$('#dark-mode-toggle').text('Dark mode is on');
+	}
+
+	function setDay(){
+		$('body').attr({
+			'class':'day'
+		});
+		$('.tile-panel-body').each(function(){
+			$(this).css({
+				'background-color': '#fff;',
+				'color': '#111;',
+				'border-color': '#000;'
+			});
+		});
+		$(body).attr({
+			'background-color':'#fff',
+			'color':'#000'
+		});
+		$('#dark-mode-toggle').text('Dark mode is off');
+	}
+
+
+	$('#dark-mode-toggle').click(function(e){
+		if($('body').attr('class') == 'day'){
+		  //turn dark
+		  setNight();
+		} else {
+		  //turn light
+		  setDay();
+		}
+	});
 
 	/**********************************
-	       Top slide down menu
+	Top slide down menu
 	**********************************/
 
 	$('#drop-down-tab').click(function(e){
 		var menuHeight = parseInt($('#drop-down-menu').css('height'));
 		if($('#drop-down-menu').css('display') == 'none'){
-		  $('.tile').each(function(){
-		    $(this).css({
-		      'top':parseInt($(this).css('top'))+menuHeight
-		    });
-		  });
+			$('.tile').each(function(){
+				$(this).css({
+					'top':parseInt($(this).css('top'))+menuHeight
+				});
+			});
 		} else {
-		  $('.tile').each(function(){
-		    $(this).css({
-		      'top':parseInt($(this).css('top'))-menuHeight
-		    });
-		  });
+			$('.tile').each(function(){
+				$(this).css({
+					'top':parseInt($(this).css('top'))-menuHeight
+				});
+			});
 		}
 		$('#drop-down-menu').slideToggle('normal');
 	});
 
 	function getCookie(name) {
-	    var cookieValue = null;
-	    if (document.cookie && document.cookie != '') {
-	        var cookies = document.cookie.split(';');
-	        for (var i = 0; i < cookies.length; i++) {
-	            var cookie = jQuery.trim(cookies[i]);
-	            // Does this cookie string begin with the name we want?
-	            if (cookie.substring(0, name.length + 1) == (name + '=')) {
-	                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-	                break;
-	            }
-	        }
+		var cookieValue = null;
+		if (document.cookie && document.cookie != '') {
+			var cookies = document.cookie.split(';');
+			for (var i = 0; i < cookies.length; i++) {
+				var cookie = jQuery.trim(cookies[i]);
+	    // Does this cookie string begin with the name we want?
+	    if (cookie.substring(0, name.length + 1) == (name + '=')) {
+	    	cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+	    	break;
 	    }
-	    return cookieValue;
+	}
+	}
+	return cookieValue;
 	}
 
 

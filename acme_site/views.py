@@ -130,8 +130,17 @@ def save_layout(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            if( len(TileLayout.objects.filter(layout_name=data['name'])) == 0):
-                layout = TileLayout(user_name=request.user, layout_name=data['name'], board_layout=json.dumps(data['layout']), mode=data['mode'])
+            if len(TileLayout.objects.filter(layout_name=data['name'])) == 0:
+                if data['default_layout'] == 1:
+                    print 'got a new default'
+                    isDefault = TileLayout.objects.filter(user_name=request.user, default=1)
+                    if isDefault:
+                        for i in isDefault:
+                            print 'found old default named ' + i.layout_name
+                            i.default = 0
+                            i.save()
+                    
+                layout = TileLayout(user_name=request.user, layout_name=data['name'], board_layout=json.dumps(data['layout']), mode=data['mode'], default=data['default_layout'])
                 layout.save()
                 return HttpResponse(status=200)
             else:
@@ -151,17 +160,21 @@ def load_layout(request):
             for i in layout:
                 j['board_layout'] = json.loads(i.board_layout)
                 j['mode'] = i.mode
-                print json.dumps(j)
                 return HttpResponse(json.dumps(j), status=200, content_type="application/json")
         except Exception as e:
             print "Unexpected error:", repr(e)
             return HttpResponse(status=500)
     elif request.method == 'GET':
         all_layouts = TileLayout.objects.filter(user_name=request.user)
-        layouts = {}
+        print all_layouts
+        layouts = []
         for layout in all_layouts:
-            layouts[layout.id] = layout.layout_name
-        print json.dumps(layouts)
+            curlayout = {}
+            curlayout['name'] = layout.layout_name
+            curlayout['default'] = layout.default
+            curlayout['layout'] = json.loads(layout.board_layout)
+            curlayout['mode'] = layout.mode
+            layouts.append(curlayout)
         return HttpResponse(json.dumps(layouts))
 
 
