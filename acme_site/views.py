@@ -11,6 +11,7 @@ import sys
 
 ##### For user registration
 from forms import UserCreationForm
+from forms import IssuesForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -40,18 +41,14 @@ def not_done(request, *args, **kwargs):
 
 ##### Index
 def index(request):
-    check= ""
-    data = ""
-    if request.method == "POST":
-        print "POST"
-    elif request.method =="GET":
-        check = request.GET.get('return')
-        if check == "PENDING":
-            data = "<center><font color='red'><p><h1>Accont Pending</h1>You will reviece a email with instruction once your account has been approved</p></font></center>"
-    else:
-        print request.method
+    return HttpResponse(render_template(request, "home.html", {}))
 
-    return HttpResponse(render_template(request, "home.html", {"data":data}))
+##### Issues
+@login_required(login_url='login')
+def issues(request):
+    form = IssuesForm()
+
+    return HttpResponse(render_template(request, "issues.html", {"form":form}))
 
 ##### Login
 def user_login(request):

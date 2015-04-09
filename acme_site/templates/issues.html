@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %} Issues{% endblock %}
+
+{% block content %}
+
+<br/>
+
+<div class="form-group">
+  {% for field in form %}
+    <label>{{ field.label_tag }}</label> {{ field }}
+    <br/>
+  {% endfor %}
+</div>
+
+<script>
+function issues(){
+  var org = document.getElementById("mySelect").value;
+  switch(org){
+    case "0":
+      hideall();
+      break;
+    case "one":
+      show("one");
+      break;
+    case "two":
+      show("two");
+      break;
+  }
+}
+
+function show(id){
+  hideall();
+  console.log(id);
+  $("#"+id).show();
+  $("#submit").show();
+}
+
+function hideall(){
+  $("#one").hide();
+  $("#two").hide();
+  $("#submit").hide();
+}
+
+</script>
+
+{% endblock %}
