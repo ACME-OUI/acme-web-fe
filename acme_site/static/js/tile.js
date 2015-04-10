@@ -126,8 +126,8 @@ $(document).ready(function(){
 	 	$('.tile-holder').append(html);
 	 	var w = $('#'+id);
 	 	$(w).css({
-	 		'display': 'none',
-	 		'z-index': 1
+	 		'z-index': 1, 
+	 		'opacity': 0
 	 	});
 
 	 	$(w).draggable({
@@ -215,23 +215,23 @@ $(document).ready(function(){
 						});
 					} 
 				}, 500, el);
-}
-});
+			}
+		});
 
-$(w).find('.ui-resizable-n').mousedown(function(){
-	resizeDir = 'n';
-});
-$(w).find('.ui-resizable-s').mousedown(function(){
-	resizeDir = 's';
-});
-$(w).find('.ui-resizable-e').mousedown(function(){
-	resizeDir = 'e';
-});
-$(w).find('.ui-resizable-w').mousedown(function(){
-	resizeDir = 'w';
-});
+		$(w).find('.ui-resizable-n').mousedown(function(){
+			resizeDir = 'n';
+		});
+		$(w).find('.ui-resizable-s').mousedown(function(){
+			resizeDir = 's';
+		});
+		$(w).find('.ui-resizable-e').mousedown(function(){
+			resizeDir = 'e';
+		});
+		$(w).find('.ui-resizable-w').mousedown(function(){
+			resizeDir = 'w';
+		});
 
-tiles.push($(w).attr('id'));
+		tiles.push($(w).attr('id'));
 
 	 	//Setup the live tile for the options menu
 	 	$(w).find('.live-tile').liveTile({ direction:'horizontal' });
@@ -289,7 +289,7 @@ tiles.push($(w).attr('id'));
 				'color': '#fff'
 			});
 		}
-		$(w).fadeIn();
+		$(w).animate({'opacity':1}, 'slow', 'easeOutCubic');
 		if(callback != null)
 			callback();
 		return $(w);
@@ -1201,9 +1201,6 @@ Left slide menu
 	}
 	return cookieValue;
 	}
-
-
-
 
 });
 
