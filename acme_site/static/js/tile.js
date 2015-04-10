@@ -9,7 +9,7 @@ $(document).ready(function(){
  	var tileWidth = 100;
  	var tileHeight = 100;
  	var maxCols = Math.floor(docWidth/tileWidth);
- 	var maxHeight = Math.floor(docHeight/tileHeight)+2;
+ 	var maxHeight = Math.floor(docHeight/tileHeight)+1;
  	$('.wrapper').width(maxCols*tileWidth);
  	$('.tile-board').css({'height':maxHeight*tileHeight});
  	var tiles = [];
@@ -952,10 +952,10 @@ Left slide menu
     		$('.tile').each(function(){
     			layout.push({
     				tileName: $(this).attr('id').substr(0, $(this).attr('id').indexOf('_')),
-    				x: $(this).attr('col'),
-    				y: $(this).attr('row'),
-    				sizex:'max-'+(maxCols-parseInt($(this).attr('sizex'))),
-    				sizey:'max-'+(maxHeight-parseInt($(this).attr('sizey')))
+    				x: parseInt($(this).attr('col'))/maxCols,
+    				y: parseInt($(this).attr('row'))/maxHeight,
+    				sizex: parseInt($(this).attr('sizex'))/maxCols,
+    				sizey: parseInt($(this).attr('sizey'))/maxHeight
     			});
     		});
     		if($('body').hasClass('night')){
@@ -1070,47 +1070,10 @@ Left slide menu
 	 */
 	function layoutFix(layout){
 
-		var x = layout.x.indexOf('max');
-		var y = layout.y.indexOf('max');
-		var sizex = layout.sizex.indexOf('max');
-		var sizey = layout.sizey.indexOf('max');
-
-		if(x != -1){
-			if(layout.x.length != 3){
-				layout.x = maxCols - parseInt(layout.x.substr(x+4)); 
-			} else {
-				layout.x = maxCols;
-			}
-		} else {
-			layout.x = parseInt(layout.x);
-		}
-		if(y != -1){
-			if(layout.y.length != 3){
-				layout.y = maxHeight - parseInt(layout.y.substr(y+4));
-			} else {
-				layout.y = maxHeight;
-			}
-		} else {
-			layout.y = parseInt(layout.y);
-		}
-		if(sizex != -1){
-			if(layout.sizex.length != 3){
-				layout.sizex = maxCols - parseInt(layout.sizex.substr(sizex+4));
-			} else {
-				layout.sizex = maxCols;
-			}
-		} else {
-			layout.sizex = parseInt(layout.sizex);
-		}
-		if(sizey != -1){
-			if(layout.sizey.length != 3){
-				layout.sizey = maxHeight - parseInt(layout.sizey.substr(sizey+4));
-			} else {
-				layout.sizey = maxHeight;
-			}
-		} else {
-			layout.sizey = parseInt(layout.sizey);
-		}
+		layout.x = Math.round(layout.x * maxCols);
+		layout.y = Math.round(layout.y * maxHeight);
+		layout.sizex = Math.round(layout.sizex * maxCols);
+		layout.sizey = Math.round(layout.sizey * maxHeight);
 
 		return layout;
 	}
