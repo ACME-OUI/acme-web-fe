@@ -9,7 +9,7 @@ $(document).ready(function(){
  	var tileWidth = 100;
  	var tileHeight = 100;
  	var maxCols = Math.floor(docWidth/tileWidth);
- 	var maxHeight = Math.floor(docHeight/tileHeight);
+ 	var maxHeight = Math.floor(docHeight/tileHeight)+1;
  	$('.wrapper').width(maxCols*tileWidth);
  	$('.tile-board').css({'height':maxHeight*tileHeight});
  	var tiles = [];
@@ -1070,7 +1070,7 @@ Left slide menu
 		}
 		if(sizey != -1){
 			if(layout.sizey.length != 3){
-				layout.sizey = parseInt(layout.sizey.substr(sizey+4));
+				layout.sizey = maxHeight - parseInt(layout.sizey.substr(sizey+4));
 			} else {
 				layout.sizey = maxHeight;
 			}
