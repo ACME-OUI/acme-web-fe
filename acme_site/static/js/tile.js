@@ -272,16 +272,17 @@ $(document).ready(function(){
 				'sizex': options.sizex,
 				'sizey': options.sizey
 			});
+			update_board(id);
+			var tile_offset = offset_from_location(parseInt($(w).attr('row')), parseInt($(w).attr('col')));
 			$(w).css({
-				'top': options.y*tileHeight,
-				'left': (options.x -1)*tileWidth + $('.tile-holder').offset().left,
-				'width': options.sizex*tileWidth,
-				'height': options.sizey*tileHeight
+				"top": tile_offset.top,
+				"left":tile_offset.left,
+				"width":$(w).attr('sizex')*tileWidth,
+				"height":$(w).attr('sizey')*tileHeight
 			});
 		} else {
 			positionFixup();
 		}
-		update_board(id);
 		if($('body').attr('class') == 'night'){
 			$(w).find('.tile-panel-body').css({
 				'background-color': '#0C1021;',
@@ -1192,14 +1193,14 @@ Left slide menu
 			var cookies = document.cookie.split(';');
 			for (var i = 0; i < cookies.length; i++) {
 				var cookie = jQuery.trim(cookies[i]);
-	    // Does this cookie string begin with the name we want?
-	    if (cookie.substring(0, name.length + 1) == (name + '=')) {
-	    	cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-	    	break;
-	    }
-	}
-	}
-	return cookieValue;
+			    // Does this cookie string begin with the name we want?
+			    if (cookie.substring(0, name.length + 1) == (name + '=')) {
+			    	cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+			    	break;
+			    }
+			}
+		}
+		return cookieValue;
 	}
 
 });
