@@ -57,10 +57,10 @@ $(document).ready(function(){
 		var resizeDir = '';
 
 	//i = cols, j = rows
-	var board = new Array(maxCols);
+	var board = new Array(maxCols+1);
 	//setup the empty board
 	for (var i = board.length - 1; i >= 0; i--) {
-		board[i] = new Array(maxHeight);
+		board[i] = new Array(maxHeight+1);
 		for (var j = board[i].length - 1; j >= 0; j--) {
 			board[i][j] = {
 				occupied: 0,
@@ -1070,10 +1070,10 @@ Left slide menu
 	 */
 	function layoutFix(layout){
 
-		layout.x = Math.round(layout.x * maxCols);
-		layout.y = Math.round(layout.y * maxHeight);
-		layout.sizex = Math.round(layout.sizex * maxCols);
-		layout.sizey = Math.round(layout.sizey * maxHeight);
+		layout.x = Math.ceil(layout.x * maxCols);
+		layout.y = Math.ceil(layout.y * maxHeight);
+		layout.sizex = Math.ceil(layout.sizex * maxCols);
+		layout.sizey = Math.ceil(layout.sizey * maxHeight);
 
 		return layout;
 	}
