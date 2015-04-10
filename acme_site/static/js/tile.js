@@ -9,7 +9,7 @@ $(document).ready(function(){
  	var tileWidth = 100;
  	var tileHeight = 100;
  	var maxCols = Math.floor(docWidth/tileWidth);
- 	var maxHeight = Math.floor(docHeight/tileHeight)+1;
+ 	var maxHeight = Math.floor(docHeight/tileHeight)+2;
  	$('.wrapper').width(maxCols*tileWidth);
  	$('.tile-board').css({'height':maxHeight*tileHeight});
  	var tiles = [];
@@ -80,7 +80,6 @@ $(document).ready(function(){
  			type: 'GET',
  			success: function(request){
  				options = jQuery.parseJSON(request);
- 				console.log(options);
  				$.each(options, function(k, v){
  					if(v.default == true){
  						for(var i = 0; i < v.layout.length; i++){
@@ -95,10 +94,7 @@ $(document).ready(function(){
  	
  	loadDefaultLayout();
 
-
-
-
-
+ 	$('#footer').remove();
 
 
 	//set the window creation buttons
@@ -167,54 +163,13 @@ $(document).ready(function(){
 			helper: 'ui-resizable-helper',
 			grid: [tileWidth, tileHeight],
 			start: function(event, ui){
-				resizeStartX = parseInt(ui.element.attr('col'));
-				resizeStartSizeX = parseInt(ui.element.attr('sizex'));
-				resizeStartY = parseInt(ui.element.attr('row'));
-				resizeStartSizeY = parseInt(ui.element.attr('sizey'));
+				handleResizeStart(event, ui);
 			},
 			resize: function(event, ui){
 
 			},
 			stop: function(event, ui){
-				resizeFixup(ui);
-				var el = ui.element;
-				setTimeout(function(el){
-					if(resizeDir == 'n' && parseInt(el.attr('row')) == 1){
-						el.css({
-							'top':$('.tile-board').offset().top,
-							'height':tileHeight*parseInt(el.attr('sizey')),
-							'width':tileWidth*parseInt(el.attr('sizex'))
-						});
-					}
-					else if(resizeDir == 's'){
-						el.css({
-							'height':tileHeight*parseInt(el.attr('sizey')),
-							'width':tileWidth*parseInt(el.attr('sizex'))
-						});
-					}
-					else if(resizeDir == 'e' && parseInt(el.attr('col'))+parseInt(el.attr('sizex'))-1 == maxCols){
-						el.css({
-							'left': tileWidth*(parseInt(el.attr('col'))-1)+$('.tile-holder').offset().left,
-							'width': tileWidth*parseInt(el.attr('sizex')),
-							'height':tileWidth*parseInt(el.attr('sizey'))
-						});
-
-					}
-					else if(resizeDir == 'w' && parseInt(el.attr('col')) == 1){
-						el.css({
-							'width':tileWidth*parseInt(el.attr('sizex')),
-							'height':tileWidth*parseInt(el.attr('sizey')),
-							'left':$('.tile-board').offset().left
-						});
-					}
-					else{
-						el.css({
-							'left':(parseInt(el.attr('col'))-1)*tileWidth+$('.tile-holder').offset().left,
-							'height':parseInt(el.attr('sizey'))*tileHeight,
-							'width':parseInt(el.attr('sizex'))*tileWidth
-						});
-					} 
-				}, 500, el);
+				handleResizeStop(event, ui);
 			}
 		});
 
@@ -265,6 +220,7 @@ $(document).ready(function(){
 		$(w).find('.options').click(function(e) {
 
 		});
+
 		if(options != null){
 			$(w).attr({
 				'row': options.y,
@@ -295,6 +251,83 @@ $(document).ready(function(){
 			callback();
 		return $(w);
 	};
+
+	/**
+	 * Handles all actions at the start of a resize event
+	 * event -> The event variable
+	 * ui -> the ui element handed down from the jquery handler
+	 */
+	function handleResizeStart(event, ui){
+		resizeStartX = parseInt(ui.element.attr('col'));
+		resizeStartSizeX = parseInt(ui.element.attr('sizex'));
+		resizeStartY = parseInt(ui.element.attr('row'));
+		resizeStartSizeY = parseInt(ui.element.attr('sizey'));
+		switch(resizeDir){
+			case 'n':
+				$('#'+ui.element.attr('id')).css({
+					'-webkit-transition': 'height 200ms easeOutQuint!important',
+				    '-moz-transition': 'height 200ms easeOutQuint!important',
+				    '-o-transition': 'height 200ms easeOutQuint!important',
+				    '-ms-transition': 'height 200ms easeOutQuint!important',
+				    'transition': 'height 200ms easeOutQuint!important',
+				});
+			case 's':
+			case 'e':
+			case 'w':
+		}
+	}
+
+	/**
+	 * Handles all actions needed at the end of a resize event
+	 * event -> The event variable
+	 * ui -> the ui element handed down from the jquery handler
+	 */
+	function handleResizeStop(event, ui){
+		resizeFixup(ui);
+		var el = ui.element;
+		el.css({
+			'left':(parseInt(el.attr('col'))-1)*tileWidth+$('.tile-holder').offset().left,
+			'height':parseInt(el.attr('sizey'))*tileHeight,
+			'width':parseInt(el.attr('sizex'))*tileWidth
+		});
+		setTimeout(function(el){
+			if(resizeDir == 'n' && parseInt(el.attr('row')) == 1){
+				el.css({
+					'top':$('.tile-board').offset().top,
+					'height':tileHeight*parseInt(el.attr('sizey')),
+					'width':tileWidth*parseInt(el.attr('sizex'))
+				});
+			}
+			else if(resizeDir == 's'){
+				el.css({
+					'height':tileHeight*parseInt(el.attr('sizey')),
+					'width':tileWidth*parseInt(el.attr('sizex'))
+				});
+			}
+			else if(resizeDir == 'e' && parseInt(el.attr('col'))+parseInt(el.attr('sizex'))-1 == maxCols){
+				el.css({
+					'left': tileWidth*(parseInt(el.attr('col'))-1)+$('.tile-holder').offset().left,
+					'width': tileWidth*parseInt(el.attr('sizex')),
+					'height':tileWidth*parseInt(el.attr('sizey'))
+				});
+
+			}
+			else if(resizeDir == 'w' && parseInt(el.attr('col')) == 1){
+				el.css({
+					'width':tileWidth*parseInt(el.attr('sizex')),
+					'height':tileWidth*parseInt(el.attr('sizey')),
+					'left':$('.tile-board').offset().left
+				});
+			}
+			else{
+				el.css({
+					'left':(parseInt(el.attr('col'))-1)*tileWidth+$('.tile-holder').offset().left,
+					'height':parseInt(el.attr('sizey'))*tileHeight,
+					'width':parseInt(el.attr('sizex'))*tileWidth
+				});
+			} 
+		}, 500, el);
+	}
 
 
 	/**
