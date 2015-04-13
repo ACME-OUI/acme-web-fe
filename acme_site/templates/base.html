@@ -68,14 +68,14 @@
             {% block new_button_left_link %}
 
             {% endblock %}
-            <li><a href="/acme">ACME</a></li>
-            <li><a href="/acme/issues">ACME Issues</a></li>
+            <li id="acme-link"><a href="/acme">ACME</a></li>
+            <li id="issues-link"><a href="/acme/issues">ACME Issues</a></li>
             <!--<li><a href="/acme/jspanel">jsPanel</a></li>-->
-            <li><a href="/acme/grid">Dashboard</a></li>
-            <li><a href="http://uvcdat.llnl.gov">UV-CDAT</a></li>
-            <li><a href="https://acme.globus.org">Globus</a></li>
-            <li><a href="http://acme-dev-0.ornl.gov/exploratory_analysis/">Classic Viewer</a></li>
-            <li><a href="http://acme-cdatweb.ornl.gov">CDATWEB</a></li>
+            <li id="dashboard-link"><a href="/acme/grid">Dashboard</a></li>
+            <li id="uvcdat-link"><a href="http://uvcdat.llnl.gov">UV-CDAT</a></li>
+            <li id="globus-link"><a href="https://acme.globus.org">Globus</a></li>
+            <li id="classic-link"><a href="http://acme-dev-0.ornl.gov/exploratory_analysis/">Classic Viewer</a></li>
+            <li id="cdatweb-link"><a href="http://acme-cdatweb.ornl.gov">CDATWEB</a></li>
             {% if user.is_authenticated %}
             <li class="navbar-right"><a href="/acme"> Welcome {{ user.username }}</a></li>
             <li class="navbar-right"><a href="logout">Log Out</a></li>

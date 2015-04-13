@@ -94,8 +94,13 @@ $(document).ready(function(){
  	
  	loadDefaultLayout();
 
+ 	// Remove extra stuff from the header which isnt going to be used from the dashboard 
  	$('#footer').remove();
-
+ 	$('#dashboard-link').remove();
+ 	$('#uvcdat-link').remove();
+ 	$('#glubus-link').remove();
+ 	$('#classic-link').remove();
+ 	$('#cdatweb-link').remove();
 
 	//set the window creation buttons
 	$('.slide-btn').each(function(){
@@ -106,6 +111,18 @@ $(document).ready(function(){
 				add_tile(new_tile, name+'_window');
 			}
 		});
+	});
+
+	//setup the hander to fix the windows after a resize
+	$(window).resize(function() {
+        if(this.resizeTO) clearTimeout(this.resizeTO);
+        this.resizeTO = setTimeout(function() {
+            $(this).trigger('resizeEnd');
+        }, 500);
+    });
+
+    $(window).bind('resizeEnd', function() {
+    	handleWindowResize();
 	});
 
 
@@ -1074,7 +1091,14 @@ Left slide menu
 		layout.y = Math.ceil(layout.y * maxHeight);
 		layout.sizex = Math.ceil(layout.sizex * maxCols);
 		layout.sizey = Math.ceil(layout.sizey * maxHeight);
-
+		var diff = layout.x + layout.sizex - 1 - maxCols
+		if(diff > 0){
+			layout.sizex -= diff;
+		}
+		diff = layout.y + layout.sizey - 1 - maxHeight;
+		if(diff > 0){
+			layout.sizey -= diff;
+		}
 		return layout;
 	}
 
@@ -1199,5 +1223,52 @@ Left slide menu
 		return cookieValue;
 	}
 
+
+	/**
+	 * Handler for window resize events
+	 *
+	 *
+	 */
+	function handleWindowResize(){
+		//iterate over all windows and adjust their size based on their proportion of the screen
+		var newMaxCols = Math.floor($(window).width()/tileWidth);
+ 		var newMaxHeight = Math.floor($(window).height()/tileHeight)+1;
+ 		for(var i = 0; i < tiles.length; i++){
+ 			var curTile = $('#'+tiles[i]);
+ 			var newX = Math.floor(parseInt(curTile.attr('col'))/maxCols * newMaxCols);
+ 			var newY = Math.floor(parseInt(curTile.attr('row'))/maxHeight * newMaxHeight);
+ 			var newSizeX = Math.floor(parseInt(curTile.attr('sizex'))/maxCols * newMaxCols);
+ 			var newSizeY = Math.floor(parseInt(curTile.attr('sizey'))/maxHeight * newMaxHeight);
+ 			curTile.attr({
+ 				'col':newX,
+ 				'row':newY,
+ 				'sizex':newSizeX,
+ 				'sizey':newSizeY
+ 			});
+ 			curTile.css({
+ 				'top':(newY-1)*tileHeight + $('.tile-board').offset().top,
+ 				'left':(newX-1)*tileWidth + $('.tile-board').offset().left,
+ 				'width':newSizeX*tileWidth,
+ 				'height':newSizeY*tileHeight
+ 			});
+ 		}
+ 		maxCols = newMaxCols;
+ 		maxHeight = newMaxHeight;
+	}
+
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
