@@ -106,16 +106,19 @@ $(document).ready(function(){
 	});
 
 	//setup the hander to fix the windows after a resize
-	// $(window).resize(function() {
- //        if(this.resizeTO) clearTimeout(this.resizeTO);
- //        this.resizeTO = setTimeout(function() {
- //            $(this).trigger('resizeEnd');
- //        }, 500);
- //    });
+	$(window).resize(function() {
+		if(event.target == this){
+			if(this.resizeTO) clearTimeout(this.resizeTO);
+	        this.resizeTO = setTimeout(function() {
+	            $(this).trigger('resizeEnd');
+	        }, 500);
+		}
+        
+    });
 
- //    $(window).bind('resizeEnd', function() {
- //    	handleWindowResize();
-	// });
+    $(window).bind('resizeEnd', function() {
+    	handleWindowResize();
+	});
 
 
 
@@ -175,10 +178,11 @@ $(document).ready(function(){
 				handleResizeStart(event, ui);
 			},
 			resize: function(event, ui){
-
+				event.stopPropagation();
 			},
 			stop: function(event, ui){
 				handleResizeStop(event, ui);
+				event.stopPropagation();
 			}
 		});
 
@@ -284,6 +288,7 @@ $(document).ready(function(){
 			case 'e':
 			case 'w':
 		}
+		event.stopPropagation();
 	}
 
 	/**
