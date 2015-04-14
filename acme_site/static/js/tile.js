@@ -4,70 +4,62 @@ $(document).ready(function(){
 /****************************************
  	Setup variables
  	***************************************/
- 	var docWidth = $(".tile-board").width();
- 	var docHeight = $(".tile-board").height();
- 	var tileWidth = 100;
- 	var tileHeight = 100;
- 	var maxCols = Math.floor(docWidth/tileWidth);
- 	var maxHeight = Math.floor(docHeight/tileHeight)+1;
+ 	// var docWidth = $(".tile-board").width();
+ 	// var docHeight = $(".tile-board").height();
+ 	var docHeight = $(window).height();
+ 	var docWidth = $(window).width();
+ 	var tileWidth = 50;
+ 	var tileHeight = 50;
+ 	var maxCols = Math.floor(docWidth/tileWidth)-1;
+ 	var maxHeight = Math.floor(docHeight/tileHeight)-1;
  	$('.wrapper').width(maxCols*tileWidth);
+ 	$('.wrapper').height(maxHeight*tileHeight);
  	$('.tile-board').css({'height':maxHeight*tileHeight});
  	var tiles = [];
  	var resize_handle_html = '<span class="gs-resize-handle gs-resize-handle-both"></span>';
-		// Define a widget
-		var header1 = ''; 
-		var header2 = '';
-		var header3 = '';
-		var contents = '';
-		var optionContents = '';
-		header1 += '<div class="tile-panel panel-default">';
-		header1 += ' <div class="tile-panel-heading">';
-		header1 += '  <div class="panel-header-title text-center">';
-		header1 += '    <button type="button" class="btn btn-default btn-xs options" style="float:left;">';
-		header1 += '     <span class="fa fa-cog" aria-label="Options"></span>';
-		header1 += '    </button>';
-		header1 += '    <button type="button" class="btn btn-default btn-xs remove"  style="float:right;">';
-		header1 += '     <span class="fa fa-times" aria-label="Close"></span>';
-		header1 += '    </button>';
-		header1 += '     <p style="text-align: center">';
-		// Widget Name
-		header2 += '     <p>';
-		header2 += '   </div>';
-		header2 += '  </div>';
-		header2 += ' </div>';
-		header2 += ' <div class="tile-panel-body" data-direction="horizontal" data-mode="slid">';
-		// Widget Contents
-		contents += '  <p>The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men.</p>';
-		header3 += ' </div>';
-		header3 += '</div>';
-		var dragStartX = 0;
-		var dragStartY = 0;
-		var dragStartSizeX = 0;
-		var dragStartSizeY = 0;
-		var dragStartId = '';
-		var dragStartOffset = {
-			top: 0,
-			left: 0
-		};
-		var widgetMargins = 1;
-		var resizeStartSizeX = 0;
-		var resizeStartSizeY = 0;
-		var resizeStartX = 0;
-		var resizeStartY = 0;
-		var resizeDir = '';
+	// Define a widget
+	var header1 = ''; 
+	var header2 = '';
+	var header3 = '';
+	var contents = '';
+	var optionContents = '';
+	header1 += '<div class="tile-panel panel-default">';
+	header1 += ' <div class="tile-panel-heading">';
+	header1 += '  <div class="panel-header-title text-center">';
+	header1 += '    <button type="button" class="btn btn-default btn-xs options" style="float:left;">';
+	header1 += '     <span class="fa fa-cog" aria-label="Options"></span>';
+	header1 += '    </button>';
+	header1 += '    <button type="button" class="btn btn-default btn-xs remove"  style="float:right;">';
+	header1 += '     <span class="fa fa-times" aria-label="Close"></span>';
+	header1 += '    </button>';
+	header1 += '     <p style="text-align: center">';
+	// Widget Name
+	header2 += '     <p>';
+	header2 += '   </div>';
+	header2 += '  </div>';
+	header2 += ' </div>';
+	header2 += ' <div class="tile-panel-body" data-direction="horizontal" data-mode="slid">';
+	// Widget Contents
+	contents += '  <p>The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men.</p>';
+	header3 += ' </div>';
+	header3 += '</div>';
+	var dragStartX = 0;
+	var dragStartY = 0;
+	var dragStartSizeX = 0;
+	var dragStartSizeY = 0;
+	var dragStartId = '';
+	var dragStartOffset = {
+		top: 0,
+		left: 0
+	};
+	var widgetMargins = 1;
+	var resizeStartSizeX = 0;
+	var resizeStartSizeY = 0;
+	var resizeStartX = 0;
+	var resizeStartY = 0;
+	var resizeDir = '';
 
-	//i = cols, j = rows
-	var board = new Array(maxCols+1);
-	//setup the empty board
-	for (var i = board.length - 1; i >= 0; i--) {
-		board[i] = new Array(maxHeight+1);
-		for (var j = board[i].length - 1; j >= 0; j--) {
-			board[i][j] = {
-				occupied: 0,
-				tile: ''
-			};
-		}
-	}
+	boardSetup(maxCols, maxHeight);
 /****************************************
  	End setup variables
  	***************************************/
@@ -114,16 +106,16 @@ $(document).ready(function(){
 	});
 
 	//setup the hander to fix the windows after a resize
-	$(window).resize(function() {
-        if(this.resizeTO) clearTimeout(this.resizeTO);
-        this.resizeTO = setTimeout(function() {
-            $(this).trigger('resizeEnd');
-        }, 500);
-    });
+	// $(window).resize(function() {
+ //        if(this.resizeTO) clearTimeout(this.resizeTO);
+ //        this.resizeTO = setTimeout(function() {
+ //            $(this).trigger('resizeEnd');
+ //        }, 500);
+ //    });
 
-    $(window).bind('resizeEnd', function() {
-    	handleWindowResize();
-	});
+ //    $(window).bind('resizeEnd', function() {
+ //    	handleWindowResize();
+	// });
 
 
 
@@ -374,7 +366,7 @@ $(document).ready(function(){
 	 				'sizey':sizey+diff
 	 			});
 	 			curWindow.css({
-	 				'top':(y-diff)*tileHeight-40,
+	 				'top':(y-diff)*tileHeight+10,
 	 				'height':(sizey+diff)*tileHeight
 	 			});
 	 			update_board(id);
@@ -429,7 +421,7 @@ $(document).ready(function(){
 					'sizey':sizey+diff
 				});
 				curWindow.css({
-					'top':(y-diff)*tileHeight-40,
+					'top':(y-diff)*tileHeight+10,
 					'height':(sizey+diff)*tileHeight
 				});
 				update_board(id);
@@ -1024,7 +1016,9 @@ Left slide menu
 			url: 'load_layout/',
 			type: 'GET',
 			success: function(request){
+				//parse response
 				options = jQuery.parseJSON(request);
+				//create background mask
 				var mask = document.createElement('div');
 				$(mask).addClass('mask');
 				$(mask).attr({'id':'mask'});
@@ -1032,6 +1026,7 @@ Left slide menu
 					fadeOutMask();
 				});
 				$('body').append(mask);
+				//create load menu and populate with values
 				var loadMenu = document.createElement('div');
 				$(loadMenu).addClass('bvc');
 				$(loadMenu).addClass('save-layout');
@@ -1046,6 +1041,7 @@ Left slide menu
 				$(loadMenu).html(loadMenuHtml);
 				$('body').append(loadMenu);
 				$(mask).fadeIn();
+
 				$('#load-button').click(function(){
 					var name = document.forms['load-layout-form'].elements[0].options[document.forms['load-layout-form'].elements[0].selectedIndex].text;
 					var csrfToken = getCookie('csrftoken');
@@ -1073,11 +1069,11 @@ Left slide menu
 			}
 		});
 
-	$('.tile').each(function(){
-		$(this).remove();
-	});
-	tiles = [];
-	leftMenuToggle();
+		$('.tile').each(function(){
+			$(this).remove();
+		});
+		tiles = [];
+		leftMenuToggle();
 	});
 
 
@@ -1233,12 +1229,13 @@ Left slide menu
 		//iterate over all windows and adjust their size based on their proportion of the screen
 		var newMaxCols = Math.floor($(window).width()/tileWidth);
  		var newMaxHeight = Math.floor($(window).height()/tileHeight)+1;
+ 		boardSetup(newMaxCols, newMaxHeight);
  		for(var i = 0; i < tiles.length; i++){
  			var curTile = $('#'+tiles[i]);
- 			var newX = Math.floor(parseInt(curTile.attr('col'))/maxCols * newMaxCols);
- 			var newY = Math.floor(parseInt(curTile.attr('row'))/maxHeight * newMaxHeight);
- 			var newSizeX = Math.floor(parseInt(curTile.attr('sizex'))/maxCols * newMaxCols);
- 			var newSizeY = Math.floor(parseInt(curTile.attr('sizey'))/maxHeight * newMaxHeight);
+ 			var newX = checkZero(Math.floor(parseInt(curTile.attr('col'))/maxCols * newMaxCols));
+ 			var newY = checkZero(Math.floor(parseInt(curTile.attr('row'))/maxHeight * newMaxHeight));
+ 			var newSizeX = checkZero(Math.floor(parseInt(curTile.attr('sizex'))/maxCols * newMaxCols));
+ 			var newSizeY = checkZero(Math.floor(parseInt(curTile.attr('sizey'))/maxHeight * newMaxHeight));
  			curTile.attr({
  				'col':newX,
  				'row':newY,
@@ -1246,14 +1243,37 @@ Left slide menu
  				'sizey':newSizeY
  			});
  			curTile.css({
- 				'top':(newY-1)*tileHeight + $('.tile-board').offset().top,
- 				'left':(newX-1)*tileWidth + $('.tile-board').offset().left,
+ 				'top':(newY - 1)*tileHeight + $('.tile-board').offset().top,
+ 				'left':(newX - 1)*tileWidth + $('.tile-board').offset().left,
  				'width':newSizeX*tileWidth,
  				'height':newSizeY*tileHeight
  			});
+ 			update_board(curTile.attr('id'));
  		}
  		maxCols = newMaxCols;
  		maxHeight = newMaxHeight;
+	}
+
+	function checkZero(val){
+		if(val == 0)
+			return 1
+		else
+			return val
+	}
+
+	function boardSetup(maxCols, maxHeight){
+		//i = cols, j = rows
+		board = new Array(maxCols+1);
+		//setup the empty board
+		for (var i = board.length - 1; i >= 0; i--) {
+			board[i] = new Array(maxHeight+1);
+			for (var j = board[i].length - 1; j >= 0; j--) {
+				board[i][j] = {
+					occupied: 0,
+					tile: ''
+				};
+			}
+		}
 	}
 
 });
