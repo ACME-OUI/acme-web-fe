@@ -420,7 +420,7 @@ $(document).ready(function(){
 	 				'sizey':sizey+diff
 	 			});
 	 			curWindow.css({
-	 				'top':(y-diff)*tileHeight- $('.navbar').height() + $('.wrapper').offset().top - $('.navbar').height(),
+	 				'top':(y-diff)*tileHeight + $('.navbar').height() - 1,
 	 				'height':(sizey+diff)*tileHeight
 	 			});
 	 			update_board(id);
@@ -475,7 +475,7 @@ $(document).ready(function(){
 					'sizey':sizey+diff
 				});
 				curWindow.css({
-					'top':(y-diff)*tileHeight- $('.navbar').height() + $('.wrapper').offset().top - $('.navbar').height(),
+					'top':(y-diff)*tileHeight + $('.navbar').height() - 1,
 					'height':(sizey+diff)*tileHeight
 				});
 				update_board(id);
@@ -607,7 +607,7 @@ $(document).ready(function(){
 				});
 				curWindow.css({
 					'width':(sizex+diff)*tileWidth,
-					'left':(x-diff)*tileWidth
+					'left':(x-diff-1)*tileWidth + $('.wrapper').offset().left
 				});
 				update_board(id);
 				moved.add(id);
