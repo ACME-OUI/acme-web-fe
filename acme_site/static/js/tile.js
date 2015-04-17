@@ -6,12 +6,36 @@ $(document).ready(function(){
  	***************************************/
  	// var docWidth = $(".tile-board").width();
  	// var docHeight = $(".tile-board").height();
- 	var docHeight = $(window).height();
+ 	var docHeight = $(window).height() - $('.navbar').height() - 10;
+ 	docHeight -= docHeight%10;
  	var docWidth = $(window).width();
- 	var tileWidth = 50;
- 	var tileHeight = 50;
- 	var maxCols = Math.floor(docWidth/tileWidth)-1;
- 	var maxHeight = Math.floor(docHeight/tileHeight)-1;
+ 	docWidth -= docWidth%10;
+ 	var dimensionComponents = factorSortReturn(factor(docHeight));
+ 	dimensionComponents = dimensionComponents.sort(function(a, b){return a.factor - b.factor});
+ 	for(var i = 0; i < dimensionComponents.length; i ++){
+ 		if(dimensionComponents[i].multiplicator % 10 != 0){
+ 			dimensionComponents.splice(i, 1);
+ 			i--;
+ 		}
+ 	}
+ 	dimensionComponents = dimensionComponents[Math.floor(dimensionComponents.length/2)];
+ 	var tileHeight = dimensionComponents.factor;
+ 	var maxHeight = dimensionComponents.multiplicator;
+ 	dimensionComponents = factorSortReturn(factor(docWidth));
+ 	dimensionComponents = dimensionComponents.sort(function(a, b){return a.factor - b.factor});
+ 	 	for(var i = 0; i < dimensionComponents.length; i ++){
+ 		if(dimensionComponents[i].multiplicator % 10 != 0){
+ 			dimensionComponents.splice(i, 1);
+ 			i--;
+ 		}
+ 	}
+ 	dimensionComponents = dimensionComponents[Math.ceil(dimensionComponents.length/2)];
+ 	var tileWidth = dimensionComponents.factor-1;
+ 	var maxCols = dimensionComponents.multiplicator;
+ 	// var tileWidth = 50;
+ 	// var tileHeight = 50;
+ 	// var maxCols = Math.floor(docWidth/tileWidth)-1;
+ 	// var maxHeight = Math.floor(docHeight/tileHeight)-1;
  	$('.wrapper').width(maxCols*tileWidth);
  	$('.wrapper').height(maxHeight*tileHeight);
  	$('.tile-board').css({'height':maxHeight*tileHeight});
@@ -63,6 +87,31 @@ $(document).ready(function(){
 /****************************************
  	End setup variables
  	***************************************/
+
+ 	function factor( a ) {
+		var c, i = 2, j = Math.floor( a / 2 ), output = [];
+		for( ; i<=a; i++ ) {
+			if(i == 1)
+				return;
+			c = a / i;
+			if(c == 1)
+				continue;
+			if( c===Math.floor( c ) ) {
+				var b = {
+						'factor':c,
+						'multiplicator':i
+						};
+				output.push(b);
+  			}
+ 		}
+ 		return output;
+ 	}
+
+ 	function factorSortReturn(factors){
+ 		return factors.sort(function(a){return a.factor});
+ 	}
+
+
 
  	//find if the user has a default layout, if so load it
  	function loadDefaultLayout(){
@@ -371,7 +420,7 @@ $(document).ready(function(){
 	 				'sizey':sizey+diff
 	 			});
 	 			curWindow.css({
-	 				'top':(y-diff)*tileHeight+10,
+	 				'top':(y-diff)*tileHeight- $('.navbar').height() + $('.wrapper').offset().top - $('.navbar').height(),
 	 				'height':(sizey+diff)*tileHeight
 	 			});
 	 			update_board(id);
@@ -426,7 +475,7 @@ $(document).ready(function(){
 					'sizey':sizey+diff
 				});
 				curWindow.css({
-					'top':(y-diff)*tileHeight+10,
+					'top':(y-diff)*tileHeight- $('.navbar').height() + $('.wrapper').offset().top - $('.navbar').height(),
 					'height':(sizey+diff)*tileHeight
 				});
 				update_board(id);
@@ -558,7 +607,7 @@ $(document).ready(function(){
 				});
 				curWindow.css({
 					'width':(sizex+diff)*tileWidth,
-					'left':(x-diff)*tileWidth-92
+					'left':(x-diff)*tileWidth
 				});
 				update_board(id);
 				moved.add(id);
@@ -1039,7 +1088,7 @@ Left slide menu
 				loadMenuHtml += '<form name="load-layout-form" id="save-form">'; 
 				loadMenuHtml += 'Select Layout:<br><select id="select-layout">';
 				$.each(options, function(k, v){
-					loadMenuHtml += '<option value="' + v + '">' + v + '</option>';
+					loadMenuHtml += '<option value="' + v.nane + '">' + v.name + '</option>';
 				});
 				loadMenuHtml += '</select><input type="submit" value="Load" id="load-button">';
 				loadMenuHtml += '</form></div><div class="bevel bl br"></div>';
@@ -1088,10 +1137,10 @@ Left slide menu
 	 */
 	function layoutFix(layout){
 
-		layout.x = Math.ceil(layout.x * maxCols);
-		layout.y = Math.ceil(layout.y * maxHeight);
-		layout.sizex = Math.ceil(layout.sizex * maxCols);
-		layout.sizey = Math.ceil(layout.sizey * maxHeight);
+		layout.x = checkZero(Math.floor(layout.x * maxCols));
+		layout.y = checkZero(Math.floor(layout.y * maxHeight));
+		layout.sizex = checkZero(Math.floor(layout.sizex * maxCols));
+		layout.sizey = checkZero(Math.floor(layout.sizey * maxHeight));
 		var diff = layout.x + layout.sizex - 1 - maxCols
 		if(diff > 0){
 			layout.sizex -= diff;
@@ -1232,15 +1281,38 @@ Left slide menu
 	 */
 	function handleWindowResize(){
 		//iterate over all windows and adjust their size based on their proportion of the screen
-		var newMaxCols = Math.floor($(window).width()/tileWidth);
- 		var newMaxHeight = Math.floor($(window).height()/tileHeight)+1;
+		var newMaxHeight;
+ 		var newDocHeight = $(window).height() - $('.navbar').height();
+	 	newDocHeight -= newDocHeight%10;
+	 	var newdDocWidth = $(window).width();
+	 	newdDocWidth -= newdDocWidth%10;
+	 	var dimensionComponents = factorSortReturn(factor(newDocHeight));
+	 	dimensionComponents = dimensionComponents.sort(function(a, b){return a.factor - b.factor});
+	 	dimensionComponents = dimensionComponents[Math.ceil(dimensionComponents.length/2)];
+	 	tileHeight = dimensionComponents.factor;
+	 	if(dimensionComponents.factor < 50){
+	 		newMaxHeight = dimensionComponents.multiplicator-2
+	 	} else {
+	 		newMaxHeight = dimensionComponents.multiplicator-1 		
+	 	}
+	 	dimensionComponents = factorSortReturn(factor(newdDocWidth));
+	 	dimensionComponents = dimensionComponents.sort(function(a, b){return a.factor - b.factor});
+	 	dimensionComponents = dimensionComponents[Math.ceil(dimensionComponents.length/2)];
+	 	tileWidth = dimensionComponents.factor;
+	 	var newMaxCols = dimensionComponents.multiplicator;
  		boardSetup(newMaxCols, newMaxHeight);
+
  		for(var i = 0; i < tiles.length; i++){
  			var curTile = $('#'+tiles[i]);
- 			var newX = checkZero(Math.floor(parseInt(curTile.attr('col'))/maxCols * newMaxCols));
- 			var newY = checkZero(Math.floor(parseInt(curTile.attr('row'))/maxHeight * newMaxHeight));
- 			var newSizeX = checkZero(Math.floor(parseInt(curTile.attr('sizex'))/maxCols * newMaxCols));
- 			var newSizeY = checkZero(Math.floor(parseInt(curTile.attr('sizey'))/maxHeight * newMaxHeight));
+ 			var xRatio = parseInt(curTile.attr('col'))/maxCols;
+ 			var yRatio = parseInt(curTile.attr('row'))/maxHeight;
+ 			var sizexRatio = parseInt(curTile.attr('sizex'))/maxCols;
+ 			var sizeyRatio = parseInt(curTile.attr('sizey'))/maxHeight;
+
+ 			var newX = checkZero(Math.ceil(xRatio * newMaxCols));
+ 			var newY = checkZero(Math.ceil(yRatio * newMaxHeight));
+ 			var newSizeX = checkZero(Math.floor(sizexRatio * newMaxCols));
+ 			var newSizeY = checkZero(Math.floor(sizeyRatio * newMaxHeight));
  			curTile.attr({
  				'col':newX,
  				'row':newY,
@@ -1257,6 +1329,8 @@ Left slide menu
  		}
  		maxCols = newMaxCols;
  		maxHeight = newMaxHeight;
+ 		$('.tile-board').height(maxHeight * tileHeight);
+ 		$('.wrapper').height(maxHeight * tileHeight);
 	}
 
 	function checkZero(val){
