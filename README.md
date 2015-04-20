@@ -42,7 +42,12 @@ acme-site
 
     mkdir acme_site/static
     python manage.py collectstatic
-    
+
+**Velo API**
+
+    Open VeloAPI.py and change /Users/baldwin32/projects/acme-web-fe/acme_site/static/java/VeloAPI.jar to the location of your .jar file
+    Install Jpype http://jpype.sourceforge.net/
+
 **setup db**
 
     python manage.py syncdb

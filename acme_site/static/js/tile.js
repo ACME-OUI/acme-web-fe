@@ -6,43 +6,8 @@ $(document).ready(function(){
  	***************************************/
  	// var docWidth = $(".tile-board").width();
  	// var docHeight = $(".tile-board").height();
- 	var docHeight = $(window).height() - $('.navbar').height() - 10;
- 	docHeight -= docHeight%10;
- 	var docWidth = $(window).width();
- 	docWidth -= docWidth%10;
- 	var dimensionComponents = factorSortReturn(factor(docHeight));
- 	dimensionComponents = dimensionComponents.sort(function(a, b){return a.factor - b.factor});
- 	for(var i = 0; i < dimensionComponents.length; i++){
- 		if(dimensionComponents[i].multiplicator % 10 != 0){
- 			dimensionComponents.splice(i, 1);
- 			i--;
- 		}
- 	}
- 	if(dimensionComponents.legnth == 0){
- 		tileHeight = 50;
- 		maxHeight = Math.floor(docHeight)/50;
- 	} else {
-	 	dimensionComponents = dimensionComponents[Math.floor(dimensionComponents.length/2)];
-	 	var tileHeight = dimensionComponents.factor;
-	 	var maxHeight = dimensionComponents.multiplicator;
- 	}
- 	
- 	dimensionComponents = factorSortReturn(factor(docWidth));
- 	dimensionComponents = dimensionComponents.sort(function(a, b){return a.factor - b.factor});
- 	for(var i = 0; i < dimensionComponents.length; i++){
- 		if(dimensionComponents[i].multiplicator % 10 != 0){
- 			dimensionComponents.splice(i, 1);
- 			i--;
- 		}
- 	}
- 	if(dimensionComponents.length == 0){
- 		tileWidth = 50;
- 		maxCols = Math.floor(docWidth/50);
- 	} else {
- 		dimensionComponents = dimensionComponents[Math.floor(dimensionComponents.length/2)];
-	 	var tileWidth = dimensionComponents.factor;
-	 	var maxCols = dimensionComponents.multiplicator;
- 	}
+ 	var docHeight, docWidth, maxCols, maxHeight, tileHeight, tileWidth;
+ 	calcMaxSize();
  	
  	// var tileWidth = 50;
  	// var tileHeight = 50;
@@ -94,8 +59,10 @@ $(document).ready(function(){
 	var resizeStartX = 0;
 	var resizeStartY = 0;
 	var resizeDir = '';
-	var needsFixBool = true;
-	var fixVal = 99;
+	var needsFixXBool = true;
+	var needsFixYBool = true;
+	var fixValX = 99;
+	var fixValY = 99;
 
 	boardSetup(maxCols, maxHeight);
 	loadDefaultLayout();
@@ -127,9 +94,17 @@ $(document).ready(function(){
  		return factors.sort(function(a){return a.factor});
  	}
 
- 	function needsFix(){
- 		if(needsFixBool){
- 			return fixVal - 1;
+ 	function needsFixX(){
+ 		if(needsFixXBool){
+ 			return fixValX - 1;
+ 		} else {
+ 			return 0;
+ 		}
+ 	}
+
+ 	function needsFixY(){
+ 		if(needsFixYBool){
+ 			return fixValY - 1;
  		} else {
  			return 0;
  		}
@@ -149,10 +124,17 @@ $(document).ready(function(){
  						for(var i = 0; i < v.layout.length; i++){
  							v.layout[i] = layoutFix(v.layout[i]);
  							if(v.layout[i].x == 1){
- 								needsFixBool = false;
+ 								needsFixXBool = false;
  							} else {
- 								if(v.layout[i].x < fixVal){
- 									fixVal = v.layout[i].x;
+ 								if(v.layout[i].x < fixValX){
+ 									fixValX = v.layout[i].x;
+ 								}
+ 							}
+ 							if(v.layout[i].y == 1){
+ 								needsFixYBool = false;
+ 							} else {
+ 								if(v.layout[i].y < fixValY){
+ 									fixValY = v.layout[i].y;
  								}
  							}
  						}
@@ -341,6 +323,21 @@ $(document).ready(function(){
 				'sizex': options.sizex,
 				'sizey': options.sizey
 			});
+			for(var i = 0; i < tiles.length; i ++){
+				if(id != tiles[i]){
+					// if the tile is overlapping in the y direction t.y + t.sizey >= y > t.y
+					if(parseInt($('#'+tiles[i]).attr('row'))+parseInt($('#'+tiles[i]).attr('sizey')) >= parseInt($(w).attr('row')) && parseInt($(w).attr('row')) > parseInt($('#'+tiles[i]).attr('row'))){
+						$(w).attr({
+							'row' : parseInt($('#'+tiles[i]).attr('row'))+parseInt($('#'+tiles[i]).attr('sizey'))
+						});
+					}
+					if(parseInt($('#'+tiles[i]).attr('col'))+parseInt($('#'+tiles[i]).attr('sizex')) >= parseInt($(w).attr('col')) && parseInt($(w).attr('col')) > parseInt($('#'+tiles[i]).attr('col'))){
+						$(w).attr({
+							'col' : parseInt($('#'+tiles[i]).attr('col'))+parseInt($('#'+tiles[i]).attr('sizex'))
+						});
+					}
+				}
+			}
 			update_board(id);
 			var tile_offset = offset_from_location(parseInt($(w).attr('row')), parseInt($(w).attr('col')));
 			$(w).css({
@@ -360,6 +357,7 @@ $(document).ready(function(){
 			});
 		}
 		$(w).animate({'opacity':1}, 'slow', 'easeOutCubic');
+
 		if(callback != null)
 			callback();
 		return $(w);
@@ -1163,6 +1161,10 @@ Left slide menu
 						data: data,
 						dataType: 'json',
 						success: function(request){
+							$('.tile').each(function(){
+								$(this).remove();
+							});
+							tiles = [];
 							layout = []
 							$.each(request.board_layout, function(k, v){
 								layout.push(layoutFix(v));
@@ -1173,11 +1175,6 @@ Left slide menu
 				});
 			}
 		});
-
-		$('.tile').each(function(){
-			$(this).remove();
-		});
-		tiles = [];
 		leftMenuToggle();
 	});
 
@@ -1222,13 +1219,11 @@ Left slide menu
 			var name = layout[i].tileName;
 			var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + contents + header3 +'</li>';
 			add_tile(new_tile, name+'_window', {
-				x: layout[i].x - needsFix(),
-				y: layout[i].y,
+				x: layout[i].x - needsFixX(),
+				y: layout[i].y - needsFixY(),
 				sizex: layout[i].sizex,
 				sizey: layout[i].sizey
 			});
-
-
 		}
 	}
 
@@ -1324,6 +1319,46 @@ Left slide menu
 		return cookieValue;
 	}
 
+	function calcMaxSize(){
+		docHeight = $(window).height() - $('.navbar').height() - 10;
+	 	docHeight -= docHeight%10;
+	 	docWidth = $(window).width();
+	 	docWidth -= docWidth%10;
+	 	var dimensionComponents = factorSortReturn(factor(docHeight));
+	 	dimensionComponents = dimensionComponents.sort(function(a, b){return a.factor - b.factor});
+	 	for(var i = 0; i < dimensionComponents.length; i++){
+	 		if(dimensionComponents[i].multiplicator % 10 != 0){
+	 			dimensionComponents.splice(i, 1);
+	 			i--;
+	 		}
+	 	}
+	 	if(dimensionComponents.legnth == 0){
+	 		tileHeight = 50;
+	 		maxHeight = Math.floor(docHeight)/50;
+	 	} else {
+		 	dimensionComponents = dimensionComponents[Math.floor(dimensionComponents.length/2)];
+		 	tileHeight = dimensionComponents.factor;
+		 	maxHeight = dimensionComponents.multiplicator;
+	 	}
+	 	
+	 	dimensionComponents = factorSortReturn(factor(docWidth));
+	 	dimensionComponents = dimensionComponents.sort(function(a, b){return a.factor - b.factor});
+	 	for(var i = 0; i < dimensionComponents.length; i++){
+	 		if(dimensionComponents[i].multiplicator % 10 != 0){
+	 			dimensionComponents.splice(i, 1);
+	 			i--;
+	 		}
+	 	}
+	 	if(dimensionComponents.length == 0){
+	 		tileWidth = 50;
+	 		maxCols = Math.floor(docWidth/50);
+	 	} else {
+	 		dimensionComponents = dimensionComponents[Math.floor(dimensionComponents.length/2)];
+		 	tileWidth = dimensionComponents.factor;
+		 	maxCols = dimensionComponents.multiplicator;
+	 	}
+	}
+
 
 	/**
 	 * Handler for window resize events
@@ -1332,54 +1367,33 @@ Left slide menu
 	 */
 	function handleWindowResize(){
 		//iterate over all windows and adjust their size based on their proportion of the screen
-		var newMaxHeight;
- 		var newDocHeight = $(window).height() - $('.navbar').height();
-	 	newDocHeight -= newDocHeight%10;
-	 	var newdDocWidth = $(window).width();
-	 	newdDocWidth -= newdDocWidth%10;
-	 	var dimensionComponents = factorSortReturn(factor(newDocHeight));
-	 	dimensionComponents = dimensionComponents.sort(function(a, b){return a.factor - b.factor});
-	 	dimensionComponents = dimensionComponents[Math.ceil(dimensionComponents.length/2)];
-	 	tileHeight = dimensionComponents.factor;
-	 	if(dimensionComponents.factor < 50){
-	 		newMaxHeight = dimensionComponents.multiplicator-2
-	 	} else {
-	 		newMaxHeight = dimensionComponents.multiplicator-1 		
-	 	}
-	 	dimensionComponents = factorSortReturn(factor(newdDocWidth));
-	 	dimensionComponents = dimensionComponents.sort(function(a, b){return a.factor - b.factor});
-	 	dimensionComponents = dimensionComponents[Math.ceil(dimensionComponents.length/2)];
-	 	tileWidth = dimensionComponents.factor;
-	 	var newMaxCols = dimensionComponents.multiplicator;
- 		boardSetup(newMaxCols, newMaxHeight);
+		var oldMaxCols = maxCols, oldMaxHeight = maxHeight;
+		calcMaxSize();
+ 		boardSetup(maxCols, maxHeight);
 
  		for(var i = 0; i < tiles.length; i++){
  			var curTile = $('#'+tiles[i]);
- 			var xRatio = parseInt(curTile.attr('col'))/maxCols;
- 			var yRatio = parseInt(curTile.attr('row'))/maxHeight;
- 			var sizexRatio = parseInt(curTile.attr('sizex'))/maxCols;
- 			var sizeyRatio = parseInt(curTile.attr('sizey'))/maxHeight;
-
- 			var newX = checkZero(Math.ceil(xRatio * newMaxCols));
- 			var newY = checkZero(Math.ceil(yRatio * newMaxHeight));
- 			var newSizeX = checkZero(Math.floor(sizexRatio * newMaxCols));
- 			var newSizeY = checkZero(Math.floor(sizeyRatio * newMaxHeight));
+ 			var layout = layoutFix({
+ 				tileName: tiles[i],
+ 				x: parseInt(curTile.attr('col')),
+ 				y: parseInt(curTile.attr('row')),
+ 				sizex: parseInt(curTile.attr('sizex')),
+ 				sizey: parseInt(curTile.attr('sizey'))
+ 			})
  			curTile.attr({
- 				'col':newX,
- 				'row':newY,
- 				'sizex':newSizeX,
- 				'sizey':newSizeY
+ 				'col':layout.y,
+ 				'row':layout.x,
+ 				'sizex':layout.sizex,
+ 				'sizey':layout.sizey
  			});
  			curTile.css({
- 				'top':(newY - 1)*tileHeight + $('.tile-board').offset().top,
- 				'left':(newX - 1)*tileWidth + $('.tile-board').offset().left,
- 				'width':newSizeX*tileWidth,
- 				'height':newSizeY*tileHeight
+ 				'top':(layout.y - 1)*tileHeight + $('.tile-board').offset().top,
+ 				'left':(layout.x - 1)*tileWidth + $('.tile-board').offset().left,
+ 				'width':layout.sizex*tileWidth,
+ 				'height':layout.sizey*tileHeight
  			});
- 			update_board(curTile.attr('id'));
+ 			update_board(tiles[i]);
  		}
- 		maxCols = newMaxCols;
- 		maxHeight = newMaxHeight;
  		$('.tile-board').height(maxHeight * tileHeight);
  		$('.wrapper').height(maxHeight * tileHeight);
 	}
