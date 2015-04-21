@@ -1287,6 +1287,7 @@ Left slide menu
 
 	$('#drop-down-tab').click(function(e){
 		var menuHeight = parseInt($('#drop-down-menu').css('height'));
+		
 		if($('#drop-down-menu').css('display') == 'none'){
 			$('.tile').each(function(){
 				$(this).css({
@@ -1419,7 +1420,6 @@ Left slide menu
 			}
 		}
 	}
-
 });
 
 

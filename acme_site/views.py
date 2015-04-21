@@ -21,6 +21,7 @@ from acme_site.models import TileLayout
 #from acme_site.forms import
 
 import json
+import xmltodict
 import simplejson
 import os
 import urllib
@@ -118,7 +119,26 @@ def jspanel(request):
 
 @login_required(login_url='login')
 def grid(request):
-    return HttpResponse(render_template(request, "acme_site/grid.html", {}))
+    ''' For demo purposes this is loading a local file '''    
+    from xml.etree.ElementTree import parse
+    tree = parse('acme_site/demo_data/registration.xml')
+
+    node_name_list = []
+    node_peer_list = []
+    node_url_list = []
+    node_location_list = []
+    for node in tree.getroot():
+        print "node", node
+        attrs = node.attrib
+        node_name_list.append(attrs["shortName"])
+        node_peer_list.append(attrs["adminPeer"])
+        node_url_list.append(attrs["hostname"])
+        for child in node:
+            if child.tag[-11:] == "GeoLocation":
+                node_location_list.append(child.attrib["city"])
+    node_list = zip(node_peer_list, node_url_list, node_name_list, node_location_list)
+    print node_list, node_peer_list, node_url_list, node_name_list, node_location_list
+    return HttpResponse(render_template(request, "acme_site/grid.html", {'nodes': node_list}))
 
 
 @login_required(login_url='login')
@@ -173,6 +193,24 @@ def load_layout(request):
             curlayout['mode'] = layout.mode
             layouts.append(curlayout)
         return HttpResponse(json.dumps(layouts))
+
+@login_required
+def node_list(request):
+    if request.method == 'GET':
+        ''' For demo purposes this is loading a local file '''
+        try:
+            node_list = open('acme_site/demo_data/registration.xml')
+            node_info = node_list.read()
+            print node_info
+            print json.dumps(xmltodict.parse(node_info))
+            return HttpResponse(json.dumps(xmltodict.parse(node_info)))
+        except Exception as e:
+            print "Unexpected error:", repr(e)
+            return HttpResponse(status=500)
+    elif request.method == 'POST':
+        print "Unexpected POST request"
+        return HttpResponse(status=500)
+
 
 
 

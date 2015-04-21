@@ -47,12 +47,7 @@ $('body').ready(function(){
 
 
   $('#load-layout').click(function(){
-    /*
 
-      Get drop down menu contents from the django backend
-
-
-    */
     var options = [{ //placeholder
       name : 'science',
       mode: 'day',
@@ -188,6 +183,21 @@ $('body').ready(function(){
 
   $('#drop-down-tab').click(function(e){
     var menuHeight = parseInt($('#drop-down-menu').css('height'));
+    $.ajax({
+      url:'node_layout/',
+      type: 'GET',
+      async: true,
+      cache: false,
+      statusCode: {
+        500: function(){
+          alert('Unable to retrieve node information');
+        }
+      },
+      success: function(response){
+        nodeInfo = jQuery.parseJSON(response);
+        console.log(nodeInfo);
+      }
+    });
     if($('#drop-down-menu').css('display') == 'none'){
       $('.tile').each(function(){
         $(this).css({
@@ -203,4 +213,27 @@ $('body').ready(function(){
     }
     $('#drop-down-menu').slideToggle('normal');
   });
+
+
+  /**
+   * This is a stub. Currently it loads dummy data from a local file. When the node manager is ready it will get the current data from there
+   *
+   */
+  function loadNodeInfo(){
+    $.ajax({
+      url:'node_layout/',
+      type: 'GET',
+      async: true,
+      cache: false,
+      statusCode: {
+        500: function(){
+          alert('Unable to retrieve node information');
+        }
+      },
+      success: function(response){
+        nodeInfo = jQuery.parseJSON(response);
+        console.log(nodeInfo);
+      }
+    });
+  }
 });

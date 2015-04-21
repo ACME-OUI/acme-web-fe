@@ -29,7 +29,6 @@ body {
 .night{
     background-color: #051451!important;
     border-color: #00f;
-    /*color:#aaa!important;*/
 }
 
 /*============================================================================
@@ -38,18 +37,14 @@ body {
 
 
 #drop-down-menu {
-	background-color: #005dab;
-	height: auto;
-	padding-top: 20px;
 	clear: both;
-	float: none;
 	display: none;
 	overflow: visible;
 	width: 100%!important;
 }
 
 #drop-down-tab {
-	background-color: #005dab !important;
+	background-color: #0756A6 !important;
 	color: #222 !important;
 	-webkit-border-radius: 20px 20px 0 0;
 	-moz-border-radius: 20px 20px 0 0;
@@ -58,6 +53,36 @@ body {
 	margin-right: -15px;
 }
 
+/*#node-holder {
+    border: 1px solid;
+    list-style: none;
+    -webkit-transition: all 0.5s ease-in-out;
+    -moz-transition: all 0.5s ease-in-out;
+    -o-transition: all 0.5s ease-in-out;
+    -ms-transition: all 0.5s ease-in-out;
+    transition: all 0.5s ease-in-out;
+    z-index: 21!important;
+}*/
+
+
+
+.carousel-inner .active.left { left: -25%; }
+.carousel-inner .next        { left:  25%; }
+.carousel-inner .prev        { left: -25%; }
+.carousel-control            { width:  4%; }
+.carousel-inner .item-holder  { 
+    border-radius: 25px;
+    text-align: center;
+    color: #111;
+    vertical-align: middle;
+    background-color:#1E70E3!;
+    border: 5px solid black;   
+    margin: 0 auto;
+}
+
+.carousel-inner .item-holder a {
+    color: #222;
+}
 
 /*============================================================================
    Sliding left menu 
