@@ -16,6 +16,7 @@ urlpatterns = patterns('',
     url(r'^save_layout/', views.save_layout, name='save_layout'),
     url(r'^load_layout/', views.load_layout, name='load_layout'),
     url(r'^node_list/', views.node_list),
+    url(r'^slick/', views.slick),
    
     #Demo Pages 03/2013
     url(r'^code/?$', views.code),

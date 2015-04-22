@@ -103,6 +103,8 @@ def register(request):
    
     return render_to_response("acme_site/register.html", {"user_form": user_form, "registered": registered}, context)
 
+def slick(request):
+    return HttpResponse(render_template(request, "acme_site/slick.html", {}))
 
 ##### Work Flows
 @login_required(login_url='login')

@@ -2,67 +2,45 @@
 {% block title %} Gridster Demo {% endblock %}
 {% block extra_headers %}
 
-  <!-- CSS resources for this page -->
-  <link rel="stylesheet" type="text/css" href="static/css/jquery.gridster.css">
-  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
-  <link rel="stylesheet" type="text/css" href="static/css/MetroJs.css">
-  <link rel="stylesheet" type="text/css" href="static/css/grid_custom.css">
-  <link rel="stylesheet" type="text/css" href="static/css/tile.css">
+
+  
+  <!-- Metro -->
+    <link rel="stylesheet" type="text/css" href="static/css/MetroJs.css">
+    <script type="text/javascript" src="static/js/MetroJs.js"></script>
 
 
-  <!-- JS resources for this page -->
-  <!--<script type="text/javascript" src="static/js/grid.js"></script>-->
-  <script type="text/javascript" src="static/js/MetroJs.js"></script>
-  <!-- <script type="text/javascript" src="static/js/jquery.gridster.js"></script> -->
-  <script type="text/javascript" src="static/js/grid_layouts.js"></script>
-  <script type="text/javascript" src="static/js/tile.js"></script>
+  <!-- Custom Grid -->
+    <link rel="stylesheet" type="text/css" href="static/css/grid_custom.css">
+    <script type="text/javascript" src="static/js/grid_layouts.js"></script>
+    <script type="text/javascript" src="static/js/tile.js"></script>
+    <link rel="stylesheet" type="text/css" href="static/css/tile.css">
 
-  <!--<script type="text/javascript" src="static/js/menu.js"></script>-->
+  <!-- Bootstrap -->
+    <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.js"></script>
+  
+  <!-- Font Awesome -->
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 
-  <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.js"></script>
+  <!-- Slick Carousel -->
+    <script type="text/javascript" src="//cdn.jsdelivr.net/jquery.slick/1.5.0/slick.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/jquery.slick/1.5.0/slick.css"/>
+
+  
+
 
   <script>
     $(document).ready(function(){
 
-      // $('.theme-showcase').remove();
-
       // $('#tabs a:first').tab('show');
       // $('#tabs a:last').tab();
-      $('#node-carousel').carousel({
-        interval: false
+      $('.node-carousel').slick({
+        infinite: true,
+        slidesToShow: 6,
+        slidesToScroll: 1
       });
-      // $('.carousel .item').each(function(){
-      //     var next = $(this).next();
-
-      //     if (!next.length) {
-      //         next = $(this).siblings(':first');
-      //     }
-
-      //     next.children(':first-child').clone().appendTo($(this));
-
-      //     if (next.next().length>0) {
-      //         next.next().children(':first-child').clone().appendTo($(this));
-      //     }
-      //     else {
-      //         $(this).siblings(':first').children(':first-child').clone().appendTo($(this));
-      //     }
-      // });
-
-      $('.carousel .item').each(function(){
-        var next = $(this).next();
-        if (!next.length) {
-          next = $(this).siblings(':first');
-        }
-        next.children(':first-child').clone().appendTo($(this));
-        
-        for (var i=0;i<2;i++) {
-          next=next.next();
-          if (!next.length) {
-            next = $(this).siblings(':first');
-          }
-          
-          next.children(':first-child').clone().appendTo($(this));
-        }
+      $('.node-carousel').slick('slickGoTo', 1, false);
+      $('#drop-down-tab').click(function(){
+        $('.node-carousel').slick('slickGoTo', 1, false);
       });
     });
   </script>
@@ -80,39 +58,16 @@
   
 
 <!-- Hidden node menu-->
-<div id="drop-down-menu" style="display: none; z-index: 20; width: 100%; height:130px; ">
-  <div id="node-carousel" class="carousel slide" data-ride="carousel" style="width: 100%; height: 100%;">
-
-    <!-- Wrapper for slides -->
-    <div class="carousel-inner" role="listbox" id="node-holder" style="width: 100%;">
+<div id="drop-down-menu" style="display: none; width: 90%; height:130px; ">
+  <div class="node-carousel">
       {% for peer, url, name, location in nodes %}
-          {% if forloop.counter0 == 0 %}
-          <div class="item active">
-          {% else %}
-          <div class="item">
-          {% endif %}
-            <div class="col-xs-3">
-              <div class="item-holder" style="width: 50%; background-color:#1E70E3">
-                <p>Node: {{name}}</p>
-                <p>AdminPeer: {{peer}}</p>
-                <p>Location: {{location}}</p>
-                <p>Url: <a href=http://{{url}}>{{url}}</a></p>
-              </div>
-            </div>
-          </div>
+        <div class="item-holder" style="padding-left: 10px; background-color: #1E70E3;">
+          <p>Node: {{name}}</p>
+          <p>AdminPeer: {{peer}}</p>
+          <p>Location: {{location}}</p>
+          <p>Url: <a href=http://{{url}}>{{url}}</a></p>
+        </div>
       {% endfor %}
-      <div style='clear:both'></div>
-    </div>
-
-    <!-- Controls -->
-    <a class="left carousel-control" href="#node-carousel" role="button" data-slide="prev" style="z-index:21;">
-      <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-      <span class="sr-only">Previous</span>
-    </a>
-    <a class="right carousel-control" href="#node-carousel" role="button" data-slide="next" style="z-index:21;">
-      <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
-      <span class="sr-only">Next</span>
-    </a>
   </div> <!-- end carousel -->
 </div><!-- end node menu -->
 

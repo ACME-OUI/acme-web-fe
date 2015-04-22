@@ -1002,7 +1002,7 @@ MGZBMEDZXGP2HVRa0cXRr1ZBsNbfPsrPxKYTXtB5NS+WsElaUI5caetHowTk9cY=
 </Cert>
         </PEMCert>
     </Node>
-    <Node organization="IPSL" namespace="fr.ipsl" nodePeerGroup="esgf-prod" supportEmail="prodiguer@ipsl.jussieu.fr" hostname="vesg.ipsl.fr" ip="134.157.176.104" dn="/O=Grid/OU=GlobusTest/OU=simpleCA-esgf-node.ipsl.fr/CN=vesg.ipsl.fr" shortName="IPSL_production_datanode_serving_CMIP5_data" longName="IPSL production datanode serving CMIP5 data" timeStamp="1425317817860" version="v1.8.0" release="Griffin" nodeType="36" adminPeer="esgf-node.ipsl.fr" defaultPeer="pcmdi9.llnl.gov">
+    <Node organization="IPSL" namespace="fr.ipsl" nodePeerGroup="esgf-prod" supportEmail="prodiguer@ipsl.jussieu.fr" hostname="vesg.ipsl.fr" ip="134.157.176.104" dn="/O=Grid/OU=GlobusTest/OU=simpleCA-esgf-node.ipsl.fr/CN=vesg.ipsl.fr" shortName="IPSL CMIP5 data" longName="IPSL production datanode serving CMIP5 data" timeStamp="1425317817860" version="v1.8.0" release="Griffin" nodeType="36" adminPeer="esgf-node.ipsl.fr" defaultPeer="pcmdi9.llnl.gov">
         <CA hash="dunno" endpoint="vesg.ipsl.fr" dn="dunno"/>
         <GeoLocation lat="48.866699" lon="2.333300" city="Paris"/>
         <NodeManager endpoint="https://vesg.ipsl.fr/esgf-node-manager/node"/>

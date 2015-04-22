@@ -21,13 +21,19 @@ body {
 * { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
 
 .day{
-    background-color: #fff;
+    background: -webkit-linear-gradient(75deg, #ddd, #999); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(75deg, #ddd, #999); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(75deg, #ddd, #999); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(75deg, #ddd, #999); /* Standard syntax */
     color: #222;
     border-color: #000;
 }
 
 .night{
-    background-color: #051451!important;
+    background: -webkit-linear-gradient(75deg, #051451, #051410); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(75deg, #051451, #051410); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(75deg, #051451, #051410); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(75deg, #051451, #051410); /* Standard syntax */
     border-color: #00f;
 }
 
@@ -44,7 +50,10 @@ body {
 }
 
 #drop-down-tab {
-	background-color: #0756A6 !important;
+    background: -webkit-linear-gradient(180deg, #0756A6, #051451); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(180deg, #0756A6, #051451); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient( 180deg,#0756A6, #051451); /* For Firefox 3.6 to 15 */
+    background: linear-gradient( 180deg,#0756A6, #051451); /* Standard syntax */
 	color: #222 !important;
 	-webkit-border-radius: 20px 20px 0 0;
 	-moz-border-radius: 20px 20px 0 0;
@@ -66,13 +75,9 @@ body {
 
 
 
-.carousel-inner .active.left { left: -25%; }
-.carousel-inner .next        { left:  25%; }
-.carousel-inner .prev        { left: -25%; }
-.carousel-control            { width:  4%; }
-.carousel-inner .item-holder  { 
+.item-holder  { 
     border-radius: 25px;
-    text-align: center;
+    text-align: left;
     color: #111;
     vertical-align: middle;
     background-color:#1E70E3!;
@@ -80,8 +85,8 @@ body {
     margin: 0 auto;
 }
 
-.carousel-inner .item-holder a {
-    color: #222;
+.item-holder a {
+    color: #111;
 }
 
 /*============================================================================
