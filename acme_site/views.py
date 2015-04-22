@@ -130,7 +130,6 @@ def grid(request):
     node_url_list = []
     node_location_list = []
     for node in tree.getroot():
-        print "node", node
         attrs = node.attrib
         node_name_list.append(attrs["shortName"])
         node_peer_list.append(attrs["adminPeer"])
@@ -197,15 +196,39 @@ def load_layout(request):
         return HttpResponse(json.dumps(layouts))
 
 @login_required
-def node_list(request):
-    if request.method == 'GET':
+def node_info(request):
+    if request.method == 'POST':
         ''' For demo purposes this is loading a local file '''
         try:
-            node_list = open('acme_site/demo_data/registration.xml')
-            node_info = node_list.read()
-            print node_info
-            print json.dumps(xmltodict.parse(node_info))
-            return HttpResponse(json.dumps(xmltodict.parse(node_info)))
+            from xml.etree.ElementTree import parse
+
+            tree = parse('acme_site/demo_data/registration.xml')
+            root = tree.getroot()
+            name = json.loads(request.body)['node']
+            
+            response = {}
+            for node in root:
+                if node.attrib['shortName'] == name:
+                    response['org'] = node.attrib['organization']
+                    response['namespace'] = node.attrib['namespace']
+                    response['email'] = node.attrib['supportEmail']
+                    response['ip'] = node.attrib['ip']
+                    response['longName'] = node.attrib['longName']
+                    response['version'] = node.attrib['version']
+
+                    for child in list(node):
+                        if child.tag[-len('AuthorizationService'):] == "AuthorizationService":
+                            response['authService'] = child.attrib["endpoint"]
+                        if child.tag[-len('Metrics'):] == "Metrics":
+                            for gchild in list(child):
+                                if gchild.tag[-len('DownloadedData'):] == "DownloadedData":
+                                    response['dataDownCount'] = gchild.attrib['count']
+                                    response['dataDownSize'] = gchild.attrib['size']
+                                    response['dataDownUsers'] = gchild.attrib['users']
+                                if gchild.tag[-len('RegisteredUsers'):] == "RegisteredUsers":
+                                    response['registeredUsers'] = gchild.attrib['count']
+
+            return HttpResponse(json.dumps(response))
         except Exception as e:
             print "Unexpected error:", repr(e)
             return HttpResponse(status=500)

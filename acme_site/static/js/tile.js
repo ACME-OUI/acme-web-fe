@@ -40,10 +40,10 @@ $(document).ready(function(){
 	header2 += '  </div>';
 	header2 += ' </div>';
 	header2 += ' <div class="tile-panel-body" data-direction="horizontal" data-mode="slid">';
+	header2 += '  <div class="tile-contents">'
 	// Widget Contents
 	contents += '  <p>The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men.</p>';
-	header3 += ' </div>';
-	header3 += '</div>';
+	header3 += ' </div></div></div>';
 	var dragStartX = 0;
 	var dragStartY = 0;
 	var dragStartSizeX = 0;
@@ -199,9 +199,63 @@ $(document).ready(function(){
     });
 
     $(window).bind('resizeEnd', function() {
-    	handleWindowResize();
+    	//handleWindowResize();
 	});
 
+    $('.node-item').click(function(){
+    	if($('#nodeSelect_window') != 0){
+    		$('#nodeSelect_window').find('.tile-contents').remove();
+    	} else {
+    		var new_tile = '<li id="' + "nodeSelect" + '_window" class="tile">' + header1 + "nodeSelect" + header2 + header3 +'</li>';
+    		add_tile(new_tile, "nodeSelect");
+    	}
+    	populateNodeSelect($(this).find('a').text());
+    });
+
+    function populateNodeSelect(id){
+    	var data = {
+    		node: id
+    	}
+    	data = JSON.stringify(data);
+    	var csrfToken = getCookie('csrftoken');
+    		$.ajaxSetup({
+    			beforeSend: function(xhr){
+    				xhr.setRequestHeader('X-CSRFToken', csrfToken);
+    			}
+    		});
+    	$.ajax({
+			url:'node_info/',
+			type: 'POST',
+			data: data,
+			success: function(response){
+				$('#nodeSelect_window').find('.tile-panel-body').append('<div class="tile-contents"></div>');
+				var node_data = jQuery.parseJSON(response);
+				for( var key in jQuery.parseJSON(response)){
+					var data = '<tr><td>' + key + '</td><td>' + node_data[key] + '</td><tr>';
+					$('#nodeSelect_window').find('.tile-contents').append(data);
+				}
+				$.ajax({
+					url:node_data['hostname'],
+					type: 'GET',
+					success: function(){
+						var status = '<tr><td>status</td><td style="color:green;">UP</td></tr>';
+						$('#nodeSelect_window').find('.tile-contents').append(status);
+					},
+					statusCode: {
+	    				500: function(){
+	    					var status = '<tr><td>status</td><td style="color:red;">DOWN</td></tr>';
+							$('#nodeSelect_window').find('.tile-contents').append(status);
+	    				},
+	    				404: function(){
+	    					var status = '<tr><td>status</td><td style="color:red;">DOWN</td></tr>';
+							$('#nodeSelect_window').find('.tile-contents').append(status);
+	    				}
+	    			}
+
+				});
+			}
+		});
+    }
 
 
 
@@ -1420,6 +1474,8 @@ Left slide menu
 			}
 		}
 	}
+
+
 });
 
 

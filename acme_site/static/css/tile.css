@@ -47,6 +47,11 @@
     z-index: 2;
 }
 
+.tile-contents td {
+    padding-left: 10px;
+    padding-top:2px;
+}
+
 .tile-board {
 	margin: 0 auto 0 auto;
 	height: 100%;
