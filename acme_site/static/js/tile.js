@@ -323,21 +323,21 @@ $(document).ready(function(){
 				'sizex': options.sizex,
 				'sizey': options.sizey
 			});
-			for(var i = 0; i < tiles.length; i ++){
-				if(id != tiles[i]){
-					// if the tile is overlapping in the y direction t.y + t.sizey >= y > t.y
-					if(parseInt($('#'+tiles[i]).attr('row'))+parseInt($('#'+tiles[i]).attr('sizey')) >= parseInt($(w).attr('row')) && parseInt($(w).attr('row')) > parseInt($('#'+tiles[i]).attr('row'))){
-						$(w).attr({
-							'row' : parseInt($('#'+tiles[i]).attr('row'))+parseInt($('#'+tiles[i]).attr('sizey'))
-						});
-					}
-					if(parseInt($('#'+tiles[i]).attr('col'))+parseInt($('#'+tiles[i]).attr('sizex')) >= parseInt($(w).attr('col')) && parseInt($(w).attr('col')) > parseInt($('#'+tiles[i]).attr('col'))){
-						$(w).attr({
-							'col' : parseInt($('#'+tiles[i]).attr('col'))+parseInt($('#'+tiles[i]).attr('sizex'))
-						});
-					}
-				}
-			}
+			// for(var i = 0; i < tiles.length -1; i ++){
+			// 	if(id != tiles[i]){
+			// 		// if the tile is overlapping in the y direction t.y + t.sizey >= y > t.y
+			// 		if(parseInt($('#'+tiles[i]).attr('row'))+parseInt($('#'+tiles[i]).attr('sizey')) - 1 > parseInt($(w).attr('row')) && parseInt($(w).attr('row')) > parseInt($('#'+tiles[i]).attr('row'))){
+			// 			$(w).attr({
+			// 				'row' : parseInt($('#'+tiles[i]).attr('row'))+parseInt($('#'+tiles[i]).attr('sizey'))
+			// 			});
+			// 		}
+			// 		if(parseInt($('#'+tiles[i]).attr('col'))+parseInt($('#'+tiles[i]).attr('sizex')) - 1 > parseInt($(w).attr('col')) && parseInt($(w).attr('col')) > parseInt($('#'+tiles[i]).attr('col'))){
+			// 			$(w).attr({
+			// 				'col' : parseInt($('#'+tiles[i]).attr('col'))+parseInt($('#'+tiles[i]).attr('sizex'))
+			// 			});
+			// 		}
+			// 	}
+			// }
 			update_board(id);
 			var tile_offset = offset_from_location(parseInt($(w).attr('row')), parseInt($(w).attr('col')));
 			$(w).css({
@@ -1406,12 +1406,12 @@ Left slide menu
 			return val
 	}
 
-	function boardSetup(maxCols, maxHeight){
+	function boardSetup(cols, height){
 		//i = cols, j = rows
-		board = new Array(maxCols+1);
+		board = new Array(cols+1);
 		//setup the empty board
 		for (var i = board.length - 1; i >= 0; i--) {
-			board[i] = new Array(maxHeight+1);
+			board[i] = new Array(height+1);
 			for (var j = board[i].length - 1; j >= 0; j--) {
 				board[i][j] = {
 					occupied: 0,
