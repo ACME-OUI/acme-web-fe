@@ -173,10 +173,9 @@ $(document).ready(function(){
     		$('#nodeSelect_window').find('.tile-contents').empty();
     	} else {
     		var new_tile = '<li id="' + "nodeSelect" + '_window" class="tile">' + header1 + "nodeSelect" + header2 + header3 +'</li>';
-    		add_tile(new_tile, "nodeSelect");
+    		add_tile(new_tile, "nodeSelect_window");
     	}
     	var nodeName = $(this).find('a').text();
-
     	populateNodeSelect(nodeName);
     
     });
