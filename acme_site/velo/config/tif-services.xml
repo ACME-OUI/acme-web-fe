@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:context="http://www.springframework.org/schema/context" 
+	xmlns:task="http://www.springframework.org/schema/task" 
+	xmlns:util="http://www.springframework.org/schema/util" 
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/task 
+        http://www.springframework.org/schema/task/spring-task-3.0.xsd
+        http://www.springframework.org/schema/util 
+        http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+        
+  <bean id="tifServiceLocator" class="gov.pnnl.velo.tif.service.TifServiceLocator">
+    <property name="codeRegistry" ref="codeRegistry"/>
+    <property name="machineRegistry" ref="machineRegistry"/>
+    <property name="scriptRegistry" ref="scriptRegistry"/>
+    <property name="jobLaunchingService" ref="jobLaunchingService"/>
+    <property name="jobConfigService" ref="jobConfigService"/>
+    <property name="veloWorkspace" ref="veloWorkspace"/>
+    <property name="credentialsPrompter" ref="credentialsPrompter"/>
+    <property name="cmsService" ref="cmsService"/>    
+  </bean>
+    
+  <bean id="cmsService" class="gov.pnnl.velo.tif.service.impl.CmsServiceVeloClient"/>
+    
+  <bean id="codeRegistry" class="gov.pnnl.velo.tif.service.impl.CodeRegistryDefault">
+  </bean>
+
+  <bean id="machineRegistry" class="gov.pnnl.velo.tif.service.impl.MachineRegistryDefault">
+  </bean>
+
+  <bean id="scriptRegistry" class="gov.pnnl.velo.tif.service.impl.ScriptRegistryDefault">
+  </bean>
+
+  <bean id="jobLaunchingService" class="gov.pnnl.velo.tif.service.impl.JobLaunchServiceVelo" lazy-init="true" init-method="init">
+    <property name="jobMonitorThread" ref="jobMonitorThread"/>
+    <property name="webServiceAPI" ref="jobLaunchWebServicesAPI"/>
+  </bean>
+ 
+  <bean id="jobLaunchWebServicesAPI" class="gov.pnnl.velo.tif.service.impl.JobLaunchWebServicesImpl">
+    <constructor-arg value="${http.url.alfresco}"/>
+    <constructor-arg ref="proxyConfig"/>  
+  </bean>
+
+  <bean id="jobMonitorThread" class="gov.pnnl.velo.tif.service.impl.JobMonitoringThread">
+  	<property name="runningJobThreadPool" ref="runningJobThreadPool"/>
+  	<property name="completedJobThreadPool" ref="completedJobThreadPool"/>
+  </bean>
+      
+  <!-- increase pool-sizes depending on the number of cores on server this code is running on -->
+  <task:scheduler id="runningJobThreadPool" pool-size="2" />
+  <task:scheduler id="completedJobThreadPool" pool-size="2" />
+
+  <bean id="jobConfigService" class="gov.pnnl.velo.tif.service.impl.JobConfigServiceDefault">
+  </bean>
+  
+  <bean id="veloWorkspace" class="gov.pnnl.velo.tif.service.impl.VeloWorkspaceDefault">
+      <property name="veloDir" value="file:." />
+  </bean>
+    
+  <bean id="registryBootstrap" class="gov.pnnl.velo.tools.tif.RegistryBootstrapRCP">
+     <property name="codeRegistry" ref="codeRegistry"/>
+     <property name="scriptRegistry" ref="scriptRegistry"/>
+     <property name="machineRegistry" ref="machineRegistry"/>
+     <property name="securityManager" ref="ISecurityManager" />
+  </bean>
+  
+  <bean id="testRegistryConfig" class="gov.pnnl.velo.tif.service.impl.RegistryConfigFileProviderDefault">
+    <property name="codeRegistry" ref="codeRegistry"/>
+    <property name="machineRegistry" ref="machineRegistry"/>
+    <property name="scriptRegistry" ref="scriptRegistry"/>
+  
+    <property name="codesDir" value="file:./config/codes" />
+    <property name="machinesDir" value="file:./config/machines" />
+    <property name="scriptsDir" value="file:./config/scripts" />
+    <property name="exeDir" value="file:./config/executables" />
+  </bean>
+  
+  <bean id="credentialsPrompter" class="gov.pnnl.velo.tif.service.impl.CredentialsPrompterSwing">
+  </bean>
+</beans>

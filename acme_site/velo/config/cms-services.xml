@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
+    "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+  <bean id="cmsServiceLocator" class="gov.pnnl.cat.core.resources.CmsServiceLocator">
+    <property name="resourceManager" ref="IResourceManager"/>
+    <property name="securityManager" ref="ISecurityManager"/>
+    <property name="searchManager" ref="ISearchManager"/>
+    <property name="mimetypeManager" ref="IMimetypeManager"/>
+    <property name="notificationManager" ref="notificationManagerJMS"/>
+    <property name="veloWorkspace" ref="cmsVeloWorkspace"/>
+  </bean>
+  
+   <!-- load common properties -->
+   <bean id="velo-global-properties" class="gov.pnnl.cat.core.resources.VeloGlobalProperties" >
+        <!-- don't inject the locations as we resolve them dynamically for each deployment -->
+        <property name="ignoreUnresolvablePlaceholders">
+            <value>true</value>
+        </property>
+    </bean>
+
+   <!-- We are creating a separate bean for veloWorkspace since I don't know which order the plugin bean
+   files are going to load - we don't want the veloWorkspace for a deployment to get overriden on accident by
+   this version.  TODO: see if there is a cleaner way to handle this class - it's where we save the cache info. -->
+   <bean id="cmsVeloWorkspace" class="gov.pnnl.velo.tif.service.impl.VeloWorkspaceDefault" />
+   
+   <bean id="IResourceManager"
+    class="gov.pnnl.cat.core.internal.resources.ResourceManager"
+    lazy-init="true">
+   	  <property name="service">
+         <ref bean="IResourceService"/>
+   	  </property>  
+      <property name="notificationManager">
+         <ref bean="notificationManagerJMS" />
+   	  </property>
+   </bean>
+
+   <bean id="ISearchManager" init-method="init"
+     class="gov.pnnl.cat.core.internal.resources.search.SearchManager"
+     lazy-init="true">
+      <property name="resourceManager">
+         <ref bean="IResourceManager"/>
+   	  </property>
+      <property name="resourceService">
+         <ref bean="IResourceService"/>
+   	  </property>
+   </bean>
+
+   <bean id="ISecurityManager" init-method="init"
+    class="gov.pnnl.cat.core.internal.resources.security.SecurityManager"
+    lazy-init="true">
+      <property name="securityService" ref="SecurityService"/>
+   	  <property name="notificationManager" ref="notificationManagerJMS"/>
+      <property name="resourceManager" ref="IResourceManager" />
+   </bean>
+
+   <bean id="proxyConfig" class="gov.pnnl.cat.core.util.ProxyConfig">
+      <constructor-arg>
+	    	<value>${http.url.alfresco}</value> 
+      </constructor-arg>   
+   </bean>
+   
+   <bean id="IResourceService"
+    class="gov.pnnl.cat.core.internal.resources.ResourceService"
+    lazy-init="true">
+      <constructor-arg>
+	    	<value>${http.url.alfresco}</value> 
+      </constructor-arg>
+      <constructor-arg ref="proxyConfig"/>
+      <property name="configurableMimeFileTypeMap">
+         <ref bean="configurableMimeFileTypeMap"/>
+      </property>
+   </bean>
+   
+   <bean id="IMimetypeManager"
+   	class="gov.pnnl.cat.core.internal.resources.MimetypeManager">
+   	  <constructor-arg>
+	    	<value>${http.url.alfresco}</value> 	    	
+      </constructor-arg>
+      <constructor-arg ref="proxyConfig"/>
+   </bean>
+   
+    <!-- add some extra mappings that are not covered by the default file -->  	
+   <bean id="configurableMimeFileTypeMap"
+   class="org.springframework.mail.javamail.ConfigurableMimeFileTypeMap">
+   	  <property name="mappings">
+		<list>
+			<value>text/xml  xml</value>		
+			<value>message/rfc822  msg</value>
+			<value>text/html  html htm HTML HTM</value>
+		</list>   	  
+   	  </property>
+   </bean>
+
+	<bean id="SecurityService"
+	class="gov.pnnl.cat.core.internal.resources.security.SecurityService"
+	lazy-init="true">
+	    <property name="resourceService">
+   		   <ref bean="IResourceService"/>
+   		</property>
+	</bean>
+	
+	<!--  begin event -->
+	
+	<bean id="notificationManagerJMS" class="gov.pnnl.cat.core.internal.resources.events.NotificationManagerJMS">
+  		<property name="destination">
+  			<ref local="raw-allevents-destination" />
+  		</property>
+  		<property name="connectionFactory">
+  			<ref local="jmsFactory"/>
+  		</property>
+	</bean>
+	
+	 <!-- destinations for sending messages to -->
+  	 <bean id="subscribeDestination" class="gov.pnnl.cat.jms.common.ServerSpecificActiveMQTopic" autowire="constructor" abstract="false" singleton="true" lazy-init="default" dependency-check="default">
+ 		 <constructor-arg value="cat.subscribe" /> 
+ 		 <constructor-arg value="${notification.server.id}" />
+ 	 </bean>    
+ 	
+ 	 <!--  raw events destination topic --> 
+     <bean id="raw-allevents-destination" class="gov.pnnl.cat.jms.common.ServerSpecificActiveMQTopic" autowire="constructor" abstract="false" singleton="true" lazy-init="default" dependency-check="default">
+ 		 <constructor-arg value="dmi.publish.allevents" /> 
+       <constructor-arg value="${notification.server.id}" />
+ 	 </bean>    
+ 	 
+    <!-- pooled connection factory for ActiveMQ -->
+ <!--     <bean id="jmsFactory" class="org.apache.activemq.pool.PooledConnectionFactory">
+    <property name="connectionFactory"> -->
+      <bean id="jmsFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL">
+          <value>${jms.url}</value>
+        </property>
+        <!-- 
+        <property name="sendTimeout">
+        	<value>500</value>
+        </property>
+         -->
+      </bean>
+ <!--   </property>
+  </bean> -->
+
+  <!-- Spring JMS Template -->
+  <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+    <property name="connectionFactory">
+      <ref local="jmsFactory"/>
+    </property>
+  </bean>
+
+  <!--  end event -->
+</beans>
