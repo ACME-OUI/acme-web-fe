@@ -83,6 +83,8 @@ body {
     background-color:#1E70E3!;
     border: 5px solid black;   
     margin: 0 auto;
+    padding-left: 10px;
+    background-color: #1E70E3;
 }
 
 .item-holder a {

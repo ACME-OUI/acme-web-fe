@@ -63,7 +63,9 @@ $(document).ready(function(){
 	var needsFixYBool = true;
 	var fixValX = 99;
 	var fixValY = 99;
-
+	var mode = {
+		light: 'day'
+	}
 	boardSetup(maxCols, maxHeight);
 	loadDefaultLayout();
 	
@@ -71,44 +73,8 @@ $(document).ready(function(){
  	End setup variables
  	***************************************/
 
- 	function factor( a ) {
-		var c, i = 2, j = Math.floor( a / 2 ), output = [];
-		for( ; i<=a; i++ ) {
-			if(i == 1)
-				return;
-			c = a / i;
-			if(c == 1)
-				continue;
-			if( c===Math.floor( c ) ) {
-				var b = {
-						'factor':c,
-						'multiplicator':i
-						};
-				output.push(b);
-  			}
- 		}
- 		return output;
- 	}
 
- 	function factorSortReturn(factors){
- 		return factors.sort(function(a){return a.factor});
- 	}
 
- 	function needsFixX(){
- 		if(needsFixXBool){
- 			return fixValX - 1;
- 		} else {
- 			return 0;
- 		}
- 	}
-
- 	function needsFixY(){
- 		if(needsFixYBool){
- 			return fixValY - 1;
- 		} else {
- 			return 0;
- 		}
- 	}
 
 
  	//find if the user has a default layout, if so load it
@@ -203,13 +169,16 @@ $(document).ready(function(){
 	});
 
     $('.node-item').click(function(){
-    	if($('#nodeSelect_window') != 0){
-    		$('#nodeSelect_window').find('.tile-contents').remove();
+    	if($('#nodeSelect_window').length != 0){
+    		$('#nodeSelect_window').find('.tile-contents').empty();
     	} else {
     		var new_tile = '<li id="' + "nodeSelect" + '_window" class="tile">' + header1 + "nodeSelect" + header2 + header3 +'</li>';
     		add_tile(new_tile, "nodeSelect");
     	}
-    	populateNodeSelect($(this).find('a').text());
+    	var nodeName = $(this).find('a').text();
+
+    	populateNodeSelect(nodeName);
+    
     });
 
     function populateNodeSelect(id){
@@ -228,26 +197,25 @@ $(document).ready(function(){
 			type: 'POST',
 			data: data,
 			success: function(response){
-				$('#nodeSelect_window').find('.tile-panel-body').append('<div class="tile-contents"></div>');
 				var node_data = jQuery.parseJSON(response);
 				for( var key in jQuery.parseJSON(response)){
-					var data = '<tr><td>' + key + '</td><td>' + node_data[key] + '</td><tr>';
+					var data = '<tr><td class="key">' + key + '</td><td class="value">' + node_data[key] + '</td><tr>';
 					$('#nodeSelect_window').find('.tile-contents').append(data);
 				}
 				$.ajax({
 					url:node_data['hostname'],
 					type: 'GET',
 					success: function(){
-						var status = '<tr><td>status</td><td style="color:green;">UP</td></tr>';
+						var status = '<tr><td class="key">status</td><td class="value" style="color:green;">UP</td></tr>';
 						$('#nodeSelect_window').find('.tile-contents').append(status);
 					},
 					statusCode: {
 	    				500: function(){
-	    					var status = '<tr><td>status</td><td style="color:red;">DOWN</td></tr>';
+	    					var status = '<tr><td class="key">status</td><td class="value"style="color:red;">DOWN</td></tr>';
 							$('#nodeSelect_window').find('.tile-contents').append(status);
 	    				},
 	    				404: function(){
-	    					var status = '<tr><td>status</td><td style="color:red;">DOWN</td></tr>';
+	    					var status = '<tr><td class="key">status</td><td class="value" style="color:red;">DOWN</td></tr>';
 							$('#nodeSelect_window').find('.tile-contents').append(status);
 	    				}
 	    			}
@@ -1268,6 +1236,7 @@ Left slide menu
 		else if(mode == 'night'){
 			setNight();
 		}
+		mode.light = mode
 
 		for(var i = 0; i < layout.length; i++){
 			var name = layout[i].tileName;
@@ -1338,7 +1307,6 @@ Left slide menu
 	/**********************************
 	Top slide down menu
 	**********************************/
-
 	$('#drop-down-tab').click(function(e){
 		var menuHeight = parseInt($('#drop-down-menu').css('height'));
 		
@@ -1355,8 +1323,9 @@ Left slide menu
 				});
 			});
 		}
-		$('#drop-down-menu').slideToggle('normal');
+		$('#drop-down-menu').slideToggle();
 	});
+
 
 	function getCookie(name) {
 		var cookieValue = null;
@@ -1379,8 +1348,7 @@ Left slide menu
 	 	docHeight -= docHeight%10;
 	 	docWidth = $(window).width();
 	 	docWidth -= docWidth%10;
-	 	var dimensionComponents = factorSortReturn(factor(docHeight));
-	 	dimensionComponents = dimensionComponents.sort(function(a, b){return a.factor - b.factor});
+	 	var dimensionComponents = factor(docHeight).sort(function(a, b){return a.factor - b.factor});
 	 	for(var i = 0; i < dimensionComponents.length; i++){
 	 		if(dimensionComponents[i].multiplicator % 10 != 0){
 	 			dimensionComponents.splice(i, 1);
@@ -1396,8 +1364,7 @@ Left slide menu
 		 	maxHeight = dimensionComponents.multiplicator;
 	 	}
 	 	
-	 	dimensionComponents = factorSortReturn(factor(docWidth));
-	 	dimensionComponents = dimensionComponents.sort(function(a, b){return a.factor - b.factor});
+	 	dimensionComponents = factor(docWidth).sort(function(a, b){return a.factor - b.factor});
 	 	for(var i = 0; i < dimensionComponents.length; i++){
 	 		if(dimensionComponents[i].multiplicator % 10 != 0){
 	 			dimensionComponents.splice(i, 1);
@@ -1475,6 +1442,42 @@ Left slide menu
 		}
 	}
 
+
+ 	function factor( a ) {
+		var c, i = 2, j = Math.floor( a / 2 ), output = [];
+		for( ; i<=a; i++ ) {
+			if(i == 1)
+				return;
+			c = a / i;
+			if(c == 1)
+				continue;
+			if( c===Math.floor( c ) ) {
+				var b = {
+						'factor':c,
+						'multiplicator':i
+						};
+				output.push(b);
+  			}
+ 		}
+ 		return output;
+ 	}
+
+
+ 	function needsFixX(){
+ 		if(needsFixXBool){
+ 			return fixValX - 1;
+ 		} else {
+ 			return 0;
+ 		}
+ 	}
+
+ 	function needsFixY(){
+ 		if(needsFixYBool){
+ 			return fixValY - 1;
+ 		} else {
+ 			return 0;
+ 		}
+ 	}
 
 });
 

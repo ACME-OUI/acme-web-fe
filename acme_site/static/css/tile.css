@@ -47,10 +47,23 @@
     z-index: 2;
 }
 
-.tile-contents td {
-    padding-left: 10px;
-    padding-top:2px;
+.tile-contents tr {
+    border-bottom: 1px solid black;
 }
+
+.tile-contents td .key {
+    padding-left: 20px;
+    padding-top:2px;
+
+}
+
+.tile-contents td .value {
+    padding-right: 20px;
+    padding-top:2px;
+    text-align: right;
+}
+
+.tile-contents 
 
 .tile-board {
 	margin: 0 auto 0 auto;

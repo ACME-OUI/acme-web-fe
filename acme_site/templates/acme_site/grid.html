@@ -36,11 +36,11 @@
         infinite: true,
         slidesToShow: 6,
         slidesToScroll: 1,
-        appendArrows: '#drop-down-menu'
       });
-      $('.node-carousel').slick('slickGoTo', 1, false);
       $('#drop-down-tab').click(function(){
         $('.node-carousel').slick('slickGoTo', 1, false);
+        $('.slick-prev').appendTo('.node-carousel');
+        $('.slick-next').appendTo('.node-carousel');
       });
 
 
