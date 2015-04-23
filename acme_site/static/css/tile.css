@@ -48,16 +48,20 @@
 }
 
 .tile-contents tr {
-    border-bottom: 1px solid black;
+    border-bottom: 1px dotted silver;
 }
 
-.tile-contents td .key {
+.tile-contents table {
+    width: 100%;
+}
+
+.tile-contents .key {
     padding-left: 20px;
     padding-top:2px;
 
 }
 
-.tile-contents td .value {
+.tile-contents .value {
     padding-right: 20px;
     padding-top:2px;
     text-align: right;

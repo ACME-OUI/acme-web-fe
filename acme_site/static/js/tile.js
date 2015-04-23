@@ -197,25 +197,26 @@ $(document).ready(function(){
 			data: data,
 			success: function(response){
 				var node_data = jQuery.parseJSON(response);
-				for( var key in jQuery.parseJSON(response)){
+				$('#nodeSelect_window').find('.tile-contents').append('<table id=node-info></table>');
+				for( var key in node_data){
 					var data = '<tr><td class="key">' + key + '</td><td class="value">' + node_data[key] + '</td><tr>';
-					$('#nodeSelect_window').find('.tile-contents').append(data);
+					$('#nodeSelect_window').find('#node-info').append(data);
 				}
 				$.ajax({
 					url:node_data['hostname'],
 					type: 'GET',
 					success: function(){
 						var status = '<tr><td class="key">status</td><td class="value" style="color:green;">UP</td></tr>';
-						$('#nodeSelect_window').find('.tile-contents').append(status);
+						$('#nodeSelect_window').find('#node-info').append(status);
 					},
 					statusCode: {
 	    				500: function(){
 	    					var status = '<tr><td class="key">status</td><td class="value"style="color:red;">DOWN</td></tr>';
-							$('#nodeSelect_window').find('.tile-contents').append(status);
+							$('#nodeSelect_window').find('#node-info').append(status);
 	    				},
 	    				404: function(){
 	    					var status = '<tr><td class="key">status</td><td class="value" style="color:red;">DOWN</td></tr>';
-							$('#nodeSelect_window').find('.tile-contents').append(status);
+							$('#nodeSelect_window').find('#node-info').append(status);
 	    				}
 	    			}
 
