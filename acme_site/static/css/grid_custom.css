@@ -204,6 +204,7 @@ nav.slide-menu-left button.close-menu {
     display: none;
 }
 
+
 /* bevel size, left offset and color settings next 3 lines */ 
 .bvc { left: -15px }
 .bevel, .content { border-width: 15px }

@@ -19,28 +19,26 @@ $(document).ready(function(){
  	var tiles = [];
  	var resize_handle_html = '<span class="gs-resize-handle gs-resize-handle-both"></span>';
 	// Define a widget
-	var header1 = ''; 
-	var header2 = '';
 	var header3 = '';
 	var contents = '';
 	var optionContents = '';
-	header1 += '<div class="tile-panel panel-default">';
-	header1 += ' <div class="tile-panel-heading">';
-	header1 += '  <div class="panel-header-title text-center">';
-	header1 += '    <button type="button" class="btn btn-default btn-xs options" style="float:left;">';
-	header1 += '     <span class="fa fa-cog" aria-label="Options"></span>';
-	header1 += '    </button>';
-	header1 += '    <button type="button" class="btn btn-default btn-xs remove"  style="float:right;">';
-	header1 += '     <span class="fa fa-times" aria-label="Close"></span>';
-	header1 += '    </button>';
-	header1 += '     <p style="text-align: center">';
-	// Widget Name
-	header2 += '     <p>';
-	header2 += '   </div>';
-	header2 += '  </div>';
-	header2 += ' </div>';
-	header2 += ' <div class="tile-panel-body" data-direction="horizontal" data-mode="slid">';
-	header2 += '  <div class="tile-contents">'
+	var header1 = [ '<div class="tile-panel panel-default">',
+				 	' <div class="tile-panel-heading">',
+					'  <div class="panel-header-title text-center">',
+					'    <button type="button" class="btn btn-default btn-xs options" style="float:left;">',
+					'     <span class="fa fa-cog" aria-label="Options"></span>',
+					'    </button>',
+					'    <button type="button" class="btn btn-default btn-xs remove"  style="float:right;">',
+					'     <span class="fa fa-times" aria-label="Close"></span>',
+					'    </button>',
+					'     <p style="text-align: center">'].join('');
+							// Widget Name
+	header2 = 	[   '     <p>',
+					'   </div>',
+					'  </div>',
+					' </div>',
+					' <div class="tile-panel-body" data-direction="horizontal" data-mode="slid">',
+					'  <div class="tile-contents">'].join('');
 	// Widget Contents
 	contents += '  <p>The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men.</p>';
 	header3 += ' </div></div></div>';
@@ -146,9 +144,26 @@ $(document).ready(function(){
 	$('.slide-btn').each(function(){
 		$(this).click(function(){
 			var name = $(this).attr('id');
+			var content = '';
+			if(name == 'nodeSearch'){
+				if($('#nodeSelect_window').length == 0){
+					var content = [	'<form id="node-search-form>"',
+									'<p>Node to search:</p><input type="text" style="color: #000;" id="node-search-name">',
+									'<input type="submit" value="Search" id="search-btn" style="color: #000;"><br>',
+									'</form>'].join('');				
+				} else {
+					nodeSearch($('#hostname_value').text());
+					return;
+				}
+
+			} 
 			if($('#' + name + '_window').length == 0) {
-				var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + contents + header3 +'</li>';
-				add_tile(new_tile, name+'_window');
+				var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + content + header3 +'</li>';
+				add_tile(new_tile, name+'_window', {ignore: 'true'}, function(){
+					$('#search-btn').click(function(){
+						nodeSearch(document.getElementById("node-search-name").value);
+					})
+				});
 			}
 		});
 	});
@@ -186,42 +201,75 @@ $(document).ready(function(){
     	}
     	data = JSON.stringify(data);
     	var csrfToken = getCookie('csrftoken');
-    		$.ajaxSetup({
-    			beforeSend: function(xhr){
-    				xhr.setRequestHeader('X-CSRFToken', csrfToken);
-    			}
-    		});
+		$.ajaxSetup({
+			beforeSend: function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', csrfToken);
+			}
+		});
     	$.ajax({
 			url:'node_info/',
 			type: 'POST',
 			data: data,
 			success: function(response){
 				var node_data = jQuery.parseJSON(response);
+				var data = '';
+				var text_style = '';
 				$('#nodeSelect_window').find('.tile-contents').append('<table id=node-info></table>');
 				for( var key in node_data){
-					var data = '<tr><td class="key">' + key + '</td><td class="value">' + node_data[key] + '</td><tr>';
+					if(key == 'status'){
+						if(node_data[key] == 'up'){
+							text_style = 'color: green;';
+						} else {
+							text_style = 'color: red;';
+						}
+					} else {
+						text_style = '';
+					}
+					var data = '<tr><td class="key" id="'+key+'">' + key + '</td><td class="value" id="'+key+'_value" style="'+text_style+'">' + node_data[key] + '</td><tr>';
 					$('#nodeSelect_window').find('#node-info').append(data);
 				}
-				$.ajax({
-					url:node_data['hostname'],
-					type: 'GET',
-					success: function(){
-						var status = '<tr><td class="key">status</td><td class="value" style="color:green;">UP</td></tr>';
-						$('#nodeSelect_window').find('#node-info').append(status);
-					},
-					statusCode: {
-	    				500: function(){
-	    					var status = '<tr><td class="key">status</td><td class="value"style="color:red;">DOWN</td></tr>';
-							$('#nodeSelect_window').find('#node-info').append(status);
-	    				},
-	    				404: function(){
-	    					var status = '<tr><td class="key">status</td><td class="value" style="color:red;">DOWN</td></tr>';
-							$('#nodeSelect_window').find('#node-info').append(status);
-	    				}
-	    			}
-
+				var button = [	'<br><button type="button" class="btn btn-default btn-xs" id="node-search" style="float:left; margin-left: 20px;">',
+								'     <span class="fa fa-search" aria-label="Options"></span>',
+								'</button>'].join('');
+				$('#nodeSelect_window').find('.tile-contents').append(button);
+				$('#node-search').click(function(){
+					nodeSearch($('#hostname_value').text());
 				});
 			}
+		});
+    }
+
+    function nodeSearch(hostname){
+    	if($('#nodeSearch_window').length != 0){
+    		$('#nodeSearch_window').find('.tile-contents').empty();
+    	} else {
+    		var new_tile = '<li id="' + "nodeSearch" + '_window" class="tile">' + header1 + "nodeSearch" + header2 + header3 +'</li>';
+    		add_tile(new_tile, "nodeSearch_window");
+    	}
+    	var searchWindow = $('#nodeSearch').find('.tile-contents');
+    	var csrfToken = getCookie('csrftoken');
+		$.ajaxSetup({
+			beforeSend: function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', csrfToken);
+			}
+		});
+		var data = JSON.stringify({'node':'http://'+hostname+'/esg-search/'})
+		$.ajax({
+			url:'node_search/',
+			data: data,
+			type: 'POST',
+			success: function(response){
+				alert('connected');
+			},
+			statusCode:{
+				422: function(){
+					//could not connect to node
+				},
+				500: function(){
+					alert('Unable to connect');
+				}
+			}
+
 		});
     }
 
@@ -338,7 +386,7 @@ $(document).ready(function(){
 
 		});
 
-		if(options != null){
+		if(options != null && options.ignore != 'true'){
 			$(w).attr({
 				'row': options.y,
 				'col': options.x,

@@ -215,10 +215,16 @@ def node_info(request):
                     response['ip'] = node.attrib['ip']
                     response['longName'] = node.attrib['longName']
                     response['version'] = node.attrib['version']
+                    response['shortName'] = name
+                    response['adminPeer'] = node.attrib['adminPeer']
+                    response['hostname'] = node.attrib['hostname']
+
 
                     for child in list(node):
                         if child.tag[-len('AuthorizationService'):] == "AuthorizationService":
                             response['authService'] = child.attrib["endpoint"]
+                        if child.tag[-len('GeoLocation'):] == "GeoLocation":
+                            response['location'] = child.attrib["city"]
                         if child.tag[-len('Metrics'):] == "Metrics":
                             for gchild in list(child):
                                 if gchild.tag[-len('DownloadedData'):] == "DownloadedData":
@@ -228,7 +234,19 @@ def node_info(request):
                                 if gchild.tag[-len('RegisteredUsers'):] == "RegisteredUsers":
                                     response['registeredUsers'] = gchild.attrib['count']
 
-            return HttpResponse(json.dumps(response))
+
+                    from pyesgf.search import SearchConnection
+                    print 'attempting to connect to ' + 'http://' + response['hostname'] + 'esg-search/'
+                    conn = SearchConnection('http://' + response['hostname'] + '/esg-search/', distrib=True)
+                    try:
+                        conn.get_shard_list()
+                        response['status'] = 'up'
+                    except Exception as e:
+                        print repr(e)
+                        response['status'] = 'down'
+
+
+                    return HttpResponse(json.dumps(response))
         except Exception as e:
             print "Unexpected error:", repr(e)
             return HttpResponse(status=500)
@@ -236,6 +254,24 @@ def node_info(request):
         print "Unexpected POST request"
         return HttpResponse(status=500)
 
+@login_required
+def node_search(request):
+    if request.method == 'POST':
+        from pyesgf.search import SearchConnection
+        searchString = json.loads(request.body)
+        print searchString
+        if 'node' in searchString:
+            try:
+                conn = SearchConnection(searchString['node'], distrib=True)
+                conn.get_shard_list()
+                response = {}
+                response['status'] = 'success'
+                return HttpResponse(json.dumps(response))
+            except Exception as e:
+                print "Unexpected error:", repr(e)
+                return HttpResponse(status=500)    
+    else:
+        return HttpResponse(status=500)
 
 
 
