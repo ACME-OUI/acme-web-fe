@@ -261,15 +261,26 @@ def node_search(request):
         searchString = json.loads(request.body)
         print searchString
         if 'node' in searchString:
-            try:
-                conn = SearchConnection(searchString['node'], distrib=True)
-                conn.get_shard_list()
-                response = {}
-                response['status'] = 'success'
-                return HttpResponse(json.dumps(response))
-            except Exception as e:
-                print "Unexpected error:", repr(e)
-                return HttpResponse(status=500)    
+            if 'test_connection' in searchString:
+                try:
+                    print 'testing connection to', searchString['node']
+                    conn = SearchConnection(searchString['node'], distrib=True)
+                    conn.get_shard_list()
+                    response = {}
+                    response['status'] = 'success'
+                    return HttpResponse(json.dumps(response))
+                except Exception as e:
+                    print "Unexpected error:", repr(e)
+                    return HttpResponse(status=500)
+            else:
+                try:
+                    conn = SearchConnection(searchString['node'], distrib=True)
+                    context = conn.new_context(searchString['text'])
+                    print 'hits', context.hit_count
+                    print 'realms', context.facet_counts['realm']
+                except Exception as e:
+                    print "Unexpected error:", repr(e)
+                    return HttpResponse(status=500)
     else:
         return HttpResponse(status=500)
 

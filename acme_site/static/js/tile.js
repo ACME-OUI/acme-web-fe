@@ -246,24 +246,90 @@ $(document).ready(function(){
     		var new_tile = '<li id="' + "nodeSearch" + '_window" class="tile">' + header1 + "nodeSearch" + header2 + header3 +'</li>';
     		add_tile(new_tile, "nodeSearch_window");
     	}
-    	var searchWindow = $('#nodeSearch').find('.tile-contents');
+    	var searchWindow = $('#nodeSearch_window').find('.tile-contents');
     	var csrfToken = getCookie('csrftoken');
 		$.ajaxSetup({
 			beforeSend: function(xhr){
 				xhr.setRequestHeader('X-CSRFToken', csrfToken);
 			}
 		});
-		var data = JSON.stringify({'node':'http://'+hostname+'/esg-search/'})
+		var data = {
+			node:'http://'+hostname+'/esg-search/',
+			test_connection: true
+		};
+		var data = JSON.stringify(data);
 		$.ajax({
 			url:'node_search/',
 			data: data,
 			type: 'POST',
 			success: function(response){
-				alert('connected');
+				searchWindow.empty();
+				var form = ['<form>',
+							'Select filter<br>',
+							'<select id="select-filter">',
+								'<option value="Project">Project</option>',
+								'<option value="Data_Tyle">Data_Type</option>',
+								'<option value="Institute">Institute</option>',
+								'<option value="Model">Model</option>',
+								'<option value="Configuration">Configuration</option>',
+								'<option value="Experiment">Experiment</option>',
+								'<option value="Version_Num">Version_Num</option>',
+								'<option value="Regridding">Regridding</option>',
+								'<option value="Years_Spanned">Years_Spanned</option>',
+								'<option value="Realm">Realm</option>',
+							'</select>',
+							'<br><p>Filter value</p><input type="text" style="color: #000;" id="filter-value">',
+							'<input type="submit" value="Add filter" id="filter-value-btn" style="color: #000;"><br>',
+							'<br><p id="search-string">Search string: </p>',
+							'<input type="submit" id="search-submit value="Search" style="color: #000;">',
+							'</form>'
+							].join('');
+				searchWindow.append(form);
+				searchTerms = {};
+				$('#filter-value-btn').click(function(){
+					searchTerms[document.getElementById("select-filter").value] = document.getElementById('filter-value').value;
+					$('#search-string').html('Search string: ');
+					for(key in searchTerms){
+						$('#search-string').append(key + '=' + searchTerms[key] + ',');
+					}
+				});
+				$('#search-submit').click(function(){
+					esgfSearch($('#search-string').text(), hostname);
+				});
 			},
 			statusCode:{
-				422: function(){
-					//could not connect to node
+				404: function(){
+					alert('Node not found');
+				},
+				500: function(){
+					alert('Unable to connect');
+				}
+			}
+
+		});
+    }
+
+    function esgfSearch(text,hostname){
+    	$.ajaxSetup({
+			beforeSend: function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', csrfToken);
+			}
+		});
+		var data = {
+			node:'http://'+hostname+'/esg-search/',
+			text: text
+		};
+		var data = JSON.stringify(data);
+		$.ajax({
+			url:'node_search/',
+			data: data,
+			type: 'POST',
+			success: function(response){
+				
+			},
+			statusCode:{
+				404: function(){
+					alert('Node not found');
 				},
 				500: function(){
 					alert('Unable to connect');
