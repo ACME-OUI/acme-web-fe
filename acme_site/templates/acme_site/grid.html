@@ -2,32 +2,47 @@
 {% block title %} Gridster Demo {% endblock %}
 {% block extra_headers %}
 
-  <!-- CSS resources for this page -->
-  <link rel="stylesheet" type="text/css" href="static/css/jquery.gridster.css">
-  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
-  <link rel="stylesheet" type="text/css" href="static/css/MetroJs.css">
-  <link rel="stylesheet" type="text/css" href="static/css/grid_custom.css">
-  <link rel="stylesheet" type="text/css" href="static/css/tile.css">
+
+  
+  <!-- Metro -->
+    <link rel="stylesheet" type="text/css" href="static/css/MetroJs.css">
+    <script type="text/javascript" src="static/js/MetroJs.js"></script>
 
 
-  <!-- JS resources for this page -->
-  <!--<script type="text/javascript" src="static/js/grid.js"></script>-->
-  <script type="text/javascript" src="static/js/MetroJs.js"></script>
-  <!-- <script type="text/javascript" src="static/js/jquery.gridster.js"></script> -->
-  <script type="text/javascript" src="static/js/grid_layouts.js"></script>
-  <script type="text/javascript" src="static/js/tile.js"></script>
+  <!-- Custom Grid -->
+    <link rel="stylesheet" type="text/css" href="static/css/grid_custom.css">
+    <script type="text/javascript" src="static/js/grid_layouts.js"></script>
+    <script type="text/javascript" src="static/js/tile.js"></script>
+    <link rel="stylesheet" type="text/css" href="static/css/tile.css">
 
-  <!--<script type="text/javascript" src="static/js/menu.js"></script>-->
+  <!-- Bootstrap -->
+    <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.js"></script>
+  
+  <!-- Font Awesome -->
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 
-  <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+  <!-- Slick Carousel -->
+    <script type="text/javascript" src="//cdn.jsdelivr.net/jquery.slick/1.5.0/slick.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/jquery.slick/1.5.0/slick.css"/>
+    <link rel="stylesheet" href="static/css/slick-theme.css">
+
 
   <script>
     $(document).ready(function(){
 
-      $('.theme-showcase').remove();
+      // $('#tabs a:first').tab('show');
+      // $('#tabs a:last').tab();
+      $('.node-carousel').slick({
+        infinite: true,
+        slidesToShow: 6,
+        slidesToScroll: 1,
+      });
+      $('#drop-down-tab').click(function(){
+        $('.node-carousel').slick('slickGoTo', 1, false);
+        $('.slick-prev').appendTo('.node-carousel');
+        $('.slick-next').appendTo('.node-carousel');
+      });
 
-      $('#tabs a:first').tab('show');
-      $('#tabs a:last').tab();
 
     });
   </script>
@@ -37,29 +52,36 @@
 
 {% block new_button_left_link%}
     <li class="navbar-left" id="toggle-slide-left" style="position: fixed; left: 10px;"><a id="toggle-left-a" href="#">Open Menu</a></li>
-    <li class="navbar-left" id="drop-down-tab" style="position: fixed; left: 80px;"><a style="color: #000;" href="#">Dropdown Menu</a></li>
+    <li class="navbar-left" id="drop-down-tab" style="position: fixed; left: 80px;"><a style="color: #000;" href="#">Node List</a></li>
 {% endblock %}
 
 {% block dropmenu %}
-  <!-- Hidden node menu-->
-  <div id="drop-down-menu" style="display: none; z-index: 20;">
-    <div class="container">
-      <div class="row">
-        <div class="span12">
-          <p style="color: #000;">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut facilisis purus condimentum faucibus placerat. In non sem arcu. In molestie dignissim mauris, sit amet ultrices purus maximus a. Morbi eu eleifend dolor. Morbi congue nibh nibh, vel efficitur mauris convallis malesuada. Donec tempus massa justo, condimentum vulputate neque ultricies vel. Nulla pretium nibh a dolor congue efficitur.
-          </p>
-        </div>
-      </div>
-    </div>
-  </div><!-- end node menu -->
+  
+  
 
-  <nav class="menu" id="slide-menu-left">
+<!-- Hidden node menu-->
+<div id="drop-down-menu" style="display: none; width: 90%; height:130px; ">
+  <div class="node-carousel" style="width:90%; margin: 0 auto 0 auto;">
+      {% for peer, url, name, location in nodes %}
+        <div class="item-holder" style="padding-left: 10px; background-color: #1E70E3;">
+          <p class="node-item">Node: <a href="#">{{name}}</a></p>
+          <p>AdminPeer: {{peer}}</p>
+          <p>Location: {{location}}</p>
+          <p>Url: <a href=http://{{url}} target="_blank">{{url}}</a></p>
+        </div>
+      {% endfor %}
+  </div> <!-- end carousel -->
+</div><!-- end node menu -->
+
+
+
+
+  <nav class="menu" id="slide-menu-left" style="top: 50px; z-index:22;">
     <ul>
       <li><button type="button" class="btn menu-btn slide-btn" id="provenance">Provenance Capture</button></li>
       <li><button type="button" class="btn menu-btn slide-btn" id="status">Status Messages</button></li>
       <li><button type="button" class="btn menu-btn slide-btn" id="science">Science Input</button></li>
-      <li><button type="button" class="btn menu-btn slide-btn" id="nodeList">Node List</button></li>
+      <li><button type="button" class="btn menu-btn slide-btn" id="nodeSearch">Node Search</button></li>
       <li><button type="button" class="btn menu-btn slide-btn" id="heatMap">Heat Map</button></li>
       <li><button type="button" class="btn menu-btn slide-btn" id="modelRun">Model Run</button></li>
       <li><button type="button" class="btn menu-btn slide-btn" id="nodeSelect">Node Selector</button></li>

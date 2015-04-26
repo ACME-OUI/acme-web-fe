@@ -11,6 +11,7 @@
 	height: -webkit-calc(100% - 30px); /* google, safari */
 	height: -moz-calc(100% - 30px); /* firefox */
 	background-color: #fff;
+    padding: 20px 20px 20px 20px;
     -webkit-transition: all 0.5s ease-in-out;
     -moz-transition: all 0.5s ease-in-out;
     -o-transition: all 0.5s ease-in-out;
@@ -47,6 +48,28 @@
     z-index: 2;
 }
 
+.tile-contents tr {
+    border-bottom: 1px dotted silver;
+}
+
+.tile-contents table {
+    width: 100%;
+}
+
+.tile-contents .key {
+    padding-left: 20px;
+    padding-top:2px;
+
+}
+
+.tile-contents .value {
+    padding-right: 20px;
+    padding-top:2px;
+    text-align: right;
+}
+
+.tile-contents 
+
 .tile-board {
 	margin: 0 auto 0 auto;
 	height: 100%;
@@ -57,7 +80,7 @@
 .wrapper {
     height: 80vh;
     width:100%;
-    margin-left: 10px;
+    margin-left: 5px;
 }
 
 

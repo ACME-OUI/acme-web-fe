@@ -21,6 +21,7 @@ from acme_site.models import TileLayout
 #from acme_site.forms import
 
 import json
+import xmltodict
 import simplejson
 import os
 import urllib
@@ -102,6 +103,8 @@ def register(request):
    
     return render_to_response("acme_site/register.html", {"user_form": user_form, "registered": registered}, context)
 
+def slick(request):
+    return HttpResponse(render_template(request, "acme_site/slick.html", {}))
 
 ##### Work Flows
 @login_required(login_url='login')
@@ -118,7 +121,25 @@ def jspanel(request):
 
 @login_required(login_url='login')
 def grid(request):
-    return HttpResponse(render_template(request, "acme_site/grid.html", {}))
+    ''' For demo purposes this is loading a local file '''    
+    from xml.etree.ElementTree import parse
+    tree = parse('acme_site/demo_data/registration.xml')
+
+    node_name_list = []
+    node_peer_list = []
+    node_url_list = []
+    node_location_list = []
+    for node in tree.getroot():
+        attrs = node.attrib
+        node_name_list.append(attrs["shortName"])
+        node_peer_list.append(attrs["adminPeer"])
+        node_url_list.append(attrs["hostname"])
+        for child in node:
+            if child.tag[-11:] == "GeoLocation":
+                node_location_list.append(child.attrib["city"])
+    node_list = zip(node_peer_list, node_url_list, node_name_list, node_location_list)
+    print node_list, node_peer_list, node_url_list, node_name_list, node_location_list
+    return HttpResponse(render_template(request, "acme_site/grid.html", {'nodes': node_list}))
 
 
 @login_required(login_url='login')
@@ -173,6 +194,95 @@ def load_layout(request):
             curlayout['mode'] = layout.mode
             layouts.append(curlayout)
         return HttpResponse(json.dumps(layouts))
+
+@login_required
+def node_info(request):
+    if request.method == 'POST':
+        ''' For demo purposes this is loading a local file '''
+        try:
+            from xml.etree.ElementTree import parse
+
+            tree = parse('acme_site/demo_data/registration.xml')
+            root = tree.getroot()
+            name = json.loads(request.body)['node']
+            
+            response = {}
+            for node in root:
+                if node.attrib['shortName'] == name:
+                    response['org'] = node.attrib['organization']
+                    response['namespace'] = node.attrib['namespace']
+                    response['email'] = node.attrib['supportEmail']
+                    response['ip'] = node.attrib['ip']
+                    response['longName'] = node.attrib['longName']
+                    response['version'] = node.attrib['version']
+                    response['shortName'] = name
+                    response['adminPeer'] = node.attrib['adminPeer']
+                    response['hostname'] = node.attrib['hostname']
+
+
+                    for child in list(node):
+                        if child.tag[-len('AuthorizationService'):] == "AuthorizationService":
+                            response['authService'] = child.attrib["endpoint"]
+                        if child.tag[-len('GeoLocation'):] == "GeoLocation":
+                            response['location'] = child.attrib["city"]
+                        if child.tag[-len('Metrics'):] == "Metrics":
+                            for gchild in list(child):
+                                if gchild.tag[-len('DownloadedData'):] == "DownloadedData":
+                                    response['dataDownCount'] = gchild.attrib['count']
+                                    response['dataDownSize'] = gchild.attrib['size']
+                                    response['dataDownUsers'] = gchild.attrib['users']
+                                if gchild.tag[-len('RegisteredUsers'):] == "RegisteredUsers":
+                                    response['registeredUsers'] = gchild.attrib['count']
+
+
+                    from pyesgf.search import SearchConnection
+                    print 'attempting to connect to ' + 'http://' + response['hostname'] + 'esg-search/'
+                    conn = SearchConnection('http://' + response['hostname'] + '/esg-search/', distrib=True)
+                    try:
+                        conn.get_shard_list()
+                        response['status'] = 'up'
+                    except Exception as e:
+                        print repr(e)
+                        response['status'] = 'down'
+
+
+                    return HttpResponse(json.dumps(response))
+        except Exception as e:
+            print "Unexpected error:", repr(e)
+            return HttpResponse(status=500)
+    elif request.method == 'POST':
+        print "Unexpected POST request"
+        return HttpResponse(status=500)
+
+@login_required
+def node_search(request):
+    if request.method == 'POST':
+        from pyesgf.search import SearchConnection
+        searchString = json.loads(request.body)
+        print searchString
+        if 'node' in searchString:
+            if 'test_connection' in searchString:
+                try:
+                    print 'testing connection to', searchString['node']
+                    conn = SearchConnection(searchString['node'], distrib=True)
+                    conn.get_shard_list()
+                    response = {}
+                    response['status'] = 'success'
+                    return HttpResponse(json.dumps(response))
+                except Exception as e:
+                    print "Unexpected error:", repr(e)
+                    return HttpResponse(status=500)
+            else:
+                try:
+                    conn = SearchConnection(searchString['node'], distrib=True)
+                    context = conn.new_context(searchString['text'])
+                    print 'hits', context.hit_count
+                    print 'realms', context.facet_counts['realm']
+                except Exception as e:
+                    print "Unexpected error:", repr(e)
+                    return HttpResponse(status=500)
+    else:
+        return HttpResponse(status=500)
 
 
 

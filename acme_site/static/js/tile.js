@@ -4,73 +4,76 @@ $(document).ready(function(){
 /****************************************
  	Setup variables
  	***************************************/
- 	var docWidth = $(".tile-board").width();
- 	var docHeight = $(".tile-board").height();
- 	var tileWidth = 100;
- 	var tileHeight = 100;
- 	var maxCols = Math.floor(docWidth/tileWidth);
- 	var maxHeight = Math.floor(docHeight/tileHeight);
+ 	// var docWidth = $(".tile-board").width();
+ 	// var docHeight = $(".tile-board").height();
+ 	var docHeight, docWidth, maxCols, maxHeight, tileHeight, tileWidth;
+ 	calcMaxSize();
+ 	
+ 	// var tileWidth = 50;
+ 	// var tileHeight = 50;
+ 	// var maxCols = Math.floor(docWidth/tileWidth)-1;
+ 	// var maxHeight = Math.floor(docHeight/tileHeight)-1;
  	$('.wrapper').width(maxCols*tileWidth);
+ 	$('.wrapper').height(maxHeight*tileHeight);
  	$('.tile-board').css({'height':maxHeight*tileHeight});
  	var tiles = [];
  	var resize_handle_html = '<span class="gs-resize-handle gs-resize-handle-both"></span>';
-		// Define a widget
-		var header1 = ''; 
-		var header2 = '';
-		var header3 = '';
-		var contents = '';
-		var optionContents = '';
-		header1 += '<div class="tile-panel panel-default">';
-		header1 += ' <div class="tile-panel-heading">';
-		header1 += '  <div class="panel-header-title text-center">';
-		header1 += '    <button type="button" class="btn btn-default btn-xs options" style="float:left;">';
-		header1 += '     <span class="fa fa-cog" aria-label="Options"></span>';
-		header1 += '    </button>';
-		header1 += '    <button type="button" class="btn btn-default btn-xs remove"  style="float:right;">';
-		header1 += '     <span class="fa fa-times" aria-label="Close"></span>';
-		header1 += '    </button>';
-		header1 += '     <p style="text-align: center">';
-		// Widget Name
-		header2 += '     <p>';
-		header2 += '   </div>';
-		header2 += '  </div>';
-		header2 += ' </div>';
-		header2 += ' <div class="tile-panel-body" data-direction="horizontal" data-mode="slid">';
-		// Widget Contents
-		contents += '  <p>The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men.</p>';
-		header3 += ' </div>';
-		header3 += '</div>';
-		var dragStartX = 0;
-		var dragStartY = 0;
-		var dragStartSizeX = 0;
-		var dragStartSizeY = 0;
-		var dragStartId = '';
-		var dragStartOffset = {
-			top: 0,
-			left: 0
-		};
-		var widgetMargins = 1;
-		var resizeStartSizeX = 0;
-		var resizeStartSizeY = 0;
-		var resizeStartX = 0;
-		var resizeStartY = 0;
-		var resizeDir = '';
-
-	//i = cols, j = rows
-	var board = new Array(maxCols);
-	//setup the empty board
-	for (var i = board.length - 1; i >= 0; i--) {
-		board[i] = new Array(maxHeight);
-		for (var j = board[i].length - 1; j >= 0; j--) {
-			board[i][j] = {
-				occupied: 0,
-				tile: ''
-			};
-		}
+	// Define a widget
+	var header3 = '';
+	var contents = '';
+	var optionContents = '';
+	var header1 = [ '<div class="tile-panel panel-default">',
+				 	' <div class="tile-panel-heading">',
+					'  <div class="panel-header-title text-center">',
+					'    <button type="button" class="btn btn-default btn-xs options" style="float:left;">',
+					'     <span class="fa fa-cog" aria-label="Options"></span>',
+					'    </button>',
+					'    <button type="button" class="btn btn-default btn-xs remove"  style="float:right;">',
+					'     <span class="fa fa-times" aria-label="Close"></span>',
+					'    </button>',
+					'     <p style="text-align: center">'].join('');
+							// Widget Name
+	header2 = 	[   '     <p>',
+					'   </div>',
+					'  </div>',
+					' </div>',
+					' <div class="tile-panel-body" data-direction="horizontal" data-mode="slid">',
+					'  <div class="tile-contents">'].join('');
+	// Widget Contents
+	contents += '  <p>The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men.</p>';
+	header3 += ' </div></div></div>';
+	var dragStartX = 0;
+	var dragStartY = 0;
+	var dragStartSizeX = 0;
+	var dragStartSizeY = 0;
+	var dragStartId = '';
+	var dragStartOffset = {
+		top: 0,
+		left: 0
+	};
+	var widgetMargins = 1;
+	var resizeStartSizeX = 0;
+	var resizeStartSizeY = 0;
+	var resizeStartX = 0;
+	var resizeStartY = 0;
+	var resizeDir = '';
+	var needsFixXBool = true;
+	var needsFixYBool = true;
+	var fixValX = 99;
+	var fixValY = 99;
+	var mode = {
+		light: 'day'
 	}
+	boardSetup(maxCols, maxHeight);
+	loadDefaultLayout();
+	
 /****************************************
  	End setup variables
  	***************************************/
+
+
+
+
 
  	//find if the user has a default layout, if so load it
  	function loadDefaultLayout(){
@@ -80,11 +83,24 @@ $(document).ready(function(){
  			type: 'GET',
  			success: function(request){
  				options = jQuery.parseJSON(request);
- 				console.log(options);
  				$.each(options, function(k, v){
  					if(v.default == true){
  						for(var i = 0; i < v.layout.length; i++){
  							v.layout[i] = layoutFix(v.layout[i]);
+ 							if(v.layout[i].x == 1){
+ 								needsFixXBool = false;
+ 							} else {
+ 								if(v.layout[i].x < fixValX){
+ 									fixValX = v.layout[i].x;
+ 								}
+ 							}
+ 							if(v.layout[i].y == 1){
+ 								needsFixYBool = false;
+ 							} else {
+ 								if(v.layout[i].y < fixValY){
+ 									fixValY = v.layout[i].y;
+ 								}
+ 							}
  						}
  						loadLayout(v.layout, v.mode);
  					}
@@ -92,26 +108,236 @@ $(document).ready(function(){
  			}
  		});
  	}
+
+
+ 	/**
+ 	 * A temporary function to deal with some aweful rounding issues
+ 	 * Hopefully I will solve the problem and I can get rid of this :(
+ 	 */
+ 	function windowLoadFix(){
+ 		var needsFixup = true;
+ 		var alltiles = $('.tile');
+ 		$('.tile').each(function(){
+ 			if(parseInt($(this).attr('col')) == 1){
+ 				needsFixup == false;
+ 			}
+ 		});
+ 		if(needsFixup){
+ 			$('.tile').each(function(){
+ 				$(this).attr('col') = parsetInt($(this).attr('col')) - 1;
+ 			});
+ 		}
+
+ 	}
  	
- 	loadDefaultLayout();
+ 	
 
-
-
-
-
-
+ 	// Remove extra stuff from the header which isnt going to be used from the dashboard 
+ 	$('#footer').remove();
+ 	$('#dashboard-link').remove();
+ 	$('#uvcdat-link').remove();
+ 	$('#glubus-link').remove();
+ 	$('#classic-link').remove();
+ 	$('#cdatweb-link').remove();
 
 	//set the window creation buttons
 	$('.slide-btn').each(function(){
 		$(this).click(function(){
 			var name = $(this).attr('id');
+			var content = '';
+			if(name == 'nodeSearch'){
+				if($('#nodeSelect_window').length == 0){
+					var content = [	'<form id="node-search-form>"',
+									'<p>Node to search:</p><input type="text" style="color: #000;" id="node-search-name">',
+									'<input type="submit" value="Search" id="search-btn" style="color: #000;"><br>',
+									'</form>'].join('');				
+				} else {
+					nodeSearch($('#hostname_value').text());
+					return;
+				}
+
+			} 
 			if($('#' + name + '_window').length == 0) {
-				var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + contents + header3 +'</li>';
-				add_tile(new_tile, name+'_window');
+				var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + content + header3 +'</li>';
+				add_tile(new_tile, name+'_window', {ignore: 'true'}, function(){
+					$('#search-btn').click(function(){
+						nodeSearch(document.getElementById("node-search-name").value);
+					})
+				});
 			}
 		});
 	});
 
+	//setup the hander to fix the windows after a resize
+	$(window).resize(function() {
+		if(event.target == this){
+			if(this.resizeTO) clearTimeout(this.resizeTO);
+	        this.resizeTO = setTimeout(function() {
+	            $(this).trigger('resizeEnd');
+	        }, 500);
+		}
+        
+    });
+
+    $(window).bind('resizeEnd', function() {
+    	//handleWindowResize();
+	});
+
+    $('.node-item').click(function(){
+    	if($('#nodeSelect_window').length != 0){
+    		$('#nodeSelect_window').find('.tile-contents').empty();
+    	} else {
+    		var new_tile = '<li id="' + "nodeSelect" + '_window" class="tile">' + header1 + "nodeSelect" + header2 + header3 +'</li>';
+    		add_tile(new_tile, "nodeSelect_window");
+    	}
+    	var nodeName = $(this).find('a').text();
+    	populateNodeSelect(nodeName);
+    
+    });
+
+    function populateNodeSelect(id){
+    	var data = {
+    		node: id
+    	}
+    	data = JSON.stringify(data);
+    	var csrfToken = getCookie('csrftoken');
+		$.ajaxSetup({
+			beforeSend: function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', csrfToken);
+			}
+		});
+    	$.ajax({
+			url:'node_info/',
+			type: 'POST',
+			data: data,
+			success: function(response){
+				var node_data = jQuery.parseJSON(response);
+				var data = '';
+				var text_style = '';
+				$('#nodeSelect_window').find('.tile-contents').append('<table id=node-info></table>');
+				for( var key in node_data){
+					if(key == 'status'){
+						if(node_data[key] == 'up'){
+							text_style = 'color: green;';
+						} else {
+							text_style = 'color: red;';
+						}
+					} else {
+						text_style = '';
+					}
+					var data = '<tr><td class="key" id="'+key+'">' + key + '</td><td class="value" id="'+key+'_value" style="'+text_style+'">' + node_data[key] + '</td><tr>';
+					$('#nodeSelect_window').find('#node-info').append(data);
+				}
+				var button = [	'<br><button type="button" class="btn btn-default btn-xs" id="node-search" style="float:left; margin-left: 20px;">',
+								'     <span class="fa fa-search" aria-label="Options"></span>',
+								'</button>'].join('');
+				$('#nodeSelect_window').find('.tile-contents').append(button);
+				$('#node-search').click(function(){
+					nodeSearch($('#hostname_value').text());
+				});
+			}
+		});
+    }
+
+    function nodeSearch(hostname){
+    	if($('#nodeSearch_window').length != 0){
+    		$('#nodeSearch_window').find('.tile-contents').empty();
+    	} else {
+    		var new_tile = '<li id="' + "nodeSearch" + '_window" class="tile">' + header1 + "nodeSearch" + header2 + header3 +'</li>';
+    		add_tile(new_tile, "nodeSearch_window");
+    	}
+    	var searchWindow = $('#nodeSearch_window').find('.tile-contents');
+    	var csrfToken = getCookie('csrftoken');
+		$.ajaxSetup({
+			beforeSend: function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', csrfToken);
+			}
+		});
+		var data = {
+			node:'http://'+hostname+'/esg-search/',
+			test_connection: true
+		};
+		var data = JSON.stringify(data);
+		$.ajax({
+			url:'node_search/',
+			data: data,
+			type: 'POST',
+			success: function(response){
+				searchWindow.empty();
+				var form = ['<form>',
+							'Select filter<br>',
+							'<select id="select-filter">',
+								'<option value="Project">Project</option>',
+								'<option value="Data_Tyle">Data_Type</option>',
+								'<option value="Institute">Institute</option>',
+								'<option value="Model">Model</option>',
+								'<option value="Configuration">Configuration</option>',
+								'<option value="Experiment">Experiment</option>',
+								'<option value="Version_Num">Version_Num</option>',
+								'<option value="Regridding">Regridding</option>',
+								'<option value="Years_Spanned">Years_Spanned</option>',
+								'<option value="Realm">Realm</option>',
+							'</select>',
+							'<br><p>Filter value</p><input type="text" style="color: #000;" id="filter-value">',
+							'<input type="submit" value="Add filter" id="filter-value-btn" style="color: #000;"><br>',
+							'<br><p id="search-string">Search string: </p>',
+							'<input type="submit" id="search-submit value="Search" style="color: #000;">',
+							'</form>'
+							].join('');
+				searchWindow.append(form);
+				searchTerms = {};
+				$('#filter-value-btn').click(function(){
+					searchTerms[document.getElementById("select-filter").value] = document.getElementById('filter-value').value;
+					$('#search-string').html('Search string: ');
+					for(key in searchTerms){
+						$('#search-string').append(key + '=' + searchTerms[key] + ',');
+					}
+				});
+				$('#search-submit').click(function(){
+					esgfSearch($('#search-string').text(), hostname);
+				});
+			},
+			statusCode:{
+				404: function(){
+					alert('Node not found');
+				},
+				500: function(){
+					alert('Unable to connect');
+				}
+			}
+
+		});
+    }
+
+    function esgfSearch(text,hostname){
+    	$.ajaxSetup({
+			beforeSend: function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', csrfToken);
+			}
+		});
+		var data = {
+			node:'http://'+hostname+'/esg-search/',
+			text: text
+		};
+		var data = JSON.stringify(data);
+		$.ajax({
+			url:'node_search/',
+			data: data,
+			type: 'POST',
+			success: function(response){
+				
+			},
+			statusCode:{
+				404: function(){
+					alert('Node not found');
+				},
+				500: function(){
+					alert('Unable to connect');
+				}
+			}
+
+		});
+    }
 
 
 
@@ -126,8 +352,8 @@ $(document).ready(function(){
 	 	$('.tile-holder').append(html);
 	 	var w = $('#'+id);
 	 	$(w).css({
-	 		'display': 'none',
-	 		'z-index': 1
+	 		'z-index': 1, 
+	 		'opacity': 0
 	 	});
 
 	 	$(w).draggable({
@@ -167,71 +393,31 @@ $(document).ready(function(){
 			helper: 'ui-resizable-helper',
 			grid: [tileWidth, tileHeight],
 			start: function(event, ui){
-				resizeStartX = parseInt(ui.element.attr('col'));
-				resizeStartSizeX = parseInt(ui.element.attr('sizex'));
-				resizeStartY = parseInt(ui.element.attr('row'));
-				resizeStartSizeY = parseInt(ui.element.attr('sizey'));
+				handleResizeStart(event, ui);
 			},
 			resize: function(event, ui){
-
+				event.stopPropagation();
 			},
 			stop: function(event, ui){
-				resizeFixup(ui);
-				var el = ui.element;
-				setTimeout(function(el){
-					if(resizeDir == 'n' && parseInt(el.attr('row')) == 1){
-						el.css({
-							'top':$('.tile-board').offset().top,
-							'height':tileHeight*parseInt(el.attr('sizey')),
-							'width':tileWidth*parseInt(el.attr('sizex'))
-						});
-					}
-					else if(resizeDir == 's'){
-						el.css({
-							'height':tileHeight*parseInt(el.attr('sizey')),
-							'width':tileWidth*parseInt(el.attr('sizex'))
-						});
-					}
-					else if(resizeDir == 'e' && parseInt(el.attr('col'))+parseInt(el.attr('sizex'))-1 == maxCols){
-						el.css({
-							'left': tileWidth*(parseInt(el.attr('col'))-1)+$('.tile-holder').offset().left,
-							'width': tileWidth*parseInt(el.attr('sizex')),
-							'height':tileWidth*parseInt(el.attr('sizey'))
-						});
+				handleResizeStop(event, ui);
+				event.stopPropagation();
+			}
+		});
 
-					}
-					else if(resizeDir == 'w' && parseInt(el.attr('col')) == 1){
-						el.css({
-							'width':tileWidth*parseInt(el.attr('sizex')),
-							'height':tileWidth*parseInt(el.attr('sizey')),
-							'left':$('.tile-board').offset().left
-						});
-					}
-					else{
-						el.css({
-							'left':(parseInt(el.attr('col'))-1)*tileWidth+$('.tile-holder').offset().left,
-							'height':parseInt(el.attr('sizey'))*tileHeight,
-							'width':parseInt(el.attr('sizex'))*tileWidth
-						});
-					} 
-				}, 500, el);
-}
-});
+		$(w).find('.ui-resizable-n').mousedown(function(){
+			resizeDir = 'n';
+		});
+		$(w).find('.ui-resizable-s').mousedown(function(){
+			resizeDir = 's';
+		});
+		$(w).find('.ui-resizable-e').mousedown(function(){
+			resizeDir = 'e';
+		});
+		$(w).find('.ui-resizable-w').mousedown(function(){
+			resizeDir = 'w';
+		});
 
-$(w).find('.ui-resizable-n').mousedown(function(){
-	resizeDir = 'n';
-});
-$(w).find('.ui-resizable-s').mousedown(function(){
-	resizeDir = 's';
-});
-$(w).find('.ui-resizable-e').mousedown(function(){
-	resizeDir = 'e';
-});
-$(w).find('.ui-resizable-w').mousedown(function(){
-	resizeDir = 'w';
-});
-
-tiles.push($(w).attr('id'));
+		tiles.push($(w).attr('id'));
 
 	 	//Setup the live tile for the options menu
 	 	$(w).find('.live-tile').liveTile({ direction:'horizontal' });
@@ -265,23 +451,40 @@ tiles.push($(w).attr('id'));
 		$(w).find('.options').click(function(e) {
 
 		});
-		if(options != null){
+
+		if(options != null && options.ignore != 'true'){
 			$(w).attr({
 				'row': options.y,
 				'col': options.x,
 				'sizex': options.sizex,
 				'sizey': options.sizey
 			});
+			// for(var i = 0; i < tiles.length -1; i ++){
+			// 	if(id != tiles[i]){
+			// 		// if the tile is overlapping in the y direction t.y + t.sizey >= y > t.y
+			// 		if(parseInt($('#'+tiles[i]).attr('row'))+parseInt($('#'+tiles[i]).attr('sizey')) - 1 > parseInt($(w).attr('row')) && parseInt($(w).attr('row')) > parseInt($('#'+tiles[i]).attr('row'))){
+			// 			$(w).attr({
+			// 				'row' : parseInt($('#'+tiles[i]).attr('row'))+parseInt($('#'+tiles[i]).attr('sizey'))
+			// 			});
+			// 		}
+			// 		if(parseInt($('#'+tiles[i]).attr('col'))+parseInt($('#'+tiles[i]).attr('sizex')) - 1 > parseInt($(w).attr('col')) && parseInt($(w).attr('col')) > parseInt($('#'+tiles[i]).attr('col'))){
+			// 			$(w).attr({
+			// 				'col' : parseInt($('#'+tiles[i]).attr('col'))+parseInt($('#'+tiles[i]).attr('sizex'))
+			// 			});
+			// 		}
+			// 	}
+			// }
+			update_board(id);
+			var tile_offset = offset_from_location(parseInt($(w).attr('row')), parseInt($(w).attr('col')));
 			$(w).css({
-				'top': options.y*tileHeight,
-				'left': (options.x -1)*tileWidth + $('.tile-holder').offset().left,
-				'width': options.sizex*tileWidth,
-				'height': options.sizey*tileHeight
+				"top": tile_offset.top,
+				"left":tile_offset.left,
+				"width":$(w).attr('sizex')*tileWidth,
+				"height":$(w).attr('sizey')*tileHeight
 			});
 		} else {
 			positionFixup();
 		}
-		update_board(id);
 		if($('body').attr('class') == 'night'){
 			$(w).find('.tile-panel-body').css({
 				'background-color': '#0C1021;',
@@ -289,11 +492,90 @@ tiles.push($(w).attr('id'));
 				'color': '#fff'
 			});
 		}
-		$(w).fadeIn();
+		$(w).animate({'opacity':1}, 'slow', 'easeOutCubic');
+
 		if(callback != null)
 			callback();
 		return $(w);
 	};
+
+	/**
+	 * Handles all actions at the start of a resize event
+	 * event -> The event variable
+	 * ui -> the ui element handed down from the jquery handler
+	 */
+	function handleResizeStart(event, ui){
+		resizeStartX = parseInt(ui.element.attr('col'));
+		resizeStartSizeX = parseInt(ui.element.attr('sizex'));
+		resizeStartY = parseInt(ui.element.attr('row'));
+		resizeStartSizeY = parseInt(ui.element.attr('sizey'));
+		switch(resizeDir){
+			case 'n':
+				$('#'+ui.element.attr('id')).css({
+					'-webkit-transition': 'height 200ms easeOutQuint!important',
+				    '-moz-transition': 'height 200ms easeOutQuint!important',
+				    '-o-transition': 'height 200ms easeOutQuint!important',
+				    '-ms-transition': 'height 200ms easeOutQuint!important',
+				    'transition': 'height 200ms easeOutQuint!important',
+				});
+			case 's':
+			case 'e':
+			case 'w':
+		}
+		event.stopPropagation();
+	}
+
+	/**
+	 * Handles all actions needed at the end of a resize event
+	 * event -> The event variable
+	 * ui -> the ui element handed down from the jquery handler
+	 */
+	function handleResizeStop(event, ui){
+		resizeFixup(ui);
+		var el = ui.element;
+		el.css({
+			'left':(parseInt(el.attr('col'))-1)*tileWidth+$('.tile-holder').offset().left,
+			'height':parseInt(el.attr('sizey'))*tileHeight,
+			'width':parseInt(el.attr('sizex'))*tileWidth
+		});
+		setTimeout(function(el){
+			if(resizeDir == 'n' && parseInt(el.attr('row')) == 1){
+				el.css({
+					'top':$('.tile-board').offset().top,
+					'height':tileHeight*parseInt(el.attr('sizey')),
+					'width':tileWidth*parseInt(el.attr('sizex'))
+				});
+			}
+			else if(resizeDir == 's'){
+				el.css({
+					'height':tileHeight*parseInt(el.attr('sizey')),
+					'width':tileWidth*parseInt(el.attr('sizex'))
+				});
+			}
+			else if(resizeDir == 'e' && parseInt(el.attr('col'))+parseInt(el.attr('sizex'))-1 == maxCols){
+				el.css({
+					'left': tileWidth*(parseInt(el.attr('col'))-1)+$('.tile-holder').offset().left,
+					'width': tileWidth*parseInt(el.attr('sizex')),
+					'height':tileWidth*parseInt(el.attr('sizey'))
+				});
+
+			}
+			else if(resizeDir == 'w' && parseInt(el.attr('col')) == 1){
+				el.css({
+					'width':tileWidth*parseInt(el.attr('sizex')),
+					'height':tileWidth*parseInt(el.attr('sizey')),
+					'left':$('.tile-board').offset().left
+				});
+			}
+			else{
+				el.css({
+					'left':(parseInt(el.attr('col'))-1)*tileWidth+$('.tile-holder').offset().left,
+					'height':parseInt(el.attr('sizey'))*tileHeight,
+					'width':parseInt(el.attr('sizex'))*tileWidth
+				});
+			} 
+		}, 500, el);
+	}
 
 
 	/**
@@ -323,7 +605,7 @@ tiles.push($(w).attr('id'));
 	 				'sizey':sizey+diff
 	 			});
 	 			curWindow.css({
-	 				'top':(y-diff)*tileHeight-40,
+	 				'top':(y-diff)*tileHeight + $('.navbar').height() - 1,
 	 				'height':(sizey+diff)*tileHeight
 	 			});
 	 			update_board(id);
@@ -378,7 +660,7 @@ tiles.push($(w).attr('id'));
 					'sizey':sizey+diff
 				});
 				curWindow.css({
-					'top':(y-diff)*tileHeight-40,
+					'top':(y-diff)*tileHeight + $('.navbar').height() - 1,
 					'height':(sizey+diff)*tileHeight
 				});
 				update_board(id);
@@ -510,7 +792,7 @@ tiles.push($(w).attr('id'));
 				});
 				curWindow.css({
 					'width':(sizex+diff)*tileWidth,
-					'left':(x-diff)*tileWidth-92
+					'left':(x-diff-1)*tileWidth + $('.wrapper').offset().left
 				});
 				update_board(id);
 				moved.add(id);
@@ -918,10 +1200,10 @@ Left slide menu
     		$('.tile').each(function(){
     			layout.push({
     				tileName: $(this).attr('id').substr(0, $(this).attr('id').indexOf('_')),
-    				x: $(this).attr('col'),
-    				y: $(this).attr('row'),
-    				sizex:'max-'+(maxCols-parseInt($(this).attr('sizex'))),
-    				sizey:'max-'+(maxHeight-parseInt($(this).attr('sizey')))
+    				x: parseInt($(this).attr('col'))/maxCols,
+    				y: parseInt($(this).attr('row'))/maxHeight,
+    				sizex: parseInt($(this).attr('sizex'))/maxCols,
+    				sizey: parseInt($(this).attr('sizey'))/maxHeight
     			});
     		});
     		if($('body').hasClass('night')){
@@ -973,7 +1255,9 @@ Left slide menu
 			url: 'load_layout/',
 			type: 'GET',
 			success: function(request){
+				//parse response
 				options = jQuery.parseJSON(request);
+				//create background mask
 				var mask = document.createElement('div');
 				$(mask).addClass('mask');
 				$(mask).attr({'id':'mask'});
@@ -981,6 +1265,7 @@ Left slide menu
 					fadeOutMask();
 				});
 				$('body').append(mask);
+				//create load menu and populate with values
 				var loadMenu = document.createElement('div');
 				$(loadMenu).addClass('bvc');
 				$(loadMenu).addClass('save-layout');
@@ -988,13 +1273,14 @@ Left slide menu
 				loadMenuHtml += '<form name="load-layout-form" id="save-form">'; 
 				loadMenuHtml += 'Select Layout:<br><select id="select-layout">';
 				$.each(options, function(k, v){
-					loadMenuHtml += '<option value="' + v + '">' + v + '</option>';
+					loadMenuHtml += '<option value="' + v.nane + '">' + v.name + '</option>';
 				});
 				loadMenuHtml += '</select><input type="submit" value="Load" id="load-button">';
 				loadMenuHtml += '</form></div><div class="bevel bl br"></div>';
 				$(loadMenu).html(loadMenuHtml);
 				$('body').append(loadMenu);
 				$(mask).fadeIn();
+
 				$('#load-button').click(function(){
 					var name = document.forms['load-layout-form'].elements[0].options[document.forms['load-layout-form'].elements[0].selectedIndex].text;
 					var csrfToken = getCookie('csrftoken');
@@ -1011,6 +1297,10 @@ Left slide menu
 						data: data,
 						dataType: 'json',
 						success: function(request){
+							$('.tile').each(function(){
+								$(this).remove();
+							});
+							tiles = [];
 							layout = []
 							$.each(request.board_layout, function(k, v){
 								layout.push(layoutFix(v));
@@ -1021,12 +1311,7 @@ Left slide menu
 				});
 			}
 		});
-
-	$('.tile').each(function(){
-		$(this).remove();
-	});
-	tiles = [];
-	leftMenuToggle();
+		leftMenuToggle();
 	});
 
 
@@ -1036,48 +1321,18 @@ Left slide menu
 	 */
 	function layoutFix(layout){
 
-		var x = layout.x.indexOf('max');
-		var y = layout.y.indexOf('max');
-		var sizex = layout.sizex.indexOf('max');
-		var sizey = layout.sizey.indexOf('max');
-
-		if(x != -1){
-			if(layout.x.length != 3){
-				layout.x = maxCols - parseInt(layout.x.substr(x+4)); 
-			} else {
-				layout.x = maxCols;
-			}
-		} else {
-			layout.x = parseInt(layout.x);
+		layout.x = checkZero(Math.round(layout.x * maxCols));
+		layout.y = checkZero(Math.round(layout.y * maxHeight));
+		layout.sizex = checkZero(Math.round(layout.sizex * maxCols));
+		layout.sizey = checkZero(Math.round(layout.sizey * maxHeight));
+		var diff = layout.x + layout.sizex - 1 - maxCols
+		if(diff > 0){
+			layout.sizex -= diff;
 		}
-		if(y != -1){
-			if(layout.y.length != 3){
-				layout.y = maxHeight - parseInt(layout.y.substr(y+4));
-			} else {
-				layout.y = maxHeight;
-			}
-		} else {
-			layout.y = parseInt(layout.y);
+		diff = layout.y + layout.sizey - 1 - maxHeight;
+		if(diff > 0){
+			layout.sizey -= diff;
 		}
-		if(sizex != -1){
-			if(layout.sizex.length != 3){
-				layout.sizex = maxCols - parseInt(layout.sizex.substr(sizex+4));
-			} else {
-				layout.sizex = maxCols;
-			}
-		} else {
-			layout.sizex = parseInt(layout.sizex);
-		}
-		if(sizey != -1){
-			if(layout.sizey.length != 3){
-				layout.sizey = parseInt(layout.sizey.substr(sizey+4));
-			} else {
-				layout.sizey = maxHeight;
-			}
-		} else {
-			layout.sizey = parseInt(layout.sizey);
-		}
-
 		return layout;
 	}
 
@@ -1095,18 +1350,17 @@ Left slide menu
 		else if(mode == 'night'){
 			setNight();
 		}
+		mode.light = mode
 
 		for(var i = 0; i < layout.length; i++){
 			var name = layout[i].tileName;
 			var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + contents + header3 +'</li>';
 			add_tile(new_tile, name+'_window', {
-				x: layout[i].x,
-				y: layout[i].y,
+				x: layout[i].x - needsFixX(),
+				y: layout[i].y - needsFixY(),
 				sizex: layout[i].sizex,
 				sizey: layout[i].sizey
 			});
-
-
 		}
 	}
 
@@ -1167,9 +1421,9 @@ Left slide menu
 	/**********************************
 	Top slide down menu
 	**********************************/
-
 	$('#drop-down-tab').click(function(e){
 		var menuHeight = parseInt($('#drop-down-menu').css('height'));
+		
 		if($('#drop-down-menu').css('display') == 'none'){
 			$('.tile').each(function(){
 				$(this).css({
@@ -1183,8 +1437,9 @@ Left slide menu
 				});
 			});
 		}
-		$('#drop-down-menu').slideToggle('normal');
+		$('#drop-down-menu').slideToggle();
 	});
+
 
 	function getCookie(name) {
 		var cookieValue = null;
@@ -1192,18 +1447,165 @@ Left slide menu
 			var cookies = document.cookie.split(';');
 			for (var i = 0; i < cookies.length; i++) {
 				var cookie = jQuery.trim(cookies[i]);
-	    // Does this cookie string begin with the name we want?
-	    if (cookie.substring(0, name.length + 1) == (name + '=')) {
-	    	cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-	    	break;
-	    }
+			    // Does this cookie string begin with the name we want?
+			    if (cookie.substring(0, name.length + 1) == (name + '=')) {
+			    	cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+			    	break;
+			    }
+			}
+		}
+		return cookieValue;
 	}
-	}
-	return cookieValue;
+
+	function calcMaxSize(){
+		docHeight = $(window).height() - $('.navbar').height() - 10;
+	 	docHeight -= docHeight%10;
+	 	docWidth = $(window).width();
+	 	docWidth -= docWidth%10;
+	 	var dimensionComponents = factor(docHeight).sort(function(a, b){return a.factor - b.factor});
+	 	for(var i = 0; i < dimensionComponents.length; i++){
+	 		if(dimensionComponents[i].multiplicator % 10 != 0){
+	 			dimensionComponents.splice(i, 1);
+	 			i--;
+	 		}
+	 	}
+	 	if(dimensionComponents.legnth == 0){
+	 		tileHeight = 50;
+	 		maxHeight = Math.floor(docHeight)/50;
+	 	} else {
+		 	dimensionComponents = dimensionComponents[Math.floor(dimensionComponents.length/2)];
+		 	tileHeight = dimensionComponents.factor;
+		 	maxHeight = dimensionComponents.multiplicator;
+	 	}
+	 	
+	 	dimensionComponents = factor(docWidth).sort(function(a, b){return a.factor - b.factor});
+	 	for(var i = 0; i < dimensionComponents.length; i++){
+	 		if(dimensionComponents[i].multiplicator % 10 != 0){
+	 			dimensionComponents.splice(i, 1);
+	 			i--;
+	 		}
+	 	}
+	 	if(dimensionComponents.length == 0){
+	 		tileWidth = 50;
+	 		maxCols = Math.floor(docWidth/50);
+	 	} else {
+	 		dimensionComponents = dimensionComponents[Math.floor(dimensionComponents.length/2)];
+		 	tileWidth = dimensionComponents.factor;
+		 	maxCols = dimensionComponents.multiplicator;
+	 	}
 	}
 
 
+	/**
+	 * Handler for window resize events
+	 *
+	 *
+	 */
+	function handleWindowResize(){
+		//iterate over all windows and adjust their size based on their proportion of the screen
+		var oldMaxCols = maxCols, oldMaxHeight = maxHeight;
+		calcMaxSize();
+ 		boardSetup(maxCols, maxHeight);
 
+ 		for(var i = 0; i < tiles.length; i++){
+ 			var curTile = $('#'+tiles[i]);
+ 			var layout = layoutFix({
+ 				tileName: tiles[i],
+ 				x: parseInt(curTile.attr('col')),
+ 				y: parseInt(curTile.attr('row')),
+ 				sizex: parseInt(curTile.attr('sizex')),
+ 				sizey: parseInt(curTile.attr('sizey'))
+ 			})
+ 			curTile.attr({
+ 				'col':layout.y,
+ 				'row':layout.x,
+ 				'sizex':layout.sizex,
+ 				'sizey':layout.sizey
+ 			});
+ 			curTile.css({
+ 				'top':(layout.y - 1)*tileHeight + $('.tile-board').offset().top,
+ 				'left':(layout.x - 1)*tileWidth + $('.tile-board').offset().left,
+ 				'width':layout.sizex*tileWidth,
+ 				'height':layout.sizey*tileHeight
+ 			});
+ 			update_board(tiles[i]);
+ 		}
+ 		$('.tile-board').height(maxHeight * tileHeight);
+ 		$('.wrapper').height(maxHeight * tileHeight);
+	}
+
+	function checkZero(val){
+		if(val == 0)
+			return 1
+		else
+			return val
+	}
+
+	function boardSetup(cols, height){
+		//i = cols, j = rows
+		board = new Array(cols+1);
+		//setup the empty board
+		for (var i = board.length - 1; i >= 0; i--) {
+			board[i] = new Array(height+1);
+			for (var j = board[i].length - 1; j >= 0; j--) {
+				board[i][j] = {
+					occupied: 0,
+					tile: ''
+				};
+			}
+		}
+	}
+
+
+ 	function factor( a ) {
+		var c, i = 2, j = Math.floor( a / 2 ), output = [];
+		for( ; i<=a; i++ ) {
+			if(i == 1)
+				return;
+			c = a / i;
+			if(c == 1)
+				continue;
+			if( c===Math.floor( c ) ) {
+				var b = {
+						'factor':c,
+						'multiplicator':i
+						};
+				output.push(b);
+  			}
+ 		}
+ 		return output;
+ 	}
+
+
+ 	function needsFixX(){
+ 		if(needsFixXBool){
+ 			return fixValX - 1;
+ 		} else {
+ 			return 0;
+ 		}
+ 	}
+
+ 	function needsFixY(){
+ 		if(needsFixYBool){
+ 			return fixValY - 1;
+ 		} else {
+ 			return 0;
+ 		}
+ 	}
 
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

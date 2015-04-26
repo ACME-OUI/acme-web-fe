@@ -21,15 +21,20 @@ body {
 * { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
 
 .day{
-    background-color: #fff;
+    background: -webkit-linear-gradient(75deg, #ddd, #999); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(75deg, #ddd, #999); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(75deg, #ddd, #999); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(75deg, #ddd, #999); /* Standard syntax */
     color: #222;
     border-color: #000;
 }
 
 .night{
-    background-color: #051451!important;
+    background: -webkit-linear-gradient(75deg, #051451, #051410); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(75deg, #051451, #051410); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(75deg, #051451, #051410); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(75deg, #051451, #051410); /* Standard syntax */
     border-color: #00f;
-    /*color:#aaa!important;*/
 }
 
 /*============================================================================
@@ -38,18 +43,17 @@ body {
 
 
 #drop-down-menu {
-	background-color: #005dab;
-	height: auto;
-	padding-top: 20px;
 	clear: both;
-	float: none;
 	display: none;
 	overflow: visible;
 	width: 100%!important;
 }
 
 #drop-down-tab {
-	background-color: #005dab !important;
+    background: -webkit-linear-gradient(180deg, #0756A6, #051451); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(180deg, #0756A6, #051451); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient( 180deg,#0756A6, #051451); /* For Firefox 3.6 to 15 */
+    background: linear-gradient( 180deg,#0756A6, #051451); /* Standard syntax */
 	color: #222 !important;
 	-webkit-border-radius: 20px 20px 0 0;
 	-moz-border-radius: 20px 20px 0 0;
@@ -58,6 +62,34 @@ body {
 	margin-right: -15px;
 }
 
+/*#node-holder {
+    border: 1px solid;
+    list-style: none;
+    -webkit-transition: all 0.5s ease-in-out;
+    -moz-transition: all 0.5s ease-in-out;
+    -o-transition: all 0.5s ease-in-out;
+    -ms-transition: all 0.5s ease-in-out;
+    transition: all 0.5s ease-in-out;
+    z-index: 21!important;
+}*/
+
+
+
+.item-holder  { 
+    border-radius: 25px;
+    text-align: left;
+    color: #111;
+    vertical-align: middle;
+    background-color:#1E70E3!;
+    border: 5px solid black;   
+    margin: 0 auto;
+    padding-left: 10px;
+    background-color: #1E70E3;
+}
+
+.item-holder a {
+    color: #111;
+}
 
 /*============================================================================
    Sliding left menu 
@@ -171,6 +203,7 @@ nav.slide-menu-left button.close-menu {
     opacity: 0.5;
     display: none;
 }
+
 
 /* bevel size, left offset and color settings next 3 lines */ 
 .bvc { left: -15px }
