@@ -1,3 +1,4 @@
+
 $(document).ready(function(){
 
 
@@ -196,47 +197,77 @@ $(document).ready(function(){
     });
 
     function populateNodeSelect(id){
-    	var data = {
-    		node: id
-    	}
-    	data = JSON.stringify(data);
-    	var csrfToken = getCookie('csrftoken');
-		$.ajaxSetup({
-			beforeSend: function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', csrfToken);
+		$.getScript("static/js/spin.js", function(){
+			if(mode = 'night'){
+				var color = '#fff';
+			} else {
+				color = '#000';
 			}
-		});
-    	$.ajax({
-			url:'node_info/',
-			type: 'POST',
-			data: data,
-			success: function(response){
-				var node_data = jQuery.parseJSON(response);
-				var data = '';
-				var text_style = '';
-				$('#nodeSelect_window').find('.tile-contents').append('<table id=node-info></table>');
-				for( var key in node_data){
-					if(key == 'status'){
-						if(node_data[key] == 'up'){
-							text_style = 'color: green;';
-						} else {
-							text_style = 'color: red;';
-						}
-					} else {
-						text_style = '';
-					}
-					var data = '<tr><td class="key" id="'+key+'">' + key + '</td><td class="value" id="'+key+'_value" style="'+text_style+'">' + node_data[key] + '</td><tr>';
-					$('#nodeSelect_window').find('#node-info').append(data);
+			var opts = {
+				lines: 17, // The number of lines to draw
+				length: 40, // The length of each line
+				width: 10, // The line thickness
+				radius: 30, // The radius of the inner circle
+				corners: 1, // Corner roundness (0..1)
+				rotate: 0, // The rotation offset
+				direction: 1, // 1: clockwise, -1: counterclockwise
+				color: color, // #rgb or #rrggbb or array of colors
+				speed: 1, // Rounds per second
+				trail: 100, // Afterglow percentage
+				shadow: false, // Whether to render a shadow
+				hwaccel: false, // Whether to use hardware acceleration
+				className: 'spinner', // The CSS class to assign to the spinner
+				zIndex: 2e9, // The z-index (defaults to 2000000000)
+				top: '50%', // Top position relative to parent
+				left: '50%' // Left position relative to parent
+			};
+	    	var spinner = new Spinner(opts).spin();
+	    	document.getElementById('nodeSelect_window').appendChild(spinner.el);
+	    	var data = {
+	    		node: id
+	    	}
+	    	data = JSON.stringify(data);
+	    	var csrfToken = getCookie('csrftoken');
+			$.ajaxSetup({
+				beforeSend: function(xhr){
+					xhr.setRequestHeader('X-CSRFToken', csrfToken);
 				}
-				var button = [	'<br><button type="button" class="btn btn-default btn-xs" id="node-search" style="float:left; margin-left: 20px;">',
-								'     <span class="fa fa-search" aria-label="Options"></span>',
-								'</button>'].join('');
-				$('#nodeSelect_window').find('.tile-contents').append(button);
-				$('#node-search').click(function(){
-					nodeSearch($('#hostname_value').text());
-				});
-			}
+			});
+	    	$.ajax({
+				url:'node_info/',
+				type: 'POST',
+				data: data,
+				success: function(response){
+					spinner.stop();
+					var node_data = jQuery.parseJSON(response);
+					var data = '';
+					var text_style = '';
+					$('#nodeSelect_window').find('.tile-contents').append('<table id=node-info></table>');
+					for( var key in node_data){
+						if(key == 'status'){
+							if(node_data[key] == 'up'){
+								text_style = 'color: green;';
+							} else {
+								text_style = 'color: red;';
+							}
+						} else {
+							text_style = '';
+						}
+						var data = '<tr><td class="key" id="'+key+'">' + key + '</td><td class="value" id="'+key+'_value" style="'+text_style+'">' + node_data[key] + '</td><tr>';
+						$('#nodeSelect_window').find('#node-info').append(data);
+					}
+					var button = [	'<br><button type="button" class="btn btn-default btn-xs" id="node-search" style="float:left; margin-left: 20px;">',
+									'     <span class="fa fa-search" aria-label="Options"></span>',
+									'</button>'].join('');
+					$('#nodeSelect_window').find('.tile-contents').append(button);
+					$('#node-search').click(function(){
+						nodeSearch($('#hostname_value').text());
+					});
+				}
+			});
 		});
+    	
+
     }
 
     function nodeSearch(hostname){
@@ -263,11 +294,12 @@ $(document).ready(function(){
 			data: data,
 			type: 'POST',
 			success: function(response){
+				console.log(response);
 				searchWindow.empty();
 				var form = ['<form>',
 							'Select filter<br>',
 							'<select id="select-filter">',
-								'<option value="Project">Project</option>',
+								'<option value="project">Project</option>',
 								'<option value="Data_Tyle">Data_Type</option>',
 								'<option value="Institute">Institute</option>',
 								'<option value="Model">Model</option>',
@@ -281,7 +313,7 @@ $(document).ready(function(){
 							'<br><p>Filter value</p><input type="text" style="color: #000;" id="filter-value">',
 							'<input type="submit" value="Add filter" id="filter-value-btn" style="color: #000;"><br>',
 							'<br><p id="search-string">Search string: </p>',
-							'<input type="submit" id="search-submit value="Search" style="color: #000;">',
+							'<input type="submit" id="search-submit" value="Search" style="color: #000;">',
 							'</form>'
 							].join('');
 				searchWindow.append(form);
@@ -290,11 +322,15 @@ $(document).ready(function(){
 					searchTerms[document.getElementById("select-filter").value] = document.getElementById('filter-value').value;
 					$('#search-string').html('Search string: ');
 					for(key in searchTerms){
-						$('#search-string').append(key + '=' + searchTerms[key] + ',');
+						$('#search-string').append('<a href="#" class="search-term" id="'+key+'">' + key + '=' + searchTerms[key] + ',</a>');
 					}
+					$('.search-term').click(function(){
+						delete searchTerms[$(this).attr('id')];
+						$(this).remove();
+					});
 				});
 				$('#search-submit').click(function(){
-					esgfSearch($('#search-string').text(), hostname);
+					esgfSearch(searchTerms, hostname);
 				});
 			},
 			statusCode:{
@@ -309,23 +345,24 @@ $(document).ready(function(){
 		});
     }
 
-    function esgfSearch(text,hostname){
+    function esgfSearch(searchTerms,hostname){
+    	var csrfToken = getCookie('csrftoken');
     	$.ajaxSetup({
 			beforeSend: function(xhr){
 				xhr.setRequestHeader('X-CSRFToken', csrfToken);
 			}
 		});
-		var data = {
-			node:'http://'+hostname+'/esg-search/',
-			text: text
-		};
-		var data = JSON.stringify(data);
+		searchTerms['node'] = 'http://'+hostname+'/esg-search/';
+
+		
+		var data = JSON.stringify(searchTerms);
 		$.ajax({
 			url:'node_search/',
 			data: data,
 			type: 'POST',
 			success: function(response){
-				
+				alert(response);
+
 			},
 			statusCode:{
 				404: function(){

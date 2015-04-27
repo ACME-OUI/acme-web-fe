@@ -258,6 +258,7 @@ def node_info(request):
 def node_search(request):
     if request.method == 'POST':
         from pyesgf.search import SearchConnection
+        import random
         searchString = json.loads(request.body)
         print searchString
         if 'node' in searchString:
@@ -265,22 +266,32 @@ def node_search(request):
                 try:
                     print 'testing connection to', searchString['node']
                     conn = SearchConnection(searchString['node'], distrib=True)
-                    conn.get_shard_list()
+                    context = conn.new_context()
                     response = {}
                     response['status'] = 'success'
-                    return HttpResponse(json.dumps(response))
+
+                    
+
+                    return HttpResponse(json.dumps(context.get_facet_options()))
                 except Exception as e:
                     print "Unexpected error:", repr(e)
                     return HttpResponse(status=500)
             else:
                 try:
                     conn = SearchConnection(searchString['node'], distrib=True)
-                    context = conn.new_context(searchString['text'])
+                    print 'Searching:', searchFilters[:-1]
+                    del searchString["node"]
+                    context = conn.new_context(**searchString)
+                    searchResponse = {}
+                    searchResponse['hits'] = context.hit_count
                     print 'hits', context.hit_count
                     print 'realms', context.facet_counts['realm']
+                    return HttpResponse(json.dumps(searchResponse))
                 except Exception as e:
                     print "Unexpected error:", repr(e)
                     return HttpResponse(status=500)
+        else:
+            return HttpResponse(status=500)
     else:
         return HttpResponse(status=500)
 
