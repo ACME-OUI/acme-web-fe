@@ -269,9 +269,6 @@ def node_search(request):
                     context = conn.new_context()
                     response = {}
                     response['status'] = 'success'
-
-                    
-
                     return HttpResponse(json.dumps(context.get_facet_options()))
                 except Exception as e:
                     print "Unexpected error:", repr(e)
@@ -279,8 +276,8 @@ def node_search(request):
             else:
                 try:
                     conn = SearchConnection(searchString['node'], distrib=True)
-                    print 'Searching:', searchFilters[:-1]
                     del searchString["node"]
+                    print 'Searching:', searchString
                     context = conn.new_context(**searchString)
                     searchResponse = {}
                     searchResponse['hits'] = context.hit_count
