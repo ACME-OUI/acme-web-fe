@@ -279,10 +279,11 @@ def node_search(request):
                     del searchString["node"]
                     print 'Searching:', searchString
                     context = conn.new_context(**searchString)
+                    rs = context.search()
                     searchResponse = {}
                     searchResponse['hits'] = context.hit_count
-                    print 'hits', context.hit_count
-                    print 'realms', context.facet_counts['realm']
+                    for i in range(8):
+                        searchResponse[str(i)] = rs[i].json
                     return HttpResponse(json.dumps(searchResponse))
                 except Exception as e:
                     print "Unexpected error:", repr(e)

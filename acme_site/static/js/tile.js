@@ -272,11 +272,7 @@ $(document).ready(function(){
 
     function nodeSearch(hostname){
     	$.getScript("static/js/spin.js", function(){
-    		if(mode = 'night'){
-				var color = '#fff';
-			} else {
-				color = '#000';
-			}
+    		
     		if($('#nodeSearch_window').length != 0){
 	    		$('#nodeSearch_window').find('.tile-contents').empty();
 	    	} else {
@@ -284,6 +280,11 @@ $(document).ready(function(){
 	    		add_tile(new_tile, "nodeSearch_window");
 	    	}
 	    	var searchWindow = $('#nodeSearch_window').find('.tile-contents');
+	    	if(mode = 'night'){
+				var color = '#fff';
+			} else {
+				color = '#000';
+			}
 	    	var opts = {
 				lines: 17, // The number of lines to draw
 				length: 40, // The length of each line
@@ -377,6 +378,31 @@ $(document).ready(function(){
 
     function esgfSearch(searchTerms,hostname){
     	$.getScript("static/js/spin.js", function(){
+    		if(mode = 'night'){
+				var color = '#fff';
+			} else {
+				color = '#000';
+			}
+	    	var opts = {
+				lines: 17, // The number of lines to draw
+				length: 40, // The length of each line
+				width: 10, // The line thickness
+				radius: 30, // The radius of the inner circle
+				corners: 1, // Corner roundness (0..1)
+				rotate: 0, // The rotation offset
+				direction: 1, // 1: clockwise, -1: counterclockwise
+				color: color, // #rgb or #rrggbb or array of colors
+				speed: 1, // Rounds per second
+				trail: 100, // Afterglow percentage
+				shadow: false, // Whether to render a shadow
+				hwaccel: false, // Whether to use hardware acceleration
+				className: 'spinner', // The CSS class to assign to the spinner
+				zIndex: 2e9, // The z-index (defaults to 2000000000)
+				top: '50%', // Top position relative to parent
+				left: '50%' // Left position relative to parent
+			};
+	    	var spinner = new Spinner(opts).spin();
+	    	document.getElementById('nodeSearch_window').appendChild(spinner.el);
     		var csrfToken = getCookie('csrftoken');
 	    	$.ajaxSetup({
 				beforeSend: function(xhr){
@@ -392,19 +418,54 @@ $(document).ready(function(){
 				data: data,
 				type: 'POST',
 				success: function(response){
-					alert(response);
-
+					spinner.stop();
+					console.log(JSON.parse(response));
+					response = JSON.parse(response);
+					var searchDisplay = [	'<div id="searchDisplay">',
+											'</div>'].join('');
+					if($('#searchDisplay').length == 0){
+						$('#nodeSearch_window').find('.tile-contents').append(searchDisplay);
+					} else {
+						$('#searchDisplay').empty();
+					}
+					 $('#searchDisplay').css({
+					// 	width: $('#nodeSearch_window').width()/2,
+					 	height: $('#nodeSearch_window').height()-$('#searchDisplay').offset().top
+					// 	left: $('#nodeSearch_window').width()/2,
+					 });
+					for( i in response ){
+						$('#searchDisplay').append('<h2>Hit number ' + (parseInt(i)+1) + '</h2><p id="' + i + '"></p>');
+						for( key in response[i]){
+							var value = '<p>' + key + ' : ';
+							if(typeof(response[i][key]) != 'object'){
+								value += response[i][key] + '</p>';
+								$('#searchDisplay').find('#'+i).append(value);
+								continue;
+							}
+							for(var j = 0; j < response[i][key].length; j++){
+								if(j == 0){
+									value += response[i][key][j];
+								} else {
+									value += ', ' + response[i][key][j];
+								}
+							}
+							$('#searchDisplay').find('#'+i).append(value + '</p>');
+						}
+						$('#searchDisplay').find('#'+i).append('<br>');
+					}
 				},
 				statusCode:{
 					404: function(){
+						spinner.stop();
 						alert('Node not found');
 					},
 					500: function(){
+						spinner.stop();
 						alert('Unable to connect');
 					}
 				}
 			});
-    	}
+    	});
     }
 
 
