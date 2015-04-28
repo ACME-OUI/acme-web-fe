@@ -204,6 +204,14 @@ nav.slide-menu-left button.close-menu {
     display: none;
 }
 
+#searchDisplay{
+    overflow-y: auto;
+}
+
+#searchDisplay p{
+    display: block;
+    margin-left: 30px;
+}
 
 /* bevel size, left offset and color settings next 3 lines */ 
 .bvc { left: -15px }

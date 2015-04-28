@@ -1,3 +1,4 @@
+
 $(document).ready(function(){
 
 
@@ -196,147 +197,275 @@ $(document).ready(function(){
     });
 
     function populateNodeSelect(id){
-    	var data = {
-    		node: id
-    	}
-    	data = JSON.stringify(data);
-    	var csrfToken = getCookie('csrftoken');
-		$.ajaxSetup({
-			beforeSend: function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', csrfToken);
+		$.getScript("static/js/spin.js", function(){
+			if(mode = 'night'){
+				var color = '#fff';
+			} else {
+				color = '#000';
 			}
-		});
-    	$.ajax({
-			url:'node_info/',
-			type: 'POST',
-			data: data,
-			success: function(response){
-				var node_data = jQuery.parseJSON(response);
-				var data = '';
-				var text_style = '';
-				$('#nodeSelect_window').find('.tile-contents').append('<table id=node-info></table>');
-				for( var key in node_data){
-					if(key == 'status'){
-						if(node_data[key] == 'up'){
-							text_style = 'color: green;';
-						} else {
-							text_style = 'color: red;';
-						}
-					} else {
-						text_style = '';
-					}
-					var data = '<tr><td class="key" id="'+key+'">' + key + '</td><td class="value" id="'+key+'_value" style="'+text_style+'">' + node_data[key] + '</td><tr>';
-					$('#nodeSelect_window').find('#node-info').append(data);
+			var opts = {
+				lines: 17, // The number of lines to draw
+				length: 40, // The length of each line
+				width: 10, // The line thickness
+				radius: 30, // The radius of the inner circle
+				corners: 1, // Corner roundness (0..1)
+				rotate: 0, // The rotation offset
+				direction: 1, // 1: clockwise, -1: counterclockwise
+				color: color, // #rgb or #rrggbb or array of colors
+				speed: 1, // Rounds per second
+				trail: 100, // Afterglow percentage
+				shadow: false, // Whether to render a shadow
+				hwaccel: false, // Whether to use hardware acceleration
+				className: 'spinner', // The CSS class to assign to the spinner
+				zIndex: 2e9, // The z-index (defaults to 2000000000)
+				top: '50%', // Top position relative to parent
+				left: '50%' // Left position relative to parent
+			};
+	    	var spinner = new Spinner(opts).spin();
+	    	document.getElementById('nodeSelect_window').appendChild(spinner.el);
+	    	var data = {
+	    		node: id
+	    	}
+	    	data = JSON.stringify(data);
+	    	var csrfToken = getCookie('csrftoken');
+			$.ajaxSetup({
+				beforeSend: function(xhr){
+					xhr.setRequestHeader('X-CSRFToken', csrfToken);
 				}
-				var button = [	'<br><button type="button" class="btn btn-default btn-xs" id="node-search" style="float:left; margin-left: 20px;">',
-								'     <span class="fa fa-search" aria-label="Options"></span>',
-								'</button>'].join('');
-				$('#nodeSelect_window').find('.tile-contents').append(button);
-				$('#node-search').click(function(){
-					nodeSearch($('#hostname_value').text());
-				});
-			}
+			});
+	    	$.ajax({
+				url:'node_info/',
+				type: 'POST',
+				data: data,
+				success: function(response){
+					spinner.stop();
+					var node_data = jQuery.parseJSON(response);
+					var data = '';
+					var text_style = '';
+					$('#nodeSelect_window').find('.tile-contents').append('<table id=node-info></table>');
+					for( var key in node_data){
+						if(key == 'status'){
+							if(node_data[key] == 'up'){
+								text_style = 'color: green;';
+							} else {
+								text_style = 'color: red;';
+							}
+						} else {
+							text_style = '';
+						}
+						var data = '<tr><td class="key" id="'+key+'">' + key + '</td><td class="value" id="'+key+'_value" style="'+text_style+'">' + node_data[key] + '</td><tr>';
+						$('#nodeSelect_window').find('#node-info').append(data);
+					}
+					var button = [	'<br><button type="button" class="btn btn-default btn-xs" id="node-search" style="float:left; margin-left: 20px;">',
+									'     <span class="fa fa-search" aria-label="Options"></span>',
+									'</button>'].join('');
+					$('#nodeSelect_window').find('.tile-contents').append(button);
+					$('#node-search').click(function(){
+						nodeSearch($('#hostname_value').text());
+					});
+				}
+			});
 		});
+    	
+
     }
 
     function nodeSearch(hostname){
-    	if($('#nodeSearch_window').length != 0){
-    		$('#nodeSearch_window').find('.tile-contents').empty();
-    	} else {
-    		var new_tile = '<li id="' + "nodeSearch" + '_window" class="tile">' + header1 + "nodeSearch" + header2 + header3 +'</li>';
-    		add_tile(new_tile, "nodeSearch_window");
-    	}
-    	var searchWindow = $('#nodeSearch_window').find('.tile-contents');
-    	var csrfToken = getCookie('csrftoken');
-		$.ajaxSetup({
-			beforeSend: function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', csrfToken);
+    	$.getScript("static/js/spin.js", function(){
+    		
+    		if($('#nodeSearch_window').length != 0){
+	    		$('#nodeSearch_window').find('.tile-contents').empty();
+	    	} else {
+	    		var new_tile = '<li id="' + "nodeSearch" + '_window" class="tile">' + header1 + "nodeSearch" + header2 + header3 +'</li>';
+	    		add_tile(new_tile, "nodeSearch_window");
+	    	}
+	    	var searchWindow = $('#nodeSearch_window').find('.tile-contents');
+	    	if(mode = 'night'){
+				var color = '#fff';
+			} else {
+				color = '#000';
 			}
-		});
-		var data = {
-			node:'http://'+hostname+'/esg-search/',
-			test_connection: true
-		};
-		var data = JSON.stringify(data);
-		$.ajax({
-			url:'node_search/',
-			data: data,
-			type: 'POST',
-			success: function(response){
-				searchWindow.empty();
-				var form = ['<form>',
-							'Select filter<br>',
-							'<select id="select-filter">',
-								'<option value="Project">Project</option>',
-								'<option value="Data_Tyle">Data_Type</option>',
-								'<option value="Institute">Institute</option>',
-								'<option value="Model">Model</option>',
-								'<option value="Configuration">Configuration</option>',
-								'<option value="Experiment">Experiment</option>',
-								'<option value="Version_Num">Version_Num</option>',
-								'<option value="Regridding">Regridding</option>',
-								'<option value="Years_Spanned">Years_Spanned</option>',
-								'<option value="Realm">Realm</option>',
-							'</select>',
-							'<br><p>Filter value</p><input type="text" style="color: #000;" id="filter-value">',
-							'<input type="submit" value="Add filter" id="filter-value-btn" style="color: #000;"><br>',
-							'<br><p id="search-string">Search string: </p>',
-							'<input type="submit" id="search-submit value="Search" style="color: #000;">',
-							'</form>'
-							].join('');
-				searchWindow.append(form);
-				searchTerms = {};
-				$('#filter-value-btn').click(function(){
-					searchTerms[document.getElementById("select-filter").value] = document.getElementById('filter-value').value;
-					$('#search-string').html('Search string: ');
-					for(key in searchTerms){
-						$('#search-string').append(key + '=' + searchTerms[key] + ',');
-					}
-				});
-				$('#search-submit').click(function(){
-					esgfSearch($('#search-string').text(), hostname);
-				});
-			},
-			statusCode:{
-				404: function(){
-					alert('Node not found');
-				},
-				500: function(){
-					alert('Unable to connect');
+	    	var opts = {
+				lines: 17, // The number of lines to draw
+				length: 40, // The length of each line
+				width: 10, // The line thickness
+				radius: 30, // The radius of the inner circle
+				corners: 1, // Corner roundness (0..1)
+				rotate: 0, // The rotation offset
+				direction: 1, // 1: clockwise, -1: counterclockwise
+				color: color, // #rgb or #rrggbb or array of colors
+				speed: 1, // Rounds per second
+				trail: 100, // Afterglow percentage
+				shadow: false, // Whether to render a shadow
+				hwaccel: false, // Whether to use hardware acceleration
+				className: 'spinner', // The CSS class to assign to the spinner
+				zIndex: 2e9, // The z-index (defaults to 2000000000)
+				top: '50%', // Top position relative to parent
+				left: '50%' // Left position relative to parent
+			};
+	    	var spinner = new Spinner(opts).spin();
+	    	document.getElementById('nodeSearch_window').appendChild(spinner.el);
+	    	var csrfToken = getCookie('csrftoken');
+			$.ajaxSetup({
+				beforeSend: function(xhr){
+					xhr.setRequestHeader('X-CSRFToken', csrfToken);
 				}
-			}
+			});
+			var data = {
+				node:'http://'+hostname+'/esg-search/',
+				test_connection: true
+			};
+			var data = JSON.stringify(data);
+			$.ajax({
+				url:'node_search/',
+				data: data,
+				type: 'POST',
+				success: function(response){
+					spinner.stop();
+					var facet_options = JSON.parse(response);
+					searchWindow.empty();
+					var form = ['<form>',
+								'Facet options<br>',
+								'<select id="select-filter"></select>',
+								'<br><p>Filter value</p><select id="filter-value"></select>',
+								'<br><p id="search-string">Search string: </p>',
+								'<input type="submit" id="search-submit" value="Search" style="color: #000;">',
+								'</form>'
+								].join('');
+					searchWindow.append(form);
+					$('#select-filter').on('change', function(){
+						$('#filter-value').empty();
+						var facet_option_values = facet_options[document.getElementById('select-filter').value]
+						for( key in facet_option_values ){
+							$('#filter-value').append('<option value="' + key + '">' + key + ' : ' + facet_option_values[key] + '</option>');
+						}
+					})
+					for( key in facet_options){
+						var facet = '<option value=' + key  + '>' + key+ '</option>';
+						searchWindow.find('#select-filter').append(facet);
+					}
 
-		});
+					searchTerms = {};
+					$('#filter-value').on('change', function(){
+						searchTerms[document.getElementById("select-filter").value] = document.getElementById('filter-value').value;
+						$('#search-string').html('Search string: ');
+						for(key in searchTerms){
+							if(key == 'node')
+								continue;
+							$('#search-string').append('<a href="#" class="search-term" id="'+key+'">' + key + '=' + searchTerms[key] + ',</a>');
+						}
+						$('.search-term').click(function(){
+							delete searchTerms[$(this).attr('id')];
+							$(this).remove();
+						});
+					});
+					$('#search-submit').click(function(){
+						esgfSearch(searchTerms, hostname);
+					});
+				},
+				statusCode:{
+					404: function(){
+						alert('Node not found');
+					},
+					500: function(){
+						alert('Unable to connect');
+					}
+				}
+
+			});
+    	});
     }
 
-    function esgfSearch(text,hostname){
-    	$.ajaxSetup({
-			beforeSend: function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', csrfToken);
+    function esgfSearch(searchTerms,hostname){
+    	$.getScript("static/js/spin.js", function(){
+    		if(mode = 'night'){
+				var color = '#fff';
+			} else {
+				color = '#000';
 			}
-		});
-		var data = {
-			node:'http://'+hostname+'/esg-search/',
-			text: text
-		};
-		var data = JSON.stringify(data);
-		$.ajax({
-			url:'node_search/',
-			data: data,
-			type: 'POST',
-			success: function(response){
-				
-			},
-			statusCode:{
-				404: function(){
-					alert('Node not found');
-				},
-				500: function(){
-					alert('Unable to connect');
+	    	var opts = {
+				lines: 17, // The number of lines to draw
+				length: 40, // The length of each line
+				width: 10, // The line thickness
+				radius: 30, // The radius of the inner circle
+				corners: 1, // Corner roundness (0..1)
+				rotate: 0, // The rotation offset
+				direction: 1, // 1: clockwise, -1: counterclockwise
+				color: color, // #rgb or #rrggbb or array of colors
+				speed: 1, // Rounds per second
+				trail: 100, // Afterglow percentage
+				shadow: false, // Whether to render a shadow
+				hwaccel: false, // Whether to use hardware acceleration
+				className: 'spinner', // The CSS class to assign to the spinner
+				zIndex: 2e9, // The z-index (defaults to 2000000000)
+				top: '50%', // Top position relative to parent
+				left: '50%' // Left position relative to parent
+			};
+	    	var spinner = new Spinner(opts).spin();
+	    	document.getElementById('nodeSearch_window').appendChild(spinner.el);
+    		var csrfToken = getCookie('csrftoken');
+	    	$.ajaxSetup({
+				beforeSend: function(xhr){
+					xhr.setRequestHeader('X-CSRFToken', csrfToken);
 				}
-			}
+			});
+			searchTerms['node'] = 'http://'+hostname+'/esg-search/';
 
-		});
+			
+			var data = JSON.stringify(searchTerms);
+			$.ajax({
+				url:'node_search/',
+				data: data,
+				type: 'POST',
+				success: function(response){
+					spinner.stop();
+					console.log(JSON.parse(response));
+					response = JSON.parse(response);
+					var searchDisplay = [	'<div id="searchDisplay">',
+											'</div>'].join('');
+					if($('#searchDisplay').length == 0){
+						$('#nodeSearch_window').find('.tile-contents').append(searchDisplay);
+					} else {
+						$('#searchDisplay').empty();
+					}
+					 $('#searchDisplay').css({
+					// 	width: $('#nodeSearch_window').width()/2,
+					 	height: $('#nodeSearch_window').height()-$('#searchDisplay').offset().top
+					// 	left: $('#nodeSearch_window').width()/2,
+					 });
+					for( i in response ){
+						$('#searchDisplay').append('<h2>Hit number ' + (parseInt(i)+1) + '</h2><p id="' + i + '"></p>');
+						for( key in response[i]){
+							var value = '<p>' + key + ' : ';
+							if(typeof(response[i][key]) != 'object'){
+								value += response[i][key] + '</p>';
+								$('#searchDisplay').find('#'+i).append(value);
+								continue;
+							}
+							for(var j = 0; j < response[i][key].length; j++){
+								if(j == 0){
+									value += response[i][key][j];
+								} else {
+									value += ', ' + response[i][key][j];
+								}
+							}
+							$('#searchDisplay').find('#'+i).append(value + '</p>');
+						}
+						$('#searchDisplay').find('#'+i).append('<br>');
+					}
+				},
+				statusCode:{
+					404: function(){
+						spinner.stop();
+						alert('Node not found');
+					},
+					500: function(){
+						spinner.stop();
+						alert('Unable to connect');
+					}
+				}
+			});
+    	});
     }
 
 
