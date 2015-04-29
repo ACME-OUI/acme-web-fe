@@ -146,18 +146,24 @@ $(document).ready(function(){
 		$(this).click(function(){
 			var name = $(this).attr('id');
 			var content = '';
-			if(name == 'nodeSearch'){
-				if($('#nodeSelect_window').length == 0){
+			switch(name) {
+				case 'nodeSearch':{
+					if($('#nodeSelect_window').length == 0){
 					var content = [	'<form id="node-search-form>"',
 									'<p>Node to search:</p><input type="text" style="color: #000;" id="node-search-name">',
 									'<input type="submit" value="Search" id="search-btn" style="color: #000;"><br>',
 									'</form>'].join('');				
-				} else {
-					nodeSearch($('#hostname_value').text());
-					return;
+					} else {
+						nodeSearch($('#hostname_value').text());
+						return;
+					}
+					break;
 				}
+				default:{
 
-			} 
+				}
+			}
+
 			if($('#' + name + '_window').length == 0) {
 				var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + content + header3 +'</li>';
 				add_tile(new_tile, name+'_window', {ignore: 'true'}, function(){

@@ -17,6 +17,7 @@ urlpatterns = patterns('',
     url(r'^load_layout/', views.load_layout, name='load_layout'),
     url(r'^node_info/', views.node_info),
     url(r'^node_search/', views.node_search),
+    url(r'^velo/', views.velo),
 
     #Demo Pages 03/2013
     url(r'^code/?$', views.code),

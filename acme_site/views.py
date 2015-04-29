@@ -305,7 +305,12 @@ def node_search(request):
     else:
         return HttpResponse(status=500)
 
-
+@login_required
+def velo(request):
+    if request.method == 'POST':
+        import VeloAPI
+    else:
+        return HttpResponse(status=500)
 
 @login_required(login_url='login')
 def config(request):
