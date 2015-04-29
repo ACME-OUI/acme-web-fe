@@ -123,7 +123,19 @@ def jspanel(request):
 def grid(request):
     ''' For demo purposes this is loading a local file '''    
     from xml.etree.ElementTree import parse
-    tree = parse('acme_site/demo_data/registration.xml')
+    import requests
+    from StringIO import StringIO
+
+    try:
+        r = requests.get('http://pcmdi9.llnl.gov/esgf-node-manager/registration.xml')
+        f = StringIO(r.content)
+        out = open('acme_site/reg_data/registration.xml', 'w')
+        out.write(f.read())
+        out.close()
+    except Exception as e:
+        print repr(e)
+        return HttpResponse(status=404)
+    tree = parse('acme_site/reg_data/registration.xml')
 
     node_name_list = []
     node_peer_list = []
@@ -201,8 +213,8 @@ def node_info(request):
         ''' For demo purposes this is loading a local file '''
         try:
             from xml.etree.ElementTree import parse
-
-            tree = parse('acme_site/demo_data/registration.xml')
+            
+            tree = parse('acme_site/reg_data/registration.xml')
             root = tree.getroot()
             name = json.loads(request.body)['node']
             
