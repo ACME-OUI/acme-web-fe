@@ -309,6 +309,11 @@ def node_search(request):
 def velo(request):
     if request.method == 'POST':
         import VeloAPI
+        request.session[0] = 'init'
+        request.session['foofoo'] = 'barbar'
+        print request.session['foofoo']
+        return HttpResponse(json.dumps(request.session))
+
     else:
         return HttpResponse(status=500)
 
