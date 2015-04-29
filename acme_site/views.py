@@ -308,10 +308,12 @@ def node_search(request):
 @login_required
 def velo(request):
     if request.method == 'POST':
-        import VeloAPI
+        import ./velo/VeloAPI
         request.session[0] = 'init'
-        request.session['foofoo'] = 'barbar'
-        print request.session['foofoo']
+        velo_api = VeloAPI.Velo()
+        velo_api.start_jvm()
+
+
         return HttpResponse(json.dumps(request.session))
 
     else:
