@@ -308,10 +308,9 @@ def node_search(request):
 @login_required
 def velo(request):
     if request.method == 'POST':
-        sys.path.append('/var/www/acme-web-fe/acme_site/velo')
-        import velo.VeloAPI
+        import velo
         request.session[0] = 'init'
-        velo_api = VeloAPI.Velo()
+        velo_api = velo.Velo()
         velo_api.start_jvm()
 
 
