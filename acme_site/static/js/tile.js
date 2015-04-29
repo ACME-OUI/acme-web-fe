@@ -729,12 +729,14 @@ $(document).ready(function(){
 	 				adj.add(board[i-1][y - 2].tile);
 	 			};
 	 			var helperReturn = adjHelper(adj, moved);
+	 			var startY = curWindow.offset().top;
 	 			curWindow.attr({
 	 				'row':y-diff,
 	 				'sizey':sizey+diff
 	 			});
 	 			curWindow.css({
-	 				'top':(y-diff)*tileHeight + $('.navbar').height() - 1,
+	 				//'top':(y-diff)*tileHeight + $('.navbar').height() - 1,
+	 				'top': startY - (diff*tileHeight), 
 	 				'height':(sizey+diff)*tileHeight
 	 			});
 	 			update_board(id);
@@ -784,12 +786,14 @@ $(document).ready(function(){
 				//check the base case-> all windows have been moved
 				moved.add(id);
 				var helperReturn = adjHelper(adj, moved);
+				var startY = curWindow.offset().top;
 				curWindow.attr({
 					'row':y-diff,
 					'sizey':sizey+diff
 				});
 				curWindow.css({
-					'top':(y-diff)*tileHeight + $('.navbar').height() - 1,
+					//'top':(y-diff)*tileHeight + $('.navbar').height() - 1,
+					'top': startY - (diff*tileHeight),
 					'height':(sizey+diff)*tileHeight
 				});
 				update_board(id);
