@@ -312,9 +312,9 @@ def velo(request):
         request.session[0] = 'init'
         velo_api = VeloAPI.Velo()
         velo_api.start_jvm()
-        blar = velo_api.init_velo("acmetest", "acmetest")
-
-        return HttpResponse(json.dumps(blar))
+        barr = velo_api.init_velo("acmetest", "acmetest")
+        foo = {'0': 'sucess i guess'}
+        return HttpResponse(json.dumps(foo))
 
     else:
         return HttpResponse(status=500)
