@@ -162,6 +162,15 @@ $(document).ready(function(){
 				
 				case 'velo':
 
+					if($('#velo_window').length == 0){
+						content = [ '<form id="velo_login">',
+									'<h2 class="form-signin-heading">Please Sign In</h2>',
+									'<label for="velo_username" class="sr-only">User name:</label>',
+									'<input type="text" id="velo_username" name="velo_username" class="form-control" placeholder="User Name">',
+						 			'<label for="velo_password" class="sr-only">Password:</label>',
+
+						].join('');
+					}
 					initVeloConnection();
 					break;
 
@@ -800,11 +809,21 @@ $(document).ready(function(){
 	 	var y = parseInt(curWindow.attr('row'));
 	 	var sizex = parseInt(curWindow.attr('sizex'));
 	 	var sizey = parseInt(curWindow.attr('sizey'));
+	 	var toAdd = true;
+	 	var adj = new Array();
 	 	if(dir == 'up'){
 	 		if(side == 'n'){
-	 			var adj = new Set();
+	 			//var adj = new Set();
 	 			for (var i = x; i < x + sizex; i++) {
-	 				adj.add(board[i-1][y - 2].tile);
+	 				for(var j = 0; j < adj.length; j++){
+	 					if(adj[j] == board[i-1][y - 2].tile){
+	 						toAdd = false;
+	 						break;
+	 					}
+	 				}
+	 				if(toAdd){
+	 					adj.push(board[i-1][y - 2].tile);
+	 				}
 	 			};
 	 			var helperReturn = adjHelper(adj, moved);
 	 			var startY = curWindow.offset().top;
@@ -820,18 +839,25 @@ $(document).ready(function(){
 	 			update_board(id);
 	 			moved.add(id);
 	 			removeHelper(curWindow);
-	 			if(helperReturn.finished == true){
+	 			if(helperReturn.finished){
 					//base case, done resizing
 					return;
 				} else {
 					//we need to keep resizing
-					recursiveResize(moved, dir, diff, 's', helperReturn.adj.values().next().value);
+					recursiveResize(moved, dir, diff, 's', helperReturn.adj[0]);
 				}
 			}
 			else if(side =='s'){
-				var adj = new Set();
 				for (var i = x; i < x + sizex; i++) {
-					adj.add(board[i-1][y + sizey - 1].tile);
+					for(var j = 0; j < adj.length; j++){
+	 					if(adj[j] == board[i-1][y + sizey - 1].tile){
+	 						toAdd = false;
+	 						break;
+	 					}
+	 				}
+	 				if(toAdd){
+	 					adj.push(board[i-1][y + sizey - 1].tile);
+	 				}
 				};
 				var helperReturn = adjHelper(adj, moved);
 				curWindow.attr({
@@ -843,12 +869,12 @@ $(document).ready(function(){
 				update_board(id);
 				moved.add(id);
 				removeHelper(curWindow);
-				if(helperReturn.finished == true){
+				if(helperReturn.finished){
 					//base case, all windows have been resized
 					return; 
 				} else {
 					//we need to keep resizeing 
-					recursiveResize(moved, dir, diff, 'n', helperReturn.adj.values().next().value);
+					recursiveResize(moved, dir, diff, 'n', helperReturn.adj[0]);
 				}
 			} else {
 	 			//error
@@ -857,9 +883,16 @@ $(document).ready(function(){
 	 	}
 	 	else if(dir == 'down'){
 	 		if(side == 'n'){
-	 			var adj = new Set();
 	 			for (var i = x; i < x + sizex; i++) {
-	 				adj.add(board[i-1][y - 2].tile);
+	 				for(var j = 0; j < adj.length; j++){
+	 					if(adj[j] == board[i-1][y - 2].tile){
+	 						toAdd = false;
+	 						break;
+	 					}
+	 				}
+	 				if(toAdd){
+	 					adj.push(board[i-1][y - 2].tile);
+	 				}
 	 			};
 				//check the base case-> all windows have been moved
 				moved.add(id);
@@ -877,18 +910,25 @@ $(document).ready(function(){
 				update_board(id);
 				moved.add(id);
 				removeHelper(curWindow);
-				if(helperReturn.finished == true){
+				if(helperReturn.finished){
 					//base case, done resizing
 					return;
 				} else {
 					//we need to keep resizing
-					recursiveResize(moved, dir, diff, 's', helperReturn.adj.values().next().value);
+					recursiveResize(moved, dir, diff, 's', helperReturn.adj[0]);
 				}
 			}
 			else if(side =='s'){
-				var adj = new Set();
 				for (var i = x; i < x + sizex; i++) {
-					adj.add(board[i-1][y + sizey - 1].tile);
+					for(var j = 0; j < adj.length; j++){
+	 					if(adj[j] == board[i-1][y + sizey - 1].tile){
+	 						toAdd = false;
+	 						break;
+	 					}
+	 				}
+	 				if(toAdd){
+	 					adj.push(board[i-1][y + sizey - 1].tile);
+	 				}
 				};
 				//check the base case-> all windows have been moved
 				moved.add(id);
@@ -907,7 +947,7 @@ $(document).ready(function(){
 					return; 
 				} else {
 					//we need to keep resizeing 
-					recursiveResize(moved, dir, diff, 'n', helperReturn.adj.values().next().value);
+					recursiveResize(moved, dir, diff, 'n', helperReturn.adj[0]);
 				}
 			} else {
 	 			//error
@@ -916,9 +956,16 @@ $(document).ready(function(){
 	 	}
 	 	else if(dir == 'right'){
 	 		if(side == 'e'){
-	 			var adj = new Set();
 	 			for (var i = y; i < y + sizey; i++) {
-	 				adj.add(board[x + sizex - 1][i - 1].tile);
+	 				for(var j = 0; j < adj.length; j++){
+	 					if(adj[j] == board[x + sizex - 1][i - 1].tile){
+	 						toAdd = false;
+	 						break;
+	 					}
+	 				}
+	 				if(toAdd){
+	 					adj.push(board[x + sizex - 1][i - 1].tile);
+	 				}
 	 			};
 	 			var helperReturn = adjHelper(adj, moved);
 	 			curWindow.attr({
@@ -930,18 +977,25 @@ $(document).ready(function(){
 	 			update_board(id);
 	 			moved.add(id);
 	 			removeHelper(curWindow);
-	 			if(helperReturn.finished == true){
+	 			if(helperReturn.finished){
 					//base case, all windows have been resized
 					return; 
 				} else {
 					//we need to keep resizeing 
-					recursiveResize(moved, dir, diff, 'w', helperReturn.adj.values().next().value);
+					recursiveResize(moved, dir, diff, 'w', helperReturn.adj[0]);
 				}
 			}
 			else if(side =='w'){
-				var adj = new Set();
 				for (var i = y; i < y + sizey; i++) {
-					adj.add(board[x - 2][i - 1].tile);
+					for(var j = 0; j < adj.length; j++){
+	 					if(adj[j] == board[x - 2][i - 1].tile){
+	 						toAdd = false;
+	 						break;
+	 					}
+	 				}
+	 				if(toAdd){
+	 					adj.push(board[x - 2][i - 1].tile);
+	 				}
 				};
 				var helperReturn = adjHelper(adj, moved);
 				curWindow.attr({
@@ -955,12 +1009,12 @@ $(document).ready(function(){
 				update_board(id);
 				moved.add(id);
 				removeHelper(curWindow);
-				if(helperReturn.finished == true){
+				if(helperReturn.finished){
 					//base case, all windows have been resized
 					return; 
 				} else {
 					//we need to keep resizeing 
-					recursiveResize(moved, dir, diff, 'e', helperReturn.adj.values().next().value);
+					recursiveResize(moved, dir, diff, 'e', helperReturn.adj[0]);
 				}
 			} else {
 	 			//error
@@ -969,9 +1023,16 @@ $(document).ready(function(){
 	 	}
 	 	else if(dir == 'left'){
 	 		if(side == 'e'){
-	 			var adj = new Set();
 	 			for (var i = y; i < y + sizey; i++) {
-	 				adj.add(board[x + sizex - 1][i - 1].tile);
+	 				for(var j = 0; j < adj.length; j++){
+	 					if(adj[j] == board[x + sizex - 1][i - 1].tile){
+	 						toAdd = false;
+	 						break;
+	 					}
+	 				}
+	 				if(toAdd){
+	 					adj.push(board[x + sizex - 1][i - 1].tile);
+	 				}
 	 			};
 	 			var helperReturn = adjHelper(adj, moved);
 	 			curWindow.attr({
@@ -983,18 +1044,25 @@ $(document).ready(function(){
 	 			update_board(id);
 	 			moved.add(id);
 	 			removeHelper(curWindow);
-	 			if(helperReturn.finished == true){
+	 			if(helperReturn.finished){
 					//base case, all windows have been resized
 					return; 
 				} else {
 					//we need to keep resizeing 
-					recursiveResize(moved, dir, diff, 'w', helperReturn.adj.values().next().value);
+					recursiveResize(moved, dir, diff, 'w', helperReturn.adj[0]);
 				}
 			}
 			else if(side =='w'){
-				var adj = new Set();
 				for (var i = y; i < y + sizey; i++) {
-					adj.add(board[x - 2][i - 1].tile);
+					for(var j = 0; j < adj.length; j++){
+	 					if(adj[j] == board[x - 2][i - 1].tile){
+	 						toAdd = false;
+	 						break;
+	 					}
+	 				}
+	 				if(toAdd){
+	 					adj.push(board[x - 2][i - 1].tile);
+	 				}
 				};
 				var helperReturn = adjHelper(adj, moved);
 				curWindow.attr({
@@ -1008,12 +1076,12 @@ $(document).ready(function(){
 				update_board(id);
 				moved.add(id);
 				removeHelper(curWindow);
-				if(helperReturn.finshed == true){
+				if(helperReturn.finished){
 					//base case, all windows have been resized
 					return; 
 				} else {
 					//we need to keep resizeing 
-					recursiveResize(moved, dir, diff, 'e', helperReturn.adj.values().next().value);
+					recursiveResize(moved, dir, diff, 'e', helperReturn.adj[0]);
 				}
 			} else {
 	 			//error
@@ -1037,7 +1105,7 @@ $(document).ready(function(){
 	  		if(!moved.has(item)){
 	  			done = false;
 	  		} else {
-	  			adj.delete(item);
+	  			adj.splice(adj.indexOf(item), 1) ;
 	  		}
 	  	}, moved);
 

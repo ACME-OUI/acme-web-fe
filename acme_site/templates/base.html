@@ -77,7 +77,7 @@
             <li id="classic-link"><a href="http://acme-dev-0.ornl.gov/exploratory_analysis/">Classic Viewer</a></li>
             <li id="cdatweb-link"><a href="http://acme-cdatweb.ornl.gov">CDATWEB</a></li>
             {% if user.is_authenticated %}
-            <li class="navbar-right"><a href="/acme"> Welcome {{ user.username }}</a></li>
+            <li class="navbar-right"><a href="/acme">{{ user.username }}</a></li>
             <li class="navbar-right"><a href="logout">Log Out</a></li>
             {% else %}
             <li class="navbar-right"><a href="login?next={% url 'index' %}">Welcome Guest</a></li>
