@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %} publication home{% endblock %}
+
+{% block content %}
+
+<div class="jumbotron">
+  <h1>ACME</h1>
+  <p class="lead">
+    The company name in the Road Runner cartoons is ironic, 
+    since the word acme is derived from Greek (αιχμή / ακμή ; 
+    English transliteration: acmē) meaning the peak, zenith or prime, 
+    and products from the fictional Acme Corporation are both generic and failure-prone.
+  </p>
+  {% if user.is_authenticated %}
+    <p></p>
+  {% else %}  
+    <p><a class="btn btn-lg btn-success" href="login?next={% url 'index' %}" role="button">Log in</a></p>
+  {% endif %}  
+</div>
+
+{% endblock %}

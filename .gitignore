@@ -16,9 +16,8 @@ local_settings.py
 /js/
 /jspanel/
 
-acme_site/static/filetree/example.py
-acme_site/static/systemtest/*
-acme_site/static/http.py
-acme_admin/static/
-update.py
-acme_site/migrations
+static/filetree/example.py
+static/systemtest/*
+static/http.py
+scripts/update.py
+apps/web_fe/migrations
