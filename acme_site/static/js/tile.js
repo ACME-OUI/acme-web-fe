@@ -168,10 +168,11 @@ $(document).ready(function(){
 									'<label for="velo_username" class="sr-only">User name:</label>',
 									'<input type="text" id="velo_username" name="velo_username" class="form-control" placeholder="User Name">',
 						 			'<label for="velo_password" class="sr-only">Password:</label>',
+						 			'<input type="text" id="velo_username" name="velo_password" class="form-control" placeholder="Password">',
+						 			'<a onclick="submit-velo-user()"  href="javascript:void(0);"><button class="btn btn-success">Submit</button></a>'
 
 						].join('');
 					}
-					initVeloConnection();
 					break;
 
 				default:{
@@ -184,9 +185,15 @@ $(document).ready(function(){
 				add_tile(new_tile, name+'_window', {ignore: 'true'}, function(){
 					$('#search-btn').click(function(){
 						nodeSearch(document.getElementById("node-search-name").value);
-					})
+					});
 				});
 			}
+
+			if(name == 'velo'){
+				initVeloConnection();
+			}
+
+
 		});
 	});
 
@@ -819,6 +826,8 @@ $(document).ready(function(){
 	 					if(adj[j] == board[i-1][y - 2].tile){
 	 						toAdd = false;
 	 						break;
+	 					} else {
+	 						toAdd = true;
 	 					}
 	 				}
 	 				if(toAdd){
@@ -853,6 +862,8 @@ $(document).ready(function(){
 	 					if(adj[j] == board[i-1][y + sizey - 1].tile){
 	 						toAdd = false;
 	 						break;
+	 					} else {
+	 						toAdd = true;
 	 					}
 	 				}
 	 				if(toAdd){
@@ -888,6 +899,8 @@ $(document).ready(function(){
 	 					if(adj[j] == board[i-1][y - 2].tile){
 	 						toAdd = false;
 	 						break;
+	 					} else {
+	 						toAdd = true;
 	 					}
 	 				}
 	 				if(toAdd){
@@ -924,6 +937,8 @@ $(document).ready(function(){
 	 					if(adj[j] == board[i-1][y + sizey - 1].tile){
 	 						toAdd = false;
 	 						break;
+	 					} else {
+	 						toAdd = true;
 	 					}
 	 				}
 	 				if(toAdd){
@@ -961,6 +976,8 @@ $(document).ready(function(){
 	 					if(adj[j] == board[x + sizex - 1][i - 1].tile){
 	 						toAdd = false;
 	 						break;
+	 					} else {
+	 						toAdd = true;
 	 					}
 	 				}
 	 				if(toAdd){
@@ -991,6 +1008,8 @@ $(document).ready(function(){
 	 					if(adj[j] == board[x - 2][i - 1].tile){
 	 						toAdd = false;
 	 						break;
+	 					} else {
+	 						toAdd = true;
 	 					}
 	 				}
 	 				if(toAdd){
@@ -1028,6 +1047,8 @@ $(document).ready(function(){
 	 					if(adj[j] == board[x + sizex - 1][i - 1].tile){
 	 						toAdd = false;
 	 						break;
+	 					} else {
+	 						toAdd = true;
 	 					}
 	 				}
 	 				if(toAdd){
@@ -1058,6 +1079,8 @@ $(document).ready(function(){
 	 					if(adj[j] == board[x - 2][i - 1].tile){
 	 						toAdd = false;
 	 						break;
+	 					} else {
+	 						toAdd = true;
 	 					}
 	 				}
 	 				if(toAdd){

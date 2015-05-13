@@ -309,12 +309,15 @@ def node_search(request):
 def velo(request):
     if request.method == 'POST':
         from velo import VeloAPI
-        request.session[0] = 'init'
-        velo_api = VeloAPI.Velo()
-        velo_api.start_jvm()
-        barr = velo_api.init_velo("acmetest", "acmetest")
-        foo = {'0': 'sucess i guess'}
-        return HttpResponse(json.dumps(foo))
+        try:
+            velo_api = VeloAPI.Velo()
+            velo_api.start_jvm()
+            barr = velo_api.init_velo("acmetest", "acmetest")
+            foo = {'0': 'success I guess'}
+            return HttpResponse(json.dumps(foo))
+        except Exception as e:
+            print "Error connecting to velo:", repr(e)
+            return HttpResponse(status=500)
 
     else:
         return HttpResponse(status=500)
