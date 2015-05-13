@@ -146,26 +146,54 @@ $(document).ready(function(){
 		$(this).click(function(){
 			var name = $(this).attr('id');
 			var content = '';
-			if(name == 'nodeSearch'){
-				if($('#nodeSelect_window').length == 0){
+			switch(name) {
+				case 'nodeSearch':
+
+					if($('#nodeSelect_window').length == 0){
 					var content = [	'<form id="node-search-form>"',
 									'<p>Node to search:</p><input type="text" style="color: #000;" id="node-search-name">',
 									'<input type="submit" value="Search" id="search-btn" style="color: #000;"><br>',
 									'</form>'].join('');				
-				} else {
-					nodeSearch($('#hostname_value').text());
-					return;
-				}
+					} else {
+						nodeSearch($('#hostname_value').text());
+						return;
+					}
+					break;
+				
+				case 'velo':
 
-			} 
+					if($('#velo_window').length == 0){
+						content = [ '<form id="velo_login">',
+									'<h2 class="form-signin-heading">Please Sign In</h2>',
+									'<label for="velo_username" class="sr-only">User name:</label>',
+									'<input type="text" id="velo_username" name="velo_username" class="form-control" placeholder="User Name">',
+						 			'<label for="velo_password" class="sr-only">Password:</label>',
+						 			'<input type="text" id="velo_username" name="velo_password" class="form-control" placeholder="Password">',
+						 			'<a onclick="submit-velo-user()"  href="javascript:void(0);"><button class="btn btn-success">Submit</button></a>'
+
+						].join('');
+					}
+					break;
+
+				default:{
+
+				}
+			}
+
 			if($('#' + name + '_window').length == 0) {
 				var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + content + header3 +'</li>';
 				add_tile(new_tile, name+'_window', {ignore: 'true'}, function(){
 					$('#search-btn').click(function(){
 						nodeSearch(document.getElementById("node-search-name").value);
-					})
+					});
 				});
 			}
+
+			if(name == 'velo'){
+				initVeloConnection();
+			}
+
+
 		});
 	});
 
@@ -195,6 +223,60 @@ $(document).ready(function(){
     	populateNodeSelect(nodeName);
     
     });
+
+    function initVeloConnection(){
+    	$.getScript("static/js/spin.js", function(){
+    		if(mode = 'night'){
+				var color = '#fff';
+			} else {
+				color = '#000';
+			}
+			var opts = {
+				lines: 17, // The number of lines to draw
+				length: 40, // The length of each line
+				width: 10, // The line thickness
+				radius: 30, // The radius of the inner circle
+				corners: 1, // Corner roundness (0..1)
+				rotate: 0, // The rotation offset
+				direction: 1, // 1: clockwise, -1: counterclockwise
+				color: color, // #rgb or #rrggbb or array of colors
+				speed: 1, // Rounds per second
+				trail: 100, // Afterglow percentage
+				shadow: false, // Whether to render a shadow
+				hwaccel: false, // Whether to use hardware acceleration
+				className: 'spinner', // The CSS class to assign to the spinner
+				zIndex: 2e9, // The z-index (defaults to 2000000000)
+				top: '50%', // Top position relative to parent
+				left: '50%' // Left position relative to parent
+			};
+	    	var spinner = new Spinner(opts).spin();
+	    	document.getElementById('velo_window').appendChild(spinner.el);
+	    	var data = {
+	    		connection: 'initial'
+	    	}
+	    	data = JSON.stringify(data);
+	    	$.ajaxSetup({
+				beforeSend: function(xhr){
+					xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+				}
+			});
+			$.ajax({
+				url: 'velo/',
+				data: data,
+				type: 'POST',
+				success: function(response){
+					spinner.stop();
+					alert(jQuery.parseJSON(response));
+				},
+				statusCode:{
+					500: function(){
+						spinner.stop();
+						alert('server error');
+					}
+				}
+			});
+    	});
+    }
 
     function populateNodeSelect(id){
 		$.getScript("static/js/spin.js", function(){
@@ -263,6 +345,16 @@ $(document).ready(function(){
 					$('#node-search').click(function(){
 						nodeSearch($('#hostname_value').text());
 					});
+				},
+				statusCode:{
+					404: function(){
+						spinner.stop();
+						alert('Resource not found');
+					},
+					500: function(){
+						spinner.stop();
+						alert('Server error');
+					}
 				}
 			});
 		});
@@ -365,9 +457,11 @@ $(document).ready(function(){
 				},
 				statusCode:{
 					404: function(){
+						spinner.stop();
 						alert('Node not found');
 					},
 					500: function(){
+						spinner.stop();
 						alert('Unable to connect');
 					}
 				}
@@ -722,11 +816,23 @@ $(document).ready(function(){
 	 	var y = parseInt(curWindow.attr('row'));
 	 	var sizex = parseInt(curWindow.attr('sizex'));
 	 	var sizey = parseInt(curWindow.attr('sizey'));
+	 	var toAdd = true;
+	 	var adj = new Array();
 	 	if(dir == 'up'){
 	 		if(side == 'n'){
-	 			var adj = new Set();
+	 			//var adj = new Set();
 	 			for (var i = x; i < x + sizex; i++) {
-	 				adj.add(board[i-1][y - 2].tile);
+	 				for(var j = 0; j < adj.length; j++){
+	 					if(adj[j] == board[i-1][y - 2].tile){
+	 						toAdd = false;
+	 						break;
+	 					} else {
+	 						toAdd = true;
+	 					}
+	 				}
+	 				if(toAdd){
+	 					adj.push(board[i-1][y - 2].tile);
+	 				}
 	 			};
 	 			var helperReturn = adjHelper(adj, moved);
 	 			var startY = curWindow.offset().top;
@@ -742,18 +848,27 @@ $(document).ready(function(){
 	 			update_board(id);
 	 			moved.add(id);
 	 			removeHelper(curWindow);
-	 			if(helperReturn.finished == true){
+	 			if(helperReturn.finished){
 					//base case, done resizing
 					return;
 				} else {
 					//we need to keep resizing
-					recursiveResize(moved, dir, diff, 's', helperReturn.adj.values().next().value);
+					recursiveResize(moved, dir, diff, 's', helperReturn.adj[0]);
 				}
 			}
 			else if(side =='s'){
-				var adj = new Set();
 				for (var i = x; i < x + sizex; i++) {
-					adj.add(board[i-1][y + sizey - 1].tile);
+					for(var j = 0; j < adj.length; j++){
+	 					if(adj[j] == board[i-1][y + sizey - 1].tile){
+	 						toAdd = false;
+	 						break;
+	 					} else {
+	 						toAdd = true;
+	 					}
+	 				}
+	 				if(toAdd){
+	 					adj.push(board[i-1][y + sizey - 1].tile);
+	 				}
 				};
 				var helperReturn = adjHelper(adj, moved);
 				curWindow.attr({
@@ -765,12 +880,12 @@ $(document).ready(function(){
 				update_board(id);
 				moved.add(id);
 				removeHelper(curWindow);
-				if(helperReturn.finished == true){
+				if(helperReturn.finished){
 					//base case, all windows have been resized
 					return; 
 				} else {
 					//we need to keep resizeing 
-					recursiveResize(moved, dir, diff, 'n', helperReturn.adj.values().next().value);
+					recursiveResize(moved, dir, diff, 'n', helperReturn.adj[0]);
 				}
 			} else {
 	 			//error
@@ -779,9 +894,18 @@ $(document).ready(function(){
 	 	}
 	 	else if(dir == 'down'){
 	 		if(side == 'n'){
-	 			var adj = new Set();
 	 			for (var i = x; i < x + sizex; i++) {
-	 				adj.add(board[i-1][y - 2].tile);
+	 				for(var j = 0; j < adj.length; j++){
+	 					if(adj[j] == board[i-1][y - 2].tile){
+	 						toAdd = false;
+	 						break;
+	 					} else {
+	 						toAdd = true;
+	 					}
+	 				}
+	 				if(toAdd){
+	 					adj.push(board[i-1][y - 2].tile);
+	 				}
 	 			};
 				//check the base case-> all windows have been moved
 				moved.add(id);
@@ -799,18 +923,27 @@ $(document).ready(function(){
 				update_board(id);
 				moved.add(id);
 				removeHelper(curWindow);
-				if(helperReturn.finished == true){
+				if(helperReturn.finished){
 					//base case, done resizing
 					return;
 				} else {
 					//we need to keep resizing
-					recursiveResize(moved, dir, diff, 's', helperReturn.adj.values().next().value);
+					recursiveResize(moved, dir, diff, 's', helperReturn.adj[0]);
 				}
 			}
 			else if(side =='s'){
-				var adj = new Set();
 				for (var i = x; i < x + sizex; i++) {
-					adj.add(board[i-1][y + sizey - 1].tile);
+					for(var j = 0; j < adj.length; j++){
+	 					if(adj[j] == board[i-1][y + sizey - 1].tile){
+	 						toAdd = false;
+	 						break;
+	 					} else {
+	 						toAdd = true;
+	 					}
+	 				}
+	 				if(toAdd){
+	 					adj.push(board[i-1][y + sizey - 1].tile);
+	 				}
 				};
 				//check the base case-> all windows have been moved
 				moved.add(id);
@@ -829,7 +962,7 @@ $(document).ready(function(){
 					return; 
 				} else {
 					//we need to keep resizeing 
-					recursiveResize(moved, dir, diff, 'n', helperReturn.adj.values().next().value);
+					recursiveResize(moved, dir, diff, 'n', helperReturn.adj[0]);
 				}
 			} else {
 	 			//error
@@ -838,9 +971,18 @@ $(document).ready(function(){
 	 	}
 	 	else if(dir == 'right'){
 	 		if(side == 'e'){
-	 			var adj = new Set();
 	 			for (var i = y; i < y + sizey; i++) {
-	 				adj.add(board[x + sizex - 1][i - 1].tile);
+	 				for(var j = 0; j < adj.length; j++){
+	 					if(adj[j] == board[x + sizex - 1][i - 1].tile){
+	 						toAdd = false;
+	 						break;
+	 					} else {
+	 						toAdd = true;
+	 					}
+	 				}
+	 				if(toAdd){
+	 					adj.push(board[x + sizex - 1][i - 1].tile);
+	 				}
 	 			};
 	 			var helperReturn = adjHelper(adj, moved);
 	 			curWindow.attr({
@@ -852,18 +994,27 @@ $(document).ready(function(){
 	 			update_board(id);
 	 			moved.add(id);
 	 			removeHelper(curWindow);
-	 			if(helperReturn.finished == true){
+	 			if(helperReturn.finished){
 					//base case, all windows have been resized
 					return; 
 				} else {
 					//we need to keep resizeing 
-					recursiveResize(moved, dir, diff, 'w', helperReturn.adj.values().next().value);
+					recursiveResize(moved, dir, diff, 'w', helperReturn.adj[0]);
 				}
 			}
 			else if(side =='w'){
-				var adj = new Set();
 				for (var i = y; i < y + sizey; i++) {
-					adj.add(board[x - 2][i - 1].tile);
+					for(var j = 0; j < adj.length; j++){
+	 					if(adj[j] == board[x - 2][i - 1].tile){
+	 						toAdd = false;
+	 						break;
+	 					} else {
+	 						toAdd = true;
+	 					}
+	 				}
+	 				if(toAdd){
+	 					adj.push(board[x - 2][i - 1].tile);
+	 				}
 				};
 				var helperReturn = adjHelper(adj, moved);
 				curWindow.attr({
@@ -877,12 +1028,12 @@ $(document).ready(function(){
 				update_board(id);
 				moved.add(id);
 				removeHelper(curWindow);
-				if(helperReturn.finished == true){
+				if(helperReturn.finished){
 					//base case, all windows have been resized
 					return; 
 				} else {
 					//we need to keep resizeing 
-					recursiveResize(moved, dir, diff, 'e', helperReturn.adj.values().next().value);
+					recursiveResize(moved, dir, diff, 'e', helperReturn.adj[0]);
 				}
 			} else {
 	 			//error
@@ -891,9 +1042,18 @@ $(document).ready(function(){
 	 	}
 	 	else if(dir == 'left'){
 	 		if(side == 'e'){
-	 			var adj = new Set();
 	 			for (var i = y; i < y + sizey; i++) {
-	 				adj.add(board[x + sizex - 1][i - 1].tile);
+	 				for(var j = 0; j < adj.length; j++){
+	 					if(adj[j] == board[x + sizex - 1][i - 1].tile){
+	 						toAdd = false;
+	 						break;
+	 					} else {
+	 						toAdd = true;
+	 					}
+	 				}
+	 				if(toAdd){
+	 					adj.push(board[x + sizex - 1][i - 1].tile);
+	 				}
 	 			};
 	 			var helperReturn = adjHelper(adj, moved);
 	 			curWindow.attr({
@@ -905,18 +1065,27 @@ $(document).ready(function(){
 	 			update_board(id);
 	 			moved.add(id);
 	 			removeHelper(curWindow);
-	 			if(helperReturn.finished == true){
+	 			if(helperReturn.finished){
 					//base case, all windows have been resized
 					return; 
 				} else {
 					//we need to keep resizeing 
-					recursiveResize(moved, dir, diff, 'w', helperReturn.adj.values().next().value);
+					recursiveResize(moved, dir, diff, 'w', helperReturn.adj[0]);
 				}
 			}
 			else if(side =='w'){
-				var adj = new Set();
 				for (var i = y; i < y + sizey; i++) {
-					adj.add(board[x - 2][i - 1].tile);
+					for(var j = 0; j < adj.length; j++){
+	 					if(adj[j] == board[x - 2][i - 1].tile){
+	 						toAdd = false;
+	 						break;
+	 					} else {
+	 						toAdd = true;
+	 					}
+	 				}
+	 				if(toAdd){
+	 					adj.push(board[x - 2][i - 1].tile);
+	 				}
 				};
 				var helperReturn = adjHelper(adj, moved);
 				curWindow.attr({
@@ -930,12 +1099,12 @@ $(document).ready(function(){
 				update_board(id);
 				moved.add(id);
 				removeHelper(curWindow);
-				if(helperReturn.finshed == true){
+				if(helperReturn.finished){
 					//base case, all windows have been resized
 					return; 
 				} else {
 					//we need to keep resizeing 
-					recursiveResize(moved, dir, diff, 'e', helperReturn.adj.values().next().value);
+					recursiveResize(moved, dir, diff, 'e', helperReturn.adj[0]);
 				}
 			} else {
 	 			//error
@@ -959,7 +1128,7 @@ $(document).ready(function(){
 	  		if(!moved.has(item)){
 	  			done = false;
 	  		} else {
-	  			adj.delete(item);
+	  			adj.splice(adj.indexOf(item), 1) ;
 	  		}
 	  	}, moved);
 

@@ -305,7 +305,22 @@ def node_search(request):
     else:
         return HttpResponse(status=500)
 
+@login_required
+def velo(request):
+    if request.method == 'POST':
+        from velo import VeloAPI
+        try:
+            velo_api = VeloAPI.Velo()
+            velo_api.start_jvm()
+            barr = velo_api.init_velo("acmetest", "acmetest")
+            foo = {'0': 'success I guess'}
+            return HttpResponse(json.dumps(foo))
+        except Exception as e:
+            print "Error connecting to velo:", repr(e)
+            return HttpResponse(status=500)
 
+    else:
+        return HttpResponse(status=500)
 
 @login_required(login_url='login')
 def config(request):
