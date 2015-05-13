@@ -15,12 +15,18 @@ class IssueSource(models.Model):
 	# Text asking for specific information from a user
 	required_info = models.TextField(unique=False)
 
+	def __str__(self):
+		return self.base_url
+
 class IssueCategory(models.Model):
 	"""
 	Labels for issues
 	"""
 	name = models.CharField(max_length=512, unique=False, blank=False)
 	source = models.ForeignKey(IssueSource)
+
+	def __str__(self):
+		return self.name + " (%s)" % self.source
 
 class CategoryQuestion(models.Model):
 	"""
@@ -34,13 +40,24 @@ class CategoryQuestion(models.Model):
 	# If you need to narrow something down, you can use several questions
 	next_question = models.ForeignKey("CategoryQuestion", blank=True, null=True)
 
+	def __str__(self):
+		return self.question
+
 class Issue(models.Model):
 	"""
 	Internal representation of an issue from an external source
 	"""
+	# URL for the endpoint for this issue
 	url = models.URLField()
+	# JIRA -> GitHub and vice versa
+	matched_issue = models.ForeignKey("Issue", blank=True, null=True)
+	# The origin of this issue
 	source = models.ForeignKey(IssueSource)
+	# Tags for this issue
 	categories = models.ManyToManyField(IssueCategory)
+
+	def __str__(self):
+		return self.url
 
 class Subscriber(models.Model):
 	"""
@@ -55,4 +72,8 @@ class Subscriber(models.Model):
 	signed_in = models.DateTimeField(auto_now=True)
 	# Default to sending an email digest for a user, rather than individual notifications
 	digest = models.BooleanField(default=True)
+	# Every issue that this subscriber is associated with
 	subscriptions = models.ManyToManyField(Issue)
+
+	def __str__(self):
+		return self.email
