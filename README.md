@@ -46,7 +46,10 @@ acme-site
 **Velo API**
 
     Open VeloAPI.py and change /Users/baldwin32/projects/acme-web-fe/acme_site/static/java/VeloAPI.jar to the location of your .jar file
-    Install Jpype http://jpype.sourceforge.net/
+    source env/bin/activate
+    git clone https://github.com/originell/jpype.git
+    cd jpype
+    python setup.py install 
 
 **setup db**
 
