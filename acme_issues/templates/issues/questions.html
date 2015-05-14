@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}{{ source.name }} Questions{% endblock %}
+
+{% block content %}
+
+{% load issues %}
+
+<div id="question_builder">
+	<div id="qb_categories" class="hidden">
+		<!-- embedded for use by JS; probably won't change during session, so it can just hang out here -->
+		{% for cat in source.issuecategory_set.all %}
+		<span data-id="{{cat.id}}">{{cat.name}}</span>
+		{% endfor %}
+	</div>
+	<div class="qb_header">
+		<h3 id="qb_source">{{ source.name }}</h3>
+		<form class="form-inline">
+			<div class="form-group">
+				<label for="new_question">Question Text</label>
+				<input type="text" name="new_question" class="form-control"> 
+			</div>
+			<button type="submit" id="qb_add_question" class="btn btn-primary">Add Question</button>
+		</form>
+	</div>
+	<div class="qb_body">
+		{% for question in root_questions %}
+			{{ question|render_question_tree }}
+		{% endfor %}
+	</div>
+</div>
+
+<script>
+
+function createCookie(name, value, days) {
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        var expires = "; expires=" + date.toGMTString();
+    }
+    else var expires = "";
+
+    var fixedName = '<%= Request["formName"] %>';
+    name = fixedName + name;
+
+    document.cookie = name + "=" + value + expires + "; path=/";
+}
+
+function readCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+}
+
+function eraseCookie(name) {
+    createCookie(name, "", -1);
+}
+
+function ajax_json(url, method, success, data, failure) {
+	var csrf = readCookie("csrftoken");
+	
+	headers = { "X-CSRFToken": csrf };
+	settings = {"accepts":"application/json", "contentType":"application/json"};
+
+	function json_succeed(d, status, jqXHR) {
+		var j = JSON.parse(d);
+		if (success !== undefined) {
+			success(j);
+		}
+	}
+
+	settings["success"] = json_succeed;
+	settings["method"] = method;
+	settings["headers"] = headers
+
+	if (data !== undefined) {
+		settings["data"] = JSON.stringify(data);
+	}
+	if (failure !== undefined) {
+		settings["error"] = failure
+	}
+	return $.ajax(url, settings);
+}
+
+$("body").ready(function(){
+	var questions = {};
+	var categories = {};
+	 $("#qb_categories>span").each(function(ind, obj){
+	 	var obj = $(obj);
+		categories[obj.attr("data-id")] = {"id":obj.attr("data-id"), "name":obj.text()};
+	});
+	$(".qb_question").each(function(ind, obj) {
+		var obj = $(obj);
+		// Initially populate questions array
+		var title = obj.children(".qb_question_title");
+		// Sublist is the next element
+		var sub = title.next();
+
+		// Get the yes value
+		var yes = sub.children("li.yes");
+
+		if (yes.children(".qb_question").size() == 1) {
+			yes = yes.children(".qb_question").attr("data-id");
+		} else if (yes.children(".qb_category").size() == 1) {
+			yes = categories[yes.children(".qb_category").attr("data-id")];
+		} else {
+			yes = -1;
+		}
+
+		// Get the no value
+		var no = sub.children("li.no");
+
+		if (no.children(".qb_question").size() == 1) {
+			no = no.children(".qb_question").attr("data-id");
+		} else if (no.children(".qb_category").size() == 1) {
+			no = categories[no.children(".qb_category").attr("data-id")];
+		} else {
+			no = -1;
+		}
+
+		questions[obj.attr("data-id")] = {"id":obj.attr("data-id"), "text": title.text(), "yes":yes, "no":no};
+	});
+
+	function add_question(j) {
+		var parent = $("#question_builder>.qb_body");
+		if ("parent" in j) {
+			if (j["parent_yes"]) {
+				questions[j["parent"]]["yes"] = j["id"];
+				parent = parent.find("ul[date-id=" + questions[j["parent"]].id +"]>li>ul>li.yes");
+			} else {
+				questions[j["parent"]]["no"] = j["id"];
+				parent = parent.find("ul[date-id=" + questions[j["parent"]].id +"]>li>ul>li.no");
+			}
+		}
+		questions[j["id"]] = {"id": j.id, "text":j.question, "yes":j.yes, "no":j.no};
+		parent.append(j.html);
+	}
+
+	function new_question(text, callback, parent, yes) {
+		if (parent !== undefined) {
+			data = {"parent": parent.id, "text": text, "yes": yes}
+		} else {
+			data = {"text": text}
+		}
+
+		ajax_json("create", "POST", callback, data);
+	}
+
+	var q_text = $(".qb_header input[name=new_question]");
+	$("#qb_add_question").click(function(e){
+		new_question(q_text.val(), add_question);
+		e.preventDefault();
+	});
+});
+
+
+
+</script>
+
+{% endblock %}

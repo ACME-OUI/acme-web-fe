@@ -9,4 +9,5 @@ urlpatterns = patterns('',
 
     url(r'^admin/', include(admin.site.urls)),
     url(r'^acme/', include('web_fe.urls'))
+    url(r'^issues/', include('issues.urls'))
 )

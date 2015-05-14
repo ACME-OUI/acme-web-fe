@@ -25,20 +25,73 @@ class IssueCategory(models.Model):
 	name = models.CharField(max_length=512, unique=False, blank=False)
 	source = models.ForeignKey(IssueSource)
 
+	def has_question(self):
+		"""
+		Builds complex query to check if any category questions point
+		to this object
+		"""
+		yes_query = models.Q(yes_type="category", yes=self.id)
+		no_query = models.Q(no_type="category", no=self.id)
+
+		objects = CategoryQuestion.objects.filter(yes_query | no_query)
+		return len(objects) > 0
+
 	def __str__(self):
 		return self.name + " (%s)" % self.source
+
 
 class CategoryQuestion(models.Model):
 	"""
 	Used to determine what category an issue goes into
 	"""
+
 	question = models.CharField(max_length=512, unique=False, blank=False)
-	# "text", "boolean"
-	question_type = models.CharField(max_length=32, unique=False)
-	# If next_question is blank, category should be filled
-	category = models.ForeignKey(IssueCategory, blank=True, null=True)
-	# If you need to narrow something down, you can use several questions
-	next_question = models.ForeignKey("CategoryQuestion", blank=True, null=True)
+	
+	# Points to either another CategoryQuestion or an IssueCategory
+	yes = models.IntegerField(blank=True, null=True)
+	no = models.IntegerField(blank=True, null=True)
+
+	# Either "category" or "question"
+	yes_type = models.CharField(max_length=12, blank=True, null=True)
+	no_type = models.CharField(max_length=12, blank=True, null=True)
+
+	def is_root(self):
+		yes = models.Q(yes_type="question", yes=self.id)
+		no = models.Q(no_type="question", no=self.id)
+		objects = CategoryQuestion.objects.filter(yes | no)
+		return len(objects) == 0
+
+	def get_yes(self):
+		if self.yes_type == "question":
+			return CategoryQuestion.objects.get(self.yes)
+		elif self.yes_type == "category":
+			return IssueCategory.objects.get(self.yes)
+		else:
+			raise ValueError("yes_type must be question or category")
+
+	def get_no(self):
+		if self.no_type == "question":
+			return CategoryQuestion.objects.get(self.no)
+		elif self.no_type == "category":
+			return IssueCategory.objects.get(self.no)
+		else:
+			raise ValueError("no_type must be question or category")
+
+	def set_yes(self, value):
+		if type(value) == CategoryQuestion:
+			self.yes_type = "question"
+		elif type(value) == IssueCategory:
+			self.yes_type = "category"
+		else:
+			raise ValueError("type of yes must be CategoryQuestion or IssueCategory")
+
+	def set_no(self, value):
+		if type(value) == CategoryQuestion:
+			self.no_type = "question"
+		elif type(value) == IssueCategory:
+			self.no_type = "category"
+		else:
+			raise ValueError("type of no must be CategoryQuestion or IssueCategory")
 
 	def __str__(self):
 		return self.question
@@ -77,3 +130,5 @@ class Subscriber(models.Model):
 
 	def __str__(self):
 		return self.email
+
+
