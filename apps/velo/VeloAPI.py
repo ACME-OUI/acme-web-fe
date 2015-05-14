@@ -7,13 +7,14 @@ import jpype
 import time
 from jpype import *
 jvmPath=jpype.getDefaultJVMPath()
+from django.conf import settings
 
 class Velo:
     def __init__(self):
         pass
     def start_jvm(self):
         #include the velo python API jar file here
-        jpype.startJVM(jvmPath, "-Djava.class.path=/Users/baldwin32/projects/acme-web-fe/acme_site/static/java/VeloAPI.jar")
+        jpype.startJVM(jvmPath, settings.JAR_PATH)
         global velo, cms, jobConfig, fileObj, tifConstants , fileServerMap
         velo=JPackage("velo").mgr.VeloManager
         cms=JPackage("gov").pnnl.velo.model.CmsPath
