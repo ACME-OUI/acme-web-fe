@@ -17,7 +17,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
 #from acme_site.filters import
-from acme_site.models import TileLayout
+from acme_site.models import TileLayout, Credential
 #from acme_site.forms import
 
 import json
@@ -61,7 +61,6 @@ def user_login(request):
             if user.is_active:
                 login(request, user)
                 messages.success(request, 'User: '+ request.POST['username'] + ' successfully loged in')
-                print 'POSTnext: ' + request.POST.get('next')
                 return HttpResponseRedirect(request.POST.get('next'))
             else:
                 messages.error(request, 'User: ' + request.POST['username'] + ' is a disactivated account')
@@ -72,13 +71,37 @@ def user_login(request):
     else:
         if 'next' in request.GET:
             redirect = request.GET.get('next')
-            print "GETnext:" + request.GET.get('next')
 
         else:
             redirect = ''
         print 'redirect:' + redirect
         response = HttpResponse(render_template(request, "acme_site/login.html", {"next": redirect}))
         return response
+
+##### Allows the user to add ESGF and Velo credentials to their account
+@login_required(login_url='login')
+def add_credentials(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            for s in data:
+                creds = Credential.objects.filter(service=s, site_user_name=str(request.user))
+                if len(creds) != 0:
+                    for i in creds:
+                        i.password = data[s]['password']
+                        i.service_user_name = data[s]['username']
+                        i.save()
+                else:
+                    print 'Getting new credential for ' + str(request.user)
+                    c = Credential(service_user_name=data[s]['username'], password=data[s]['password'], service=s, site_user_name=str(request.user))
+                    c.save()
+            return HttpResponse(render_template(request, 'acme_site/add_credentials.html', {'added': 'true'}))
+        except Exception as e:
+            print 'Error creating new credentials:', repr(e)
+            return HttpResponse(status=500)
+    else:
+        return HttpResponse(render_template(request, 'acme_site/add_credentials.html', {'added': 'false'}))
+
 
 ##### Logout
 def user_logout(request):
@@ -103,8 +126,6 @@ def register(request):
    
     return render_to_response("acme_site/register.html", {"user_form": user_form, "registered": registered}, context)
 
-def slick(request):
-    return HttpResponse(render_template(request, "acme_site/slick.html", {}))
 
 ##### Work Flows
 @login_required(login_url='login')
