@@ -15,6 +15,7 @@ local_settings.py
 /images/
 /js/
 /jspanel/
+/java/
 
 static/filetree/example.py
 static/systemtest/*
