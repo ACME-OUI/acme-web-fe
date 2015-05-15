@@ -202,7 +202,30 @@ def grid(request):
             if child.tag[-11:] == "GeoLocation":
                 node_location_list.append(child.attrib["city"])
     node_list = zip(node_peer_list, node_url_list, node_name_list, node_location_list)
-    print node_list, node_peer_list, node_url_list, node_name_list, node_location_list
+
+    creds = Credential.objects.filter(site_user_name=request.user)
+    if len(creds) != 0:
+        for c in creds:
+            if c.service = 'esgf':
+                import pyesgf
+                from pyesgf import LogonManager
+                lm = LogonManager()
+                lm.logon_with_openid(c.service_user_name, c.password)
+                if lm.is_logged_on():
+                    request.session['esgf_login'] = lm
+            if c.service = 'velo':
+                lib_path = os.path.abspath(os.path.join('apps', 'velo'))
+                sys.path.append(lib_path)
+                import VeloAPI
+                
+                velo_api = VeloAPI.Velo()
+                velo_api.start_jvm()
+                res = velo_api.init('acmetest', 'acmetest')
+                request.session['velo_login'] = res
+                '''
+                For production, uncomment
+                res = velo_api.init(c.service_user_name, c.password)
+                '''
     return HttpResponse(render_template(request, "web_fe/grid.html", {'nodes': node_list}))
 
 
