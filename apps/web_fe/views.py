@@ -15,7 +15,6 @@ from django.contrib.auth.decorators import login_required
 from web_fe.models import TileLayout, Credential
 import sys
 import json
-import xmltodict
 import simplejson
 import os
 import urllib
@@ -82,13 +81,57 @@ def add_credentials(request):
                     print 'Getting new credential for ' + str(request.user)
                     c = Credential(service_user_name=data[s]['username'], password=data[s]['password'], service=s, site_user_name=str(request.user))
                     c.save()
-            return HttpResponse(render_template(request, 'acme_site/add_credentials.html', {'added': 'true'}))
+            return HttpResponse(render_template(request, 'web_fe/add_credentials.html', {'added': 'true'}))
         except Exception as e:
             print 'Error creating new credentials:', repr(e)
             return HttpResponse(status=500)
     else:
-        return HttpResponse(render_template(request, 'acme_site/add_credentials.html', {'added': 'false'}))
+        return HttpResponse(render_template(request, 'web_fe/add_credentials.html', {'added': 'false'}))
 
+@login_required(login_url='login')
+def check_credentials(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            response = {}
+            for s in data:
+                if s == 'esgf':
+                    import pyesgf
+                    from pyesgf.logon import LogonManager
+
+                    lm = LogonManager()
+                    lm.logon_with_openid(data[s]['username'], data[s]['password'])
+                    if lm.is_logged_on() != True:
+                        response[s] = 'failed'
+                    else:
+                        response[s] = 'success'
+                if s == 'velo':
+                    lib_path = os.path.abspath(os.path.join('apps', 'velo'))
+                    sys.path.append(lib_path)
+                    import VeloAPI
+                    
+                    velo_api = VeloAPI.Velo()
+                    velo_api.start_jvm()
+                    '''
+                    Using the test credentials for the time being, simply uncomment to 
+                    use the users credentials
+                    velo_api.init_velo(data[s]['username'], data[s]['password'])
+                    '''
+                    #res = velo_api.init_velo("acmetest", "acmetest")
+                    response[s] = 'success'
+                    '''
+                    if res.logged_on() != True:
+                        resonse[s] = 'failed'
+                    else:
+                        response[s] = 'success
+                    '''
+            return HttpResponse(json.dumps(response))
+
+        except Exception as e:
+            print "Error checking credentials", repr(e)
+            return HttpResponse(status=500)
+    else:
+        return HttpResponse(status=404)
 
 ##### Logout
 def user_logout(request):
