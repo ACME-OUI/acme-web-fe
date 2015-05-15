@@ -4,6 +4,41 @@
 {% block content %}
 
 {% load issues %}
+<style>
+	.qb_body li {
+		list-style-type: none;
+	}
+
+	li.yes>*, li.no>* {
+		padding-left:40px;
+	}
+
+	li.yes, li.no, li.yes li, li.no li {
+		margin-top:5px;
+		margin-bottom:5px;
+	}
+
+	li.yes:before, li.no:before {
+		padding:7px;
+		font-weight:bold;
+	}
+
+	li.yes:before {
+		content:"Yes:";
+	}
+
+	li.no:before {
+		padding-left:13px;
+		content:"No:";
+	}
+	.qb_question_title, .qb_category {
+		margin-top:6px;
+		display:inline-block;
+	}
+	div.cat_wrapper {
+		display:inline-block;
+	}
+</style>
 
 <div id="question_builder">
 	<div id="qb_categories" class="hidden">
@@ -87,12 +122,14 @@ function ajax_json(url, method, success, data, failure) {
 }
 
 $("body").ready(function(){
+	var source = $("#qb_source").text()
 	var questions = {};
 	var categories = {};
-	 $("#qb_categories>span").each(function(ind, obj){
-	 	var obj = $(obj);
+	$("#qb_categories>span").each(function(ind, obj){
+		var obj = $(obj);
 		categories[obj.attr("data-id")] = {"id":obj.attr("data-id"), "name":obj.text()};
 	});
+	var category_names = $.map(categories, function(obj, ind){ return obj.name; })
 	$(".qb_question").each(function(ind, obj) {
 		var obj = $(obj);
 		// Initially populate questions array
@@ -124,25 +161,103 @@ $("body").ready(function(){
 
 		questions[obj.attr("data-id")] = {"id":obj.attr("data-id"), "text": title.text(), "yes":yes, "no":no};
 	});
+	
+	var root = $("#question_builder>.qb_body");
+	
+	function add_category(j) {
+		var parent = root.find("*[data-id=" + j.id + "]");
+		var el = $(j.html);
+		var li = null;
+		
+		if (j.yes === true) {
+			li = parent.children("ul").children("li.yes");
+		} else {
+			li = parent.children("ul").children("li.no");
+		}
+		
+		el.find(".remove_category").click(remove_category);
+
+		li.empty();
+		li.append(el);
+	}
+
+	function prep_input(el) {
+		el.find(".save_button").click(save_question);
+		el.find(".new_text").autocomplete({source: category_names});
+		el.find(".remove_question").click(remove_question)
+	}
+
+	function remove_category() {
+		var el = $(this);
+		var li = el.parent().parent();
+		var yes = li.hasClass("yes");
+		var q = li.parent().parent();
+		ajax_json("edit/" + q.attr("data-id"), "POST", function(j) {
+			li.empty();
+			var newel = $(j.html);
+			prep_input(newel);
+			li.append(newel);
+		}, {"name":null, "yes":yes});
+	}
 
 	function add_question(j) {
-		var parent = $("#question_builder>.qb_body");
+		var parent = root;
 		if ("parent" in j) {
-			if (j["parent_yes"]) {
+			if (j["yes"]) {
 				questions[j["parent"]]["yes"] = j["id"];
-				parent = parent.find("ul[date-id=" + questions[j["parent"]].id +"]>li>ul>li.yes");
+				parent = parent.find("*[data-id=" + questions[j["parent"]].id +"]>ul>li.yes");
 			} else {
 				questions[j["parent"]]["no"] = j["id"];
-				parent = parent.find("ul[date-id=" + questions[j["parent"]].id +"]>li>ul>li.no");
+				parent = parent.find("*[data-id=" + questions[j["parent"]].id +"]>ul>li.no");
 			}
 		}
 		questions[j["id"]] = {"id": j.id, "text":j.question, "yes":j.yes, "no":j.no};
-		parent.append(j.html);
+		var q = $(j.html);
+		prep_input(q);
+		parent.append(q);
+	}
+
+	function save_question() {
+		var t = $(this).parent().parent().parent().find("input[type='text']");
+		var yesno = t.parent().parent();
+		var question = yesno.parent().parent();
+		var yes = yesno.hasClass("yes");
+
+		for (var i = 0; i < category_names.length; i++) {
+			if (category_names[i] === t.val()) {
+				// This is a category, not a question
+				ajax_json("edit/" + question.attr("data-id"), "POST", add_category, {"name":t.val(), "yes":yes, "source":source});
+				return;
+			}
+		}
+
+		function remove_input_add_question(j) {
+			yesno.empty();
+			add_question(j)
+		}
+		new_question(t.val(), remove_input_add_question, question.attr('data-id'), yes);
+	}
+
+	function deleted_question(j) {
+		var removed = $("*[data-id=" + j.id + "]");
+		var p = removed.parent();
+		questions[j.id] = null;
+		removed.detach();
+		if (!p.is(root)) {
+			p.append($(j.html));
+			p.find(".save_button").click(save_question);
+		}
+
+	}
+
+	function remove_question() {
+		var me = $(this).parent();
+		ajax_json("delete/" + me.attr("data-id"), "POST", deleted_question);
 	}
 
 	function new_question(text, callback, parent, yes) {
 		if (parent !== undefined) {
-			data = {"parent": parent.id, "text": text, "yes": yes}
+			data = {"parent": parent, "text": text, "yes": yes}
 		} else {
 			data = {"text": text}
 		}
@@ -150,14 +265,18 @@ $("body").ready(function(){
 		ajax_json("create", "POST", callback, data);
 	}
 
+	$(".remove_question").click(remove_question);
+	$(".new_text").autocomplete({source: category_names});
+	$(".save_button").click(save_question);
+	$(".remove_category").click(remove_category)
+
 	var q_text = $(".qb_header input[name=new_question]");
 	$("#qb_add_question").click(function(e){
 		new_question(q_text.val(), add_question);
+		q_text.val("");
 		e.preventDefault();
 	});
 });
-
-
 
 </script>
 

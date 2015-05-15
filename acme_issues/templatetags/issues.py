@@ -1,6 +1,7 @@
 from django import template
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
+from acme_issues.models import IssueCategory
 
 register = template.Library()
 
@@ -11,30 +12,34 @@ def render_question_tree(question, autoescape=True):
 
 def recurse_tree(question, escape):
 	if question is None:
-		return ""
+		return render_input()
+	
+	if type(question) == IssueCategory:
+		return render_category(question, escape)
+
 	markup = """
-<ul data-id="{id}" class="qb_question">
-	<li>
+<div data-id="{id}" class="qb_question">
+		<button class="btn btn-danger btn-xs remove_question"><span class="glyphicon glyphicon-remove"></span></button>
 		<span class="qb_question_title">{question}</span>
 		<ul>
 			<li class="yes">{yes}</li>
 			<li class="no">{no}</li>
 		</ul>
-	</li>
-</ul>
+</div>
 """
-	if question.yes is not None and question.yes_type == "category":
-		yes = """<span class="qb_category" data-id="{id}">{name}</span>"""
-		y = question.get_yes()
-		yes = yes.format(name=escape(y.name), id=escape(y.id))
-	else:
-		yes = recurse_tree(question.yes, escape)
-
-	if question.no is not None and question.no_type == "category":
-		no = """<span class="qb_category" data-id="{id}">{name}</span>"""
-		n = question.get_no()
-		no = no.format(name=escape(n.name), id=escape(n.id))
-	else:
-		no = recurse_tree(question.no, escape)
+	yes = recurse_tree(question.get_yes(), escape)
+	no = recurse_tree(question.get_no(), escape)
 
 	return markup.format(id=question.id, question=question.question, yes=yes, no=no)
+
+def render_category(category, escape):
+	t = """<div><button class="btn btn-danger btn-xs remove_category"><span class="glyphicon glyphicon-remove"></span></button> <span class="qb_category">{name}</span></div>"""
+	return t.format(name=escape(category.name), id=escape(category.id))
+
+def render_input():
+	return """<div class="input-group" style="width:300px">
+	<input type="text" class="form-control new_text" placeholder="Add question or category...">
+	<span class="input-group-btn">
+		<button class="btn btn-primary save_button" type="button"><span class="glyphicon glyphicon-plus"></span></button>
+	</span>
+</div>"""

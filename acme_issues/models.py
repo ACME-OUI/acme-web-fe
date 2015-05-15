@@ -55,27 +55,47 @@ class CategoryQuestion(models.Model):
 	yes_type = models.CharField(max_length=12, blank=True, null=True)
 	no_type = models.CharField(max_length=12, blank=True, null=True)
 
-	def is_root(self):
+	def get_parents(self):
 		yes = models.Q(yes_type="question", yes=self.id)
 		no = models.Q(no_type="question", no=self.id)
 		objects = CategoryQuestion.objects.filter(yes | no)
+		return objects
+
+	def is_root(self):
+		objects = self.get_parents()
 		return len(objects) == 0
 
 	def get_yes(self):
 		if self.yes_type == "question":
-			return CategoryQuestion.objects.get(self.yes)
+			try:
+				return CategoryQuestion.objects.get(id=self.yes)
+			except CategoryQuestion.DoesNotExist:
+				self.set_yes(None)
+				self.save()
 		elif self.yes_type == "category":
-			return IssueCategory.objects.get(self.yes)
+			try:
+				return IssueCategory.objects.get(id=self.yes)
+			except IssueCategory.DoesNotExist:
+				self.set_yes(None)
+				self.save()
 		else:
-			raise ValueError("yes_type must be question or category")
+			return None
 
 	def get_no(self):
 		if self.no_type == "question":
-			return CategoryQuestion.objects.get(self.no)
+			try:
+				return CategoryQuestion.objects.get(id=self.no)
+			except CategoryQuestion.DoesNotExist:
+				self.set_no(None)
+				self.save()
 		elif self.no_type == "category":
-			return IssueCategory.objects.get(self.no)
+			try:
+				return IssueCategory.objects.get(id=self.no)
+			except IssueCategory.DoesNotExist:
+				self.set_no(None)
+				self.save()
 		else:
-			raise ValueError("no_type must be question or category")
+			return None
 
 	def set_yes(self, value):
 		if type(value) == CategoryQuestion:
@@ -83,7 +103,10 @@ class CategoryQuestion(models.Model):
 		elif type(value) == IssueCategory:
 			self.yes_type = "category"
 		else:
-			raise ValueError("type of yes must be CategoryQuestion or IssueCategory")
+			self.yes_type = None
+			self.yes = None
+			return
+		self.yes = value.id
 
 	def set_no(self, value):
 		if type(value) == CategoryQuestion:
@@ -91,7 +114,28 @@ class CategoryQuestion(models.Model):
 		elif type(value) == IssueCategory:
 			self.no_type = "category"
 		else:
-			raise ValueError("type of no must be CategoryQuestion or IssueCategory")
+			self.no_type = None
+			self.yes = None
+			return
+		self.no = value.id
+
+	def delete_chain(self):
+		if self.yes is not None:
+			if self.yes_type == "question":
+				self.get_yes().delete_chain()
+		if self.no is not None:
+			if self.no_type == "question":
+				self.get_no().delete_chain()
+
+		parents = self.get_parents()
+		for p in parents:
+			if p.yes == self.id:
+				p.set_yes(None)
+			if p.no == self.id:
+				p.set_no(None)
+			p.save()
+
+		self.delete()
 
 	def __str__(self):
 		return self.question

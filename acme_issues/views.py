@@ -21,6 +21,40 @@ def show_question(request, source):
 	return HttpResponse(render_template(request, "issues/questions.html", {"source":s, "root_questions":roots}))
 
 from templatetags.issues import render_question_tree
+def edit_question(request, id):
+	if request.method != "POST":
+		return HttpResponseNotAllowed(["POST"])
+	try:
+		q = CategoryQuestion.objects.get(id=id)
+
+		data = json.loads(request.body)
+		
+		if data["name"] is None:
+			c = None
+		else:
+			c = IssueCategory.objects.get(name=data["name"], source__name=data["source"])
+
+		if data["yes"]:
+			q.set_yes(c)
+		else:
+			q.set_no(c)
+		q.save()
+
+		return HttpResponse(json.dumps({"id":id, "yes":data["yes"], "html":render_question_tree(c)}))
+	except CategoryQuestion.DoesNotExist:
+		return HttpResponseBadRequest(json.dumps({"reason":"Question #%d does not exist" % id}))
+	except IssueCategory.DoesNotExist:
+		return HttpResponseBadRequest(json.dumps({"reason":"Category %s of source %s does not exist " % (data['name'], data["source"])}))
+
+def delete_question(request, id):
+	if request.method != "POST":
+		return HttpResponseNotAllowed(["POST"])
+	try:
+		c = CategoryQuestion.objects.get(id=id)
+		c.delete_chain()
+		return HttpResponse(json.dumps({"id":id, "html":render_question_tree(None)}))
+	except CategoryQuestion.DoesNotExist:
+		return HttpResponseBadRequest(json.dumps({"reason":"Question #%d does not exist" % id}))
 
 def create_question(request):
 	if request.method == "POST":
@@ -39,11 +73,15 @@ def create_question(request):
 		}
 
 		if "parent" in parsed:
-			p = CategoryQuestion.objects.get(parsed["parent"])
+			print "fetching parent"
+			p = CategoryQuestion.objects.get(id=parsed["parent"])
 			if parsed["yes"]:
+				print "setting yes on parent"
 				p.set_yes(q)
+				assert p.get_yes() == q, "Yes not set correctly"
 			else:
 				p.set_no(q)
+			p.save()
 			response["parent"] = p.id
 			response["yes"] = parsed["yes"]
 
