@@ -583,7 +583,7 @@ $(document).ready(function(){
 			//containment: '.tile-board',
 			helper: 'clone',
 			start: function(event, ui){
-
+				ui.helper.find('.tile-contents').hide();
 				ui.helper.addClass('ui-draggable-dragging-no-transition');
 				ui.helper.animate({
 					'opacity':'0.5',
@@ -593,7 +593,7 @@ $(document).ready(function(){
 				});
 			},
 			stop: function(event, ui){
-				
+				ui.helper.find('.tile-contents').show();
 				var pos = grid_from_offset(ui.position);
 				dragFixup(pos.col, pos.row);
 				$(ui.helper).css({
