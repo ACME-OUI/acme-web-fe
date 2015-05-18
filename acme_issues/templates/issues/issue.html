@@ -2,11 +2,29 @@
 {% block title %}Submit an Issue{% endblock %}
 
 {% block content %}
+<style>
+	label {
+		min-width:30px;
+	}
+	.form-inline > .form-group {
+		margin: auto 10px;
+	}
+	#final_input {
+		opacity:0;
+		transition: opacity;
+	}
+</style>
 
 <div class="row">
 	<div class="col-sm-12">
-		<form id="issue_form" class="form-horizontal" action="issue/submit" method="POST">
-			<div class="form-group">
+		<h1>ACME Issue Submitter</h1>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12">
+		<form id="issue_form" action="issue/submit" method="POST">
+			{% csrf_token %}
+			<div class="form-group root_wrapper clearfix">
 				<div class="col-sm-3">
 					<label for="root_question">What's the nature of your issue?</label>
 				</div>
@@ -20,6 +38,25 @@
 				<div class="col-sm-2">
 					<button class="btn btn-primary" id="choose_root">Next</button>
 				</div>
+			</div>
+			<div id="final_input" class="form-group">
+				<div class="form-group">
+					<label for="summary">Please provide a brief summary of your issue</label>
+					<input type="text" name="summary">
+				</div>
+				<div class="form-group">
+					<!-- this is the actual question input -->
+					<label for="question_text">Please provide a detailed explanation of your problem</label>
+					<!-- enter specific info that the developers want here -->
+					<small id="text_small"></small>
+					<input type="hidden" name="category" id="category">
+					<textarea name="question_text" id="question_text" form="issue_form" class="form-control" rows="5"></textarea>
+				</div>
+				<div class="form-group">
+					<label for="email">Please enter your email address so we can let you know about progress on your issue</label>
+					<input type="email" class="form-control" name="email">
+				</div>
+				<button class="btn btn-primary" type="submit">Submit your issue</button>
 			</div>
 		</form>
 	</div>
@@ -100,26 +137,41 @@ function ajax_json(url, method, success, data, failure) {
 }
 
 function build_question(question) {
-	var base = $("<div class='form-group'><div class='col-sm-3'></div><div class='col-sm-9'></div></div>");
+	var base = $("<div class='form-group clearfix question'><div class='col-sm-3'></div><div class='form-inline col-sm-9'></div></div>");
 	base.children(".col-sm-3").append($("<label></label>").text(question.question).attr("for", "q_" + question.id));
 
-	var yes = $("<label for='" + question.id + "'>Yes</label><input class='form-control' type='radio' id='yes_" + question.id +"' name='q_" + question.id + "' value='true'>");
+	var yes = $("<div class='form-group'><label for='" + question.id + "'>Yes</label><input class='form-control' type='radio' id='yes_" + question.id +"' name='q_" + question.id + "' value='true'></div>");
 
-	var no = $("<label for='" + question.id + "'>No</label><input class='form-control' type='radio' id='no_" + question.id +"' name='q_" + question.id + "' value='false'>");
+	var no = $("<div class='form-group'><label for='" + question.id + "'>No</label><input class='form-control' type='radio' id='no_" + question.id +"' name='q_" + question.id + "' value='false'></div>");
 
 	base.children(".col-sm-9").append(yes).append(no);
 	return base;
 }
 
+function set_final_input(cat) {
+	$("#text_small").text(cat.required_info);
+	$("#category").val(cat.id);
+	$("#final_input").css("opacity", 1);
+}
+
 function fetch_next_question(q_id, yes) {
 	ajax_json("question/" + q_id + "/next", "GET", function(j){
+		if ("category" in j) {
+			set_final_input(j);
+			return;
+		}
+
 		var q = build_question(j);
+
 		q.css({"opacity": 0, "transition": "opacity"});
-		$("#issue_form").append(q);
+
+		$("#final_input").before(q);
+
 		q.find("input[type='radio']").change(function(){
-			q.nextAll().remove();
+			q.nextAll(".question").remove();
 			fetch_next_question(j.id, this.value === "true");
 		});
+
 		q.css("opacity", 1);
 	}, {"yes":yes});
 }
@@ -128,6 +180,7 @@ $("body").ready(function(){
 	$("#choose_root").click(function(e){
 		// Get current value from root select item
 		var selected = $("#root_question").val();
+		$(".root_wrapper").nextAll(".question").remove()
 		fetch_next_question(selected, true);
 		e.preventDefault();
 	});

@@ -26,11 +26,11 @@ class Command(BaseCommand):
 			repo = github.repository(user, repo)
 			labels = []
 			for label in repo.iter_labels():
-				labels.append(label)
-				if label in cat_names:
+				labels.append(label.name)
+				if label.name in cat_names:
 					continue
-				c = IssueCategory(name=label, source=source)
+				c = IssueCategory(name=label.name, source=source)
 				c.save()
 			for c in cat_names:
-				if c.name not in labels:
+				if c not in labels:
 					print source.name, "does not have label", c.name, "anymore. You should clean this up manually."

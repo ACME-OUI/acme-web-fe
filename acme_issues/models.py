@@ -1,4 +1,29 @@
 from django.db import models
+from github3 import login as gh_login
+from django.core.exceptions import ValidationError
+from django.conf import settings
+import urlparse
+
+
+def validate_acyclic_linked_source(value):
+	"""
+	Validates that the linked field on IssueSource is acyclic
+	Cycles are bad. Very bad. Infinite loop bad.
+	"""
+	try:
+		source = IssueSource.objects.get(id=value)
+		visited = set()
+		while source.linked is not None:
+			if source.id in visited:
+				break
+			visited.add(source.id)
+			source = source.linked
+		else:
+			return
+		raise ValidationError("Cycle detected at %d" % source.id)
+	except IssueSource.DoesNotExist:
+		raise ValidationError("Linked source doesn't exist")
+
 
 class IssueSource(models.Model):
 	"""
@@ -14,6 +39,57 @@ class IssueSource(models.Model):
 	source_type = models.CharField(max_length=512, unique=False, blank=False)
 	# Text asking for specific information from a user
 	required_info = models.TextField(unique=False)
+	# If an issue is made in this source, also make it in the linked source
+	linked = models.ForeignKey("IssueSource", blank=True, null=True, validators=[validate_acyclic_linked_source])
+
+	def submit_github_issue(self, category, title, description):
+		gh = gh_login(token=settings.GITHUB_KEY)
+		# Parse the base_url to get the user & repo info
+		parts = urlparse.urlparse(self.base_url)
+		path = parts.path
+
+		_, _, user, repo = path.split("/")
+		r = gh.repository(user, repo)
+		i = r.create_issue(title, description, labels=[category.name])
+		local_tracker = Issue(url=i._api, source=self)
+		local_tracker.save()
+		local_tracker.categories.add(category)
+
+		return local_tracker
+
+	def submit_issue(self, category, title, description):
+		if self.source_type == "github":
+			issue = self.submit_github_issue(category, title, description)
+		elif self.source_type == "jira":
+			raise NotImplementedError("JIRA integration not yet implemented")
+
+		if self.linked is not None:
+			linked_issue = self.linked.submit_issue(category, title, description)
+			issue.matched_issue = linked_issue
+		
+		issue.save()
+		return issue
+
+	def get_issue(self, issue):
+		if self.source_type == "github":
+			import requests
+			response = requests.get(issue.url, headers={"Authorization": "token %s" % settings.GITHUB_KEY})
+			obj = response.json()
+			return obj
+		else:
+			raise NotImplementedError("Only GitHub works right now.")
+
+	def clean(self):
+		"""
+		A safeguard against cycles
+		"""
+		l = self.linked
+		previous = self
+		while l is not None:
+			if l.id == self.id:
+				raise ValidationError("Linking from %s to %s would create a cycle; %s pointed to by %s" % (self.name, self.linked.name, self.name, previous.name))
+			previous = l
+			l = l.linked
 
 	def __str__(self):
 		return self.base_url
@@ -60,6 +136,24 @@ class CategoryQuestion(models.Model):
 		no = models.Q(no_type="question", no=self.id)
 		objects = CategoryQuestion.objects.filter(yes | no)
 		return objects
+
+	def points_to(self, source):
+		y = self.get_yes()
+		n = self.get_no()
+
+		if self.yes_type == "category":
+			if y.source.id == source.id:
+				return True
+		elif y is not None and y.points_to(source):
+			return True
+
+		if self.no_type == "category":
+			if n.source.id == source.id:
+				return True
+		elif n is not None and n.points_to(source):
+			return True
+
+		return False
 
 	def is_root(self):
 		objects = self.get_parents()
@@ -153,6 +247,19 @@ class Issue(models.Model):
 	# Tags for this issue
 	categories = models.ManyToManyField(IssueCategory)
 
+	@property
+	def name(self):
+		# Use the appropriate API to grab the name for this issue
+		api_self = self.source.get_issue(self)
+		return api_self["title"]
+
+
+	def get_all_matched(self):
+		if self.matched_issue is not None:
+			return Issue.objects.filter(matched_issue=self.matched_issue)
+		else:
+			return Issue.objects.filter(matched_issue=self)
+
 	def __str__(self):
 		return self.url
 
@@ -164,13 +271,46 @@ class Subscriber(models.Model):
 	# Send an email with a link to confirm address
 	confirmed = models.BooleanField(default=False)
 	# Used for temporary authentication; allows additional subscriptions without reauthing via email
-	token = models.CharField(max_length=32, unique=True, blank=True)
+	token = models.CharField(max_length=64, unique=True, blank=True, null=True)
 	# Used to timeout tokens
 	signed_in = models.DateTimeField(auto_now=True)
-	# Default to sending an email digest for a user, rather than individual notifications
-	digest = models.BooleanField(default=True)
 	# Every issue that this subscriber is associated with
 	subscriptions = models.ManyToManyField(Issue)
+
+	def subscribe(self, issue):
+		if self.confirmed is False and self.token is None:
+			self.confirm_email()
+			self.subscriptions.add(issue)
+		elif self.confirmed:
+			self.confirm_subscription(issue)
+
+	def confirm_email(self):
+		from uuid import uuid4
+		self.token = uuid4().hex
+		from django.core.mail import send_mail
+		send_mail("Welcome to ACME Issues!", "Please confirm your email address at <http://localhost:8000/issues/confirm?token=%s>" % self.token, "fries2@llnl.gov", [self.email])
+		self.save()
+
+	def subscriptions_token(self, issue):
+		from hashlib import sha256
+		digest = sha256()
+		digest.update(self.email)
+		for sub in self.subscriptions.all():
+			digest.update(sub.url)
+		digest.update(issue.url)
+		digest.update(settings.SECRET_KEY)
+		return digest.hexdigest()
+
+	def confirm(self):
+		self.token = None
+		self.confirmed = True
+		self.save()
+
+	def confirm_subscription(self, issue):
+		from django.core.mail import send_mail
+		self.token = self.subscriptions_token(issue)
+		send_mail("ACME Issues: Confirm issue subscription", "Please click here to confirm your subscription to the issue '%s': <http://localhost:8000/issues/confirm/subscription?token=%s&issue=%d>" % (issue.name, self.token, issue.id), "fries2@llnl.gov", [self.email])
+		self.save()
 
 	def __str__(self):
 		return self.email
