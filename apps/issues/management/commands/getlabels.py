@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 import github3 as gh
-from acme_issues.models import IssueSource, IssueCategory
+from issues.models import IssueSource, IssueCategory
 from django.conf import settings
 import urlparse
 

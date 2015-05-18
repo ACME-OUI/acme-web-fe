@@ -116,7 +116,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'south',
     'captcha',
-    'acme_issues'
+    'issues'
     # 'django.contrib.admindocs',
 )
 
