@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Submit an Issue{% endblock %}
+
+{% block content %}
+
+<div class="row">
+	<div class="col-sm-12">
+		<form id="issue_form" class="form-horizontal" action="issue/submit" method="POST">
+			<div class="form-group">
+				<div class="col-sm-3">
+					<label for="root_question">What's the nature of your issue?</label>
+				</div>
+				<div class="col-sm-7">
+					<select class="form-control" id="root_question">
+						{% for q in root_questions %}
+							<option value="{{q.id}}">{{ q.question }}</option>
+						{% endfor %}
+					</select>
+				</div>
+				<div class="col-sm-2">
+					<button class="btn btn-primary" id="choose_root">Next</button>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+
+<!--
+<div class="form-group">
+	<div class="col-sm-3">
+		<label for="q_#ID">QUESTION TEXT</label>
+	</div>
+	<div class="col-sm-9">
+		<label for="yes_#ID">Yes</label>
+		<input class="form-control" type="radio" id="yes_#ID" name="q_#ID" value="true">
+		<label for="no_#ID">No</label>
+		<input class="form-control" type="radio" id="no_#ID" name="q_#ID" value="false">
+	</div>
+</div>
+-->
+
+<script>
+function createCookie(name, value, days) {
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        var expires = "; expires=" + date.toGMTString();
+    }
+    else var expires = "";
+
+    var fixedName = '<%= Request["formName"] %>';
+    name = fixedName + name;
+
+    document.cookie = name + "=" + value + expires + "; path=/";
+}
+
+function readCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+}
+
+function eraseCookie(name) {
+    createCookie(name, "", -1);
+}
+
+function ajax_json(url, method, success, data, failure) {
+	var csrf = readCookie("csrftoken");
+	
+	headers = { "X-CSRFToken": csrf };
+	settings = {"accepts":"application/json", "contentType":"application/json"};
+
+	function json_succeed(d, status, jqXHR) {
+		var j = JSON.parse(d);
+		if (success !== undefined) {
+			success(j);
+		}
+	}
+
+	settings["success"] = json_succeed;
+	settings["method"] = method;
+	settings["headers"] = headers
+
+	if (data !== undefined) {
+		if (method !== "GET") {
+			settings["data"] = JSON.stringify(data);
+		} else {
+			settings["data"] = data;
+		}
+	}
+	if (failure !== undefined) {
+		settings["error"] = failure
+	}
+	return $.ajax(url, settings);
+}
+
+function build_question(question) {
+	var base = $("<div class='form-group'><div class='col-sm-3'></div><div class='col-sm-9'></div></div>");
+	base.children(".col-sm-3").append($("<label></label>").text(question.question).attr("for", "q_" + question.id));
+
+	var yes = $("<label for='" + question.id + "'>Yes</label><input class='form-control' type='radio' id='yes_" + question.id +"' name='q_" + question.id + "' value='true'>");
+
+	var no = $("<label for='" + question.id + "'>No</label><input class='form-control' type='radio' id='no_" + question.id +"' name='q_" + question.id + "' value='false'>");
+
+	base.children(".col-sm-9").append(yes).append(no);
+	return base;
+}
+
+function fetch_next_question(q_id, yes) {
+	ajax_json("question/" + q_id + "/next", "GET", function(j){
+		var q = build_question(j);
+		q.css({"opacity": 0, "transition": "opacity"});
+		$("#issue_form").append(q);
+		q.find("input[type='radio']").change(function(){
+			q.nextAll().remove();
+			fetch_next_question(j.id, this.value === "true");
+		});
+		q.css("opacity", 1);
+	}, {"yes":yes});
+}
+
+$("body").ready(function(){
+	$("#choose_root").click(function(e){
+		// Get current value from root select item
+		var selected = $("#root_question").val();
+		fetch_next_question(selected, true);
+		e.preventDefault();
+	});
+});
+
+</script>
+
+{% endblock %}
