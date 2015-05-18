@@ -583,7 +583,7 @@ $(document).ready(function(){
 			//containment: '.tile-board',
 			helper: 'clone',
 			start: function(event, ui){
-
+				ui.helper.find('.tile-contents').hide();
 				ui.helper.addClass('ui-draggable-dragging-no-transition');
 				ui.helper.animate({
 					'opacity':'0.5',
@@ -593,7 +593,7 @@ $(document).ready(function(){
 				});
 			},
 			stop: function(event, ui){
-				
+				ui.helper.find('.tile-contents').show();
 				var pos = grid_from_offset(ui.position);
 				dragFixup(pos.col, pos.row);
 				$(ui.helper).css({
@@ -1725,7 +1725,16 @@ Left slide menu
 	**********************************/
 	$('#drop-down-tab').click(function(e){
 		var menuHeight = parseInt($('#drop-down-menu').css('height'));
-		
+		$('.node-carousel').hide();
+		setTimeout(function(){
+			$('.node-carousel').slick({
+		      infinite: true,
+		      slidesToShow: 3,
+		      slidesToScroll: 1,
+		    });
+
+		}, 50);
+		$('.node-carousel').show();
 		if($('#drop-down-menu').css('display') == 'none'){
 			$('.tile').each(function(){
 				$(this).css({

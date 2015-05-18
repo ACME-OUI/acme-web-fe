@@ -5,8 +5,8 @@
 {% load staticfiles %} 
 
   <!-- Metro -->
-    <link rel="stylesheet" type="text/css" href="static/css/MetroJs.css">
-    <script type="text/javascript" src="static/js/MetroJs.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/MetroJs.css">
+    <script type="text/javascript" src="/static/js/MetroJs.js"></script>
 
   <!-- Custom Grid -->
     <link rel="stylesheet" type="text/css" href="static/css/grid_custom.css">
@@ -21,8 +21,8 @@
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 
   <!-- Slick Carousel -->
-    <script type="text/javascript" src="//cdn.jsdelivr.net/jquery.slick/1.5.0/slick.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/jquery.slick/1.5.0/slick.css"/>
+    <script type="text/javascript" src="static/js/slick.js"></script>
+    <link rel="stylesheet" type="text/css" href="static/css/slick.css"/>
     <link rel="stylesheet" href="static/css/slick-theme.css">
 
   <script>
@@ -30,16 +30,18 @@
 
       // $('#tabs a:first').tab('show');
       // $('#tabs a:last').tab();
-      $('.node-carousel').slick({
-        infinite: true,
-        slidesToShow: 6,
-        slidesToScroll: 1,
-      });
-      $('#drop-down-tab').click(function(){
-        $('.node-carousel').slick('slickGoTo', 1, false);
-        $('.slick-prev').appendTo('.node-carousel');
-        $('.slick-next').appendTo('.node-carousel');
-      });
+      // setTimeout(function(){
+      //     $('.node-carousel').slick({
+      //     infinite: true,
+      //     slidesToShow: 3,
+      //     slidesToScroll: 1,
+      //   });
+      // }, 500);
+      // $('#drop-down-tab').click(function(){
+      //   $('.node-carousel').slick('slickGoTo', 1, false);
+      //   $('.slick-prev').appendTo('.node-carousel');
+      //   $('.slick-next').appendTo('.node-carousel');
+      // });
 
     });
   </script>
@@ -55,7 +57,7 @@
 {% block dropmenu %}
 
 <!-- Hidden node menu-->
-<div id="drop-down-menu" style="display: none; width: 90%; height:130px; ">
+<div id="drop-down-menu" style="width: 90%; height:130px; ">
   <div class="node-carousel" style="width:90%; margin: 0 auto 0 auto;">
       {% for peer, url, name, location in nodes %}
         <div class="item-holder" style="padding-left: 10px; background-color: #1E70E3;">

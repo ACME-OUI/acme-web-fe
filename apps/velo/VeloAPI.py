@@ -14,7 +14,7 @@ class Velo:
         pass
     def start_jvm(self):
         #include the velo python API jar file here
-        jpype.startJVM(jvmPath, "-Djava.class.path=/var/www/acme-web-fe/java/VeloAPI.jar")
+        jpype.startJVM(jvmPath, "-Djava.class.path=/Users/sterling/projects/acme-web-fe/java/VeloAPI.jar")
         global velo, cms, jobConfig, fileObj, tifConstants , fileServerMap
         velo=JPackage("velo").mgr.VeloManager
         cms=JPackage("gov").pnnl.velo.model.CmsPath
