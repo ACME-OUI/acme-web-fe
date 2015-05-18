@@ -397,7 +397,12 @@ def node_search(request):
                     rs = context.search()
                     searchResponse = {}
                     searchResponse['hits'] = context.hit_count
-                    for i in range(8):
+                    if context.hit_count == 0:
+                        return HttpResponse(status=504)
+                    size = 10
+                    if context.hit_count < size:
+                        size = context.hit_count
+                    for i in range(size):
                         searchResponse[str(i)] = rs[i].json
                     return HttpResponse(json.dumps(searchResponse))
                 except Exception as e:

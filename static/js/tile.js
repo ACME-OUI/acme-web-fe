@@ -569,6 +569,10 @@ $(document).ready(function(){
 					500: function(){
 						spinner.stop();
 						alert('Unable to connect');
+					},
+					504: function(){
+						spinner.stop();
+						alert('No data found, ease search restrictions and try again');
 					}
 				}
 			});
