@@ -128,7 +128,14 @@ def check_credentials(request):
             return HttpResponse(json.dumps(response))
 
         except Exception as e:
-            print "Error checking credentials", repr(e)
+            import traceback
+            print '1', e.__doc__
+            print '2', sys.exc_info()
+            print '3', sys.exc_info()[0]
+            print '4', sys.exc_info()[1]
+            print '5', traceback.tb_lineno(sys.exc_info()[2])
+            ex_type, ex, tb = sys.exc_info()
+            print '6', traceback.print_tb(tb)
             return HttpResponse(status=500)
     else:
         return HttpResponse(status=404)
@@ -206,26 +213,40 @@ def grid(request):
     creds = Credential.objects.filter(site_user_name=request.user)
     if len(creds) != 0:
         for c in creds:
-            if c.service = 'esgf':
-                import pyesgf
-                from pyesgf import LogonManager
-                lm = LogonManager()
-                lm.logon_with_openid(c.service_user_name, c.password)
-                if lm.is_logged_on():
-                    request.session['esgf_login'] = lm
-            if c.service = 'velo':
-                lib_path = os.path.abspath(os.path.join('apps', 'velo'))
-                sys.path.append(lib_path)
-                import VeloAPI
-                
-                velo_api = VeloAPI.Velo()
-                velo_api.start_jvm()
-                res = velo_api.init('acmetest', 'acmetest')
-                request.session['velo_login'] = res
-                '''
-                For production, uncomment
-                res = velo_api.init(c.service_user_name, c.password)
-                '''
+            try:
+                if c.service == 'esgf':
+                    import pyesgf
+                    from pyesgf import LogonManager
+                    lm = LogonManager()
+                    lm.logon_with_openid(c.service_user_name, c.password)
+                    if lm.is_logged_on():
+                        request.session['esgf_login'] = lm
+                        print 'esgf log in successful'
+                if c.service == 'velo':
+                    lib_path = os.path.abspath(os.path.join('apps', 'velo'))
+                    sys.path.append(lib_path)
+                    import VeloAPI
+                    
+                    velo_api = VeloAPI.Velo()
+                    velo_api.start_jvm()
+                    res = velo_api.init('acmetest', 'acmetest')
+                    request.session['velo_login'] = res
+                    print 'velo log in successful'
+                    '''
+                    For production, uncomment
+                    res = velo_api.init(c.service_user_name, c.password)
+                    '''
+            except:
+                import traceback
+                print '1', e.__doc__
+                print '2', sys.exc_info()
+                print '3', sys.exc_info()[0]
+                print '4', sys.exc_info()[1]
+                print '5', traceback.tb_lineno(sys.exc_info()[2])
+                ex_type, ex, tb = sys.exc_info()
+                print '6', traceback.print_tb(tb)
+                return HttpResponse(status=500)
+            
     return HttpResponse(render_template(request, "web_fe/grid.html", {'nodes': node_list}))
 
 
@@ -289,7 +310,7 @@ def node_info(request):
         try:
             from xml.etree.ElementTree import parse
             
-            tree = parse('web_fe/reg_data/registration.xml')
+            tree = parse('scripts/registration.xml')
             root = tree.getroot()
             name = json.loads(request.body)['node']
             
@@ -335,7 +356,14 @@ def node_info(request):
 
                     return HttpResponse(json.dumps(response))
         except Exception as e:
-            print "Unexpected error:", repr(e)
+            import traceback
+            print '1', e.__doc__
+            print '2', sys.exc_info()
+            print '3', sys.exc_info()[0]
+            print '4', sys.exc_info()[1]
+            print '5', traceback.tb_lineno(sys.exc_info()[2])
+            ex_type, ex, tb = sys.exc_info()
+            print '6', traceback.print_tb(tb)
             return HttpResponse(status=500)
     elif request.method == 'POST':
         print "Unexpected POST request"

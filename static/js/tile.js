@@ -1725,7 +1725,16 @@ Left slide menu
 	**********************************/
 	$('#drop-down-tab').click(function(e){
 		var menuHeight = parseInt($('#drop-down-menu').css('height'));
-		
+		$('.node-carousel').hide();
+		setTimeout(function(){
+			$('.node-carousel').slick({
+		      infinite: true,
+		      slidesToShow: 3,
+		      slidesToScroll: 1,
+		    });
+
+		}, 50);
+		$('.node-carousel').show();
 		if($('#drop-down-menu').css('display') == 'none'){
 			$('.tile').each(function(){
 				$(this).css({
