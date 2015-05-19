@@ -26,6 +26,7 @@ def validate_acyclic_linked_source(value):
 
 
 class IssueSource(models.Model):
+
     """
     Used to retrieve/post issues from/to external services
 
@@ -35,12 +36,14 @@ class IssueSource(models.Model):
     name = models.CharField(max_length=512, unique=True, blank=False)
     # The base URL of the service
     base_url = models.URLField()
-    # Currently just github or jira; derive issues/creation urls from this and base
+    # Currently just github or jira; derive issues/creation urls from this and
+    # base
     source_type = models.CharField(max_length=512, unique=False, blank=False)
     # Text asking for specific information from a user
     required_info = models.TextField(unique=False)
     # If an issue is made in this source, also make it in the linked source
-    linked = models.ForeignKey("IssueSource", blank=True, null=True, validators=[validate_acyclic_linked_source])
+    linked = models.ForeignKey("IssueSource", blank=True, null=True,
+                               validators=[validate_acyclic_linked_source])
 
     def submit_github_issue(self, category, title, description):
         gh = gh_login(token=settings.GITHUB_KEY)
@@ -64,16 +67,20 @@ class IssueSource(models.Model):
             raise NotImplementedError("JIRA integration not yet implemented")
 
         if self.linked is not None:
-            linked_issue = self.linked.submit_issue(category, title, description)
+            linked_issue = self.linked.submit_issue(
+                category, title, description)
             issue.matched_issue = linked_issue
-        
+
         issue.save()
         return issue
 
     def get_issue(self, issue):
         if self.source_type == "github":
             import requests
-            response = requests.get(issue.url, headers={"Authorization": "token %s" % settings.GITHUB_KEY})
+            response = requests.get(
+                issue.url, headers={
+                    "Authorization": "token %s" % settings.GITHUB_KEY
+                })
             obj = response.json()
             return obj
         else:
@@ -87,14 +94,18 @@ class IssueSource(models.Model):
         previous = self
         while l is not None:
             if l.id == self.id:
-                raise ValidationError("Linking from %s to %s would create a cycle; %s pointed to by %s" % (self.name, self.linked.name, self.name, previous.name))
+                raise ValidationError("Linking from %s to %s would create a \
+cycle; %s pointed to by %s" % (
+                    self.name, self.linked.name, self.name, previous.name))
             previous = l
             l = l.linked
 
     def __str__(self):
         return self.base_url
 
+
 class IssueCategory(models.Model):
+
     """
     Labels for issues
     """
@@ -117,12 +128,13 @@ class IssueCategory(models.Model):
 
 
 class CategoryQuestion(models.Model):
+
     """
     Used to determine what category an issue goes into
     """
 
     question = models.CharField(max_length=512, unique=False, blank=False)
-    
+
     # Points to either another CategoryQuestion or an IssueCategory
     yes = models.IntegerField(blank=True, null=True)
     no = models.IntegerField(blank=True, null=True)
@@ -234,7 +246,9 @@ class CategoryQuestion(models.Model):
     def __str__(self):
         return self.question
 
+
 class Issue(models.Model):
+
     """
     Internal representation of an issue from an external source
     """
@@ -253,7 +267,6 @@ class Issue(models.Model):
         api_self = self.source.get_issue(self)
         return api_self["title"]
 
-
     def get_all_matched(self):
         if self.matched_issue is not None:
             return Issue.objects.filter(matched_issue=self.matched_issue)
@@ -265,14 +278,17 @@ class Issue(models.Model):
 
 from django.core.urlresolvers import reverse
 
+
 class Subscriber(models.Model):
+
     """
     Users interested in issues; requires email confirmation of account
     """
     email = models.EmailField(max_length=254, unique=True)
     # Send an email with a link to confirm address
     confirmed = models.BooleanField(default=False)
-    # Used for temporary authentication; allows additional subscriptions without reauthing via email
+    # Used for temporary authentication; allows additional subscriptions
+    # without reauthing via email
     token = models.CharField(max_length=64, unique=True, blank=True, null=True)
     # Used to timeout tokens
     signed_in = models.DateTimeField(auto_now=True)
@@ -290,7 +306,10 @@ class Subscriber(models.Model):
         from uuid import uuid4
         self.token = uuid4().hex
         from django.core.mail import send_mail
-        send_mail("Welcome to ACME Issues!", "Please confirm your email address at %s?token=%s" % (reverse("confirm_email"), self.token), "fries2@llnl.gov", [self.email])
+        send_mail("Welcome to ACME Issues!", "Please confirm your \
+email address at %s?token=%s" % (
+            reverse("confirm_email"),
+            self.token), "fries2@llnl.gov", [self.email])
         self.save()
 
     def subscriptions_token(self, issue):
@@ -311,10 +330,16 @@ class Subscriber(models.Model):
     def confirm_subscription(self, issue):
         from django.core.mail import send_mail
         self.token = self.subscriptions_token(issue)
-        send_mail("ACME Issues: Confirm issue subscription", "Please click here to confirm your subscription to the issue '%s': %s?token=%s&issue=%d>" % (issue.name, reverse("confirm_subscription"), self.token, issue.id), "fries2@llnl.gov", [self.email])
+
+        send_mail("ACME Issues: Confirm issue subscription",
+                  "Please click here to confirm your subscription to \
+the issue '%s': %s?token=%s&issue=%d>" % (
+            issue.name,
+            reverse("confirm_subscription"),
+            self.token,
+            issue.id),
+            "fries2@llnl.gov", [self.email])
         self.save()
 
     def __str__(self):
         return self.email
-
-

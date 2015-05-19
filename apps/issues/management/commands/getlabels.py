@@ -4,13 +4,15 @@ from issues.models import IssueSource, IssueCategory
 from django.conf import settings
 import urlparse
 
+
 class Command(BaseCommand):
     help = "Sync IssueCategories for all IssueSources"
 
     def handle(self, *args, **options):
         github = gh.login(token=settings.GITHUB_KEY)
 
-        gh_sources = IssueSource.objects.filter(source_type__startswith="github")
+        gh_sources = IssueSource.objects.filter(
+            source_type__startswith="github")
         for source in gh_sources:
             url = source.base_url
             parts = urlparse.urlparse(url)
@@ -33,4 +35,6 @@ class Command(BaseCommand):
                 c.save()
             for c in cat_names:
                 if c not in labels:
-                    print source.name, "does not have label", c.name, "anymore. You should clean this up manually."
+                    s = "%s does not have label %s anymore."
+                    print s % (source.name, c.name)
+                    print "You should clean this up manually."

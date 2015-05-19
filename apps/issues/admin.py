@@ -1,5 +1,12 @@
 from django.contrib import admin
-from models import IssueSource, IssueCategory, CategoryQuestion, Issue, Subscriber
+from models import (
+    IssueSource,
+    IssueCategory,
+    CategoryQuestion,
+    Issue,
+    Subscriber
+)
+
 
 # Register your models here.
 admin.site.register(IssueSource)
