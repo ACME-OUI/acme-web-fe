@@ -16,6 +16,7 @@ local_settings.py
 /js/
 /jspanel/
 /java/
+/apps/velo/VeloAPI.py
 
 static/filetree/example.py
 static/systemtest/*
