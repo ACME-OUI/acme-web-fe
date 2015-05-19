@@ -127,7 +127,7 @@ def check_credentials(request):
                                 print 'velo log in successful'
                             else:
                                 response[s] = 'fail'
-                                print 'Error in velo initialization'
+                                print 'Error in velo initialization', rm.getRepositoryUrlBase()
                             
                         if c.service == 'github':
                             import github3
