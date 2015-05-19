@@ -8,21 +8,20 @@ import time
 from jpype import *
 jvmPath=jpype.getDefaultJVMPath()
 
-
 class Velo:
     def __init__(self):
         pass
     def start_jvm(self):
         #include the velo python API jar file here
-        jpype.startJVM(jvmPath, "-Djava.class.path=/Users/sterling/projects/acme-web-fe/java/VeloAPI.jar")
-        global velo, cms, jobConfig, fileObj, tifConstants , fileServerMap
+        jpype.startJVM(jvmPath, "-Djava.class.path=/Users/baldwin32/projects/acme-web-fe/static/java/VeloAPI.jar")
+        global velo, cms, jobConfig, fileObj, tifConstants , fileServerMap, filesToDownload
         velo=JPackage("velo").mgr.VeloManager
         cms=JPackage("gov").pnnl.velo.model.CmsPath
         jobConfig = JPackage("gov").pnnl.velo.tif.model.JobConfig
         tifConstants = JPackage("gov").pnnl.velo.util.VeloTifConstants
         
         fileServerMap = jpype.java.util.HashMap()
-      
+        filesToDownload = jpype.java.util.ArrayList()
     def init_velo(self,username,password):
         global resMgr
         resMgr = velo.init(username, password)
@@ -50,7 +49,30 @@ class Velo:
         fileServerMap.put(fileObj,cmspath)
         #velo.uploadFile(location, filename , fileServerMap, None)
         resMgr.bulkUpload(fileServerMap, None)
-    def launch_job(self, acmeusername): #launch the fake job
+    def download_userhome_file(self,filename, location): # download file from velo
+        destFolder = jpype.java.io.File(location)
+        homeFolder = Velo.get_homefolder(self)
+        cmspath = homeFolder.append(filename)
+        filesToDownload.add(cmspath)                  
+        resMgr.bulkDownload(filesToDownload , destFolder);   
+    
+    def download_file(self,filepath, location): # download file from velo
+        destFolder = jpype.java.io.File(location)  
+        cmsfilepath = cms(filepath);       
+        filesToDownload.add(cmsfilepath)                  
+        resMgr.bulkDownload(filesToDownload , destFolder); 
+        print "File downloaded"  
+    def download_job_outputs(self,contextPathName,location):  # download the job outputs
+        destFolder = jpype.java.io.File(location)  
+        homeFolder = Velo.get_homefolder(self)
+        joberrfile = homeFolder.append(contextPathName).append("Outputs").append("job.err") 
+        joboutfile = homeFolder.append(contextPathName).append("Outputs").append("job.out")   
+        joboutput = homeFolder.append(contextPathName).append("Outputs").append("output.txt")  
+        filesToDownload.add(joberrfile)  
+        filesToDownload.add(joboutfile)
+        filesToDownload.add(joboutput)
+        resMgr.bulkDownload(filesToDownload , destFolder);  
+    def launch_job(self, acmeusername, location): #launch the fake job
         secMgr = Velo.get_security_manager(self)
         config = jobConfig("fake_acme_job");
         config.setCmsUser(secMgr.getUsername())
@@ -83,10 +105,28 @@ class Velo:
         con = config            
         #job_config = velo.launchJob()
         print "Fake Job submitted"
+        print "Waiting for job output files" 
+        time.sleep(60)
+        print "Job output files downloaded to ", location      
+        Velo.download_job_outputs(self,contextPathName,location)
         return job_config
+    def get_resources(self, parentPath):
+        Folder = JPackage("gov").pnnl.cat.core.resources.IFolder       
+        cmsparentPath = cms(parentPath)        
+        ress = resMgr.getChildren(cmsparentPath)
+        for resource in ress:           
+            print resource
+            if isinstance(resource, Folder):
+                Velo.get_resources(self,resource.toString())           
+    def get_homefolder_resources(self): # returns all the subfolders in users' home folder
+        folder = resMgr.getHomeFolder()
+        ress = resMgr.getChildren(folder.getPath())
+        for resource in ress:           
+            print resource
+        #Velo.get_resources(self,folder.toString())
     def get_homefolder(self): # get user's home folder
         folder = resMgr.getHomeFolder()
-        home_folder = folder.getPath();
+        home_folder = folder.getPath()
         return home_folder   
     def create_instance(self): # create tool instance in user's home folder
         velo.createToolInstance()

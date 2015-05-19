@@ -412,8 +412,13 @@ def velo(request):
             velo_api = VeloAPI.Velo()
             velo_api.start_jvm()
             barr = velo_api.init_velo("acmetest", "acmetest")
-            foo = {'0': 'success I guess'}
-            return HttpResponse(json.dumps(foo))
+            if barr.getRepositoryUrlBase() == 'u\'http://acmetest.ornl.gov:80/alfresco\'':
+                foo = {'0': 'success I guess'}
+                print 'success initializing velo connection'
+                return HttpResponse(json.dumps(foo))
+            else:
+                print 'failed connecting to velo'
+                return HttpResponse(status=500)
         except Exception as e:
             print "Error connecting to velo:", repr(e)
             return HttpResponse(status=500)
