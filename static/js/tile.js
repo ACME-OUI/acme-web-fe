@@ -163,6 +163,10 @@ $(document).ready(function(){
 				case 'velo':
 
 					if($('#velo_window').length == 0){
+
+						check_credentials('velo');
+
+
 						content = [ '<form id="velo_login">',
 									'<h2 class="form-signin-heading">Please Sign In</h2>',
 									'<label for="velo_username" class="sr-only">User name:</label>',
@@ -224,6 +228,35 @@ $(document).ready(function(){
     
     });
 
+    /* Checks with the server to see if the users has credentials for 
+     *  the requested service in the servers database
+     *
+     * service_name -> the name of the service to check credentials for
+     */
+    function check_credentials(service_name){
+    	var data = {
+    		'service': service_name
+    	};
+    	data = JSON.stringify(data);
+    	$.ajaxSetup({
+			beforeSend: function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+			}
+		});
+		$.ajax({
+			url: 'credential_check',
+			data: data,
+			type: 'POST',
+			success: function(response){
+				return true
+			},
+			statusCode:{
+				500: function(){
+					return false;
+				}
+			}
+		});
+    }
 
     /* Initializes the connection to the velo api
      *

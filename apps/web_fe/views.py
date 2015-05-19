@@ -405,6 +405,29 @@ def node_search(request):
         return HttpResponse(status=500)
 
 @login_required
+def credential_check(request):
+    if request.method == 'POST':
+        try:
+            service = json.loads(request.body)['service']
+            cred = Credential.objects.filter(user_name=request.user, service=service)
+            if len(cred) != 0:
+                return HttpResponse(status=200)
+            else:
+                return HttpResponse(status=500)
+        except:
+            import traceback
+            print '1', e.__doc__
+            print '2', sys.exc_info()
+            print '3', sys.exc_info()[0]
+            print '4', sys.exc_info()[1]
+            print '5', traceback.tb_lineno(sys.exc_info()[2])
+            ex_type, ex, tb = sys.exc_info()
+            print '6', traceback.print_tb(tb)
+            return HttpResponse(status=500)
+    else:
+        return HttpResponse(status=404)
+
+@login_required
 def velo(request):
     if request.method == 'POST':
         from velo import VeloAPI
