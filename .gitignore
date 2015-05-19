@@ -22,3 +22,8 @@ static/systemtest/*
 static/http.py
 scripts/update.py
 apps/web_fe/migrations
+update.py
+
+*.sublime-project
+*.sublime-workspace
+db
