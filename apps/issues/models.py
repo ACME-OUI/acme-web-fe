@@ -1,6 +1,7 @@
 from django.db import models
 from github3 import login as gh_login
 from django.core.exceptions import ValidationError
+from django.core.urlresolvers import reverse
 from django.conf import settings
 import urlparse
 
@@ -276,8 +277,6 @@ class Issue(models.Model):
     def __str__(self):
         return self.url
 
-from django.core.urlresolvers import reverse
-
 
 class Subscriber(models.Model):
 
@@ -331,14 +330,20 @@ email address at %s?token=%s" % (
         from django.core.mail import send_mail
         self.token = self.subscriptions_token(issue)
 
-        send_mail("ACME Issues: Confirm issue subscription",
-                  "Please click here to confirm your subscription to \
-the issue '%s': %s?token=%s&issue=%d>" % (
+        message = "Please click here to confirm your subscription to \
+the issue '%s': %s?token=%s&issue=%d>"
+
+        message %= (
             issue.name,
             reverse("confirm_subscription"),
             self.token,
-            issue.id),
-            "fries2@llnl.gov", [self.email])
+            issue.id
+        )
+
+        send_mail("ACME Issues: Confirm issue subscription",
+                  message,
+                  "fries2@llnl.gov",
+                  [self.email])
         self.save()
 
     def __str__(self):

@@ -6,6 +6,8 @@ from django.http import (
     HttpResponseNotAllowed
 )
 from django.template import RequestContext, loader
+from django.core.urlresolvers import reverse
+from templatetags.issues import render_question_tree
 from models import *
 import json
 
@@ -74,8 +76,6 @@ def make_issue(request):
 
     user.subscribe(issue)
     return HttpResponse("")
-
-from django.core.urlresolvers import reverse
 
 
 def confirm_email(request):
@@ -191,8 +191,6 @@ def show_question(request, source):
             "issues/questions.html",
             {"source": s, "root_questions": related}
         ))
-
-from templatetags.issues import render_question_tree
 
 
 @post_only
