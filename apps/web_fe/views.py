@@ -74,6 +74,7 @@ def add_credentials(request):
                 creds = Credential.objects.filter(service=s, site_user_name=str(request.user))
                 if len(creds) != 0:
                     for i in creds:
+                        print 'changing username and password to ', s, ' for ', str(request.user)
                         i.password = data[s]['password']
                         i.service_user_name = data[s]['username']
                         i.save()
@@ -94,37 +95,64 @@ def check_credentials(request):
         try:
             data = json.loads(request.body)
             response = {}
-            for s in data:
-                if s == 'esgf':
-                    import pyesgf
-                    from pyesgf.logon import LogonManager
+            creds = Credential.objects.filter(site_user_name=request.user)
+            if len(creds) != 0:
+                for c in creds:
+                    try:
+                        if c.service == 'esgf':
+                            import pyesgf
+                            from pyesgf import LogonManager
+                            lm = LogonManager()
+                            lm.logon_with_openid(c.service_user_name, c.password)
+                            if lm.is_logged_on():
+                                response[s] = 'success'
+                                print 'esgf log in successful'
+                            else:
+                                print 'esgf log in failed'
+                                response[s] = 'fail'
+                        if c.service == 'velo':
+                            lib_path = os.path.abspath(os.path.join('apps', 'velo'))
+                            sys.path.append(lib_path)
+                            import VeloAPI
+                            
+                            velo_api = VeloAPI.Velo()
+                            velo_api.start_jvm()
+                            '''
+                            For production, replace below with:
+                            rm = velo_api.init(c.service_user_name, c.password)
+                            '''
+                            rm = velo_api.init('acmetest', 'acmetest')
+                            if rm.getRepositoryUrlBase() == 'u\'http://acmetest.ornl.gov:80/alfresco\'':
+                                response[s] = 'success'
+                                print 'velo log in successful'
+                            else:
+                                response[s] = 'fail'
+                                print 'Error in velo initialization'
+                            
+                        if c.service == 'github':
+                            import github3
+                            from github3 import login
+                            gh = login(c.site_user_name, password=c.password)
+                            if gh.user() == c.site_user_name:
+                                print 'Github login successful'
+                                response[s] = 'success'
+                            else:
+                                print 'Github login failure'
+                                response[s] = 'fail'
 
-                    lm = LogonManager()
-                    lm.logon_with_openid(data[s]['username'], data[s]['password'])
-                    if lm.is_logged_on() != True:
-                        response[s] = 'failed'
-                    else:
-                        response[s] = 'success'
-                if s == 'velo':
-                    lib_path = os.path.abspath(os.path.join('apps', 'velo'))
-                    sys.path.append(lib_path)
-                    import VeloAPI
-                    
-                    velo_api = VeloAPI.Velo()
-                    velo_api.start_jvm()
-                    '''
-                    Using the test credentials for the time being, simply uncomment to 
-                    use the users credentials
-                    velo_api.init_velo(data[s]['username'], data[s]['password'])
-                    '''
-                    #res = velo_api.init_velo("acmetest", "acmetest")
-                    response[s] = 'success'
-                    '''
-                    if res.logged_on() != True:
-                        resonse[s] = 'failed'
-                    else:
-                        response[s] = 'success
-                    '''
+                        if c.service == 'jira':
+                            print 'Working on jira....'
+                    except:
+                        import traceback
+                        print '1', e.__doc__
+                        print '2', sys.exc_info()
+                        print '3', sys.exc_info()[0]
+                        print '4', sys.exc_info()[1]
+                        print '5', traceback.tb_lineno(sys.exc_info()[2])
+                        ex_type, ex, tb = sys.exc_info()
+                        print '6', traceback.print_tb(tb)
+                        return HttpResponse(status=500)
+
             return HttpResponse(json.dumps(response))
 
         except Exception as e:
@@ -209,44 +237,7 @@ def grid(request):
             if child.tag[-11:] == "GeoLocation":
                 node_location_list.append(child.attrib["city"])
     node_list = zip(node_peer_list, node_url_list, node_name_list, node_location_list)
-
-    creds = Credential.objects.filter(site_user_name=request.user)
-    if len(creds) != 0:
-        for c in creds:
-            try:
-                if c.service == 'esgf':
-                    import pyesgf
-                    from pyesgf import LogonManager
-                    lm = LogonManager()
-                    lm.logon_with_openid(c.service_user_name, c.password)
-                    if lm.is_logged_on():
-                        request.session['esgf_login'] = lm
-                        print 'esgf log in successful'
-                if c.service == 'velo':
-                    lib_path = os.path.abspath(os.path.join('apps', 'velo'))
-                    sys.path.append(lib_path)
-                    import VeloAPI
-                    
-                    velo_api = VeloAPI.Velo()
-                    velo_api.start_jvm()
-                    res = velo_api.init('acmetest', 'acmetest')
-                    request.session['velo_login'] = res
-                    print 'velo log in successful'
-                    '''
-                    For production, uncomment
-                    res = velo_api.init(c.service_user_name, c.password)
-                    '''
-            except:
-                import traceback
-                print '1', e.__doc__
-                print '2', sys.exc_info()
-                print '3', sys.exc_info()[0]
-                print '4', sys.exc_info()[1]
-                print '5', traceback.tb_lineno(sys.exc_info()[2])
-                ex_type, ex, tb = sys.exc_info()
-                print '6', traceback.print_tb(tb)
-                return HttpResponse(status=500)
-            
+        
     return HttpResponse(render_template(request, "web_fe/grid.html", {'nodes': node_list}))
 
 
