@@ -4,6 +4,7 @@ import shutil
 import os
 
 shutil.rmtree('admin')
+shutil.rmtree('java')
 shutil.rmtree('css')
 shutil.rmtree('filetree')
 shutil.rmtree('fonts')
