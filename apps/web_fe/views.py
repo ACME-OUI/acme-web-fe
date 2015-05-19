@@ -417,7 +417,7 @@ def velo(request):
                 print 'success initializing velo connection'
                 return HttpResponse(json.dumps(foo))
             else:
-                print 'failed connecting to velo'
+                print 'failed connecting to velo', barr.getRepositoryUrlBase()
                 return HttpResponse(status=500)
         except Exception as e:
             print "Error connecting to velo:", repr(e)
