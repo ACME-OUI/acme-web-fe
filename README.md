@@ -9,6 +9,8 @@ acme-site
     fork git@github.com:acme-oui/acme-web-fe.git
     git clone git@github.com:username/acme-web-fe.git
     cd acme-web-fe
+    git remote add upstream http://github.com/acme-oui/acme-web-fe.git
+    git pull upstream
 
     sudo pip install virtualenv
     virtualenv env
