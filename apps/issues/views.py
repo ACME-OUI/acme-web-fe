@@ -60,12 +60,13 @@ def make_issue(request):
 	user.subscribe(issue)
 	return HttpResponse("")
 
+from django.core.urlresolvers import reverse
 def confirm_email(request):
 	token = request.GET["token"]
 	try:
 		user = Subscriber.objects.get(token=token)
 		user.confirm()
-		return HttpResponse(render_template(request, "issues/confirmed.html", {"user":user, "remove_url":"subscriptions/remove"}))
+		return HttpResponse(render_template(request, "issues/confirmed.html", {"user":user, "remove_url":reverse(remove_subscription)}))
 	except Subscriber.DoesNotExist:
 		return HttpResponseBadRequest("Token doesn't match any known users.")
 
@@ -82,7 +83,7 @@ def confirm_subscription(request):
 			user.subscriptions.add(issue)
 			user.save()
 			# Should make this set a HTTPOnly cookie; but for now I'll be lazy.
-			return HttpResponse(render_template(request, "issues/confirmed.html", {"user":user, "issue":issue, "remove_url":"../subscriptions/remove"}))
+			return HttpResponse(render_template(request, "issues/confirmed.html", {"user":user, "issue":issue, "remove_url":reverse(remove_subscription)}))
 		else:
 			return HttpResponseBadRequest("Tokens don't match.")
 	except Subscriber.DoesNotExist:
