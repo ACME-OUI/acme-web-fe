@@ -263,6 +263,8 @@ class Issue(models.Model):
 	def __str__(self):
 		return self.url
 
+from django.core.urlresolvers import reverse
+
 class Subscriber(models.Model):
 	"""
 	Users interested in issues; requires email confirmation of account
@@ -288,7 +290,7 @@ class Subscriber(models.Model):
 		from uuid import uuid4
 		self.token = uuid4().hex
 		from django.core.mail import send_mail
-		send_mail("Welcome to ACME Issues!", "Please confirm your email address at <http://localhost:8000/issues/confirm?token=%s>" % self.token, "fries2@llnl.gov", [self.email])
+		send_mail("Welcome to ACME Issues!", "Please confirm your email address at %s?token=%s" % (reverse("confirm_email"), self.token), "fries2@llnl.gov", [self.email])
 		self.save()
 
 	def subscriptions_token(self, issue):
@@ -309,7 +311,7 @@ class Subscriber(models.Model):
 	def confirm_subscription(self, issue):
 		from django.core.mail import send_mail
 		self.token = self.subscriptions_token(issue)
-		send_mail("ACME Issues: Confirm issue subscription", "Please click here to confirm your subscription to the issue '%s': <http://localhost:8000/issues/confirm/subscription?token=%s&issue=%d>" % (issue.name, self.token, issue.id), "fries2@llnl.gov", [self.email])
+		send_mail("ACME Issues: Confirm issue subscription", "Please click here to confirm your subscription to the issue '%s': %s?token=%s&issue=%d>" % (issue.name, reverse("confirm_subscription"), self.token, issue.id), "fries2@llnl.gov", [self.email])
 		self.save()
 
 	def __str__(self):
