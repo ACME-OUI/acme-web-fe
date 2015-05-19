@@ -101,7 +101,7 @@ def check_credentials(request):
                     try:
                         if c.service == 'esgf':
                             import pyesgf
-                            from pyesgf import LogonManager
+                            from pyesgf.logon import LogonManager
                             lm = LogonManager()
                             lm.logon_with_openid(c.service_user_name, c.password)
                             if lm.is_logged_on():
