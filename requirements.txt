@@ -10,6 +10,4 @@ simplejson==3.6.5
 uritemplate.py==0.3.0
 wsgiref==0.1.2
 xmltodict==0.9.2
-esgf-pyclient
-requests
 MyProxyClient
