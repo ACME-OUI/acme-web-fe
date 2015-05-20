@@ -164,10 +164,14 @@ $(document).ready(function(){
 
 					if($('#velo_window').length == 0){
 
-						check_credentials('velo');
-
-
-						content = [ '<form id="velo_login">',
+						if( check_credentials('velo') ){
+							content = [	'<div id="velo-file-tree">',
+										'</div>',
+										'<div id="velo-text-edit"',
+										'</div>'
+							].join('');
+						} else {
+							content = [ '<form id="velo_login">',
 									'<h2 class="form-signin-heading">Please Sign In</h2>',
 									'<label for="velo_username" class="sr-only">User name:</label>',
 									'<input type="text" id="velo_username" name="velo_username" class="form-control" placeholder="User Name">',
@@ -175,7 +179,8 @@ $(document).ready(function(){
 						 			'<input type="text" id="velo_username" name="velo_password" class="form-control" placeholder="Password">',
 						 			'<a onclick="submit-velo-user()"  href="javascript:void(0);"><button class="btn btn-success">Submit</button></a>'
 
-						].join('');
+							].join('');
+						}
 					}
 					break;
 
@@ -244,7 +249,7 @@ $(document).ready(function(){
 			}
 		});
 		$.ajax({
-			url: 'credential_check',
+			url: 'credential_check_existance',
 			data: data,
 			type: 'POST',
 			success: function(response){

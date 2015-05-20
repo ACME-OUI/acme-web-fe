@@ -436,7 +436,7 @@ def node_search(request):
 
 
 @login_required
-def credential_check(request):
+def credential_check_existance(request):
     if request.method == 'POST':
         try:
             service = json.loads(request.body)['service']

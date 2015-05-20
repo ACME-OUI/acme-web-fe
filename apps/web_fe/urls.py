@@ -12,6 +12,7 @@ urlpatterns = patterns('',
                        url(r'^register/?$', views.register, name='register'),
                        url(r'^workflow/?$', views.workflow),
                        url(r'^grid/?$', views.grid, name='grid'),
+                       url(r'^credential_check_existance', view.credential_check_existance),
 
                        url(r'^save_layout/', views.save_layout,
                            name='save_layout'),
