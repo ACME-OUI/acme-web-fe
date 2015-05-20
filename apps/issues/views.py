@@ -1,10 +1,20 @@
 from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotAllowed
+from django.http import (
+    HttpResponse,
+    HttpResponseRedirect,
+    HttpResponseBadRequest,
+    HttpResponseNotAllowed
+)
 from django.template import RequestContext, loader
+from django.core.urlresolvers import reverse
+from templatetags.issues import render_question_tree
 from models import *
 import json
 
-# Decorator that passes parsed HTTP body as a kwarg (json_data=) if it's present
+# Decorator that passes parsed HTTP body as a kwarg (json_data=) if it's
+# present
+
+
 def expects_json(f):
     def wrapper(request, *args, **kwargs):
         if request.META.get("CONTENT_TYPE", None) == "application/json":
@@ -14,6 +24,7 @@ def expects_json(f):
         return f(request, *args, **kwargs)
     return wrapper
 
+
 def post_only(f):
     def wrapper(request, *args, **kwargs):
         if request.method != "POST":
@@ -22,21 +33,27 @@ def post_only(f):
             return f(request, *args, **kwargs)
     return wrapper
 
+
 def str_response(f):
     def wrapper(*args, **kwargs):
         return HttpResponse(f(*args, **kwargs))
     return wrapper
 
-##### General
+# General
+
+
 def render_template(request, template, context):
     template = loader.get_template(template)
     context = RequestContext(request, context)
     return template.render(context)
 
+
 def issue_form(request):
     questions = CategoryQuestion.objects.all()
     roots = [q for q in questions if q.is_root()]
-    return HttpResponse(render_template(request, "issues/issue.html", {"root_questions":roots}))
+    return HttpResponse(render_template(request, "issues/issue.html",
+                        {"root_questions": roots}))
+
 
 @post_only
 def make_issue(request):
@@ -60,15 +77,19 @@ def make_issue(request):
     user.subscribe(issue)
     return HttpResponse("")
 
-from django.core.urlresolvers import reverse
+
 def confirm_email(request):
     token = request.GET["token"]
     try:
         user = Subscriber.objects.get(token=token)
         user.confirm()
-        return HttpResponse(render_template(request, "issues/confirmed.html", {"user":user, "remove_url":reverse(remove_subscription)}))
+        return HttpResponse(render_template(request, "issues/confirmed.html", {
+            "user": user,
+            "remove_url": reverse(remove_subscription)
+        }))
     except Subscriber.DoesNotExist:
         return HttpResponseBadRequest("Token doesn't match any known users.")
+
 
 def confirm_subscription(request):
     token = request.GET["token"]
@@ -83,13 +104,27 @@ def confirm_subscription(request):
             user.subscriptions.add(issue)
             user.save()
             # Should make this set a HTTPOnly cookie; but for now I'll be lazy.
-            return HttpResponse(render_template(request, "issues/confirmed.html", {"user":user, "issue":issue, "remove_url":reverse(remove_subscription)}))
+            return HttpResponse(
+                render_template(request,
+                                "issues/confirmed.html", {
+                                    "user": user,
+                                    "issue": issue,
+                                    "remove_url": reverse(remove_subscription)
+                                }))
+
         else:
             return HttpResponseBadRequest("Tokens don't match.")
     except Subscriber.DoesNotExist:
         return HttpResponseBadRequest("Token doesn't match any known users")
     except Issue.DoesNotExist:
         return HttpResponseBadRequest("Issue doesn't match any known issues")
+
+
+def json_error(message):
+    return HttpResponseBadRequest(
+        json.dumps({"reason": message})
+    )
+
 
 @post_only
 @expects_json
@@ -101,12 +136,13 @@ def remove_subscription(request, json_data=None):
             if sub.id == json_data["subscription"]:
                 break
         else:
-            return HttpResponseBadRequest(json.dumps({"reason":"No matching subscription found."}))
+            return json_error("No matching subscription found.")
         user.subscriptions.remove(sub)
         user.save()
         return HttpResponse(json.dumps({"id": json_data["subscription"]}))
     except Subscriber.DoesNotExist:
-        return HttpResponseBadRequest(json.dumps({"reason":"No matching user found."}))
+        return json_error("No matching user found.")
+
 
 def get_next(request, id):
     try:
@@ -123,9 +159,9 @@ def get_next(request, id):
             q = q.get_yes()
         else:
             q = q.get_no()
-        
+
         data = {"id": q.id}
-        
+
         if type(q) == CategoryQuestion:
             data["question"] = q.question
         else:
@@ -135,9 +171,11 @@ def get_next(request, id):
         return HttpResponse(json.dumps(data))
 
     except CategoryQuestion.DoesNotExist:
-        return HttpResponseBadRequest(json.dumps({"reason":"Question %d does not exist" % id}))
+        return json_error("Question %d does not exist" % id)
     except AttributeError:
-        return HttpResponseBadRequest(json.dumps({"reason":"Question %d has no %s value" % (int(id), "yes" if request.GET["yes"] else "no")}))
+        yesno = "yes" if request.GET["yes"] else "no"
+        return json_error("Question %d has no %s value" % (int(id), yesno))
+
 
 def show_question(request, source):
     s = IssueSource.objects.get(name__iexact=source)
@@ -147,9 +185,13 @@ def show_question(request, source):
     for q in questions:
         if q.points_to(s):
             related.append(q)
-    return HttpResponse(render_template(request, "issues/questions.html", {"source":s, "root_questions":related}))
+    return HttpResponse(
+        render_template(
+            request,
+            "issues/questions.html",
+            {"source": s, "root_questions": related}
+        ))
 
-from templatetags.issues import render_question_tree
 
 @post_only
 def edit_question(request, id):
@@ -157,43 +199,52 @@ def edit_question(request, id):
         q = CategoryQuestion.objects.get(id=id)
 
         data = json.loads(request.body)
-        
+
         if data["name"] is None:
             c = None
         else:
-            c = IssueCategory.objects.get(name=data["name"], source__name=data["source"])
+            c = IssueCategory.objects.get(
+                name=data["name"], source__name=data["source"])
 
         if data["yes"]:
             q.set_yes(c)
         else:
             q.set_no(c)
         q.save()
-
-        return HttpResponse(json.dumps({"id":id, "yes":data["yes"], "html":render_question_tree(c)}))
+        response = {
+            "id": id,
+            "yes": data["yes"],
+            "html": render_question_tree(c)
+        }
+        return HttpResponse(json.dumps(response))
     except CategoryQuestion.DoesNotExist:
-        return HttpResponseBadRequest(json.dumps({"reason":"Question #%d does not exist" % id}))
+        return json_error("Question #%d does not exist" % id)
     except IssueCategory.DoesNotExist:
-        return HttpResponseBadRequest(json.dumps({"reason":"Category %s of source %s does not exist " % (data['name'], data["source"])}))
+        return json_error("Category %s of source %s does not exist " %
+                          (data['name'], data["source"]))
+
 
 @post_only
 def delete_question(request, id):
     try:
         c = CategoryQuestion.objects.get(id=id)
         c.delete_chain()
-        return HttpResponse(json.dumps({"id":id, "html":render_question_tree(None)}))
+        response = {"id": id, "html": render_question_tree(None)}
+        return HttpResponse(json.dumps(response))
     except CategoryQuestion.DoesNotExist:
-        return HttpResponseBadRequest(json.dumps({"reason":"Question #%d does not exist" % id}))
+        return json_error("Question #%d does not exist" % id)
+
 
 @post_only
 def create_question(request):
     data = request.body
     parsed = json.loads(data)
     if "text" not in parsed:
-        return HttpResponseBadRequest(json.dumps({"reason":"No text provided for question"}))
+        return json_error("No text provided for question")
     text = parsed["text"]
     q = CategoryQuestion(question=text)
     q.save()
-    
+
     response = {
         "id": q.id,
         "question": q.question,
