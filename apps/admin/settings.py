@@ -1,6 +1,8 @@
-# Django settings for admin project.
 import os.path
 from local_settings import *
+from django.contrib.messages import constants as message_constants
+
+# Django settings for admin project.
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -151,8 +153,6 @@ LOGGING = {
 }
 
 LOGIN_URL = "/acme/login"
-
-from django.contrib.messages import constants as message_constants
 
 MESSAGE_TAGS = {
     message_constants.DEBUG: 'alert-debug',
