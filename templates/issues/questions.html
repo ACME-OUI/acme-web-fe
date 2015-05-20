@@ -192,7 +192,7 @@ $("body").ready(function(){
 		var li = el.parent().parent();
 		var yes = li.hasClass("yes");
 		var q = li.parent().parent();
-		ajax_json("edit/" + q.attr("data-id"), "POST", function(j) {
+		ajax_json("category/" + q.attr("data-id"), "POST", function(j) {
 			li.empty();
 			var newel = $(j.html);
 			prep_input(newel);
@@ -226,7 +226,7 @@ $("body").ready(function(){
 		for (var i = 0; i < category_names.length; i++) {
 			if (category_names[i] === t.val()) {
 				// This is a category, not a question
-				ajax_json("edit/" + question.attr("data-id"), "POST", add_category, {"name":t.val(), "yes":yes, "source":source});
+				ajax_json("category/" + question.attr("data-id"), "POST", add_category, {"name":t.val(), "yes":yes, "source":source});
 				return;
 			}
 		}

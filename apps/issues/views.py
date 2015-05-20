@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 from django.http import (
     HttpResponse,
     HttpResponseRedirect,
@@ -9,13 +10,54 @@ from django.template import RequestContext, loader
 from django.core.urlresolvers import reverse
 from templatetags.issues import render_question_tree
 from models import *
+from django.core.exceptions import PermissionDenied
 import json
 
-# Decorator that passes parsed HTTP body as a kwarg (json_data=) if it's
-# present
+
+# Convenience functions / decorators
+def can_add(f):
+    """
+    Decorator that makes sure users have the "add" permission
+    """
+    @login_required
+    def wrapper(request, *args, **kwargs):
+        if request.user.has_add_permission() is False:
+            raise PermissionDenied
+        else:
+            return f(request, *args, **kwargs)
+    return wrapper
+
+
+def can_edit(f):
+    """
+    Decorator that makes sure users have the "change" permission
+    """
+    @login_required
+    def wrapper(request, *args, **kwargs):
+        if request.user.has_change_permission() is False:
+            raise PermissionDenied
+        else:
+            return f(request, *args, **kwargs)
+    return wrapper
+
+
+def can_remove(f):
+    """
+    Decorator that makes sure users have the "delete" permission
+    """
+    @login_required
+    def wrapper(request, *args, **kwargs):
+        if request.user.has_delete_permission() is False:
+            raise PermissionDenied
+        else:
+            return f(request, *args, **kwargs)
+    return wrapper
 
 
 def expects_json(f):
+    """
+    Decorator that parses HTTP body and passes it in as a kwarg (json_data=)
+    """
     def wrapper(request, *args, **kwargs):
         if request.META.get("CONTENT_TYPE", None) == "application/json":
             data = request.body
@@ -25,7 +67,22 @@ def expects_json(f):
     return wrapper
 
 
+def json_error(message):
+    """
+    Convenience function for error messages on AJAX
+    """
+    return HttpResponseBadRequest(
+        json.dumps({"reason": message})
+    )
+
+
 def post_only(f):
+    """
+    Decorator that ensures access to an endpoint is only with POST
+    Since POST is used to create/delete/update data, anything
+    that is POST only should be login_required.
+    """
+    @login_required
     def wrapper(request, *args, **kwargs):
         if request.method != "POST":
             return HttpResponseNotAllowed(["POST"])
@@ -34,21 +91,22 @@ def post_only(f):
     return wrapper
 
 
-def str_response(f):
-    def wrapper(*args, **kwargs):
-        return HttpResponse(f(*args, **kwargs))
-    return wrapper
-
-# General
-
-
 def render_template(request, template, context):
+    """
+    Convenience function for automating template rendering
+    Should be extracted into something we all can use...
+    """
     template = loader.get_template(template)
     context = RequestContext(request, context)
     return template.render(context)
 
 
+# Actual views
+@login_required
 def issue_form(request):
+    """
+    Renders the form for submitting new issues
+    """
     questions = CategoryQuestion.objects.all()
     roots = [q for q in questions if q.is_root()]
     return HttpResponse(render_template(request, "issues/issue.html",
@@ -78,6 +136,24 @@ def make_issue(request):
     return HttpResponse("")
 
 
+@post_only
+@expects_json
+def remove_subscription(request, json_data=None):
+    try:
+        user = Subscriber.objects.get(id=json_data["user"])
+        for sub in user.subscriptions.all():
+            if sub.id == json_data["subscription"]:
+                break
+        else:
+            return json_error("No matching subscription found.")
+        user.subscriptions.remove(sub)
+        user.save()
+        return HttpResponse(json.dumps({"id": json_data["subscription"]}))
+    except Subscriber.DoesNotExist:
+        return json_error("No matching user found.")
+
+
+@login_required
 def confirm_email(request):
     token = request.GET["token"]
     try:
@@ -91,6 +167,7 @@ def confirm_email(request):
         return HttpResponseBadRequest("Token doesn't match any known users.")
 
 
+@login_required
 def confirm_subscription(request):
     token = request.GET["token"]
     issue_id = request.GET["issue"]
@@ -120,37 +197,17 @@ def confirm_subscription(request):
         return HttpResponseBadRequest("Issue doesn't match any known issues")
 
 
-def json_error(message):
-    return HttpResponseBadRequest(
-        json.dumps({"reason": message})
-    )
-
-
-@post_only
-@expects_json
-def remove_subscription(request, json_data=None):
-    # NEEDS TO BE SECURED
-    try:
-        user = Subscriber.objects.get(id=json_data["user"])
-        for sub in user.subscriptions.all():
-            if sub.id == json_data["subscription"]:
-                break
-        else:
-            return json_error("No matching subscription found.")
-        user.subscriptions.remove(sub)
-        user.save()
-        return HttpResponse(json.dumps({"id": json_data["subscription"]}))
-    except Subscriber.DoesNotExist:
-        return json_error("No matching user found.")
-
-
 def get_next(request, id):
+    """
+    Fetches the next question in the sequence,
+    based on the "yes" parameter in the query string
+    and the ID of the current question.
+    """
     try:
         q = CategoryQuestion.objects.get(id=id)
         data = request.GET
 
         if "yes" not in data:
-            print "defaulting to true"
             yes = True
         else:
             yes = data["yes"] == "true"
@@ -177,7 +234,14 @@ def get_next(request, id):
         return json_error("Question %d has no %s value" % (int(id), yesno))
 
 
+@can_add
 def show_question(request, source):
+    """
+    Displays the question-builder
+    """
+    if request.user.has_add_permission() is False:
+        raise PermissionDenied
+
     s = IssueSource.objects.get(name__iexact=source)
     # Root question of every group of categories has no "no" value.
     questions = CategoryQuestion.objects.filter(no=None)
@@ -194,7 +258,8 @@ def show_question(request, source):
 
 
 @post_only
-def edit_question(request, id):
+@can_edit
+def add_category_to_question(request, id):
     try:
         q = CategoryQuestion.objects.get(id=id)
 
@@ -225,6 +290,7 @@ def edit_question(request, id):
 
 
 @post_only
+@can_remove
 def delete_question(request, id):
     try:
         c = CategoryQuestion.objects.get(id=id)
@@ -236,6 +302,7 @@ def delete_question(request, id):
 
 
 @post_only
+@can_add
 def create_question(request):
     data = request.body
     parsed = json.loads(data)
