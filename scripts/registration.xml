@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Registration xmlns="http://www.esgf.org/registry" timeStamp="1431937675544" version="v0.0.1">
+<Registration xmlns="http://www.esgf.org/registry" timeStamp="1431989052071" version="v0.0.1">
     <Node organization="cnrm-game-meteo" namespace="fr.cnrm-game-meteo" nodePeerGroup="esgf-prod" supportEmail="esgf@cnrm-game-meteo.fr" hostname="esg.cnrm-game-meteo.fr" ip="193.49.97.164" shortName="cnrm-game-meteo" longName="esg data for french meteorological office" timeStamp="1431828299234" version="v1.8.1" release="Griffin" nodeType="4" adminPeer="pcmdi9.llnl.gov" defaultPeer="pcmdi9.llnl.gov">
         <CA hash="dunno" endpoint="esg.cnrm-game-meteo.fr" dn="dunno"/>
         <GeoLocation lat="43.575292" lon="1.374657" city="Toulouse"/>
@@ -316,6 +316,80 @@ g9qsCH0XouCbNJbso7aYGQIDAQABoxUwEzARBglghkgBhvhCAQEEBAMCBPAwDQYJ
 KoZIhvcNAQEFBQADgYEAowW+JGpR+U15RephXB+Pmb7xlkW8aqBMMCs+pXD4fOsj
 BzaOIrvnES2kiErOFFG8/gzsAXv5df+pTg0aMe7ADAT/nB5rd6mjxPukZuCKEWC6
 lLpv2P11XKd7Udj7LOuTXuoadCOekGNmqUr6v33+wzp7K5K3cQmLNImox9+4F74=
+-----END CERTIFICATE-----
+</Cert>
+        </PEMCert>
+    </Node>
+    <Node organization="IPSL" namespace="fr.polytechnique.ipsl" nodePeerGroup="esgf-prod" supportEmail="ClimServ@ipsl.polytechnique.fr" hostname="vesg.ipsl.polytechnique.fr" ip="129.104.53.4" dn="/O=ESGF/OU=ESGF.ORG/CN=vesg.ipsl.polytechnique.fr" shortName="IPSL-X_ESGF_Data_Node" longName="IPSL ESGF Data Node hosted by Ecole Polytechnique" timeStamp="1431989050075" version="v1.8.1" release="Griffin" nodeType="36" adminPeer="esgf-node.ipsl.fr" defaultPeer="pcmdi9.llnl.gov">
+        <CA hash="dunno" endpoint="vesg.ipsl.polytechnique.fr" dn="dunno"/>
+        <GeoLocation lat="48.716702" lon="2.250000" city="Palaiseau"/>
+        <NodeManager endpoint="https://vesg.ipsl.polytechnique.fr/esgf-node-manager/node"/>
+        <AuthorizationService endpoint="https://vesg.ipsl.polytechnique.fr/esg-orp/saml/soap/secure/authorizationService.htm"/>
+        <ThreddsService endpoint="http://vesg.ipsl.polytechnique.fr/thredds"/>
+        <GridFTPService endpoint="gsiftp://vesg.ipsl.polytechnique.fr">
+            <Configuration serviceType="Replication" port="2812"/>
+            <Configuration serviceType="Download" port="2811"/>
+        </GridFTPService>
+        <LASService endpoint="http://vesg.ipsl.polytechnique.fr/las"/>
+        <RelyingPartyService endpoint="https://vesg.ipsl.polytechnique.fr/esg-orp/html.htm"/>
+        <PEMCert>
+            <Cert>Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 14156 (0x374c)
+        Signature Algorithm: sha1WithRSAEncryption
+        Issuer: O=Grid, OU=GlobusTest, OU=simpleCA-esgf-node.ipsl.fr, CN=Globus Simple CA
+        Validity
+            Not Before: Sep 23 13:12:12 2014 GMT
+            Not After : Sep 23 13:12:12 2015 GMT
+        Subject: O=Grid, OU=GlobusTest, OU=simpleCA-esgf-node.ipsl.fr, CN=vesg.ipsl.polytechnique.fr
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (1024 bit)
+                Modulus (1024 bit):
+                    00:bf:3e:00:e7:f4:6a:9f:f6:af:69:82:08:2c:fd:
+                    79:dc:3f:72:d2:fe:20:2f:70:43:e0:24:c2:d7:e1:
+                    45:d9:1b:70:1d:21:b3:12:6a:da:7c:ad:b9:92:7e:
+                    a4:85:63:b4:cc:c8:d8:05:65:ba:74:3d:dd:2a:df:
+                    67:ed:03:40:d8:27:89:ca:c3:cd:7a:65:86:31:7b:
+                    18:4a:4d:b5:b3:ec:4d:c8:ac:3e:85:e9:38:0b:38:
+                    39:58:59:96:8f:ed:28:4a:5c:52:fe:cc:ad:43:1f:
+                    7a:57:7d:10:51:47:45:37:06:e5:8b:35:8d:0b:21:
+                    01:1b:94:3b:c9:5a:d7:fb:d1
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            Netscape Cert Type: 
+                SSL Client, SSL Server, S/MIME, Object Signing
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            X509v3 Key Usage: 
+                Digital Signature, Non Repudiation, Key Encipherment
+            X509v3 Subject Alternative Name: 
+                email:noc@example.com
+    Signature Algorithm: sha1WithRSAEncryption
+        99:2c:b3:ec:07:21:45:2f:9b:0f:67:38:38:67:70:91:d9:1d:
+        37:7b:d3:c3:93:dd:c3:1c:ed:52:96:4f:6f:f7:71:f0:9e:e5:
+        28:07:e9:aa:0f:bb:c2:7a:7e:5c:61:0c:15:c8:ca:5a:e6:88:
+        4c:d5:60:c1:88:15:c8:82:3c:bd:b2:af:7c:c6:4e:5f:b7:83:
+        15:ad:49:67:22:e7:a1:1c:f6:e4:18:69:29:d3:2e:f0:cf:fe:
+        90:2f:e7:d0:08:fd:b7:f4:8a:a2:35:ec:69:6e:c9:7f:83:75:
+        9d:c7:6f:35:c2:c8:11:4e:59:85:80:69:b9:79:e0:c2:25:ab:
+        70:cc
+-----BEGIN CERTIFICATE-----
+MIICkjCCAfugAwIBAgICN0wwDQYJKoZIhvcNAQEFBQAwZDENMAsGA1UEChMER3Jp
+ZDETMBEGA1UECxMKR2xvYnVzVGVzdDEjMCEGA1UECxMac2ltcGxlQ0EtZXNnZi1u
+b2RlLmlwc2wuZnIxGTAXBgNVBAMTEEdsb2J1cyBTaW1wbGUgQ0EwHhcNMTQwOTIz
+MTMxMjEyWhcNMTUwOTIzMTMxMjEyWjBuMQ0wCwYDVQQKEwRHcmlkMRMwEQYDVQQL
+EwpHbG9idXNUZXN0MSMwIQYDVQQLExpzaW1wbGVDQS1lc2dmLW5vZGUuaXBzbC5m
+cjEjMCEGA1UEAxMadmVzZy5pcHNsLnBvbHl0ZWNobmlxdWUuZnIwgZ8wDQYJKoZI
+hvcNAQEBBQADgY0AMIGJAoGBAL8+AOf0ap/2r2mCCCz9edw/ctL+IC9wQ+Akwtfh
+RdkbcB0hsxJq2nytuZJ+pIVjtMzI2AVlunQ93SrfZ+0DQNgnicrDzXplhjF7GEpN
+tbPsTcisPoXpOAs4OVhZlo/tKEpcUv7MrUMfeld9EFFHRTcG5Ys1jQshARuUO8la
+1/vRAgMBAAGjSTBHMBEGCWCGSAGG+EIBAQQEAwIE8DAJBgNVHRMEAjAAMAsGA1Ud
+DwQEAwIF4DAaBgNVHREEEzARgQ9ub2NAZXhhbXBsZS5jb20wDQYJKoZIhvcNAQEF
+BQADgYEAmSyz7AchRS+bD2c4OGdwkdkdN3vTw5PdwxztUpZPb/dx8J7lKAfpqg+7
+wnp+XGEMFcjKWuaITNVgwYgVyII8vbKvfMZOX7eDFa1JZyLnoRz25BhpKdMu8M/+
+kC/n0Aj9t/SKojXsaW7Jf4N1ncdvNcLIEU5ZhYBpuXngwiWrcMw=
 -----END CERTIFICATE-----
 </Cert>
         </PEMCert>

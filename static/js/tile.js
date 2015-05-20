@@ -163,6 +163,10 @@ $(document).ready(function(){
 				case 'velo':
 
 					if($('#velo_window').length == 0){
+
+						check_credentials('velo');
+
+
 						content = [ '<form id="velo_login">',
 									'<h2 class="form-signin-heading">Please Sign In</h2>',
 									'<label for="velo_username" class="sr-only">User name:</label>',
@@ -224,9 +228,44 @@ $(document).ready(function(){
     
     });
 
+    /* Checks with the server to see if the users has credentials for 
+     *  the requested service in the servers database
+     *
+     * service_name -> the name of the service to check credentials for
+     */
+    function check_credentials(service_name){
+    	var data = {
+    		'service': service_name
+    	};
+    	data = JSON.stringify(data);
+    	$.ajaxSetup({
+			beforeSend: function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+			}
+		});
+		$.ajax({
+			url: 'credential_check',
+			data: data,
+			type: 'POST',
+			success: function(response){
+				return true
+			},
+			statusCode:{
+				500: function(){
+					return false;
+				}
+			}
+		});
+    }
+
+    /* Initializes the connection to the velo api
+     *
+     *
+     *
+     */
     function initVeloConnection(){
     	$.getScript("static/js/spin.js", function(){
-    		if(mode = 'night'){
+    		if(mode == 'night'){
 				var color = '#fff';
 			} else {
 				color = '#000';
@@ -278,9 +317,15 @@ $(document).ready(function(){
     	});
     }
 
+
+    /* populates additional node info by querying the server 
+     * 
+     * id -> the name of the node to fetch information for
+     *
+     */
     function populateNodeSelect(id){
 		$.getScript("static/js/spin.js", function(){
-			if(mode = 'night'){
+			if(mode == 'night'){
 				var color = '#fff';
 			} else {
 				color = '#000';
@@ -309,10 +354,9 @@ $(document).ready(function(){
 	    		node: id
 	    	}
 	    	data = JSON.stringify(data);
-	    	var csrfToken = getCookie('csrftoken');
 			$.ajaxSetup({
 				beforeSend: function(xhr){
-					xhr.setRequestHeader('X-CSRFToken', csrfToken);
+					xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
 				}
 			});
 	    	$.ajax({
@@ -358,13 +402,20 @@ $(document).ready(function(){
 				}
 			});
 		});
-    	
-
     }
 
+    /* Creates the window for searching a node for its data
+     * 
+     * hostname -> the hostname of the node to search
+     *
+     */
     function nodeSearch(hostname){
     	$.getScript("static/js/spin.js", function(){
-    		
+    		if(mode == 'night'){
+				var color = '#fff';
+			} else {
+				color = '#000';
+			}
     		if($('#nodeSearch_window').length != 0){
 	    		$('#nodeSearch_window').find('.tile-contents').empty();
 	    	} else {
@@ -372,11 +423,6 @@ $(document).ready(function(){
 	    		add_tile(new_tile, "nodeSearch_window");
 	    	}
 	    	var searchWindow = $('#nodeSearch_window').find('.tile-contents');
-	    	if(mode = 'night'){
-				var color = '#fff';
-			} else {
-				color = '#000';
-			}
 	    	var opts = {
 				lines: 17, // The number of lines to draw
 				length: 40, // The length of each line
@@ -472,7 +518,7 @@ $(document).ready(function(){
 
     function esgfSearch(searchTerms,hostname){
     	$.getScript("static/js/spin.js", function(){
-    		if(mode = 'night'){
+    		if(mode == 'night'){
 				var color = '#fff';
 			} else {
 				color = '#000';
@@ -556,6 +602,10 @@ $(document).ready(function(){
 					500: function(){
 						spinner.stop();
 						alert('Unable to connect');
+					},
+					504: function(){
+						spinner.stop();
+						alert('No data found, ease search restrictions and try again');
 					}
 				}
 			});
@@ -1674,6 +1724,7 @@ Left slide menu
 	}
 
 	function setNight(){
+		mode = 'night'
 		$('body').attr({
 			'class':'night'
 		});
@@ -1692,6 +1743,7 @@ Left slide menu
 	}
 
 	function setDay(){
+		mode = 'day'
 		$('body').attr({
 			'class':'day'
 		});

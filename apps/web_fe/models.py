@@ -12,6 +12,7 @@ class TileLayout(models.Model):
 
 class Credential(models.Model):
     site_user_name = models.CharField(max_length=100, default='default_user')
-    service_user_name = models.CharField(max_length=100, default='default_user')
+    service_user_name = models.CharField(
+        max_length=100, default='default_user')
     password = models.CharField(max_length=100)
     service = models.CharField(max_length=100)
