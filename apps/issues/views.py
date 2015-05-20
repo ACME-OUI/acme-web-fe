@@ -15,43 +15,58 @@ import json
 
 
 # Convenience functions / decorators
-def can_add(f):
+def can_add(*models):
     """
-    Decorator that makes sure users have the "add" permission
+    Decorator that makes sure users have the "add" permission for the specified models
     """
-    @login_required
-    def wrapper(request, *args, **kwargs):
-        if request.user.has_add_permission() is False:
-            raise PermissionDenied
-        else:
+    def deco(f):
+        """
+        To take arguments in a decorator, we have to wrap it again
+        """
+        @login_required
+        def wrapper(request, *args, **kwargs):
+            for m in models:
+                if request.user.has_perm("issues.add_%s" % m) is False:
+                    raise PermissionDenied
             return f(request, *args, **kwargs)
-    return wrapper
+        return wrapper
+    return deco
 
 
-def can_edit(f):
+def can_edit(*models):
     """
-    Decorator that makes sure users have the "change" permission
+    Decorator that makes sure users have the "change" permission for the specified models
     """
-    @login_required
-    def wrapper(request, *args, **kwargs):
-        if request.user.has_change_permission() is False:
-            raise PermissionDenied
-        else:
+    def deco(f):
+        """
+        To take arguments in a decorator, we have to wrap it again
+        """
+        @login_required
+        def wrapper(request, *args, **kwargs):
+            for m in models:
+                if request.user.has_perm("issues.change_%s" % m) is False:
+                    raise PermissionDenied
             return f(request, *args, **kwargs)
-    return wrapper
+        return wrapper
+    return deco
 
 
-def can_remove(f):
+def can_remove(*models):
     """
-    Decorator that makes sure users have the "delete" permission
+    Decorator that makes sure users have the "delete" permission for the specified models
     """
-    @login_required
-    def wrapper(request, *args, **kwargs):
-        if request.user.has_delete_permission() is False:
-            raise PermissionDenied
-        else:
+    def deco(f):
+        """
+        To take arguments in a decorator, we have to wrap it again
+        """
+        @login_required
+        def wrapper(request, *args, **kwargs):
+            for m in models:
+                if request.user.has_perm("issues.delete_%s" % m) is False:
+                    raise PermissionDenied
             return f(request, *args, **kwargs)
-    return wrapper
+        return wrapper
+    return deco
 
 
 def expects_json(f):
@@ -103,6 +118,7 @@ def render_template(request, template, context):
 
 # Actual views
 @login_required
+@can_add("Issue")
 def issue_form(request):
     """
     Renders the form for submitting new issues
@@ -114,6 +130,7 @@ def issue_form(request):
 
 
 @post_only
+@can_add("Issue")
 def make_issue(request):
     c_id = request.POST["category"]
     title = request.POST["summary"]
@@ -182,8 +199,8 @@ def confirm_subscription(request):
             user.save()
             # Should make this set a HTTPOnly cookie; but for now I'll be lazy.
             return HttpResponse(
-                render_template(request,
-                                "issues/confirmed.html", {
+                render_template(request, "issues/confirmed.html",
+                                {
                                     "user": user,
                                     "issue": issue,
                                     "remove_url": reverse(remove_subscription)
@@ -234,13 +251,12 @@ def get_next(request, id):
         return json_error("Question %d has no %s value" % (int(id), yesno))
 
 
-@can_add
+@can_add("CategoryQuestion")
+@can_edit("CategoryQuestion")
 def show_question(request, source):
     """
     Displays the question-builder
     """
-    if request.user.has_add_permission() is False:
-        raise PermissionDenied
 
     s = IssueSource.objects.get(name__iexact=source)
     # Root question of every group of categories has no "no" value.
@@ -258,7 +274,7 @@ def show_question(request, source):
 
 
 @post_only
-@can_edit
+@can_edit("CategoryQuestion")
 def add_category_to_question(request, id):
     try:
         q = CategoryQuestion.objects.get(id=id)
@@ -290,7 +306,7 @@ def add_category_to_question(request, id):
 
 
 @post_only
-@can_remove
+@can_remove("CategoryQuestion")
 def delete_question(request, id):
     try:
         c = CategoryQuestion.objects.get(id=id)
@@ -302,7 +318,7 @@ def delete_question(request, id):
 
 
 @post_only
-@can_add
+@can_add("CategoryQuestion")
 def create_question(request):
     data = request.body
     parsed = json.loads(data)
