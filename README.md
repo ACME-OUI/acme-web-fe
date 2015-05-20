@@ -1,14 +1,23 @@
 acme-site
 =========
+[![Build Status](https://travis-ci.org/ACME-OUI/acme-web-fe.svg?branch=master)](https://travis-ci.org/ACME-OUI/acme-web-fe)
+## Please Read the [Development Guidelines](https://github.com/ACME-OUI/acme-web-fe/wiki/Development-Guidelines)
 
-###Overarching user interface for the acme project
+###ACME Dashboard
 **init**
 
-    git clone git@github.com:acme-oui/acme-web-fe.git
+    fork git@github.com:acme-oui/acme-web-fe.git
+    git clone git@github.com:username/acme-web-fe.git
     cd acme-web-fe
+    git remote add upstream http://github.com/acme-oui/acme-web-fe.git
+    git fetch upstream
+
     sudo pip install virtualenv
     virtualenv env
     source env/bin/activate
+
+    You need to have installed openssl or myproxy-devel
+
     pip install -r requirements.txt
 
 **local settings**
@@ -38,10 +47,15 @@ acme-site
     RECAPTCHA_PUBLIC_KEY = ''
     RECAPTCHA_PRIVATE_KEY = ''
 
+    # Make this unique, and don't share it with anybody.
+    SECRET_KEY = ''
+
+    JAR_PATH = '-Djava.class.path=/path/to/acme-web-fe/static/java/VeloAPI.jar'
+
+
 **static files**
 
-    mkdir acme_site/static
-    python manage.py collectstatic
+   python manage.py collectstatic
 
 **Velo API**
 
@@ -89,26 +103,3 @@ then from your browser you can view the site at
 * admin front end (**not implemented yet**)
   * *boxname.domain*:8000/admin
   * 127.0.0.1:8000/admin
-
-
-###Changing HTML
-
-    cd acme_site/templates/
-    pwd  /path/acme-site/acme_site/templates
-    vim base.html   <-- base layout will change all the pages
-    vim home.html   <-- sites home page which extends base.html
-
-    cd acme_site/
-    pwd  /path/acme-site/acme_site/templates/acme_site
-    vim *.html      <-- all pages content, they all include sidebars and extend base.html 
-  
-    cd acme_sidebars/
-    pwd  /path/acme-site/acme_site/templates/acme_site/acme_sidebars
-    vim *.html      <-- all sidebar partial pages, they are include in with content pages that extend base.html 
-
-###Creating CSS
-
-    <script> ... </script> put stlying in the file for now.
-
-###Itergration
-* https://github.com/globusonline/python-nexus-client 

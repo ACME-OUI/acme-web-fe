@@ -16,9 +16,15 @@ local_settings.py
 /js/
 /jspanel/
 /java/
+/apps/velo/VeloAPI.py
 
 static/filetree/example.py
 static/systemtest/*
 static/http.py
 scripts/update.py
 apps/web_fe/migrations
+update.py
+
+*.sublime-project
+*.sublime-workspace
+db

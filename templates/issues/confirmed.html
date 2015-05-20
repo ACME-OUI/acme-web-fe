@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Manage Subscriptions{% endblock %}
+
+{% block content %}
+<style>
+	.subscription.new {
+		background-color:#DDD;
+		border:1px solid #888;
+		border-radius:5px;
+	}
+</style>
+
+<div class="row">
+	<div class="col-sm-12">
+		<h1>{{user.email}} Subscriptions</h1>
+	</div>
+</div>
+<input id="user_id" type="hidden" value={{user.id}}>
+{% for sub in user.subscriptions.all %}
+<div class="row subscription" data-id="{{sub.id}}">
+	<div class="col-sm-1">
+		<button class="remove_button btn btn-danger btn-xs"><i class="glyphicon glyphicon-remove"></i></button>
+	</div>
+	<div class="col-sm-11">
+		{{sub.name}}
+	</div>
+</div>
+{% endfor %}
+{% if issue %}
+<div class="row subscription new" data-id="{{issue.id}}">
+	<div class="col-sm-1">
+		<button class="remove_button btn btn-danger btn-xs"><i class="glyphicon glyphicon-remove"></i></button>
+	</div>
+	<div class="col-sm-11">
+		{{issue.name}}
+	</div>
+</div>
+{% endif %}
+
+
+<script>
+function createCookie(name, value, days) {
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        var expires = "; expires=" + date.toGMTString();
+    }
+    else var expires = "";
+
+    var fixedName = '<%= Request["formName"] %>';
+    name = fixedName + name;
+
+    document.cookie = name + "=" + value + expires + "; path=/";
+}
+
+function readCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+}
+
+function eraseCookie(name) {
+    createCookie(name, "", -1);
+}
+
+function ajax_json(url, method, success, data, failure) {
+	var csrf = readCookie("csrftoken");
+	
+	headers = { "X-CSRFToken": csrf };
+	settings = {"accepts":"application/json", "contentType":"application/json"};
+
+	function json_succeed(d, status, jqXHR) {
+		var j = JSON.parse(d);
+		if (success !== undefined) {
+			success(j);
+		}
+	}
+
+	settings["success"] = json_succeed;
+	settings["method"] = method;
+	settings["headers"] = headers
+
+	if (data !== undefined) {
+		if (method !== "GET") {
+			settings["data"] = JSON.stringify(data);
+		} else {
+			settings["data"] = data;
+		}
+	}
+	if (failure !== undefined) {
+		settings["error"] = failure
+	}
+	return $.ajax(url, settings);
+}
+
+$("body").ready(function(){
+	$(".subscription").find(".remove_button").click(function(){
+		var $sub = $(this).parent().parent();
+		var id = $sub.attr('data-id');
+		ajax_json('{{remove_url}}', "POST", function(j){
+			$sub.remove();
+		}, {"user":$("#user_id").val(), "subscription": id});
+	});
+});
+
+</script>
+
+{% endblock %}
