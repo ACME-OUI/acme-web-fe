@@ -436,6 +436,28 @@ def node_search(request):
 
 
 @login_required
+def get_home_folder(request):
+    if request.method == 'POST':
+        try:
+            rm = request.session['velo']
+            response = json.dumps(rm.get_homefolder_resources())
+            return HttpResponse(response)
+
+        except:
+            import traceback
+            print '1', e.__doc__
+            print '2', sys.exc_info()
+            print '3', sys.exc_info()[0]
+            print '4', sys.exc_info()[1]
+            print '5', traceback.tb_lineno(sys.exc_info()[2])
+            ex_type, ex, tb = sys.exc_info()
+            print '6', traceback.print_tb(tb)
+            return HttpResponse(status=500)
+    else:
+        return HttpResponse(status=404)
+
+
+@login_required
 def credential_check_existance(request):
     if request.method == 'POST':
         try:
@@ -467,9 +489,10 @@ def velo(request):
         try:
             velo_api = VeloAPI.Velo()
             velo_api.start_jvm()
-            barr = velo_api.init_velo("acmetest", "acmetest")
-            if barr.getRepositoryUrlBase() == 'http://acmetest.ornl.gov:80/alfresco':
+            rm = velo_api.init_velo("acmetest", "acmetest")
+            if rm.getRepositoryUrlBase() == 'http://acmetest.ornl.gov:80/alfresco':
                 foo = {'0': 'success I guess'}
+                request.session['velo'] = rm
                 print 'success initializing velo connection'
                 return HttpResponse(json.dumps(foo))
             else:

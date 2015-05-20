@@ -200,6 +200,7 @@ $(document).ready(function(){
 
 			if(name == 'velo'){
 				initVeloConnection();
+				initFileTree();
 			}
 
 
@@ -232,6 +233,51 @@ $(document).ready(function(){
     	populateNodeSelect(nodeName);
     
     });
+
+    function initCodeMirror(){
+    	$.getScript("static/js/codemirror.js", function(){
+			initCodeMirror();
+			if(mode == 'night'){
+				var theme = 'twilight';
+			} else {
+				theme = '3024-day';
+			}
+			var codeMirror = CodeMirror(document.getElementById('velo-text-edit'),
+				{
+					'theme': theme,
+					'dragDrop': 'false'
+				});
+		});
+    }
+
+    function initFileTree(){
+		$.getScript('static/filetree/jqueryFileTree.js', function(){
+			$.ajaxSetup({
+				beforeSend: function(xhr){
+					xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+				}
+			});
+			$.ajax({
+				url: 'get_home_folder/',
+				data: data,
+				type: 'POST',
+				success: function(response){
+					$('#velo-file-tree').fileTree({
+						root: jQuery.parseJSON(response)
+					}, function(file){
+						populateFile(file);
+					});
+				},
+				error: function(response){
+					alert('error initializing fileTree')
+				}
+			});
+		});
+    }
+
+    function populateFile(file){
+    	alert(file);
+    }
 
     /* Checks with the server to see if the users has credentials for 
      *  the requested service in the servers database
