@@ -7,7 +7,7 @@ from django.forms.models import modelform_factory
 
 class UserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput())
-    #captcha = ReCaptchaField()
+    # captcha = ReCaptchaField()
 
     class Meta:
         model = User

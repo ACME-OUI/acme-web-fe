@@ -34,30 +34,25 @@ def render_template(request, template, context):
 def not_done(request, *args, **kwargs):
     return HttpResponse("Stub")
 
+
 # Index
-
-
 def index(request):
     return HttpResponse(render_template(request, "web_fe/home.html", {}))
 
+
 # Login
-
-
 def user_login(request):
     context = RequestContext(request)
 
     if request.method == 'POST':
-        user = authenticate(
-            username=request.POST['username'], password=request.POST['password'])
+        user = authenticate(username=request.POST['username'], password=request.POST['password'])
         if user:
             if user.is_active:
                 login(request, user)
-                messages.success(
-                    request, 'User: ' + request.POST['username'] + ' successfully loged in')
+                messages.success(request, 'User: ' + request.POST['username'] + ' successfully loged in')
                 return HttpResponseRedirect(request.POST.get('next'))
             else:
-                messages.error(
-                    request, 'User: ' + request.POST['username'] + ' is a disactivated account')
+                messages.error(request, 'User: ' + request.POST['username'] + ' is a disactivated account')
                 return HttpResponseRedirect('login')
         else:
             messages.error(request, "Username or password incorrect")
@@ -69,31 +64,26 @@ def user_login(request):
         else:
             redirect = ''
         print 'redirect:' + redirect
-        response = HttpResponse(
-            render_template(request, "web_fe/login.html", {"next": redirect}))
+        response = HttpResponse(render_template(request, "web_fe/login.html", {"next": redirect}))
         return response
 
+
 # Allows the user to add ESGF and Velo credentials to their account
-
-
 @login_required(login_url='login')
 def add_credentials(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             for s in data:
-                creds = Credential.objects.filter(
-                    service=s, site_user_name=str(request.user))
+                creds = Credential.objects.filter(service=s, site_user_name=str(request.user))
                 if len(creds) != 0:
                     for i in creds:
-                        print 'changing username and password to ', s, ' for ', str(request.user)
                         i.password = data[s]['password']
                         i.service_user_name = data[s]['username']
                         i.save()
                 else:
                     print 'Getting new credential for ' + str(request.user)
-                    c = Credential(service_user_name=data[s]['username'], password=data[s][
-                                   'password'], service=s, site_user_name=str(request.user))
+                    c = Credential(service_user_name=data[s]['username'], password=data[s]['password'], service=s, site_user_name=str(request.user))
                     c.save()
             return HttpResponse(render_template(request, 'web_fe/add_credentials.html', {'added': 'true'}))
         except Exception as e:
@@ -109,66 +99,37 @@ def check_credentials(request):
         try:
             data = json.loads(request.body)
             response = {}
-            creds = Credential.objects.filter(site_user_name=request.user)
-            if len(creds) != 0:
-                for c in creds:
-                    try:
-                        if c.service == 'esgf':
-                            import pyesgf
-                            from pyesgf.logon import LogonManager
-                            lm = LogonManager()
-                            lm.logon_with_openid(
-                                c.service_user_name, c.password)
-                            if lm.is_logged_on():
-                                response[s] = 'success'
-                                print 'esgf log in successful'
-                            else:
-                                print 'esgf log in failed'
-                                response[s] = 'fail'
-                        if c.service == 'velo':
-                            lib_path = os.path.abspath(
-                                os.path.join('apps', 'velo'))
-                            sys.path.append(lib_path)
-                            import VeloAPI
+            for s in data:
+                if s == 'esgf':
+                    import pyesgf
+                    from pyesgf.logon import LogonManager
 
-                            velo_api = VeloAPI.Velo()
-                            velo_api.start_jvm()
-                            '''
-                            For production, replace below with:
-                            rm = velo_api.init(c.service_user_name, c.password)
-                            '''
-                            rm = velo_api.init('acmetest', 'acmetest')
-                            if rm.getRepositoryUrlBase() == 'u\'http://acmetest.ornl.gov:80/alfresco\'':
-                                response[s] = 'success'
-                                print 'velo log in successful'
-                            else:
-                                response[s] = 'fail'
-                                print 'Error in velo initialization', rm.getRepositoryUrlBase()
+                    lm = LogonManager()
+                    lm.logon_with_openid(data[s]['username'], data[s]['password'])
+                    if lm.is_logged_on() != True:
+                        response[s] = 'failed'
+                    else:
+                        response[s] = 'success'
+                if s == 'velo':
+                    lib_path = os.path.abspath(os.path.join('apps', 'velo'))
+                    sys.path.append(lib_path)
+                    import VeloAPI
 
-                        if c.service == 'github':
-                            import github3
-                            from github3 import login
-                            gh = login(c.site_user_name, password=c.password)
-                            if gh.user() == c.site_user_name:
-                                print 'Github login successful'
-                                response[s] = 'success'
-                            else:
-                                print 'Github login failure'
-                                response[s] = 'fail'
-
-                        if c.service == 'jira':
-                            print 'Working on jira....'
-                    except:
-                        import traceback
-                        print '1', e.__doc__
-                        print '2', sys.exc_info()
-                        print '3', sys.exc_info()[0]
-                        print '4', sys.exc_info()[1]
-                        print '5', traceback.tb_lineno(sys.exc_info()[2])
-                        ex_type, ex, tb = sys.exc_info()
-                        print '6', traceback.print_tb(tb)
-                        return HttpResponse(status=500)
-
+                    velo_api = VeloAPI.Velo()
+                    velo_api.start_jvm()
+                    '''
+                    Using the test credentials for the time being, simply uncomment to
+                    use the users credentials
+                    velo_api.init_velo(data[s]['username'], data[s]['password'])
+                    '''
+                    # res = velo_api.init_velo("acmetest", "acmetest")
+                    response[s] = 'success'
+                    '''
+                    if res.logged_on() != True:
+                        resonse[s] = 'failed'
+                    else:
+                        response[s] = 'success
+                    '''
             return HttpResponse(json.dumps(response))
 
         except Exception as e:
@@ -184,17 +145,15 @@ def check_credentials(request):
     else:
         return HttpResponse(status=404)
 
+
 # Logout
-
-
 def user_logout(request):
     logout(request)
     messages.success(request, 'Log out successful')
     return HttpResponse(render_template(request, "web_fe/home.html", {}))
 
+
 # Register new user
-
-
 def register(request):
     context = RequestContext(request)
     registered = False
@@ -236,8 +195,7 @@ def grid(request):
     from StringIO import StringIO
 
     try:
-        r = requests.get(
-            'http://pcmdi9.llnl.gov/esgf-node-manager/registration.xml')
+        r = requests.get('http://pcmdi9.llnl.gov/esgf-node-manager/registration.xml')
         f = StringIO(r.content)
         out = open('scripts/registration.xml', 'w')
         out.write(f.read())
@@ -259,8 +217,44 @@ def grid(request):
         for child in node:
             if child.tag[-11:] == "GeoLocation":
                 node_location_list.append(child.attrib["city"])
-    node_list = zip(
-        node_peer_list, node_url_list, node_name_list, node_location_list)
+    node_list = zip(node_peer_list, node_url_list, node_name_list, node_location_list)
+
+    creds = Credential.objects.filter(site_user_name=request.user)
+    if len(creds) != 0:
+        for c in creds:
+            try:
+                if c.service == 'esgf':
+                    import pyesgf
+                    from pyesgf import LogonManager
+                    lm = LogonManager()
+                    lm.logon_with_openid(c.service_user_name, c.password)
+                    if lm.is_logged_on():
+                        request.session['esgf_login'] = lm
+                        print 'esgf log in successful'
+                if c.service == 'velo':
+                    lib_path = os.path.abspath(os.path.join('apps', 'velo'))
+                    sys.path.append(lib_path)
+                    import VeloAPI
+
+                    velo_api = VeloAPI.Velo()
+                    velo_api.start_jvm()
+                    res = velo_api.init('acmetest', 'acmetest')
+                    request.session['velo_login'] = res
+                    print 'velo log in successful'
+                    '''
+                    For production, uncomment
+                    res = velo_api.init(c.service_user_name, c.password)
+                    '''
+            except:
+                import traceback
+                print '1', e.__doc__
+                print '2', sys.exc_info()
+                print '3', sys.exc_info()[0]
+                print '4', sys.exc_info()[1]
+                print '5', traceback.tb_lineno(sys.exc_info()[2])
+                ex_type, ex, tb = sys.exc_info()
+                print '6', traceback.print_tb(tb)
+                return HttpResponse(status=500)
 
     return HttpResponse(render_template(request, "web_fe/grid.html", {'nodes': node_list}))
 
@@ -274,16 +268,14 @@ def save_layout(request):
             if len(TileLayout.objects.filter(layout_name=data['name'])) == 0:
                 if data['default_layout'] == 1:
                     print 'got a new default'
-                    isDefault = TileLayout.objects.filter(
-                        user_name=request.user, default=1)
+                    isDefault = TileLayout.objects.filter(user_name=request.user, default=1)
                     if isDefault:
                         for i in isDefault:
                             print 'found old default named ' + i.layout_name
                             i.default = 0
                             i.save()
 
-                layout = TileLayout(user_name=request.user, layout_name=data['name'], board_layout=json.dumps(
-                    data['layout']), mode=data['mode'], default=data['default_layout'])
+                layout = TileLayout(user_name=request.user, layout_name=data['name'], board_layout=json.dumps(data['layout']), mode=data['mode'], default=data['default_layout'])
                 layout.save()
                 return HttpResponse(status=200)
             else:
@@ -327,7 +319,6 @@ def node_info(request):
         ''' For demo purposes this is loading a local file '''
         try:
             from xml.etree.ElementTree import parse
-
             tree = parse('scripts/registration.xml')
             root = tree.getroot()
             name = json.loads(request.body)['node']
@@ -353,20 +344,15 @@ def node_info(request):
                         if child.tag[-len('Metrics'):] == "Metrics":
                             for gchild in list(child):
                                 if gchild.tag[-len('DownloadedData'):] == "DownloadedData":
-                                    response['dataDownCount'] = gchild.attrib[
-                                        'count']
-                                    response['dataDownSize'] = gchild.attrib[
-                                        'size']
-                                    response['dataDownUsers'] = gchild.attrib[
-                                        'users']
+                                    response['dataDownCount'] = gchild.attrib['count']
+                                    response['dataDownSize'] = gchild.attrib['size']
+                                    response['dataDownUsers'] = gchild.attrib['users']
                                 if gchild.tag[-len('RegisteredUsers'):] == "RegisteredUsers":
-                                    response['registeredUsers'] = gchild.attrib[
-                                        'count']
+                                    response['registeredUsers'] = gchild.attrib['count']
 
                     from pyesgf.search import SearchConnection
                     print 'attempting to connect to ' + 'http://' + response['hostname'] + 'esg-search/'
-                    conn = SearchConnection(
-                        'http://' + response['hostname'] + '/esg-search/', distrib=True)
+                    conn = SearchConnection('http://' + response['hostname'] + '/esg-search/', distrib=True)
                     try:
                         conn.get_shard_list()
                         response['status'] = 'up'
@@ -418,12 +404,7 @@ def node_search(request):
                     rs = context.search()
                     searchResponse = {}
                     searchResponse['hits'] = context.hit_count
-                    if context.hit_count == 0:
-                        return HttpResponse(status=504)
-                    size = 10
-                    if context.hit_count < size:
-                        size = context.hit_count
-                    for i in range(size):
+                    for i in range(8):
                         searchResponse[str(i)] = rs[i].json
                     return HttpResponse(json.dumps(searchResponse))
                 except Exception as e:
@@ -436,31 +417,6 @@ def node_search(request):
 
 
 @login_required
-def credential_check(request):
-    if request.method == 'POST':
-        try:
-            service = json.loads(request.body)['service']
-            cred = Credential.objects.filter(
-                user_name=request.user, service=service)
-            if len(cred) != 0:
-                return HttpResponse(status=200)
-            else:
-                return HttpResponse(status=500)
-        except:
-            import traceback
-            print '1', e.__doc__
-            print '2', sys.exc_info()
-            print '3', sys.exc_info()[0]
-            print '4', sys.exc_info()[1]
-            print '5', traceback.tb_lineno(sys.exc_info()[2])
-            ex_type, ex, tb = sys.exc_info()
-            print '6', traceback.print_tb(tb)
-            return HttpResponse(status=500)
-    else:
-        return HttpResponse(status=404)
-
-
-@login_required
 def velo(request):
     if request.method == 'POST':
         from velo import VeloAPI
@@ -468,13 +424,8 @@ def velo(request):
             velo_api = VeloAPI.Velo()
             velo_api.start_jvm()
             barr = velo_api.init_velo("acmetest", "acmetest")
-            if barr.getRepositoryUrlBase() == 'http://acmetest.ornl.gov:80/alfresco':
-                foo = {'0': 'success I guess'}
-                print 'success initializing velo connection'
-                return HttpResponse(json.dumps(foo))
-            else:
-                print 'failed connecting to velo', barr.getRepositoryUrlBase()
-                return HttpResponse(status=500)
+            foo = {'0': 'success I guess'}
+            return HttpResponse(json.dumps(foo))
         except Exception as e:
             print "Error connecting to velo:", repr(e)
             return HttpResponse(status=500)
@@ -482,12 +433,11 @@ def velo(request):
     else:
         return HttpResponse(status=500)
 
+
 # AJAX
-
-
 @csrf_exempt
 def gettemplates(request):
-    ## GET call ##
+    # GET call
     status = ""
     try:
         inputstring = request.POST.get('user')
@@ -495,15 +445,13 @@ def gettemplates(request):
 
         username = inputjson['username']
         password = inputjson['password']
-        base64string = base64.encodestring(
-            '%s:%s' % (username, password)).replace('\n', '')
+        base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
 
         url = "https://acmetest.ornl.gov/alfresco/service/cssef/listWorkflowPackageTemplates"
         request = urllib2.Request(url)
         request.add_header("Authorization", "Basic %s" % base64string)
         response = urllib2.urlopen(request)
         page = response.read()
-
         status = page
     except Exception, e:
         status = "fail: " + str(e)
@@ -514,7 +462,7 @@ def gettemplates(request):
 
 @csrf_exempt
 def clonetemplates(request):
-    ## POST call ##
+    # POST call
     status = ""
     try:
         inputstring = request.POST.get('user')
@@ -523,12 +471,10 @@ def clonetemplates(request):
         username = inputjson['username']
         password = inputjson['password']
         template = inputjson['template']
-        case = template + "_" + username + "_" + \
-            datetime.datetime.now().isoformat()
+        case = template + "_" + username + "_" + datetime.datetime.now().isoformat()
         data_args = {'caseName': case, 'templateName': template}
         data = urllib.urlencode(data_args)
-        base64string = base64.encodestring(
-            '%s:%s' % (username, password)).replace('\n', '')
+        base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
 
         url = "https://acmetest.ornl.gov/alfresco/service/cssef/cloneWorkflowPackageTemplate"
         request = urllib2.Request(url, data)
@@ -546,7 +492,7 @@ def clonetemplates(request):
 
 @csrf_exempt
 def getchildren(request):
-    ## GET call ##
+    # GET call
     status = ""
     try:
         inputstring = request.POST.get('user')
@@ -555,11 +501,9 @@ def getchildren(request):
         username = inputjson['username']
         password = inputjson['password']
         path = inputjson['path']
-        base64string = base64.encodestring(
-            '%s:%s' % (username, password)).replace('\n', '')
+        base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
 
-        url = "https://acmetest.ornl.gov/alfresco/service/cat/getChildren?path=" + \
-            path
+        url = "https://acmetest.ornl.gov/alfresco/service/cat/getChildren?path=" + path
         request = urllib2.Request(url)
         request.add_header("Authorization", "Basic %s" % base64string)
         response = urllib2.urlopen(request)
@@ -575,7 +519,7 @@ def getchildren(request):
 
 @csrf_exempt
 def getfile(request):
-    ## GET call ##
+    # GET call
     status = ""
     try:
         inputstring = request.POST.get('user')
@@ -584,11 +528,9 @@ def getfile(request):
         username = inputjson['username']
         password = inputjson['password']
         path = inputjson['path']
-        base64string = base64.encodestring(
-            '%s:%s' % (username, password)).replace('\n', '')
+        base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
 
-        url = "https://acmetest.ornl.gov/alfresco/service/cat/getFileContents?path=" + \
-            path
+        url = "https://acmetest.ornl.gov/alfresco/service/cat/getFileContents?path=" + path
         request = urllib2.Request(url)
         request.add_header("Authorization", "Basic %s" % base64string)
         response = urllib2.urlopen(request)
@@ -604,7 +546,7 @@ def getfile(request):
 
 @csrf_exempt
 def savefile(request):
-     ## POST call ##
+    # POST call
     status = ""
     try:
         inputstring = request.POST.get('user')
@@ -617,16 +559,15 @@ def savefile(request):
 
         data_args = {'path': path, 'content': content}
         data = urllib.urlencode(data_args)
-        base64string = base64.encodestring(
-            '%s:%s' % (username, password)).replace('\n', '')
+        base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
 
         url = "https://acmetest.ornl.gov/alfresco/service/cat/upload"
 
-        #request = urllib2.Request(url, data)
-        #request.add_header("Authorization", "Basic %s" % base64string)
-        #response = urllib2.urlopen(request)
-        #page = response.read()
-        #status = page
+        # request = urllib2.Request(url, data)
+        # request.add_header("Authorization", "Basic %s" % base64string)
+        # response = urllib2.urlopen(request)
+        # page = response.read()
+        # status = page
         status = "success"
     except Exception, e:
         status = "fail: " + str(e)
@@ -637,7 +578,7 @@ def savefile(request):
 
 @csrf_exempt
 def getresource(request):
-    ## GET call ##
+    # GET call
     status = ""
     try:
         inputstring = request.POST.get('user')
@@ -646,11 +587,9 @@ def getresource(request):
         username = inputjson['username']
         password = inputjson['password']
         path = inputjson['path']
-        base64string = base64.encodestring(
-            '%s:%s' % (username, password)).replace('\n', '')
+        base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
 
-        url = "https://acmetest.ornl.gov/alfresco/service/cssef/getResource?path=" + \
-            path
+        url = "https://acmetest.ornl.gov/alfresco/service/cssef/getResource?path=" + path
         print url
         request = urllib2.Request(url)
         request.add_header("Authorization", "Basic %s" % base64string)
@@ -667,25 +606,21 @@ def getresource(request):
     json_data['key'] = status
     return HttpResponse(json.dumps(json_data))
 
-#### FILE TREE PLUG IN ####
 
-
+# FILE TREE PLUG IN
 @csrf_exempt
 def filetree(request):
     r = ['<ul class="jqueryFileTree" style="display: none;">']
     try:
         r = ['<ul class="jqueryFileTree" style="display: none;">']
-        d = urllib.unquote(
-            request.POST.get('dir', '/Users/harris112/Projects/aims/acme-site'))
+        d = urllib.unquote(request.POST.get('dir', '/Users/harris112/Projects/aims/acme-site'))
         for f in os.listdir(d):
             ff = os.path.join(d, f)
             if os.path.isdir(ff):
-                r.append(
-                    '<li class="directory collapsed"><a href="#" rel="%s/">%s</a></li>' % (ff, f))
+                r.append('<li class="directory collapsed"><a href="#" rel="%s/">%s</a></li>' % (ff, f))
             else:
                 e = os.path.splitext(f)[1][1:]  # get .ext and remove dot
-                r.append(
-                    '<li class="file ext_%s"><a href="#" rel="%s">%s</a></li>' % (e, ff, f))
+                r.append('<li class="file ext_%s"><a href="#" rel="%s">%s</a></li>' % (e, ff, f))
         r.append('</ul>')
     except Exception, e:
         r.append('Could not load directory: %s' % str(e))
