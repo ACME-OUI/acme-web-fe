@@ -13,7 +13,7 @@ urlpatterns = patterns('',
                        url(r'^workflow/?$', views.workflow),
                        url(r'^grid/?$', views.grid, name='grid'),
                        url(r'^credential_check_existance/', view.credential_check_existance),
-                       url(r'^get_home_folder/', view.get_home_folder),
+                       url(r'^get_home_folder/', views.get_home_folder),
 
                        url(r'^save_layout/', views.save_layout,
                            name='save_layout'),
