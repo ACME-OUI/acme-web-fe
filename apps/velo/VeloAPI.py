@@ -59,7 +59,7 @@ class Velo:
         homeFolder = Velo.get_homefolder(self)
         cmspath = homeFolder.append(filename)
         fileServerMap.put(fileObj, cmspath)
-        #velo.uploadFile(location, filename , fileServerMap, None)
+        # velo.uploadFile(location, filename , fileServerMap, None)
         resMgr.bulkUpload(fileServerMap, None)
 
     # download file from velo
@@ -125,7 +125,7 @@ class Velo:
         job_config = jobLaunchService.launchJob(config, None)
         global con
         con = config
-        #job_config = velo.launchJob()
+        # job_config = velo.launchJob()
         print "Fake Job submitted"
         print "Waiting for job output files"
         time.sleep(60)
