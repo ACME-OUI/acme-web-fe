@@ -6,13 +6,6 @@
 
 
 <form id="login_form" action="login" method="post" class="form-signin">
-  {% if messages %}
-    {% for message in messages %}
-       <div class="alert alert-{{message.tags}}" role="alert">
-        {{ message }}
-      </div>
-    {% endfor %}
-  {% endif %}
 
   <h2 class="form-signin-heading">Please Sign In</h2>
   {% csrf_token %}
