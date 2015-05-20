@@ -12,4 +12,3 @@ shutil.rmtree('js')
 shutil.rmtree('jspanel')
 
 os.remove('local_settings.pyc')
-
