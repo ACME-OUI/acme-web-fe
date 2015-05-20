@@ -2,9 +2,9 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
 
-urlpatterns = patterns('',
-
-                        url(r'^admin/', include(admin.site.urls)),
-                        url(r'^acme/', include('web_fe.urls')),
-                        url(r'^issues/', include('issues.urls'))
+urlpatterns = patterns(
+    '',
+    url(r'^admin/', include(admin.site.urls)),
+    url(r'^acme/', include('web_fe.urls')),
+    url(r'^issues/', include('issues.urls'))
 )
