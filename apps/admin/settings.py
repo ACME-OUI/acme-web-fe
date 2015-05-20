@@ -153,6 +153,8 @@ LOGGING = {
     }
 }
 
+LOGIN_URL = "/acme/login"
+
 from django.contrib.messages import constants as message_constants
 MESSAGE_TAGS = {message_constants.DEBUG: 'debug',
                 message_constants.INFO: 'info',
