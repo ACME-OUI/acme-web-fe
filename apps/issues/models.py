@@ -1,7 +1,6 @@
 from django.db import models
 from github3 import login as gh_login
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
 from django.conf import settings
 import urlparse
 
@@ -269,6 +268,19 @@ class Issue(models.Model):
         # Use the appropriate API to grab the name for this issue
         api_self = self.source.get_issue(self)
         return api_self["title"]
+
+    def subscribe(self, user):
+        self.subscribers.add(user)
+
+    def notify(self, subject, message):
+        from django.core.mail import send_mass_mail
+        from smtplib import SMTPException
+
+        subs = [user.email for user in self.subscribers.all() if user.email is not None]
+        try:
+            send_mass_mail((subject, message, settings.ISSUES_MAIL_ADDRESS, subs))
+        except SMTPException as e:
+            print "Issue Notification: Couldn't send mail because", e
 
     def get_all_matched(self):
         if self.matched_issue is not None:

@@ -141,16 +141,11 @@ def make_issue(request):
 
     issue = source.submit_issue(category, title, body)
 
-    email = request.POST["email"]
+    issue.subscribe(request.user)
 
-    try:
-        user = Subscriber.objects.get(email=email)
-    except Subscriber.DoesNotExist:
-        user = Subscriber(email=email)
-        user.save()
+    issue.save()
 
-    user.subscribe(issue)
-    return HttpResponse("")
+    return HttpResponseRedirect(reverse(issue_form))
 
 
 @post_only
