@@ -1,7 +1,6 @@
 from django.db import models
 from github3 import login as gh_login
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
 from django.conf import settings
 import urlparse
 
@@ -144,6 +143,8 @@ class CategoryQuestion(models.Model):
     yes_type = models.CharField(max_length=12, blank=True, null=True)
     no_type = models.CharField(max_length=12, blank=True, null=True)
 
+    source = models.ForeignKey(IssueSource, null=True, blank=True)
+
     def get_parents(self):
         yes = models.Q(yes_type="question", yes=self.id)
         no = models.Q(no_type="question", no=self.id)
@@ -262,11 +263,42 @@ class Issue(models.Model):
     # Tags for this issue
     categories = models.ManyToManyField(IssueCategory)
 
+    subscribers = models.ManyToManyField(getattr(settings, "AUTH_USER_MODEL", "auth.User"))
+
+    def __init__(self, *args, **kwargs):
+        super(Issue, self).__init__(*args, **kwargs)
+        self._api_cache = None
+
     @property
     def name(self):
-        # Use the appropriate API to grab the name for this issue
-        api_self = self.source.get_issue(self)
-        return api_self["title"]
+        if self._api_cache is None:
+            self._api_cache = self.source.get_issue(self)
+        if self.source.source_type == "github":
+            return self._api_cache["title"]
+        else:
+            raise NotImplementedError("JIRA not supported yet")
+
+    @property
+    def web_url(self):
+        if self._api_cache is None:
+            self._api_cache = self.source.get_issue(self)
+        if self.source.source_type == "github":
+            return self._api_cache["html_url"]
+        else:
+            raise NotImplementedError("JIRA not supported yet")
+
+    def subscribe(self, user):
+        self.subscribers.add(user)
+
+    def notify(self, subject, message):
+        from django.core.mail import send_mass_mail
+        from smtplib import SMTPException
+
+        subs = [user.email for user in self.subscribers.all() if user.email is not None]
+        try:
+            send_mass_mail((subject, message, settings.ISSUES_MAIL_ADDRESS, subs))
+        except SMTPException as e:
+            print "Issue Notification: Couldn't send mail because", e
 
     def get_all_matched(self):
         if self.matched_issue is not None:
@@ -276,75 +308,3 @@ class Issue(models.Model):
 
     def __str__(self):
         return self.url
-
-
-class Subscriber(models.Model):
-
-    """
-    Users interested in issues; requires email confirmation of account
-    """
-    email = models.EmailField(max_length=254, unique=True)
-    # Send an email with a link to confirm address
-    confirmed = models.BooleanField(default=False)
-    # Used for temporary authentication; allows additional subscriptions
-    # without reauthing via email
-    token = models.CharField(max_length=64, unique=True, blank=True, null=True)
-    # Used to timeout tokens
-    signed_in = models.DateTimeField(auto_now=True)
-    # Every issue that this subscriber is associated with
-    subscriptions = models.ManyToManyField(Issue)
-
-    def subscribe(self, issue):
-        if self.confirmed is False and self.token is None:
-            self.confirm_email()
-            self.subscriptions.add(issue)
-        elif self.confirmed:
-            self.confirm_subscription(issue)
-
-    def confirm_email(self):
-        from uuid import uuid4
-        self.token = uuid4().hex
-        from django.core.mail import send_mail
-        send_mail("Welcome to ACME Issues!", "Please confirm your \
-email address at %s?token=%s" % (
-            reverse("confirm_email"),
-            self.token), "fries2@llnl.gov", [self.email])
-        self.save()
-
-    def subscriptions_token(self, issue):
-        from hashlib import sha256
-        digest = sha256()
-        digest.update(self.email)
-        for sub in self.subscriptions.all():
-            digest.update(sub.url)
-        digest.update(issue.url)
-        digest.update(settings.SECRET_KEY)
-        return digest.hexdigest()
-
-    def confirm(self):
-        self.token = None
-        self.confirmed = True
-        self.save()
-
-    def confirm_subscription(self, issue):
-        from django.core.mail import send_mail
-        self.token = self.subscriptions_token(issue)
-
-        message = "Please click here to confirm your subscription to \
-the issue '%s': %s?token=%s&issue=%d>"
-
-        message %= (
-            issue.name,
-            reverse("confirm_subscription"),
-            self.token,
-            issue.id
-        )
-
-        send_mail("ACME Issues: Confirm issue subscription",
-                  message,
-                  "fries2@llnl.gov",
-                  [self.email])
-        self.save()
-
-    def __str__(self):
-        return self.email
