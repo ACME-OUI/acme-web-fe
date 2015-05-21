@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 [flake8]
 ignore = E501
-=======
->>>>>>> 35edf8c... Brought back .pep8 and added template I forgot
 [pep8]
 ignore = E501
