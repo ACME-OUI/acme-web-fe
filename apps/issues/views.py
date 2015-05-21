@@ -8,6 +8,7 @@ from django.http import (
 from django.template import RequestContext, loader
 from django.core.urlresolvers import reverse
 from templatetags.issues import render_question_tree
+from django.contrib import messages
 from models import (
     IssueSource,
     CategoryQuestion,
@@ -151,6 +152,8 @@ def make_issue(request):
     issue.subscribe(request.user)
 
     issue.save()
+
+    messages.success(request, "Created issue and subscribed you to notifications for it.")
 
     return HttpResponseRedirect(reverse(issue_form))
 
