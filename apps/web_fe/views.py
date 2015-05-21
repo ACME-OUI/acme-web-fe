@@ -335,15 +335,24 @@ def node_info(request):
             response = {}
             for node in root:
                 if node.attrib['shortName'] == name:
-                    response['org'] = node.attrib['organization']
-                    response['namespace'] = node.attrib['namespace']
-                    response['email'] = node.attrib['supportEmail']
-                    response['ip'] = node.attrib['ip']
-                    response['longName'] = node.attrib['longName']
-                    response['version'] = node.attrib['version']
-                    response['shortName'] = name
-                    response['adminPeer'] = node.attrib['adminPeer']
-                    response['hostname'] = node.attrib['hostname']
+                    if 'organization' in node.attrib:
+                        response['org'] = node.attrib['organization']
+                    if 'namespace' in node.attrib:
+                        response['namespace'] = node.attrib['namespace']
+                    if 'supportEmail' in node.attrib:
+                        response['email'] = node.attrib['supportEmail']
+                    if 'ip' in node.attrib:
+                        response['ip'] = node.attrib['ip']
+                    if 'longName' in node.attrib:
+                        response['longName'] = node.attrib['longName']
+                    if 'version' in node.attrib:
+                        response['version'] = node.attrib['version']
+                    if 'shortNamep' in node.attrib:
+                        response['shortName'] = name
+                    if 'adminPeer' in node.attrib:
+                        response['adminPeer'] = node.attrib['adminPeer']
+                    if 'hostname' in node.attrib:
+                        response['hostname'] = node.attrib['hostname']
 
                     for child in list(node):
                         if child.tag[-len('AuthorizationService'):] == "AuthorizationService":
