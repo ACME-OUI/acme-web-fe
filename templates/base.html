@@ -42,6 +42,9 @@
       .navbar-nav > li.navbar-left {
         float: left !important;
       }
+      .theme-showcase {
+        margin-top:1em;
+      }
     </style>
 
     <!-- <link=href="https://raw.github.com/ehynds/jquery-ui-multiselect-widget/1.13/jquery.multiselect.css" rel="stylesheet">-->
@@ -69,18 +72,18 @@
 
             {% endblock %}
             <li id="acme-link"><a href="/acme">ACME</a></li>
-            <li id="issues-link"><a href="#">Issues</a></li>
+            <li id="issues-link"><a href="/issues">Submit Issue</a></li>
             <li id="dashboard-link"><a href="/acme/grid">Dashboard</a></li>
             <li id="uvcdat-link"><a href="http://uvcdat.llnl.gov">UV-CDAT</a></li>
             <li id="globus-link"><a href="https://acme.globus.org">Globus</a></li>
             <li id="classic-link"><a href="http://acme-dev-0.ornl.gov/exploratory_analysis/">Classic Viewer</a></li>
             <li id="cdatweb-link"><a href="http://acme-cdatweb.ornl.gov">CDATWEB</a></li>
             {% if user.is_authenticated %}
-            <li class="navbar-right"><a href="add_credentials">{{ user.username }}</a></li>
-            <li class="navbar-right"><a href="logout">Log Out</a></li>
+            <li class="navbar-right"><a href="/acme/add_credentials">{{ user.username }}</a></li>
+            <li class="navbar-right"><a href="/acme/logout">Log Out</a></li>
             {% else %}
-            <li class="navbar-right"><a href="login?next={% url 'index' %}">Welcome Guest</a></li>
-            <li class="navbar-right"><a href="login?next={% url 'index' %}">Log In</a></li>
+            <li class="navbar-right"><a href="/acme/login?next={% url 'index' %}">Welcome Guest</a></li>
+            <li class="navbar-right"><a href="/acme/login?next={% url 'index' %}">Log In</a></li>
             {% endif %}
           </ul>
           
@@ -90,7 +93,13 @@
     {% block dropmenu %}
 
     {% endblock %}
+    
     <div class="container theme-showcase" role="main">
+      {% if messages %}
+          {% for message in messages %}
+          <div class="alert {% if message.tags %} {{ message.tags }} {% else %} alert-info {% endif %}" role="alert">{{ message }}</div>
+          {% endfor %}
+      {% endif %}
       {% block content %}   
 
       {% endblock %}

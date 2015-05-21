@@ -1,6 +1,7 @@
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.conf.urls import patterns, include, url
-
 from web_fe import views
+
 
 urlpatterns = patterns('',
                        url(r'^$', views.index, name='index'),
@@ -15,16 +16,13 @@ urlpatterns = patterns('',
                        url(r'^credential_check_existance/', views.credential_check_existance),
                        url(r'^get_home_folder/', views.get_home_folder),
 
-                       url(r'^save_layout/', views.save_layout,
-                           name='save_layout'),
-                       url(r'^load_layout/', views.load_layout,
-                           name='load_layout'),
+                       url(r'^save_layout/', views.save_layout, name='save_layout'),
+                       url(r'^load_layout/', views.load_layout, name='load_layout'),
                        url(r'^node_info/', views.node_info),
                        url(r'^node_search/', views.node_search),
                        url(r'^velo/', views.velo),
 
-
-                       # ajax
+                       # ajax needs to be moved to service app
                        url(r'^gettemplates/?$', views.gettemplates),
                        url(r'^clonetemplates/?$', views.clonetemplates),
                        url(r'^getchildren/?$', views.getchildren),
@@ -35,5 +33,4 @@ urlpatterns = patterns('',
                        url(r'^filetree/?$', views.filetree),
                        )
 
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 urlpatterns += staticfiles_urlpatterns()

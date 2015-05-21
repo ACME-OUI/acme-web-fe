@@ -1,6 +1,8 @@
-# Django settings for admin project.
 import os.path
 from local_settings import *
+from django.contrib.messages import constants as message_constants
+
+# Django settings for admin project.
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -71,7 +73,7 @@ STATIC_ROOT = ''
 STATIC_URL = '/static/'
 
 # define in local_settings.py
-#STATICFILES_DIRS = ()
+# STATICFILES_DIRS = ()
 
 
 # List of finder classes that know how to find static files in
@@ -157,3 +159,5 @@ MESSAGE_TAGS = {message_constants.DEBUG: 'debug',
                 message_constants.WARNING: 'warning',
                 message_constants.ERROR: 'danger',
                 }
+
+LOGIN_URL = "/acme/login"
