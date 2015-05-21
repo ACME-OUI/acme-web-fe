@@ -110,6 +110,7 @@ def check_credentials(request):
             data = json.loads(request.body)
             response = {}
             creds = Credential.objects.filter(site_user_name=request.user)
+            velo_started = False
             if len(creds) != 0:
                 for c in creds:
                     try:
@@ -133,6 +134,7 @@ def check_credentials(request):
 
                             velo_api = VeloAPI.Velo()
                             velo_api.start_jvm()
+                            velo_started = True
                             '''
                             For production, replace below with:
                             rm = velo_api.init(c.service_user_name, c.password)
@@ -140,8 +142,10 @@ def check_credentials(request):
                             rm = velo_api.init('acmetest', 'acmetest')
                             if rm.getRepositoryUrlBase() == 'u\'http://acmetest.ornl.gov:80/alfresco\'':
                                 response[s] = 'success'
+                                velo_api.shutdown_jvm();
                                 print 'velo log in successful'
                             else:
+                                velo_api.shutdown_jvm();
                                 response[s] = 'fail'
                                 print 'Error in velo initialization', rm.getRepositoryUrlBase()
 
@@ -159,6 +163,8 @@ def check_credentials(request):
                         if c.service == 'jira':
                             print 'Working on jira....'
                     except:
+                        if velo_started:
+                            velo_api.shutdown_jvm();
                         import traceback
                         print '1', e.__doc__
                         print '2', sys.exc_info()
@@ -448,11 +454,13 @@ def node_search(request):
 def get_home_folder(request):
     if request.method == 'POST':
         try:
-            rm = request.session['velo']
+            import VeloAPI
+            velo_api = VeloAPI.velo()
+            rm = velo_api.init('acmetest', 'acmetest')
             response = json.dumps(rm.get_homefolder_resources())
             return HttpResponse(response)
 
-        except:
+        except Exception as e:
             import traceback
             print '1', e.__doc__
             print '2', sys.exc_info()
@@ -472,12 +480,12 @@ def credential_check_existance(request):
         try:
             service = json.loads(request.body)['service']
             cred = Credential.objects.filter(
-                user_name=request.user, service=service)
+                site_user_name=request.user, service=service)
             if len(cred) != 0:
                 return HttpResponse(status=200)
             else:
                 return HttpResponse(status=500)
-        except:
+        except Exception as e:
             import traceback
             print '1', e.__doc__
             print '2', sys.exc_info()
@@ -501,13 +509,16 @@ def velo(request):
             rm = velo_api.init_velo("acmetest", "acmetest")
             if rm.getRepositoryUrlBase() == 'http://acmetest.ornl.gov:80/alfresco':
                 foo = {'0': 'success I guess'}
-                request.session['velo'] = rm
+
                 print 'success initializing velo connection'
+                velo_api.shutdown_jvm();
                 return HttpResponse(json.dumps(foo))
             else:
+                velo_api.shutdown_jvm();
                 print 'failed connecting to velo', barr.getRepositoryUrlBase()
                 return HttpResponse(status=500)
         except Exception as e:
+            velo_api.shutdown_jvm();
             print "Error connecting to velo:", repr(e)
             return HttpResponse(status=500)
 

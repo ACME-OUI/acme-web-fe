@@ -259,7 +259,6 @@ $(document).ready(function(){
 			});
 			$.ajax({
 				url: 'get_home_folder/',
-				data: data,
 				type: 'POST',
 				success: function(response){
 					$('#velo-file-tree').fileTree({
@@ -295,7 +294,7 @@ $(document).ready(function(){
 			}
 		});
 		$.ajax({
-			url: 'credential_check_existance',
+			url: 'credential_check_existance/',
 			data: data,
 			type: 'POST',
 			success: function(response){
