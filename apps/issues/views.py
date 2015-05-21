@@ -155,6 +155,11 @@ def make_issue(request):
     return HttpResponseRedirect(reverse(issue_form))
 
 
+@login_required
+def manage_subscriptions(request):
+    return HttpResponse(render_template(request, "issues/subscriptions.html", {}))
+
+
 @post_only
 @expects_json
 def remove_subscription(request, json_data=None):

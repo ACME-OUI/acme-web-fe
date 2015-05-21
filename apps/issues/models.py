@@ -265,11 +265,27 @@ class Issue(models.Model):
 
     subscribers = models.ManyToManyField(getattr(settings, "AUTH_USER_MODEL", "auth.User"))
 
+    def __init__(self, *args, **kwargs):
+        super(Issue, self).__init__(*args, **kwargs)
+        self._api_cache = None
+
     @property
     def name(self):
-        # Use the appropriate API to grab the name for this issue
-        api_self = self.source.get_issue(self)
-        return api_self["title"]
+        if self._api_cache is None:
+            self._api_cache = self.source.get_issue(self)
+        if self.source.source_type == "github":
+            return self._api_cache["title"]
+        else:
+            raise NotImplementedError("JIRA not supported yet")
+
+    @property
+    def web_url(self):
+        if self._api_cache is None:
+            self._api_cache = self.source.get_issue(self)
+        if self.source.source_type == "github":
+            return self._api_cache["html_url"]
+        else:
+            raise NotImplementedError("JIRA not supported yet")
 
     def subscribe(self, user):
         self.subscribers.add(user)
