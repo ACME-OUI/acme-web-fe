@@ -143,6 +143,8 @@ class CategoryQuestion(models.Model):
     yes_type = models.CharField(max_length=12, blank=True, null=True)
     no_type = models.CharField(max_length=12, blank=True, null=True)
 
+    source = models.ForeignKey(IssueSource, null=True, blank=True)
+
     def get_parents(self):
         yes = models.Q(yes_type="question", yes=self.id)
         no = models.Q(no_type="question", no=self.id)

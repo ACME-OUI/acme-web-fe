@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import (
     HttpResponse,
@@ -9,7 +8,12 @@ from django.http import (
 from django.template import RequestContext, loader
 from django.core.urlresolvers import reverse
 from templatetags.issues import render_question_tree
-from models import *
+from models import (
+    IssueSource,
+    CategoryQuestion,
+    IssueCategory,
+    Issue
+)
 from django.core.exceptions import PermissionDenied
 import json
 
@@ -76,7 +80,10 @@ def expects_json(f):
     def wrapper(request, *args, **kwargs):
         if request.META.get("CONTENT_TYPE", None) == "application/json":
             data = request.body
-            data = json.loads(data)
+            try:
+                data = json.loads(data)
+            except ValueError:
+                data = None
             kwargs["json_data"] = data
         return f(request, *args, **kwargs)
     return wrapper
@@ -151,62 +158,15 @@ def make_issue(request):
 @post_only
 @expects_json
 def remove_subscription(request, json_data=None):
+    user = request.user
+
     try:
-        user = Subscriber.objects.get(id=json_data["user"])
-        for sub in user.subscriptions.all():
-            if sub.id == json_data["subscription"]:
-                break
-        else:
-            return json_error("No matching subscription found.")
-        user.subscriptions.remove(sub)
+        sub = user.issue_set.get(id=json_data["subscription"])
+        user.issue_set.remove(sub)
         user.save()
         return HttpResponse(json.dumps({"id": json_data["subscription"]}))
-    except Subscriber.DoesNotExist:
-        return json_error("No matching user found.")
-
-
-@login_required
-def confirm_email(request):
-    token = request.GET["token"]
-    try:
-        user = Subscriber.objects.get(token=token)
-        user.confirm()
-        return HttpResponse(render_template(request, "issues/confirmed.html", {
-            "user": user,
-            "remove_url": reverse(remove_subscription)
-        }))
-    except Subscriber.DoesNotExist:
-        return HttpResponseBadRequest("Token doesn't match any known users.")
-
-
-@login_required
-def confirm_subscription(request):
-    token = request.GET["token"]
-    issue_id = request.GET["issue"]
-
-    try:
-        issue = Issue.objects.get(id=issue_id)
-        user = Subscriber.objects.get(token=token)
-        t = user.subscriptions_token(issue)
-        if t == user.token:
-            user.token = None
-            user.subscriptions.add(issue)
-            user.save()
-            # Should make this set a HTTPOnly cookie; but for now I'll be lazy.
-            return HttpResponse(
-                render_template(request, "issues/confirmed.html",
-                                {
-                                    "user": user,
-                                    "issue": issue,
-                                    "remove_url": reverse(remove_subscription)
-                                }))
-
-        else:
-            return HttpResponseBadRequest("Tokens don't match.")
-    except Subscriber.DoesNotExist:
-        return HttpResponseBadRequest("Token doesn't match any known users")
     except Issue.DoesNotExist:
-        return HttpResponseBadRequest("Issue doesn't match any known issues")
+        return json_error("No subscription to issue %d found" % json_data["subscription"])
 
 
 def get_next(request, id):
@@ -255,16 +215,16 @@ def show_question(request, source):
 
     s = IssueSource.objects.get(name__iexact=source)
     # Root question of every group of categories has no "no" value.
-    questions = CategoryQuestion.objects.filter(no=None)
-    related = []
+    questions = s.categoryquestion_set.all()
+    roots = []
     for q in questions:
-        if q.points_to(s):
-            related.append(q)
+        if q.is_root():
+            roots.append(q)
     return HttpResponse(
         render_template(
             request,
             "issues/questions.html",
-            {"source": s, "root_questions": related}
+            {"source": s, "root_questions": roots}
         ))
 
 
@@ -313,33 +273,36 @@ def delete_question(request, id):
 
 
 @post_only
+@expects_json
 @can_add("CategoryQuestion")
-def create_question(request):
-    data = request.body
-    parsed = json.loads(data)
-    if "text" not in parsed:
+def create_question(request, json_data=None):
+    if json_data is None:
+        return json_error("No data provided for new question.")
+    if "text" not in json_data:
         return json_error("No text provided for question")
-    text = parsed["text"]
+
+    text = json_data["text"]
+
     q = CategoryQuestion(question=text)
+    if "source" in json_data:
+        source = IssueSource.objects.get(name=json_data["source"])
+        q.source = source
     q.save()
+    response = {}
+    if "parent" in json_data:
+        try:
+            p = CategoryQuestion.objects.get(id=int(json_data["parent"]))
+            if json_data["yes"]:
+                p.set_yes(q)
+            else:
+                p.set_no(q)
+            p.save()
+            response["parent"] = p.id
+            response["yes"] = json_data["yes"]
+        except CategoryQuestion.DoesNotExist:
+            return json_error("Question %d does not exist" % json_data["parent"])
 
-    response = {
-        "id": q.id,
-        "question": q.question,
-        "html": render_question_tree(q)
-    }
-
-    if "parent" in parsed:
-        print "fetching parent"
-        p = CategoryQuestion.objects.get(id=parsed["parent"])
-        if parsed["yes"]:
-            print "setting yes on parent"
-            p.set_yes(q)
-            assert p.get_yes() == q, "Yes not set correctly"
-        else:
-            p.set_no(q)
-        p.save()
-        response["parent"] = p.id
-        response["yes"] = parsed["yes"]
-
+    response["id"] = q.id,
+    response["question"] = q.question,
+    response["html"] = render_question_tree(q)
     return HttpResponse(json.dumps(response))

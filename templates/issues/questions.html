@@ -257,9 +257,9 @@ $("body").ready(function(){
 
 	function new_question(text, callback, parent, yes) {
 		if (parent !== undefined) {
-			data = {"parent": parent, "text": text, "yes": yes}
+			data = {"parent": parent, "text": text, "yes": yes, "source":source}
 		} else {
-			data = {"text": text}
+			data = {"text": text, "source":source}
 		}
 
 		ajax_json("create", "POST", callback, data);

@@ -1,13 +1,8 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import patterns, url
 import views
 
 urlpatterns = patterns('',
                        url(r'^/?$', views.issue_form),
-                       url(r'^confirm/?$', views.confirm_email,
-                           name="confirm_email"),
-                       url(r'^confirm/subscription/?$',
-                           views.confirm_subscription,
-                           name="confirm_subscription"),
                        url(r'^issue/submit/?$', views.make_issue),
                        url(r'^subscriptions/remove/?$',
                            views.remove_subscription),
