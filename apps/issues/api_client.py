@@ -104,7 +104,19 @@ class JIRAClient(APIClient):
         super(JIRAClient, self).__init__(url, auth)
 
     def authenticate(self):
-        options = {
-            "server": self.url
-        }
-        self._client = JIRA(options, basic_auth=self.auth)
+        server = urlparse.urlparse(self.url)
+        server = server.scheme + "://" + server.netloc
+        self._client = JIRA(server=server, basic_auth=self.auth)
+
+    def get_project(self):
+        parts = urlparse.urlparse(self.url)
+        project_id = parts.path.split("/")[-1]
+        return project_id
+
+    def get_labels(self):
+        # Grab the Components from the project
+        components = self.client.project_components(self.get_project())
+        labels = []
+        for label in components:
+            labels.append(DictBacked(api=label, source=self, name=label.name))
+        return labels
