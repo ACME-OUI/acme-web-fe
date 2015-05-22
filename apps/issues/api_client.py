@@ -141,3 +141,8 @@ class JIRAClient(APIClient):
             fields["labels"] = [category.name]
         i = self.client.create_issue(fields=fields)
         return DictBacked(url=i.self, api=i)
+
+    def get_issue(self, issue):
+        issue_id = urlparse.urlparse(issue.url).path.split("/")[-1]
+        i = self.client.issue(issue_id)
+        return DictBacked(name=i.fields.summary, web_url=i.permalink(), api=i)
