@@ -1,8 +1,7 @@
 from django.db import models
-from github3 import login as gh_login
+from api_client import GithubClient, JIRAClient
 from django.core.exceptions import ValidationError
 from django.conf import settings
-import urlparse
 
 
 def validate_acyclic_linked_source(value):
@@ -25,6 +24,13 @@ def validate_acyclic_linked_source(value):
         raise ValidationError("Linked source doesn't exist")
 
 
+def validate_source_type(value):
+    if value in ("jira", "github"):
+        return
+    else:
+        raise ValidationError("Source Type %s not implemented." % value)
+
+
 class IssueSource(models.Model):
 
     """
@@ -38,53 +44,52 @@ class IssueSource(models.Model):
     base_url = models.URLField()
     # Currently just github or jira; derive issues/creation urls from this and
     # base
-    source_type = models.CharField(max_length=512, unique=False, blank=False)
+    source_type = models.CharField(max_length=512, unique=False, blank=False, validators=[validate_source_type])
     # Text asking for specific information from a user
     required_info = models.TextField(unique=False)
     # If an issue is made in this source, also make it in the linked source
     linked = models.ForeignKey("IssueSource", blank=True, null=True,
                                validators=[validate_acyclic_linked_source])
 
-    def submit_github_issue(self, category, title, description):
-        gh = gh_login(token=settings.GITHUB_KEY)
-        # Parse the base_url to get the user & repo info
-        parts = urlparse.urlparse(self.base_url)
-        path = parts.path
+    def __init__(self, *args, **kwargs):
+        super(IssueSource, self).__init__(*args, **kwargs)
+        self._client = None
 
-        _, _, user, repo = path.split("/")
-        r = gh.repository(user, repo)
-        i = r.create_issue(title, description, labels=[category.name])
-        local_tracker = Issue(url=i._api, source=self)
+    def is_github(self):
+        return self.source_type == "github"
+
+    def is_jira(self):
+        return self.source_type == "jira"
+
+    @property
+    def client(self):
+        if self._client is None:
+            if self.is_github():
+                self._client = GithubClient(self.base_url, settings.GITHUB_KEY)
+            elif self.is_jira():
+                self._client = JIRAClient(self.base_url, (settings.JIRA_USER, settings.JIRA_PASSWORD))
+        return self._client
+
+    def get_labels(self):
+        return self.client.get_labels()
+
+    def submit_issue(self, category, title, description, parent_issue=None):
+        issue = self.client.submit_issue(category, title, description)
+        local_tracker = Issue(url=issue.url, source=self)
+        if parent_issue is None:
+            parent_issue = local_tracker
+        else:
+            local_tracker.matched_issue = parent_issue
         local_tracker.save()
         local_tracker.categories.add(category)
 
+        if self.linked is not None:
+            self.linked.submit_issue(category, title, description, parent_issue=parent_issue)
+
         return local_tracker
 
-    def submit_issue(self, category, title, description):
-        if self.source_type == "github":
-            issue = self.submit_github_issue(category, title, description)
-        elif self.source_type == "jira":
-            raise NotImplementedError("JIRA integration not yet implemented")
-
-        if self.linked is not None:
-            linked_issue = self.linked.submit_issue(
-                category, title, description)
-            issue.matched_issue = linked_issue
-
-        issue.save()
-        return issue
-
     def get_issue(self, issue):
-        if self.source_type == "github":
-            import requests
-            response = requests.get(
-                issue.url, headers={
-                    "Authorization": "token %s" % settings.GITHUB_KEY
-                })
-            obj = response.json()
-            return obj
-        else:
-            raise NotImplementedError("Only GitHub works right now.")
+        return self.client.get_issue(issue)
 
     def clean(self):
         """
@@ -94,9 +99,8 @@ class IssueSource(models.Model):
         previous = self
         while l is not None:
             if l.id == self.id:
-                raise ValidationError("Linking from %s to %s would create a \
-cycle; %s pointed to by %s" % (
-                    self.name, self.linked.name, self.name, previous.name))
+                raise ValidationError("Linking from %s to %s would create a cycle; %s pointed to by %s" %
+                                      (self.name, self.linked.name, self.name, previous.name))
             previous = l
             l = l.linked
 
@@ -273,19 +277,13 @@ class Issue(models.Model):
     def name(self):
         if self._api_cache is None:
             self._api_cache = self.source.get_issue(self)
-        if self.source.source_type == "github":
-            return self._api_cache["title"]
-        else:
-            raise NotImplementedError("JIRA not supported yet")
+        return self._api_cache.name
 
     @property
     def web_url(self):
         if self._api_cache is None:
             self._api_cache = self.source.get_issue(self)
-        if self.source.source_type == "github":
-            return self._api_cache["html_url"]
-        else:
-            raise NotImplementedError("JIRA not supported yet")
+        return self._api_cache.web_url
 
     def subscribe(self, user):
         self.subscribers.add(user)
