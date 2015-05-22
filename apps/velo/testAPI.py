@@ -8,12 +8,16 @@ import VeloAPI
 velo_api = VeloAPI.Velo()
 velo_api.start_jvm()  # start jvm
 # provide velo username and password
-velo_api.init_velo("<username>", "<password>")
-velo_api.get_homefolder_resources()  # get directory from user home folder
+print 'starting velo initialization'
+velo_api.init_velo("acmetest", "acmetest")
+#print 'retrieving home folder resources'
+#velo_api.get_homefolder_resources()  # get directory from user home folder
 print " "
 # get resources from the specified path
-velo_api.get_resources(
-    "/User Documents/admin/fake_acme_case_04-03-2015_16-11-27")
+filepath = "/User Documents/admin/fake_acme_case_04-03-2015_16-11-27"
+print 'retrieving resource at', filepath
+velo_api.get_resources(filepath)
+print 'creating test folder'
 velo_api.create_folder("testFolder")  # provide folder name
 # specify location of file and name of file
 velo_api.upload_file("C:/Python34/nf", "file.txt")
