@@ -120,3 +120,24 @@ class JIRAClient(APIClient):
         for label in components:
             labels.append(DictBacked(api=label, source=self, name=label.name))
         return labels
+
+    def submit_issue(self, category, title, description):
+        fields = {
+            "summary": title,
+            "description": description,
+            "project": {
+                "id": self.get_project()
+            },
+            "issuetype": {
+                "id": 3  # Extract this to a setting... or maybe a field on the source?
+            },
+            "duedate": "2015-05-31"  # Extract this to a setting
+        }
+        if category.source.base_url == self.url:
+            # This category is associated with this endpoint
+            # It's a component
+            fields["components"] = [{"name": category.name}]
+        else:
+            fields["labels"] = [category.name]
+        i = self.client.create_issue(fields=fields)
+        return DictBacked(url=i.self, api=i)
