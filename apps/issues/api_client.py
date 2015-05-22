@@ -1,3 +1,5 @@
+from django.conf import settings
+from datetime import date
 from github3 import login as gh_login
 from jira.client import JIRA
 import urlparse
@@ -122,6 +124,8 @@ class JIRAClient(APIClient):
         return labels
 
     def submit_issue(self, category, title, description):
+        duedate = date.today() + settings.JIRA_DUEDATE_OFFSET  # Extract this to a setting
+
         fields = {
             "summary": title,
             "description": description,
@@ -129,9 +133,9 @@ class JIRAClient(APIClient):
                 "id": self.get_project()
             },
             "issuetype": {
-                "id": 3  # Extract this to a setting... or maybe a field on the source?
+                "id": settings.JIRA_ISSUE_TYPE
             },
-            "duedate": "2015-05-31"  # Extract this to a setting
+            "duedate": duedate.isoformat()
         }
         if category.source.base_url == self.url:
             # This category is associated with this endpoint
