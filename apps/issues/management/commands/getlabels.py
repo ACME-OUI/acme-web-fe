@@ -1,38 +1,23 @@
-from django.core.management.base import BaseCommand, CommandError
-import github3 as gh
+from django.core.management.base import BaseCommand
 from issues.models import IssueSource, IssueCategory
-from django.conf import settings
-import urlparse
 
 
 class Command(BaseCommand):
     help = "Sync IssueCategories for all IssueSources"
 
     def handle(self, *args, **options):
-        github = gh.login(token=settings.GITHUB_KEY)
-
-        gh_sources = IssueSource.objects.filter(
-            source_type__startswith="github")
-        for source in gh_sources:
-            url = source.base_url
-            parts = urlparse.urlparse(url)
-            path = parts.path
-
-            path_components = path.split("/")
-            user = path_components[2]
-            repo = path_components[3]
-
+        sources = IssueSource.objects.all()
+        for source in sources:
             existing_categories = source.issuecategory_set.all()
             cat_names = [c.name for c in existing_categories]
-
-            repo = github.repository(user, repo)
             labels = []
-            for label in repo.iter_labels():
+            for label in source.get_labels():
                 labels.append(label.name)
                 if label.name in cat_names:
                     continue
                 c = IssueCategory(name=label.name, source=source)
                 c.save()
+
             for c in cat_names:
                 if c not in labels:
                     s = "%s does not have label %s anymore."
