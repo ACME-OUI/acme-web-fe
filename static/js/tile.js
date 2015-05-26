@@ -275,7 +275,6 @@ $(document).ready(function(){
     	var data = {
     		'service': service_name
     	};
-    	data = JSON.stringify(data);
 
     	get_data('credential_check_existance/', 'POST', data, function(){
     		return true;
