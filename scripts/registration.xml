@@ -1,5 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Registration xmlns="http://www.esgf.org/registry" timeStamp="1431989052071" version="v0.0.1">
+<Registration xmlns="http://www.esgf.org/registry" timeStamp="1432151139413" version="v0.0.1">
+    <Node organization="cccma" namespace="cccma.ec.gc.ca" nodePeerGroup="esgf-prod" supportEmail="cccma_info@ec.gc.ca" hostname="dapp2p.cccma.ec.gc.ca" ip="142.104.195.18" dn="/O=ESGF/OU=ESGF.ORG/CN=dapp2p.cccma.ec.gc.ca" shortName="dapp2p-cccma" longName="Canadian Centre for Climate Modelling and Analysis [CCCma] data node" timeStamp="1432134094254" version="v1.5.0-brower_park-release-3-g9a0c6de-master" release="brower_park" nodeType="4" adminPeer="pcmdi9.llnl.gov" defaultPeer="pcmdi9.llnl.gov">
+        <CA hash="dunno" endpoint="dapp2p.cccma.ec.gc.ca" dn="dunno"/>
+        <GeoLocation lat="48.433300" lon="-123.349998" city="Victoria"/>
+        <NodeManager endpoint="https://dapp2p.cccma.ec.gc.ca/esgf-node-manager/node"/>
+        <AuthorizationService endpoint="https://dapp2p.cccma.ec.gc.ca/esg-orp/saml/soap/secure/authorizationService.htm"/>
+        <ThreddsService endpoint="http://dapp2p.cccma.ec.gc.ca/thredds"/>
+        <GridFTPService endpoint="gsiftp://dapp2p.cccma.ec.gc.ca">
+            <Configuration serviceType="Replication" port="2812"/>
+            <Configuration serviceType="Download" port="2811"/>
+        </GridFTPService>
+        <Metrics>
+            <DownloadedData count="0" size="0" users="0"/>
+            <RegisteredUsers count="0"/>
+        </Metrics>
+        <RelyingPartyService endpoint="https://dapp2p.cccma.ec.gc.ca/esg-orp/html.htm"/>
+        <PEMCert>
+            <Cert>NOT_AVAILABLE</Cert>
+        </PEMCert>
+    </Node>
+    <Node organization="inpe" namespace="br.inpe.cptec" nodePeerGroup="esgf-prod" supportEmail="wander.mendes@cptec.inpe.br" hostname="dm1.cptec.inpe.br" ip="150.163.217.11" dn="/C=SP/Paulo/ST=Sao/Paulista/L=Cachoeira/O=INPE/OU=ESGF.ORG/CN=dm1.cptec.inpe.br" shortName="ESGF-INPE" longName="ESGF-INPE" timeStamp="1432150702224" adminPeer="dm1.cptec.inpe.br" defaultPeer="pcmdi9.llnl.gov"/>
     <Node organization="cnrm-game-meteo" namespace="fr.cnrm-game-meteo" nodePeerGroup="esgf-prod" supportEmail="esgf@cnrm-game-meteo.fr" hostname="esg.cnrm-game-meteo.fr" ip="193.49.97.164" shortName="cnrm-game-meteo" longName="esg data for french meteorological office" timeStamp="1431828299234" version="v1.8.1" release="Griffin" nodeType="4" adminPeer="pcmdi9.llnl.gov" defaultPeer="pcmdi9.llnl.gov">
         <CA hash="dunno" endpoint="esg.cnrm-game-meteo.fr" dn="dunno"/>
         <GeoLocation lat="43.575292" lon="1.374657" city="Toulouse"/>
@@ -318,6 +338,22 @@ BzaOIrvnES2kiErOFFG8/gzsAXv5df+pTg0aMe7ADAT/nB5rd6mjxPukZuCKEWC6
 lLpv2P11XKd7Udj7LOuTXuoadCOekGNmqUr6v33+wzp7K5K3cQmLNImox9+4F74=
 -----END CERTIFICATE-----
 </Cert>
+        </PEMCert>
+    </Node>
+    <Node organization="idris" namespace="fr.idris" nodePeerGroup="esgf-prod" supportEmail="agnes.ansari@idris.fr" hostname="prodn.idris.fr" ip="130.84.42.42" dn="/O=ESGF/OU=ESGF.ORG/CN=prodn.idris.fr" shortName="PRODN-DATA" longName="prodn.idris.fr" timeStamp="1432104080251" version="v1.8.1" release="Griffin" nodeType="36" adminPeer="esgf-node.ipsl.fr" defaultPeer="esgf-node.ipsl.fr">
+        <CA hash="dunno" endpoint="prodn.idris.fr" dn="dunno"/>
+        <GeoLocation lat="48.700001" lon="2.183300" city="Orsay"/>
+        <NodeManager endpoint="https://prodn.idris.fr/esgf-node-manager/node"/>
+        <AuthorizationService endpoint="https://prodn.idris.fr/esg-orp/saml/soap/secure/authorizationService.htm"/>
+        <ThreddsService endpoint="http://prodn.idris.fr/thredds"/>
+        <GridFTPService endpoint="gsiftp://prodn.idris.fr">
+            <Configuration serviceType="Replication" port="2812"/>
+            <Configuration serviceType="Download" port="2811"/>
+        </GridFTPService>
+        <LASService endpoint="http://prodn.idris.fr/las"/>
+        <RelyingPartyService endpoint="https://prodn.idris.fr/esg-orp/html.htm"/>
+        <PEMCert>
+            <Cert>NOT_AVAILABLE</Cert>
         </PEMCert>
     </Node>
     <Node organization="IPSL" namespace="fr.polytechnique.ipsl" nodePeerGroup="esgf-prod" supportEmail="ClimServ@ipsl.polytechnique.fr" hostname="vesg.ipsl.polytechnique.fr" ip="129.104.53.4" dn="/O=ESGF/OU=ESGF.ORG/CN=vesg.ipsl.polytechnique.fr" shortName="IPSL-X_ESGF_Data_Node" longName="IPSL ESGF Data Node hosted by Ecole Polytechnique" timeStamp="1431989050075" version="v1.8.1" release="Griffin" nodeType="36" adminPeer="esgf-node.ipsl.fr" defaultPeer="pcmdi9.llnl.gov">

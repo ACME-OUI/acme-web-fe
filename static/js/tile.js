@@ -78,35 +78,33 @@ $(document).ready(function(){
 
  	//find if the user has a default layout, if so load it
  	function loadDefaultLayout(){
+ 		var jsonObj = new Object;
+		jsonObj.result = '';
+		jsonObj.data = '';
 
- 		$.ajax({
- 			url: 'load_layout/',
- 			type: 'GET',
- 			success: function(request){
- 				options = jQuery.parseJSON(request);
- 				$.each(options, function(k, v){
- 					if(v.default == true){
- 						for(var i = 0; i < v.layout.length; i++){
- 							v.layout[i] = layoutFix(v.layout[i]);
- 							if(v.layout[i].x == 1){
- 								needsFixXBool = false;
- 							} else {
- 								if(v.layout[i].x < fixValX){
- 									fixValX = v.layout[i].x;
- 								}
- 							}
- 							if(v.layout[i].y == 1){
- 								needsFixYBool = false;
- 							} else {
- 								if(v.layout[i].y < fixValY){
- 									fixValY = v.layout[i].y;
- 								}
- 							}
- 						}
- 						loadLayout(v.layout, v.mode);
- 					}
- 				});
- 			}
+ 		get_data('load_layout/', 'GET', jsonObj, function(request){
+			$.each(request, function(k, v){
+				if(v.default == true){
+					for(var i = 0; i < v.layout.length; i++){
+						v.layout[i] = layoutFix(v.layout[i]);
+						if(v.layout[i].x == 1){
+							needsFixXBool = false;
+						} else {
+							if(v.layout[i].x < fixValX){
+								fixValX = v.layout[i].x;
+							}
+						}
+						if(v.layout[i].y == 1){
+							needsFixYBool = false;
+						} else {
+							if(v.layout[i].y < fixValY){
+								fixValY = v.layout[i].y;
+							}
+						}
+					}
+					loadLayout(v.layout, v.mode);
+				}
+			});
  		});
  	}
 
@@ -252,25 +250,14 @@ $(document).ready(function(){
 
     function initFileTree(){
 		$.getScript('static/filetree/jqueryFileTree.js', function(){
-			$.ajaxSetup({
-				beforeSend: function(xhr){
-					xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
-				}
-			});
-			$.ajax({
-				url: 'get_home_folder/',
-				data: data,
-				type: 'POST',
-				success: function(response){
-					$('#velo-file-tree').fileTree({
-						root: jQuery.parseJSON(response)
-					}, function(file){
-						populateFile(file);
-					});
-				},
-				error: function(response){
-					alert('error initializing fileTree')
-				}
+			get_data('get_home_folder', 'POST', new Oject(), function(response){
+				$('#velo-file-tree').fileTree({
+					root: response
+				}, function(file){
+					populateFile(file);
+				});
+			},	function(){
+				alert('error getting home folder');
 			});
 		});
     }
@@ -289,24 +276,11 @@ $(document).ready(function(){
     		'service': service_name
     	};
     	data = JSON.stringify(data);
-    	$.ajaxSetup({
-			beforeSend: function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
-			}
-		});
-		$.ajax({
-			url: 'credential_check_existance',
-			data: data,
-			type: 'POST',
-			success: function(response){
-				return true
-			},
-			statusCode:{
-				500: function(){
-					return false;
-				}
-			}
-		});
+    	get_data('credential_check_existance/', 'POST', data, function(){
+    		return true;
+    	}, function(){
+    		return false;
+    	});
     }
 
     /* Initializes the connection to the velo api
@@ -345,26 +319,13 @@ $(document).ready(function(){
 	    		connection: 'initial'
 	    	}
 	    	data = JSON.stringify(data);
-	    	$.ajaxSetup({
-				beforeSend: function(xhr){
-					xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
-				}
-			});
-			$.ajax({
-				url: 'velo/',
-				data: data,
-				type: 'POST',
-				success: function(response){
-					spinner.stop();
-					alert(jQuery.parseJSON(response));
-				},
-				statusCode:{
-					500: function(){
-						spinner.stop();
-						alert('server error');
-					}
-				}
-			});
+	    	get_data('velo/', 'POST', data, function(){
+	    		spinner.stop();
+				alert(jQuery.parseJSON(response));
+	    	}, function(){
+	    		spinner.stop();
+				alert('server error');
+	    	});
     	});
     }
 
@@ -405,53 +366,36 @@ $(document).ready(function(){
 	    		node: id
 	    	}
 	    	data = JSON.stringify(data);
-			$.ajaxSetup({
-				beforeSend: function(xhr){
-					xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
-				}
-			});
-	    	$.ajax({
-				url:'node_info/',
-				type: 'POST',
-				data: data,
-				success: function(response){
-					spinner.stop();
-					var node_data = jQuery.parseJSON(response);
-					var data = '';
-					var text_style = '';
-					$('#nodeSelect_window').find('.tile-contents').append('<table id=node-info></table>');
-					for( var key in node_data){
-						if(key == 'status'){
-							if(node_data[key] == 'up'){
-								text_style = 'color: green;';
-							} else {
-								text_style = 'color: red;';
-							}
+	    	get_data('node_info/', 'POST', data, function(){
+	    		spinner.stop();
+				var node_data = jQuery.parseJSON(response);
+				var data = '';
+				var text_style = '';
+				$('#nodeSelect_window').find('.tile-contents').append('<table id=node-info></table>');
+				for( var key in node_data){
+					if(key == 'status'){
+						if(node_data[key] == 'up'){
+							text_style = 'color: green;';
 						} else {
-							text_style = '';
+							text_style = 'color: red;';
 						}
-						var data = '<tr><td class="key" id="'+key+'">' + key + '</td><td class="value" id="'+key+'_value" style="'+text_style+'">' + node_data[key] + '</td><tr>';
-						$('#nodeSelect_window').find('#node-info').append(data);
+					} else {
+						text_style = '';
 					}
-					var button = [	'<br><button type="button" class="btn btn-default btn-xs" id="node-search" style="float:left; margin-left: 20px;">',
-									'     <span class="fa fa-search" aria-label="Options"></span>',
-									'</button>'].join('');
-					$('#nodeSelect_window').find('.tile-contents').append(button);
-					$('#node-search').click(function(){
-						nodeSearch($('#hostname_value').text());
-					});
-				},
-				statusCode:{
-					404: function(){
-						spinner.stop();
-						alert('Resource not found');
-					},
-					500: function(){
-						spinner.stop();
-						alert('Server error');
-					}
+					var data = '<tr><td class="key" id="'+key+'">' + key + '</td><td class="value" id="'+key+'_value" style="'+text_style+'">' + node_data[key] + '</td><tr>';
+					$('#nodeSelect_window').find('#node-info').append(data);
 				}
-			});
+				var button = [	'<br><button type="button" class="btn btn-default btn-xs" id="node-search" style="float:left; margin-left: 20px;">',
+								'     <span class="fa fa-search" aria-label="Options"></span>',
+								'</button>'].join('');
+				$('#nodeSelect_window').find('.tile-contents').append(button);
+				$('#node-search').click(function(){
+					nodeSearch($('#hostname_value').text());
+				});
+	    	}, function(){
+	    		spinner.stop();
+				alert('Server error');
+	    	});
 		});
     }
 
@@ -494,75 +438,56 @@ $(document).ready(function(){
 			};
 	    	var spinner = new Spinner(opts).spin();
 	    	document.getElementById('nodeSearch_window').appendChild(spinner.el);
-	    	var csrfToken = getCookie('csrftoken');
-			$.ajaxSetup({
-				beforeSend: function(xhr){
-					xhr.setRequestHeader('X-CSRFToken', csrfToken);
-				}
-			});
 			var data = {
 				node:'http://'+hostname+'/esg-search/',
 				test_connection: true
 			};
 			var data = JSON.stringify(data);
-			$.ajax({
-				url:'node_search/',
-				data: data,
-				type: 'POST',
-				success: function(response){
-					spinner.stop();
-					var facet_options = JSON.parse(response);
-					searchWindow.empty();
-					var form = ['<form>',
-								'Facet options<br>',
-								'<select id="select-filter"></select>',
-								'<br><p>Filter value</p><select id="filter-value"></select>',
-								'<br><p id="search-string">Search string: </p>',
-								'<input type="submit" id="search-submit" value="Search" style="color: #000;">',
-								'</form>'
-								].join('');
-					searchWindow.append(form);
-					$('#select-filter').on('change', function(){
-						$('#filter-value').empty();
-						var facet_option_values = facet_options[document.getElementById('select-filter').value]
-						for( key in facet_option_values ){
-							$('#filter-value').append('<option value="' + key + '">' + key + ' : ' + facet_option_values[key] + '</option>');
-						}
-					})
-					for( key in facet_options){
-						var facet = '<option value=' + key  + '>' + key+ '</option>';
-						searchWindow.find('#select-filter').append(facet);
+			get_data('node_search/', 'POST', data, function(){
+				spinner.stop();
+				var facet_options = JSON.parse(response);
+				searchWindow.empty();
+				var form = ['<form>',
+							'Facet options<br>',
+							'<select id="select-filter"></select>',
+							'<br><p>Filter value</p><select id="filter-value"></select>',
+							'<br><p id="search-string">Search string: </p>',
+							'<input type="submit" id="search-submit" value="Search" style="color: #000;">',
+							'</form>'
+							].join('');
+				searchWindow.append(form);
+				$('#select-filter').on('change', function(){
+					$('#filter-value').empty();
+					var facet_option_values = facet_options[document.getElementById('select-filter').value]
+					for( key in facet_option_values ){
+						$('#filter-value').append('<option value="' + key + '">' + key + ' : ' + facet_option_values[key] + '</option>');
 					}
-
-					searchTerms = {};
-					$('#filter-value').on('change', function(){
-						searchTerms[document.getElementById("select-filter").value] = document.getElementById('filter-value').value;
-						$('#search-string').html('Search string: ');
-						for(key in searchTerms){
-							if(key == 'node')
-								continue;
-							$('#search-string').append('<a href="#" class="search-term" id="'+key+'">' + key + '=' + searchTerms[key] + ',</a>');
-						}
-						$('.search-term').click(function(){
-							delete searchTerms[$(this).attr('id')];
-							$(this).remove();
-						});
-					});
-					$('#search-submit').click(function(){
-						esgfSearch(searchTerms, hostname);
-					});
-				},
-				statusCode:{
-					404: function(){
-						spinner.stop();
-						alert('Node not found');
-					},
-					500: function(){
-						spinner.stop();
-						alert('Unable to connect');
-					}
+				})
+				for( key in facet_options){
+					var facet = '<option value=' + key  + '>' + key+ '</option>';
+					searchWindow.find('#select-filter').append(facet);
 				}
 
+				searchTerms = {};
+				$('#filter-value').on('change', function(){
+					searchTerms[document.getElementById("select-filter").value] = document.getElementById('filter-value').value;
+					$('#search-string').html('Search string: ');
+					for(key in searchTerms){
+						if(key == 'node')
+							continue;
+						$('#search-string').append('<a href="#" class="search-term" id="'+key+'">' + key + '=' + searchTerms[key] + ',</a>');
+					}
+					$('.search-term').click(function(){
+						delete searchTerms[$(this).attr('id')];
+						$(this).remove();
+					});
+				});
+				$('#search-submit').click(function(){
+					esgfSearch(searchTerms, hostname);
+				});
+			}, function(){
+				spinner.stop();
+				alert('Unable to connect');
 			});
     	});
     }
@@ -594,71 +519,47 @@ $(document).ready(function(){
 			};
 	    	var spinner = new Spinner(opts).spin();
 	    	document.getElementById('nodeSearch_window').appendChild(spinner.el);
-    		var csrfToken = getCookie('csrftoken');
-	    	$.ajaxSetup({
-				beforeSend: function(xhr){
-					xhr.setRequestHeader('X-CSRFToken', csrfToken);
-				}
-			});
 			searchTerms['node'] = 'http://'+hostname+'/esg-search/';
-
-			
 			var data = JSON.stringify(searchTerms);
-			$.ajax({
-				url:'node_search/',
-				data: data,
-				type: 'POST',
-				success: function(response){
-					spinner.stop();
-					console.log(JSON.parse(response));
-					response = JSON.parse(response);
-					var searchDisplay = [	'<div id="searchDisplay">',
-											'</div>'].join('');
-					if($('#searchDisplay').length == 0){
-						$('#nodeSearch_window').find('.tile-contents').append(searchDisplay);
-					} else {
-						$('#searchDisplay').empty();
-					}
-					 $('#searchDisplay').css({
-					// 	width: $('#nodeSearch_window').width()/2,
-					 	height: $('#nodeSearch_window').height()-$('#searchDisplay').offset().top
-					// 	left: $('#nodeSearch_window').width()/2,
-					 });
-					for( i in response ){
-						$('#searchDisplay').append('<h2>Hit number ' + (parseInt(i)+1) + '</h2><p id="' + i + '"></p>');
-						for( key in response[i]){
-							var value = '<p>' + key + ' : ';
-							if(typeof(response[i][key]) != 'object'){
-								value += response[i][key] + '</p>';
-								$('#searchDisplay').find('#'+i).append(value);
-								continue;
-							}
-							for(var j = 0; j < response[i][key].length; j++){
-								if(j == 0){
-									value += response[i][key][j];
-								} else {
-									value += ', ' + response[i][key][j];
-								}
-							}
-							$('#searchDisplay').find('#'+i).append(value + '</p>');
-						}
-						$('#searchDisplay').find('#'+i).append('<br>');
-					}
-				},
-				statusCode:{
-					404: function(){
-						spinner.stop();
-						alert('Node not found');
-					},
-					500: function(){
-						spinner.stop();
-						alert('Unable to connect');
-					},
-					504: function(){
-						spinner.stop();
-						alert('No data found, ease search restrictions and try again');
-					}
+			get_data('node_search/', 'POST', data, function(){
+				spinner.stop();
+				console.log(JSON.parse(response));
+				response = JSON.parse(response);
+				var searchDisplay = [	'<div id="searchDisplay">',
+										'</div>'].join('');
+				if($('#searchDisplay').length == 0){
+					$('#nodeSearch_window').find('.tile-contents').append(searchDisplay);
+				} else {
+					$('#searchDisplay').empty();
 				}
+				 $('#searchDisplay').css({
+				// 	width: $('#nodeSearch_window').width()/2,
+				 	height: $('#nodeSearch_window').height()-$('#searchDisplay').offset().top
+				// 	left: $('#nodeSearch_window').width()/2,
+				 });
+				for( i in response ){
+					$('#searchDisplay').append('<h2>Hit number ' + (parseInt(i)+1) + '</h2><p id="' + i + '"></p>');
+					for( key in response[i]){
+						var value = '<p>' + key + ' : ';
+						if(typeof(response[i][key]) != 'object'){
+							value += response[i][key] + '</p>';
+							$('#searchDisplay').find('#'+i).append(value);
+							continue;
+						}
+						for(var j = 0; j < response[i][key].length; j++){
+							if(j == 0){
+								value += response[i][key][j];
+							} else {
+								value += ', ' + response[i][key][j];
+							}
+						}
+						$('#searchDisplay').find('#'+i).append(value + '</p>');
+					}
+					$('#searchDisplay').find('#'+i).append('<br>');
+				}
+			}, function(){
+				spinner.stop();
+				alert('No data found, ease search restrictions and try again');
 			});
     	});
     }
@@ -1622,29 +1523,11 @@ Left slide menu
     			default_layout: document.getElementById('default').checked
     		};
 
-    		data = JSON.stringify(data);
-    		var csrfToken = getCookie('csrftoken');
-    		$.ajaxSetup({
-    			beforeSend: function(xhr){
-    				xhr.setRequestHeader('X-CSRFToken', csrfToken);
-    			}
-    		});
-    		$.ajax({
-    			url:'save_layout/',
-    			type: 'POST',
-    			data: data,
-    			dataType: 'json',
-    			async: true,
-    			cache: false,
-    			statusCode: {
-    				422: function(){
-    					alert('Invalid Layout Name');
-    				},
-    				500: function(){
-    					alert('Server Error')
-    				}
-
-    			}
+    		//data = JSON.stringify(data);
+    		get_data('save_layout/', 'POST', data, function(){
+    			alert('layout saved');
+    		}, function(){
+    			alert('Server Error');
     		});
     		$('.mask').remove();
     		$('.save-layout').remove();
@@ -1654,66 +1537,54 @@ Left slide menu
 
 	$('#load-layout').click(function(){
 		var options = {};
-		$.ajax({
-			url: 'load_layout/',
-			type: 'GET',
-			success: function(request){
-				//parse response
-				options = jQuery.parseJSON(request);
-				//create background mask
-				var mask = document.createElement('div');
-				$(mask).addClass('mask');
-				$(mask).attr({'id':'mask'});
-				$(mask).click(function(){
-					fadeOutMask();
-				});
-				$('body').append(mask);
-				//create load menu and populate with values
-				var loadMenu = document.createElement('div');
-				$(loadMenu).addClass('bvc');
-				$(loadMenu).addClass('save-layout');
-				var loadMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
-				loadMenuHtml += '<form name="load-layout-form" id="save-form">'; 
-				loadMenuHtml += 'Select Layout:<br><select id="select-layout">';
-				$.each(options, function(k, v){
-					loadMenuHtml += '<option value="' + v.nane + '">' + v.name + '</option>';
-				});
-				loadMenuHtml += '</select><input type="submit" value="Load" id="load-button">';
-				loadMenuHtml += '</form></div><div class="bevel bl br"></div>';
-				$(loadMenu).html(loadMenuHtml);
-				$('body').append(loadMenu);
-				$(mask).fadeIn();
+		get_data('load_layout/', 'GET', new Object(), function(request){
+			//parse response
+			options = request;
+			//create background mask
+			var mask = document.createElement('div');
+			$(mask).addClass('mask');
+			$(mask).attr({'id':'mask'});
+			$(mask).click(function(){
+				fadeOutMask();
+			});
+			$('body').append(mask);
+			//create load menu and populate with values
+			var loadMenu = document.createElement('div');
+			$(loadMenu).addClass('bvc');
+			$(loadMenu).addClass('save-layout');
+			var loadMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
+			loadMenuHtml += '<form name="load-layout-form" id="save-form">'; 
+			loadMenuHtml += 'Select Layout:<br><select id="select-layout">';
+			$.each(options, function(k, v){
+				loadMenuHtml += '<option value="' + v.nane + '">' + v.name + '</option>';
+			});
+			loadMenuHtml += '</select><input type="submit" value="Load" id="load-button">';
+			loadMenuHtml += '</form></div><div class="bevel bl br"></div>';
+			$(loadMenu).html(loadMenuHtml);
+			$('body').append(loadMenu);
+			$(mask).fadeIn();
 
-				$('#load-button').click(function(){
-					var name = document.forms['load-layout-form'].elements[0].options[document.forms['load-layout-form'].elements[0].selectedIndex].text;
-					var csrfToken = getCookie('csrftoken');
-					$.ajaxSetup({
-						beforeSend: function(xhr){
-							xhr.setRequestHeader('X-CSRFToken', csrfToken);
-						}
+			$('#load-button').click(function(){
+				var name = document.forms['load-layout-form'].elements[0].options[document.forms['load-layout-form'].elements[0].selectedIndex].text;
+				var data = {'layout_name':name};
+				get_data('load_layout/', 'POST', data, function(request){
+					$('.tile').each(function(){
+						$(this).remove();
 					});
-					var data = {'layout_name':name};
-					data = JSON.stringify(data);
-					$.ajax({
-						url: 'load_layout/',
-						type: 'POST',
-						data: data,
-						dataType: 'json',
-						success: function(request){
-							$('.tile').each(function(){
-								$(this).remove();
-							});
-							tiles = [];
-							layout = []
-							$.each(request.board_layout, function(k, v){
-								layout.push(layoutFix(v));
-							});
-							loadLayout(layout, request.mode);
-						}
+					tiles = [];
+					layout = []
+					$.each(request.board_layout, function(k, v){
+						layout.push(layoutFix(v));
 					});
+					loadLayout(layout, request.mode);
+				}, function(){
+					alert('failed to load layout');
 				});
-			}
+			});
+		}, function(){
+			alert('failed to load layout');
 		});
+
 		leftMenuToggle();
 	});
 
@@ -2006,6 +1877,56 @@ Left slide menu
  			return 0;
  		}
  	}
+
+ 	function get_csrf() {
+	    var nameEQ = "csrftoken=";
+	    var ca = document.cookie.split(';');
+	    for (var i = 0; i < ca.length; i++) {
+	        var c = ca[i];
+	        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+	        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+	    }
+	    return null;
+	}
+
+	function get_data(url, type, jsonObj, success_callback, fail_callback){
+		var csrftoken = get_csrf();
+
+		// var jsonObj = new Object;
+		// jsonObj.result = '';
+		// jsonObj.data = '';
+		data = JSON.stringify(jsonObj);
+		var ajax_obj = $.ajax({
+			type: type,
+			url: url,
+			data: data,
+			dataType: 'json',
+			success: function(data){
+				jsonObj.result = 'success';
+				jsonObj.data = data;
+				success_callback(jsonObj.data);
+			},
+			headers: {
+				"X-CSRFToken": csrftoken
+			},
+			error: function(request, status, error){
+				jsonObj.result = 'error';
+				if(request.status == 200){
+					success_callback(request);
+					return;
+				}
+				var errorObj = new Object;
+				errorObj.request = request;
+				errorObj.status = status;
+				errorObj.error = error;
+				var errorStr = JSON.stringify(errorObj);
+				jsonObj.data = errorStr;
+				console.log(jsonObj);
+				fail_callback(status);
+			}
+		});
+		return ajax_obj;
+	}
 
 });
 

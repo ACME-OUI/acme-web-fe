@@ -271,6 +271,7 @@ def save_layout(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
+
             if len(TileLayout.objects.filter(layout_name=data['name'])) == 0:
                 if data['default_layout'] == 1:
                     print 'got a new default'
@@ -289,7 +290,14 @@ def save_layout(request):
             else:
                 return HttpResponse(status=422)
         except Exception as e:
-            print "Unexpected error:", repr(e)
+            import traceback
+            print '1', e.__doc__
+            print '2', sys.exc_info()
+            print '3', sys.exc_info()[0]
+            print '4', sys.exc_info()[1]
+            print '5', traceback.tb_lineno(sys.exc_info()[2])
+            ex_type, ex, tb = sys.exc_info()
+            print '6', traceback.print_tb(tb)
             return HttpResponse(status=500)
 
 
