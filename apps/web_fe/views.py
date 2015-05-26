@@ -283,7 +283,7 @@ def grid(request):
 
                     velo_api = VeloAPI.Velo()
                     velo_api.start_jvm()
-                    res = velo_api.init('acmetest', 'acmetest')
+                    res = velo_api.init_velo('acmetest', 'acmetest')
                     request.session['velo_login'] = res
                     print 'velo log in successful'
                     '''
