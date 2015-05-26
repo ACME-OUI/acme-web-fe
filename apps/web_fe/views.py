@@ -83,6 +83,7 @@ def add_credentials(request):
                     service=s, site_user_name=str(request.user))
                 if len(creds) != 0:
                     for i in creds:
+                        print 'changing credentials for ', request.user
                         i.password = data[s]['password']
                         i.service_user_name = data[s]['username']
                         i.save()
@@ -91,6 +92,7 @@ def add_credentials(request):
                     c = Credential(service_user_name=data[s]['username'], password=data[s][
                                    'password'], service=s, site_user_name=str(request.user))
                     c.save()
+
             return HttpResponse(render_template(request, 'web_fe/add_credentials.html', {'added': 'true'}))
         except Exception as e:
             print 'Error creating new credentials:', repr(e)

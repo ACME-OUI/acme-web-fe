@@ -317,9 +317,8 @@ $(document).ready(function(){
 	    	var spinner = new Spinner(opts).spin();
 	    	document.getElementById('velo_window').appendChild(spinner.el);
 	    	var data = {
-	    		connection: 'initial'
+	    		connection: 'init'
 	    	}
-	    	data = JSON.stringify(data);
 	    	get_data('velo/', 'POST', data, function(){
 	    		spinner.stop();
 				alert(jQuery.parseJSON(response));
