@@ -48,8 +48,8 @@ acme-site
     RECAPTCHA_PRIVATE_KEY = ''
 
     # Make this unique, and don't share it with anybody.
+    # CAN NOT BE EMPTY http://www.miniwebtool.com/django-secret-key-generator
     SECRET_KEY = ''
-
     JAR_PATH = '-Djava.class.path=/path/to/acme-web-fe/static/java/VeloAPI.jar'
 
 
