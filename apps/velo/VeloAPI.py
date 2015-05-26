@@ -17,7 +17,7 @@ class Velo:
     def start_jvm(self):
         # include the velo python API jar file here
         jpype.startJVM(
-            jvmPath, "-Djava.class.path=/Users/baldwin32/projects/acme-web-fe/static/java/VeloAPI.jar")
+            jvmPath, "-Djava.class.path=/home/sterling/projects/acme-web-fe/static/java/VeloAPI.jar")
         global velo, cms, jobConfig, fileObj, tifConstants, fileServerMap, filesToDownload
         velo = JPackage("velo").mgr.VeloManager
         cms = JPackage("gov").pnnl.velo.model.CmsPath
@@ -59,7 +59,7 @@ class Velo:
         homeFolder = Velo.get_homefolder(self)
         cmspath = homeFolder.append(filename)
         fileServerMap.put(fileObj, cmspath)
-        #velo.uploadFile(location, filename , fileServerMap, None)
+        # velo.uploadFile(location, filename , fileServerMap, None)
         resMgr.bulkUpload(fileServerMap, None)
 
     # download file from velo
@@ -125,7 +125,7 @@ class Velo:
         job_config = jobLaunchService.launchJob(config, None)
         global con
         con = config
-        #job_config = velo.launchJob()
+        # job_config = velo.launchJob()
         print "Fake Job submitted"
         print "Waiting for job output files"
         time.sleep(60)

@@ -1,0 +1,11 @@
+*** Settings ***
+Library       Selenium Library
+
+*** Testcases ***
+Login Should Succeed When the Correct Username and Password are Entered
+  Start Selenium Server
+  Open Browser  http://localhost:8000/acme/  
+  Maximize Browser Window
+  Page Should Contain  The company name in the Road Runner cartoons is ironic
+  Close Browser
+  Stop Selenium Server
