@@ -1,0 +1,1080 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Registration xmlns="http://www.esgf.org/registry" timeStamp="1432650021761" version="v0.0.1">
+    <Node organization="inpe" namespace="br.inpe.cptec" nodePeerGroup="esgf-prod" supportEmail="wander.mendes@cptec.inpe.br" hostname="dm1.cptec.inpe.br" ip="150.163.217.11" shortName="ESGF-INPE" longName="ESGF-INPE" timeStamp="1432649570100" version="v1.8.1" release="Griffin" nodeType="60" adminPeer="dm1.cptec.inpe.br" defaultPeer="pcmdi9.llnl.gov">
+        <CA hash="dunno" endpoint="dm1.cptec.inpe.br" dn="dunno"/>
+        <GeoLocation lat="-23.183300" lon="-45.883301" city="São José Dos Campos"/>
+        <NodeManager endpoint="https://dm1.cptec.inpe.br/esgf-node-manager/node"/>
+        <OpenIDProvider endpoint="https://dm1.cptec.inpe.br/esgf-idp/idp/openidServer.htm"/>
+        <FrontEnd endpoint="http://dm1.cptec.inpe.br/esgf-web-fe/"/>
+        <IndexService port="8983" endpoint="http://dm1.cptec.inpe.br/esg-search/search"/>
+        <AttributeService endpoint="https://dm1.cptec.inpe.br/esgf-idp/saml/soap/secure/attributeService.htm">
+            <Group name="wheel" description="Administrator Group"/>
+        </AttributeService>
+        <AuthorizationService endpoint="https://dm1.cptec.inpe.br/esg-orp/saml/soap/secure/authorizationService.htm"/>
+        <RegistrationService endpoint="https://dm1.cptec.inpe.br/esgf-idp/secure/registrationService.htm"/>
+        <ThreddsService endpoint="http://dm1.cptec.inpe.br/thredds"/>
+        <GridFTPService endpoint="gsiftp://dm1.cptec.inpe.br">
+            <Configuration serviceType="Replication" port="2812"/>
+            <Configuration serviceType="Download" port="2811"/>
+        </GridFTPService>
+        <Metrics>
+            <DownloadedData count="0" size="0" users="0"/>
+            <RegisteredUsers count="2"/>
+        </Metrics>
+        <RSSFeeds>
+            <RSSFeed url="http://dm1.cptec.inpe.br/esg-search/feed/node.rss" title="ESGF-INPE RSS"/>
+        </RSSFeeds>
+        <LASService endpoint="http://dm1.cptec.inpe.br/las"/>
+        <MyProxyService endpoint="dm1.cptec.inpe.br"/>
+        <PublishingService endpoint="https://dm1.cptec.inpe.br/esg-search/remote/secure/client-cert/hessian/publishingService"/>
+        <RelyingPartyService endpoint="https://dm1.cptec.inpe.br/esg-orp/html.htm"/>
+        <PEMCert>
+            <Cert>Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 1 (0x1)
+        Signature Algorithm: sha1WithRSAEncryption
+        Issuer: O=ESGF, OU=ESGF.ORG, OU=ESGF-dm1.cptec.inpe.br, CN=ESGF CA
+        Validity
+            Not Before: May 26 13:51:36 2015 GMT
+            Not After : May 25 13:51:36 2016 GMT
+        Subject: O=ESGF, OU=ESGF.ORG, OU=ESGF-dm1.cptec.inpe.br, CN=host/dm1.cptec.inpe.br
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (1024 bit)
+                Modulus (1024 bit):
+                    00:d7:e9:1c:c8:0e:34:02:5e:b4:b6:f0:95:ab:fd:
+                    35:90:3d:41:2a:65:dc:e1:81:27:66:3c:68:71:c8:
+                    28:e2:f6:d4:2a:a1:fd:71:31:fb:58:55:5d:04:98:
+                    ed:b3:65:f2:e7:ea:3c:1a:80:48:c0:cb:eb:aa:6a:
+                    35:e6:cb:27:78:e3:2b:0f:52:d8:58:12:60:2f:d9:
+                    03:73:d3:cb:89:36:7d:af:bb:41:f3:a4:f0:e4:42:
+                    e9:06:c2:03:58:96:c8:e0:ff:7b:19:d8:3c:51:5e:
+                    26:27:dc:aa:25:e9:86:c8:3a:7e:53:e7:bd:f3:75:
+                    45:4a:b5:8c:5d:8e:2a:a1:93
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            Netscape Cert Type: 
+                SSL Client, SSL Server, S/MIME, Object Signing
+    Signature Algorithm: sha1WithRSAEncryption
+        c3:8b:58:64:99:77:6e:96:68:1e:44:fc:c2:67:84:9d:6b:09:
+        93:f5:4f:32:36:f7:52:9f:8d:0b:01:3e:e2:ef:d6:23:fa:2f:
+        7f:9e:4b:24:18:d7:08:22:f7:c6:b5:6a:7f:c8:25:63:c4:30:
+        53:fa:2d:15:2f:0e:33:60:43:b4:14:4c:34:62:90:b0:94:6d:
+        2a:19:3c:f4:9d:d8:d6:30:e9:a2:47:09:5c:1c:c1:70:10:c9:
+        40:97:76:f8:bb:0a:dd:dd:47:05:38:e6:ae:1e:d2:b8:99:83:
+        b9:cd:c3:ce:ee:2a:61:2d:c0:4e:4d:33:50:4c:74:17:2b:c0:
+        64:96
+-----BEGIN CERTIFICATE-----
+MIICRDCCAa2gAwIBAgIBATANBgkqhkiG9w0BAQUFADBVMQ0wCwYDVQQKEwRFU0dG
+MREwDwYDVQQLEwhFU0dGLk9SRzEfMB0GA1UECxMWRVNHRi1kbTEuY3B0ZWMuaW5w
+ZS5icjEQMA4GA1UEAxMHRVNHRiBDQTAeFw0xNTA1MjYxMzUxMzZaFw0xNjA1MjUx
+MzUxMzZaMGQxDTALBgNVBAoTBEVTR0YxETAPBgNVBAsTCEVTR0YuT1JHMR8wHQYD
+VQQLExZFU0dGLWRtMS5jcHRlYy5pbnBlLmJyMR8wHQYDVQQDExZob3N0L2RtMS5j
+cHRlYy5pbnBlLmJyMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDX6RzIDjQC
+XrS28JWr/TWQPUEqZdzhgSdmPGhxyCji9tQqof1xMftYVV0EmO2zZfLn6jwagEjA
+y+uqajXmyyd44ysPUthYEmAv2QNz08uJNn2vu0HzpPDkQukGwgNYlsjg/3sZ2DxR
+XiYn3Kol6YbIOn5T573zdUVKtYxdjiqhkwIDAQABoxUwEzARBglghkgBhvhCAQEE
+BAMCBPAwDQYJKoZIhvcNAQEFBQADgYEAw4tYZJl3bpZoHkT8wmeEnWsJk/VPMjb3
+Up+NCwE+4u/WI/ovf55LJBjXCCL3xrVqf8glY8QwU/otFS8OM2BDtBRMNGKQsJRt
+Khk89J3Y1jDpokcJXBzBcBDJQJd2+LsK3d1HBTjmrh7SuJmDuc3Dzu4qYS3ATk0z
+UEx0FyvAZJY=
+-----END CERTIFICATE-----
+</Cert>
+        </PEMCert>
+    </Node>
+    <Node organization="liu" namespace="se.liu.nsc" nodePeerGroup="esgf-prod" supportEmail="esg-admin@nsc.liu.se" hostname="esg-dn1.nsc.liu.se" ip="130.236.100.123" dn="/O=ESGF/OU=ESGF.ORG/CN=host/esg-dn1.nsc.liu.se" shortName="esg-dn1" longName="esg-datanode1" timeStamp="1432213762777" version="v1.6.2-bushwick_myrtle-release-master" release="bushwick_myrtle" nodeType="60" adminPeer="esg-dn1.nsc.liu.se" defaultPeer="pcmdi9.llnl.gov">
+        <CA hash="dunno" endpoint="esg-dn1.nsc.liu.se" dn="dunno"/>
+        <GeoLocation lat="58.416698" lon="15.616700" city="Linköping"/>
+        <NodeManager endpoint="https://esg-dn1.nsc.liu.se/esgf-node-manager/node"/>
+        <OpenIDProvider endpoint="https://esg-dn1.nsc.liu.se/esgf-idp/idp/openidServer.htm"/>
+        <FrontEnd endpoint="http://esg-dn1.nsc.liu.se/esgf-web-fe/"/>
+        <IndexService port="8983" endpoint="http://esg-dn1.nsc.liu.se/esg-search/search"/>
+        <AttributeService endpoint="https://esg-dn1.nsc.liu.se/esgf-idp/saml/soap/secure/attributeService.htm">
+            <Group name="wheel" description="Administrator Group"/>
+            <Group name="CORDEX_Commercial" description="User group for possible commercial users of CORDEX data"/>
+            <Group name="CORDEX_Research" description="User group only for non-commercial users of CORDEX data"/>
+        </AttributeService>
+        <AuthorizationService endpoint="https://esg-dn1.nsc.liu.se/esg-orp/saml/soap/secure/authorizationService.htm"/>
+        <RegistrationService endpoint="https://esg-dn1.nsc.liu.se/esgf-idp/secure/registrationService.htm"/>
+        <ThreddsService endpoint="http://esg-dn1.nsc.liu.se/thredds"/>
+        <GridFTPService endpoint="gsiftp://esg-dn1.nsc.liu.se">
+            <Configuration serviceType="Replication" port="2812"/>
+            <Configuration serviceType="Download" port="2811"/>
+        </GridFTPService>
+        <Metrics>
+            <DownloadedData count="0" size="0" users="0"/>
+            <RegisteredUsers count="491"/>
+        </Metrics>
+        <RSSFeeds>
+            <RSSFeed url="http://esg-dn1.nsc.liu.se/esg-search/feed/node.rss" title="esg-dn1 RSS"/>
+        </RSSFeeds>
+        <MyProxyService endpoint="esg-dn1.nsc.liu.se"/>
+        <PublishingService endpoint="https://esg-dn1.nsc.liu.se/esg-search/remote/secure/client-cert/hessian/publishingService"/>
+        <RelyingPartyService endpoint="https://esg-dn1.nsc.liu.se/esg-orp/html.htm"/>
+        <PEMCert>
+            <Cert>Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 1066 (0x42a)
+        Signature Algorithm: sha1WithRSAEncryption
+        Issuer: O=ESGF, OU=ESGF.ORG, CN=NSC Simple CA
+        Validity
+            Not Before: Apr  3 09:34:22 2015 GMT
+            Not After : Apr  2 09:34:22 2016 GMT
+        Subject: O=ESGF, OU=ESGF.ORG, CN=host/esg-dn1.nsc.liu.se
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (4096 bit)
+                Modulus (4096 bit):
+                    00:a5:25:cf:6d:fc:71:9e:b0:68:6b:dc:c3:8a:1f:
+                    68:be:c4:60:cd:4b:02:2f:03:6b:ea:fe:5f:d5:5f:
+                    32:ca:07:a0:33:bc:49:fe:86:23:36:65:2e:89:68:
+                    fd:da:29:eb:ef:d7:66:9e:de:a1:84:f3:0d:76:14:
+                    e5:02:78:2b:59:77:10:00:4b:14:ce:21:e1:e9:9d:
+                    bb:b3:cf:2d:04:c4:2e:1c:3a:de:c5:01:c9:66:8e:
+                    e1:d7:2c:cc:f3:9e:e5:8d:c1:4d:fe:97:54:bd:63:
+                    90:52:dd:c6:d4:e9:61:e0:4f:89:6a:68:4f:42:4f:
+                    5f:08:b8:6f:88:4b:1b:a0:e9:45:7b:2a:84:c0:03:
+                    46:d2:c5:9f:eb:e8:9b:87:28:5a:3b:86:21:2d:cf:
+                    01:e4:b4:72:6e:d3:f9:a2:02:cb:ff:3a:85:a4:36:
+                    16:02:dc:71:e0:b0:e4:e2:39:7c:0c:24:7e:12:f7:
+                    7c:0c:d1:8d:41:ff:2a:ba:66:61:2c:4d:02:b9:6f:
+                    55:57:21:de:f6:83:e0:3a:d0:a8:92:44:f3:f9:47:
+                    7f:e1:7b:20:9a:48:f4:e6:5c:07:50:30:b9:e1:cf:
+                    53:9b:63:9a:7f:a4:16:1f:b9:ea:8f:3a:d1:e1:f0:
+                    37:95:3a:0f:49:e8:30:61:6b:fa:d5:65:e7:92:ea:
+                    58:bd:f1:bb:cf:e7:92:4b:07:e7:30:a1:9c:cc:37:
+                    d3:3e:e1:72:a6:5c:a0:bd:ca:5f:c4:2c:3d:b9:00:
+                    e3:fa:38:96:4f:f3:6d:ba:f9:33:07:50:0c:81:e2:
+                    7a:47:c0:b3:69:1d:b9:c2:45:6d:07:5a:e2:2c:8b:
+                    bb:d9:8e:78:e6:ee:66:62:d7:70:fd:80:94:6d:f7:
+                    03:c7:3e:3a:3e:8d:83:f2:f3:6f:0a:b8:65:75:f4:
+                    72:c6:e3:f5:24:ed:5d:4c:40:6f:b7:b8:79:7c:6a:
+                    8d:bb:d4:6c:db:bc:cf:27:eb:58:44:cc:69:cc:84:
+                    ec:ce:01:82:71:c1:bf:9f:43:8a:ea:e5:b3:e3:fb:
+                    24:3d:fb:15:d4:d8:75:e0:c6:a8:c4:c7:85:14:8e:
+                    8c:c6:47:fa:f2:af:6a:d9:3f:b7:b8:4c:e1:29:d2:
+                    d9:dc:52:0c:df:28:76:a8:d1:cb:10:d7:21:55:0a:
+                    3a:c2:9f:8d:50:15:5a:11:18:73:95:e0:fc:68:26:
+                    a2:6d:ee:45:6e:9e:49:75:6b:fc:d4:41:06:72:d5:
+                    cb:f8:47:b2:e2:5c:64:80:df:3e:25:2e:fd:41:d4:
+                    0e:93:bd:af:51:7a:3b:83:06:28:b5:8f:f7:c3:7e:
+                    d2:c1:6b:db:65:e1:4c:9b:d1:d9:1f:dc:81:d1:5b:
+                    04:cd:1d
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            Netscape Cert Type: 
+                SSL Client, SSL Server, S/MIME, Object Signing
+    Signature Algorithm: sha1WithRSAEncryption
+        74:88:b9:a0:8f:69:cf:b0:61:be:21:27:ab:e9:7d:3d:11:84:
+        fb:13:80:5c:3b:3f:78:4e:1d:25:06:14:2e:0c:46:d8:2c:1f:
+        95:8d:82:24:b2:b8:2c:7f:cc:ce:44:15:80:c4:5f:39:69:ad:
+        18:69:6c:60:80:ab:23:30:e3:bd:75:a9:6d:8a:99:20:05:f5:
+        8c:0f:5d:20:63:45:91:bc:05:9c:77:d5:71:52:19:cd:98:d4:
+        9e:7f:f3:3c:77:ca:21:3d:19:64:35:94:56:46:94:d9:3d:10:
+        44:1d:cb:4c:66:03:57:2d:56:15:a7:06:bb:ec:12:a0:3e:57:
+        e4:95
+-----BEGIN CERTIFICATE-----
+MIIDjjCCAvegAwIBAgICBCowDQYJKoZIhvcNAQEFBQAwOjENMAsGA1UEChMERVNH
+RjERMA8GA1UECxMIRVNHRi5PUkcxFjAUBgNVBAMTDU5TQyBTaW1wbGUgQ0EwHhcN
+MTUwNDAzMDkzNDIyWhcNMTYwNDAyMDkzNDIyWjBEMQ0wCwYDVQQKEwRFU0dGMREw
+DwYDVQQLEwhFU0dGLk9SRzEgMB4GA1UEAxMXaG9zdC9lc2ctZG4xLm5zYy5saXUu
+c2UwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQClJc9t/HGesGhr3MOK
+H2i+xGDNSwIvA2vq/l/VXzLKB6AzvEn+hiM2ZS6JaP3aKevv12ae3qGE8w12FOUC
+eCtZdxAASxTOIeHpnbuzzy0ExC4cOt7FAclmjuHXLMzznuWNwU3+l1S9Y5BS3cbU
+6WHgT4lqaE9CT18IuG+ISxug6UV7KoTAA0bSxZ/r6JuHKFo7hiEtzwHktHJu0/mi
+Asv/OoWkNhYC3HHgsOTiOXwMJH4S93wM0Y1B/yq6ZmEsTQK5b1VXId72g+A60KiS
+RPP5R3/heyCaSPTmXAdQMLnhz1ObY5p/pBYfueqPOtHh8DeVOg9J6DBha/rVZeeS
+6li98bvP55JLB+cwoZzMN9M+4XKmXKC9yl/ELD25AOP6OJZP8226+TMHUAyB4npH
+wLNpHbnCRW0HWuIsi7vZjnjm7mZi13D9gJRt9wPHPjo+jYPy828KuGV19HLG4/Uk
+7V1MQG+3uHl8ao271GzbvM8n61hEzGnMhOzOAYJxwb+fQ4rq5bPj+yQ9+xXU2HXg
+xqjEx4UUjozGR/ryr2rZP7e4TOEp0tncUgzfKHao0csQ1yFVCjrCn41QFVoRGHOV
+4PxoJqJt7kVunkl1a/zUQQZy1cv4R7LiXGSA3z4lLv1B1A6Tva9RejuDBii1j/fD
+ftLBa9tl4Uyb0dkf3IHRWwTNHQIDAQABoxUwEzARBglghkgBhvhCAQEEBAMCBPAw
+DQYJKoZIhvcNAQEFBQADgYEAdIi5oI9pz7BhviEnq+l9PRGE+xOAXDs/eE4dJQYU
+LgxG2CwflY2CJLK4LH/MzkQVgMRfOWmtGGlsYICrIzDjvXWpbYqZIAX1jA9dIGNF
+kbwFnHfVcVIZzZjUnn/zPHfKIT0ZZDWUVkaU2T0QRB3LTGYDVy1WFacGu+wSoD5X
+5JU=
+-----END CERTIFICATE-----
+</Cert>
+        </PEMCert>
+    </Node>
+    <Node organization="ornl" namespace="gov.ornl.ccs" nodePeerGroup="esgf-prod" supportEmail="harneyjf@ornl.gov" hostname="esg.ccs.ornl.gov" ip="192.168.1.14" dn="/O=ESGF/OU=ESGF.ORG/CN=esg.ccs.ornl.gov" shortName="ornl" longName="ornl" timeStamp="1432579959308" version="v1.7.0-phoenix-release-master" release="Phoenix" nodeType="28" adminPeer="esg.ccs.ornl.gov" defaultPeer="pcmdi9.llnl.gov">
+        <CA hash="dunno" endpoint="esg.ccs.ornl.gov" dn="dunno"/>
+        <NodeManager endpoint="https://esg.ccs.ornl.gov/esgf-node-manager/node"/>
+        <OpenIDProvider endpoint="https://esg.ccs.ornl.gov/esgf-idp/idp/openidServer.htm"/>
+        <FrontEnd endpoint="http://esg.ccs.ornl.gov/esgf-web-fe/"/>
+        <IndexService port="8983" endpoint="http://esg.ccs.ornl.gov/esg-search/search"/>
+        <AttributeService endpoint="https://esg.ccs.ornl.gov/esgf-idp/saml/soap/secure/attributeService.htm">
+            <Group name="wheel" description="Administrator Group"/>
+            <Group name="CSSEF" description=""/>
+            <Group name="ACME" description=""/>
+            <Group name="CSSEF-ADHOC" description=""/>
+        </AttributeService>
+        <AuthorizationService endpoint="https://esg.ccs.ornl.gov/esg-orp/saml/soap/secure/authorizationService.htm"/>
+        <RegistrationService endpoint="https://esg.ccs.ornl.gov/esgf-idp/secure/registrationService.htm"/>
+        <ThreddsService endpoint="http://esg.ccs.ornl.gov/thredds"/>
+        <GridFTPService endpoint="gsiftp://esg.ccs.ornl.gov">
+            <Configuration serviceType="Replication" port="2812"/>
+            <Configuration serviceType="Download" port="2811"/>
+        </GridFTPService>
+        <Metrics>
+            <DownloadedData count="0" size="0" users="0"/>
+            <RegisteredUsers count="104"/>
+        </Metrics>
+        <RSSFeeds>
+            <RSSFeed url="http://esg.ccs.ornl.gov/esg-search/feed/node.rss" title="ornl RSS"/>
+        </RSSFeeds>
+        <MyProxyService endpoint="esg.ccs.ornl.gov"/>
+        <PublishingService endpoint="https://esg.ccs.ornl.gov/esg-search/remote/secure/client-cert/hessian/publishingService"/>
+        <RelyingPartyService endpoint="https://esg.ccs.ornl.gov/esg-orp/html.htm"/>
+        <PEMCert>
+            <Cert>Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 1193 (0x4a9)
+        Signature Algorithm: sha1WithRSAEncryption
+        Issuer: O=ESGF, OU=ESGF.ORG, CN=NSC Simple CA
+        Validity
+            Not Before: May 25 13:47:04 2015 GMT
+            Not After : May 24 13:47:04 2016 GMT
+        Subject: O=ESGF, OU=ESGF.ORG, CN=host/esg.ccs.ornl.gov
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (4096 bit)
+                Modulus (4096 bit):
+                    00:c3:fe:b8:c4:27:c8:84:46:6e:fa:9d:19:e8:0f:
+                    f0:9f:9f:52:96:90:29:7e:80:18:24:90:45:60:c2:
+                    0e:6f:c7:9c:76:3f:bd:f9:c5:1a:34:3d:de:0b:18:
+                    bc:34:3c:5e:71:dd:91:05:d4:f2:9c:39:9b:91:8b:
+                    a7:da:13:80:9a:b0:ec:2d:40:b8:8c:d0:de:60:2c:
+                    09:67:a7:a6:52:ba:65:35:48:bb:35:58:2e:9c:7e:
+                    ac:be:8f:f8:74:35:b6:b4:f4:b0:88:03:f0:c3:eb:
+                    37:a0:ec:fe:ba:d8:64:fb:dd:62:7e:c7:71:be:24:
+                    ea:69:42:eb:99:6a:42:6c:c8:c3:cf:ed:c3:3f:f3:
+                    de:0c:52:9e:31:4c:38:70:7c:06:7a:c4:55:70:82:
+                    1d:b0:7f:fa:a4:e1:51:22:2a:12:95:9f:b7:dd:ec:
+                    76:fc:af:f3:a1:ce:db:a0:d4:83:37:c0:1b:b2:57:
+                    41:e3:59:38:1d:de:0e:cf:a7:f7:05:65:83:7d:e8:
+                    aa:4b:8b:7f:7c:2f:16:23:e8:de:56:28:e9:1c:f0:
+                    f1:a9:d0:ef:1c:90:26:20:c8:6c:89:ea:54:b8:20:
+                    f6:7e:dd:03:16:1c:9a:c5:3a:31:e8:72:2f:31:f0:
+                    c3:c9:25:86:40:4f:e3:31:37:18:1f:9b:4a:cd:39:
+                    05:c2:99:63:98:08:47:38:73:aa:76:a6:ba:8b:5d:
+                    d5:59:ce:1b:7b:e5:80:0f:ae:c1:ea:9d:b9:1b:1f:
+                    0f:1b:97:a3:7f:39:af:09:76:52:4f:43:07:45:31:
+                    7f:5f:6b:79:73:2f:cb:d9:3d:d8:65:6a:8b:39:c4:
+                    49:98:4b:82:3d:05:07:5b:b6:c3:2c:51:97:f6:41:
+                    0c:cf:76:ce:e0:4f:85:a6:54:eb:d1:06:03:0f:25:
+                    e6:b8:52:a2:5b:1c:34:c7:64:cb:d3:7f:60:0b:d0:
+                    71:e5:e6:cc:f4:6d:e6:0d:bb:bd:1f:53:b2:3c:09:
+                    e3:10:02:49:1e:b4:97:1c:e2:0d:e2:45:0b:52:83:
+                    e2:bf:d1:be:92:23:15:c5:e3:73:19:63:1b:a0:92:
+                    11:6f:59:97:27:bc:38:41:91:4f:9c:91:cf:fd:03:
+                    ac:f2:87:de:cb:40:df:9e:57:d1:4c:01:21:c3:a3:
+                    19:17:d6:88:1d:61:9a:b2:4b:b1:2f:19:64:df:d5:
+                    c6:a4:4c:61:a5:d4:4c:44:1f:e1:27:0e:c5:f4:fa:
+                    16:83:ce:31:0f:c7:ab:77:cc:25:06:26:ec:29:31:
+                    b8:68:67:e1:c3:9f:0c:e8:2c:f2:aa:11:29:77:52:
+                    e3:e1:a7:ed:b6:6f:4c:ba:7e:cd:b9:89:a1:25:45:
+                    84:b3:e3
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            Netscape Cert Type: 
+                SSL Client, SSL Server, S/MIME, Object Signing
+    Signature Algorithm: sha1WithRSAEncryption
+        8f:bd:b3:6c:26:16:b0:56:e0:5d:7a:37:1d:a2:0b:26:15:cd:
+        83:75:0f:f0:0a:6a:42:fc:eb:79:93:09:53:79:06:cc:a2:ab:
+        e2:2c:a1:f4:e7:96:db:31:95:dc:9d:e5:24:fb:51:b8:7c:15:
+        28:06:fc:f6:81:bd:71:5a:ee:6d:2e:fe:31:4e:41:21:d5:82:
+        f5:81:c9:b6:af:5a:2c:c3:53:d0:0d:45:f3:a6:1c:dd:c9:60:
+        db:ce:ca:be:61:77:92:ca:cb:06:84:07:a5:47:4d:48:5a:a3:
+        46:8a:75:32:a5:a1:87:1a:fe:11:75:ee:07:c6:5c:12:9b:e7:
+        44:1d
+-----BEGIN CERTIFICATE-----
+MIIDjDCCAvWgAwIBAgICBKkwDQYJKoZIhvcNAQEFBQAwOjENMAsGA1UEChMERVNH
+RjERMA8GA1UECxMIRVNHRi5PUkcxFjAUBgNVBAMTDU5TQyBTaW1wbGUgQ0EwHhcN
+MTUwNTI1MTM0NzA0WhcNMTYwNTI0MTM0NzA0WjBCMQ0wCwYDVQQKEwRFU0dGMREw
+DwYDVQQLEwhFU0dGLk9SRzEeMBwGA1UEAxMVaG9zdC9lc2cuY2NzLm9ybmwuZ292
+MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAw/64xCfIhEZu+p0Z6A/w
+n59SlpApfoAYJJBFYMIOb8ecdj+9+cUaND3eCxi8NDxecd2RBdTynDmbkYun2hOA
+mrDsLUC4jNDeYCwJZ6emUrplNUi7NVgunH6svo/4dDW2tPSwiAPww+s3oOz+uthk
++91ifsdxviTqaULrmWpCbMjDz+3DP/PeDFKeMUw4cHwGesRVcIIdsH/6pOFRIioS
+lZ+33ex2/K/zoc7boNSDN8AbsldB41k4Hd4Oz6f3BWWDfeiqS4t/fC8WI+jeVijp
+HPDxqdDvHJAmIMhsiepUuCD2ft0DFhyaxTox6HIvMfDDySWGQE/jMTcYH5tKzTkF
+wpljmAhHOHOqdqa6i13VWc4be+WAD67B6p25Gx8PG5ejfzmvCXZST0MHRTF/X2t5
+cy/L2T3YZWqLOcRJmEuCPQUHW7bDLFGX9kEMz3bO4E+FplTr0QYDDyXmuFKiWxw0
+x2TL039gC9Bx5ebM9G3mDbu9H1OyPAnjEAJJHrSXHOIN4kULUoPiv9G+kiMVxeNz
+GWMboJIRb1mXJ7w4QZFPnJHP/QOs8ofey0DfnlfRTAEhw6MZF9aIHWGaskuxLxlk
+39XGpExhpdRMRB/hJw7F9PoWg84xD8erd8wlBibsKTG4aGfhw58M6CzyqhEpd1Lj
+4afttm9Mun7NuYmhJUWEs+MCAwEAAaMVMBMwEQYJYIZIAYb4QgEBBAQDAgTwMA0G
+CSqGSIb3DQEBBQUAA4GBAI+9s2wmFrBW4F16Nx2iCyYVzYN1D/AKakL863mTCVN5
+Bsyiq+IsofTnltsxldyd5ST7Ubh8FSgG/PaBvXFa7m0u/jFOQSHVgvWBybavWizD
+U9ANRfOmHN3JYNvOyr5hd5LKywaEB6VHTUhao0aKdTKloYca/hF17gfGXBKb50Qd
+-----END CERTIFICATE-----
+</Cert>
+        </PEMCert>
+    </Node>
+    <Node organization="cnrm-game-meteo" namespace="fr.cnrm-game-meteo" nodePeerGroup="esgf-prod" supportEmail="esgf@cnrm-game-meteo.fr" hostname="esg.cnrm-game-meteo.fr" ip="193.49.97.164" shortName="cnrm-game-meteo" longName="esg data for french meteorological office" timeStamp="1432433065687" version="v1.8.1" release="Griffin" nodeType="4" adminPeer="pcmdi9.llnl.gov" defaultPeer="pcmdi9.llnl.gov">
+        <CA hash="dunno" endpoint="esg.cnrm-game-meteo.fr" dn="dunno"/>
+        <GeoLocation lat="43.575292" lon="1.374657" city="Toulouse"/>
+        <NodeManager endpoint="https://esg.cnrm-game-meteo.fr/esgf-node-manager/node"/>
+        <AuthorizationService endpoint="https://esg.cnrm-game-meteo.fr/esg-orp/saml/soap/secure/authorizationService.htm"/>
+        <ThreddsService endpoint="http://esg.cnrm-game-meteo.fr/thredds"/>
+        <GridFTPService endpoint="gsiftp://esg.cnrm-game-meteo.fr">
+            <Configuration serviceType="Replication" port="2812"/>
+            <Configuration serviceType="Download" port="2811"/>
+        </GridFTPService>
+        <Metrics>
+            <DownloadedData count="0" size="0" users="0"/>
+            <RegisteredUsers count="0"/>
+        </Metrics>
+        <RelyingPartyService endpoint="https://esg.cnrm-game-meteo.fr/esg-orp/html.htm"/>
+        <PEMCert>
+            <Cert>Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 19078 (0x4a86)
+        Signature Algorithm: sha1WithRSAEncryption
+        Issuer: O=Grid, OU=GlobusTest, OU=simpleCA-esgf-node.ipsl.fr, CN=Globus Simple CA
+        Validity
+            Not Before: Jan 13 10:04:29 2015 GMT
+            Not After : Jan 13 10:04:29 2016 GMT
+        Subject: O=Grid, OU=GlobusTest, OU=simpleCA-esgf-node.ipsl.fr, CN=esg.cnrm-game-meteo.fr
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (1024 bit)
+                Modulus (1024 bit):
+                    00:cf:2d:89:79:f3:06:76:9e:be:cd:70:f4:10:02:
+                    6d:31:23:18:5f:52:e8:eb:44:c0:74:19:ed:2b:c8:
+                    74:63:85:ab:87:ae:90:ba:14:fa:a6:6f:f0:bf:2a:
+                    04:f7:2d:e9:ba:db:4d:8b:d4:45:c9:9d:14:25:f2:
+                    cb:66:b6:4c:66:3b:cb:fb:25:ce:ac:57:ea:90:33:
+                    c5:03:8c:52:94:71:4e:fd:6d:a8:6d:ba:b2:e6:cf:
+                    a1:f2:78:8e:c9:25:3b:61:28:2b:23:91:0b:24:16:
+                    47:c8:cf:7b:03:8a:01:b9:8d:cb:63:04:2d:57:89:
+                    2e:7a:c8:de:4d:89:d9:25:01
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            Netscape Cert Type: 
+                SSL Client, SSL Server, S/MIME, Object Signing
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            X509v3 Key Usage: 
+                Digital Signature, Non Repudiation, Key Encipherment
+            X509v3 Subject Alternative Name: 
+                email:noc@example.com
+    Signature Algorithm: sha1WithRSAEncryption
+        5c:41:4d:63:90:85:6f:4d:50:37:95:a1:22:8b:38:8b:8f:14:
+        03:e0:05:18:8c:e9:e0:1a:d5:f8:a4:31:6a:cc:e2:82:ee:16:
+        36:8f:24:38:87:7e:0f:1f:89:b0:6c:c0:8d:50:36:2a:b5:6c:
+        92:5b:91:70:45:bb:c1:71:08:c9:36:af:23:e0:d8:6a:01:79:
+        89:51:03:05:c7:51:48:20:99:26:c0:c9:65:0a:5a:05:8e:11:
+        1a:f5:1d:2a:6b:6d:f9:20:22:95:17:7b:3c:ce:69:b1:c1:f1:
+        49:45:7d:c9:8d:eb:81:6a:a8:ef:ab:f1:c9:60:9b:90:a5:36:
+        39:4d
+-----BEGIN CERTIFICATE-----
+MIICjjCCAfegAwIBAgICSoYwDQYJKoZIhvcNAQEFBQAwZDENMAsGA1UEChMER3Jp
+ZDETMBEGA1UECxMKR2xvYnVzVGVzdDEjMCEGA1UECxMac2ltcGxlQ0EtZXNnZi1u
+b2RlLmlwc2wuZnIxGTAXBgNVBAMTEEdsb2J1cyBTaW1wbGUgQ0EwHhcNMTUwMTEz
+MTAwNDI5WhcNMTYwMTEzMTAwNDI5WjBqMQ0wCwYDVQQKEwRHcmlkMRMwEQYDVQQL
+EwpHbG9idXNUZXN0MSMwIQYDVQQLExpzaW1wbGVDQS1lc2dmLW5vZGUuaXBzbC5m
+cjEfMB0GA1UEAxMWZXNnLmNucm0tZ2FtZS1tZXRlby5mcjCBnzANBgkqhkiG9w0B
+AQEFAAOBjQAwgYkCgYEAzy2JefMGdp6+zXD0EAJtMSMYX1Lo60TAdBntK8h0Y4Wr
+h66QuhT6pm/wvyoE9y3puttNi9RFyZ0UJfLLZrZMZjvL+yXOrFfqkDPFA4xSlHFO
+/W2obbqy5s+h8niOySU7YSgrI5ELJBZHyM97A4oBuY3LYwQtV4kuesjeTYnZJQEC
+AwEAAaNJMEcwEQYJYIZIAYb4QgEBBAQDAgTwMAkGA1UdEwQCMAAwCwYDVR0PBAQD
+AgXgMBoGA1UdEQQTMBGBD25vY0BleGFtcGxlLmNvbTANBgkqhkiG9w0BAQUFAAOB
+gQBcQU1jkIVvTVA3laEiiziLjxQD4AUYjOngGtX4pDFqzOKC7hY2jyQ4h34PH4mw
+bMCNUDYqtWySW5FwRbvBcQjJNq8j4NhqAXmJUQMFx1FIIJkmwMllCloFjhEa9R0q
+a235ICKVF3s8zmmxwfFJRX3JjeuBaqjvq/HJYJuQpTY5TQ==
+-----END CERTIFICATE-----
+</Cert>
+        </PEMCert>
+    </Node>
+    <Node organization="Potsdam-Institute_for_Climate_Impact_Research" namespace="de.pik-potsdam" nodePeerGroup="esgf-prod" supportEmail="esg-postmaster@pik-potsdam.de" hostname="esg.pik-potsdam.de" ip="192.168.15.17" dn="/O=ESGF/OU=ESGF.ORG/CN=host/se38.pik-potsdam.de" shortName="PIK-ESGF" longName="ISI-MIP ESGF Node" timeStamp="1432302615816" version="v1.8.1" release="Griffin" nodeType="60" adminPeer="esg.pik-potsdam.de" defaultPeer="pcmdi9.llnl.gov">
+        <CA hash="dunno" endpoint="esg.pik-potsdam.de" dn="dunno"/>
+        <GeoLocation lat="52.380983" lon="13.06415" city="Potsdam"/>
+        <NodeManager endpoint="https://esg.pik-potsdam.de/esgf-node-manager/node"/>
+        <OpenIDProvider endpoint="https://esg.pik-potsdam.de/esgf-idp/idp/openidServer.htm"/>
+        <FrontEnd endpoint="http://esg.pik-potsdam.de/esgf-web-fe/"/>
+        <IndexService port="8983" endpoint="http://esg.pik-potsdam.de/esg-search/search"/>
+        <AttributeService endpoint="https://esg.pik-potsdam.de/esgf-idp/saml/soap/secure/attributeService.htm">
+            <Group name="wheel" description="Administrator Group"/>
+            <Group name="ISI-MIP2_Research" description="Users of ISI-MIP2 data for non-commercial research purposes only"/>
+            <Group name="ISI-MIP_Unrestricted" description="Users of ISI-MIP Fast Track data for unrestricted use"/>
+            <Group name="ISI-MIP_Research" description="Users of ISI-MIP Fast Track data for non-commercial research purposes only"/>
+        </AttributeService>
+        <AuthorizationService endpoint="https://esg.pik-potsdam.de/esg-orp/saml/soap/secure/authorizationService.htm"/>
+        <RegistrationService endpoint="https://esg.pik-potsdam.de/esgf-idp/secure/registrationService.htm"/>
+        <ThreddsService endpoint="http://esg.pik-potsdam.de/thredds"/>
+        <GridFTPService endpoint="gsiftp://esg.pik-potsdam.de">
+            <Configuration serviceType="Replication" port="2812"/>
+            <Configuration serviceType="Download" port="2811"/>
+        </GridFTPService>
+        <Metrics>
+            <DownloadedData count="0" size="0" users="0"/>
+            <RegisteredUsers count="244"/>
+        </Metrics>
+        <RSSFeeds>
+            <RSSFeed url="http://esg.pik-potsdam.de/esg-search/feed/node.rss" title="PIK-ESGF RSS"/>
+        </RSSFeeds>
+        <LASService endpoint="http://esg.pik-potsdam.de/las"/>
+        <MyProxyService endpoint="esg.pik-potsdam.de"/>
+        <PublishingService endpoint="https://esg.pik-potsdam.de/esg-search/remote/secure/client-cert/hessian/publishingService"/>
+        <RelyingPartyService endpoint="https://esg.pik-potsdam.de/esg-orp/html.htm"/>
+        <PEMCert>
+            <Cert>Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 667 (0x29b)
+        Signature Algorithm: sha1WithRSAEncryption
+        Issuer: O=ESGF, OU=ESGF.ORG, CN=NSC Simple CA
+        Validity
+            Not Before: Sep  1 15:48:54 2014 GMT
+            Not After : Sep  1 15:48:54 2015 GMT
+        Subject: O=ESGF, OU=ESGF.ORG, CN=host/se38.pik-potsdam.de
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (4096 bit)
+                Modulus (4096 bit):
+                    00:b1:a0:a4:20:c4:57:91:7e:db:95:ca:c7:df:25:
+                    39:96:20:57:51:28:98:2f:c4:ce:42:94:62:c8:6e:
+                    c0:ff:1f:c6:c2:06:bc:40:df:70:a3:35:5a:08:a7:
+                    93:9c:dc:6a:76:e8:75:f0:fc:0e:21:e8:4c:8b:15:
+                    cd:18:1f:03:f8:4b:4f:0c:f0:c6:17:ad:ee:02:ec:
+                    1e:b4:09:ec:7f:37:3d:df:80:d2:2f:3c:17:ce:ce:
+                    a4:07:95:ef:57:44:df:58:b8:38:4a:a3:fa:ab:26:
+                    38:8f:4b:b6:dd:53:3b:2e:06:b4:69:66:30:4c:e3:
+                    6e:46:0e:12:d7:cf:b2:c1:d9:dc:a6:d1:e9:89:92:
+                    ac:f1:9a:ac:f9:45:15:61:df:4a:13:16:65:91:f9:
+                    02:69:d8:55:28:3f:01:c5:0f:ef:e4:f7:ec:7f:41:
+                    86:bb:07:14:94:da:ec:25:7d:c6:a8:ab:c0:45:e6:
+                    d6:80:26:50:f9:8c:c3:1c:a0:68:d4:7d:09:6e:e9:
+                    3e:86:f1:36:ac:10:e5:5d:1f:11:74:6e:43:27:24:
+                    d9:2f:64:58:bd:c1:70:25:c7:81:e9:e5:18:18:85:
+                    d8:3c:9b:e4:c3:78:5b:a0:5a:9b:2f:72:0a:ab:d7:
+                    25:86:26:b8:d9:9d:3d:a5:5a:3c:1e:27:03:fa:14:
+                    d1:6b:c9:19:4a:2c:5a:8a:53:9d:0e:27:3f:ce:85:
+                    f3:5e:f1:44:85:0d:1d:64:93:e8:cb:f1:77:4f:92:
+                    80:aa:5b:34:33:ff:41:4d:61:63:a7:87:a1:84:b4:
+                    4e:6b:ab:4d:fc:db:c6:b6:97:0e:81:25:08:be:b8:
+                    c3:dc:84:67:d4:cd:3c:61:d6:98:85:66:d1:3f:7f:
+                    a7:a6:0a:5d:d2:5a:19:20:c0:a4:63:d1:84:0a:a7:
+                    eb:83:46:4e:8d:0d:ab:be:ff:27:e3:14:8c:99:06:
+                    09:a3:45:b9:ac:57:33:59:f2:7f:d7:d0:11:1f:5b:
+                    d3:7b:47:87:c7:cb:ee:79:16:aa:42:92:e2:2c:e6:
+                    2a:3a:e1:93:24:a2:6d:bd:ec:bc:f1:a2:84:5e:19:
+                    95:e5:58:cd:c9:04:bd:59:be:97:56:86:3f:5c:a8:
+                    63:1f:35:11:57:46:ff:c0:4f:c1:89:3b:80:e3:63:
+                    af:27:be:e7:b0:5c:fa:6a:a1:57:ba:e5:9b:dc:f0:
+                    d9:10:f5:95:b4:b4:06:68:47:bf:a5:0f:ea:d6:b1:
+                    ba:31:c6:04:66:32:6e:89:02:ca:17:5e:21:c9:5d:
+                    b4:f6:b9:c8:1d:f9:a4:44:05:b7:6e:6f:0a:a8:22:
+                    19:dc:b2:95:e7:9c:51:33:23:86:0e:4b:9e:5f:20:
+                    34:9a:0f
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            Netscape Cert Type: 
+                SSL Client, SSL Server, S/MIME, Object Signing
+    Signature Algorithm: sha1WithRSAEncryption
+        13:2a:e6:91:56:12:95:35:80:08:9d:27:91:95:de:e7:40:b3:
+        c0:0d:d3:72:b0:a2:b0:ee:82:1c:e8:b2:fe:c4:1e:90:cd:79:
+        9e:b3:9a:ff:27:b4:a5:d9:6f:eb:94:7a:73:bf:15:43:1b:35:
+        a6:b1:fe:9a:5f:31:5b:27:5d:9c:ad:13:c0:5d:0c:b3:fb:6b:
+        ad:c8:13:d7:e7:0d:63:22:b7:25:e3:56:2e:cd:a9:9c:87:60:
+        68:1c:76:ff:92:c1:8e:37:1d:f1:a7:1d:c5:10:1c:ab:fc:33:
+        a1:42:5c:22:0c:bb:db:20:3a:15:9f:10:16:60:c1:01:66:3d:
+        8c:86
+-----BEGIN CERTIFICATE-----
+MIIDjzCCAvigAwIBAgICApswDQYJKoZIhvcNAQEFBQAwOjENMAsGA1UEChMERVNH
+RjERMA8GA1UECxMIRVNHRi5PUkcxFjAUBgNVBAMTDU5TQyBTaW1wbGUgQ0EwHhcN
+MTQwOTAxMTU0ODU0WhcNMTUwOTAxMTU0ODU0WjBFMQ0wCwYDVQQKEwRFU0dGMREw
+DwYDVQQLEwhFU0dGLk9SRzEhMB8GA1UEAxMYaG9zdC9zZTM4LnBpay1wb3RzZGFt
+LmRlMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAsaCkIMRXkX7blcrH
+3yU5liBXUSiYL8TOQpRiyG7A/x/Gwga8QN9wozVaCKeTnNxqduh18PwOIehMixXN
+GB8D+EtPDPDGF63uAuwetAnsfzc934DSLzwXzs6kB5XvV0TfWLg4SqP6qyY4j0u2
+3VM7Lga0aWYwTONuRg4S18+ywdncptHpiZKs8Zqs+UUVYd9KExZlkfkCadhVKD8B
+xQ/v5Pfsf0GGuwcUlNrsJX3GqKvARebWgCZQ+YzDHKBo1H0Jbuk+hvE2rBDlXR8R
+dG5DJyTZL2RYvcFwJceB6eUYGIXYPJvkw3hboFqbL3IKq9clhia42Z09pVo8HicD
++hTRa8kZSixailOdDic/zoXzXvFEhQ0dZJPoy/F3T5KAqls0M/9BTWFjp4ehhLRO
+a6tN/NvGtpcOgSUIvrjD3IRn1M08YdaYhWbRP3+npgpd0loZIMCkY9GECqfrg0ZO
+jQ2rvv8n4xSMmQYJo0W5rFczWfJ/19ARH1vTe0eHx8vueRaqQpLiLOYqOuGTJKJt
+vey88aKEXhmV5VjNyQS9Wb6XVoY/XKhjHzURV0b/wE/BiTuA42OvJ77nsFz6aqFX
+uuWb3PDZEPWVtLQGaEe/pQ/q1rG6McYEZjJuiQLKF14hyV209rnIHfmkRAW3bm8K
+qCIZ3LKV55xRMyOGDkueXyA0mg8CAwEAAaMVMBMwEQYJYIZIAYb4QgEBBAQDAgTw
+MA0GCSqGSIb3DQEBBQUAA4GBABMq5pFWEpU1gAidJ5GV3udAs8AN03KworDughzo
+sv7EHpDNeZ6zmv8ntKXZb+uUenO/FUMbNaax/ppfMVsnXZytE8BdDLP7a63IE9fn
+DWMityXjVi7NqZyHYGgcdv+SwY43HfGnHcUQHKv8M6FCXCIMu9sgOhWfEBZgwQFm
+PYyG
+-----END CERTIFICATE-----
+</Cert>
+        </PEMCert>
+    </Node>
+    <Node organization="dkrz" namespace="de.dkrz" nodePeerGroup="esgf-prod" supportEmail="esgf@dkrz.de" hostname="esgf-data.dkrz.de" ip="136.172.30.96" dn="/O=ESGF/OU=ESGF.ORG/CN=esgf-data.dkrz.de" shortName="WDCC_Gate" longName="WDCC Index and Idp P2P node" timeStamp="1432625406639" version="v1.8.0" release="Griffin" nodeType="60" adminPeer="esgf-data.dkrz.de" defaultPeer="pcmdi9.llnl.gov">
+        <CA hash="dunno" endpoint="esgf-data.dkrz.de" dn="dunno"/>
+        <GeoLocation lat="53.549999" lon="10.000000" city="Hamburg"/>
+        <NodeManager endpoint="https://esgf-data.dkrz.de/esgf-node-manager/node"/>
+        <OpenIDProvider endpoint="https://esgf-data.dkrz.de/esgf-idp/idp/openidServer.htm"/>
+        <FrontEnd endpoint="http://esgf-data.dkrz.de/esgf-web-fe/"/>
+        <IndexService port="8983" endpoint="http://esgf-data.dkrz.de/esg-search/search"/>
+        <AttributeService endpoint="https://esgf-data.dkrz.de/esgf-idp/saml/soap/secure/attributeService.htm">
+            <Group name="wheel" description="Administrator Group"/>
+            <Group name="DKRZ publishers" description="Only for people allowed to publish ANYTHING to DKRZ"/>
+        </AttributeService>
+        <AuthorizationService endpoint="https://esgf-data.dkrz.de/esg-orp/saml/soap/secure/authorizationService.htm"/>
+        <RegistrationService endpoint="https://esgf-data.dkrz.de/esgf-idp/secure/registrationService.htm"/>
+        <ThreddsService endpoint="http://esgf-data.dkrz.de/thredds"/>
+        <Metrics>
+            <DownloadedData count="0" size="0" users="0"/>
+            <RegisteredUsers count="1951"/>
+        </Metrics>
+        <RSSFeeds>
+            <RSSFeed url="http://esgf-data.dkrz.de/esg-search/feed/node.rss" title="WDCC_Gate RSS"/>
+        </RSSFeeds>
+        <LASService endpoint="http://esgf-data.dkrz.de/las"/>
+        <MyProxyService endpoint="esgf-data.dkrz.de"/>
+        <PublishingService endpoint="https://esgf-data.dkrz.de/esg-search/remote/secure/client-cert/hessian/publishingService"/>
+        <RelyingPartyService endpoint="https://esgf-data.dkrz.de/esg-orp/html.htm"/>
+        <PEMCert>
+            <Cert>Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 34746 (0x87ba)
+        Signature Algorithm: sha1WithRSAEncryption
+        Issuer: O=ESGF, OU=ESGF.ORG, OU=DKRZ, CN=esgf-data.dkrz.de
+        Validity
+            Not Before: Sep 11 07:22:10 2014 GMT
+            Not After : Sep 11 07:22:10 2015 GMT
+        Subject: O=ESGF, OU=ESGF.ORG, OU=DKRZ, CN=host/esgf-data.dkrz.de
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (2048 bit)
+                Modulus (2048 bit):
+                    00:cb:0f:e8:32:1b:6c:1c:41:0f:c9:3d:3f:9a:b1:
+                    0e:73:d2:87:18:d4:c1:e0:9c:71:ff:69:07:59:62:
+                    83:91:7a:34:ee:b2:e4:d9:4b:12:94:9c:0b:e3:a0:
+                    20:28:69:b2:0b:70:fe:23:47:10:bc:f6:c1:63:87:
+                    55:df:3b:ca:a4:b5:15:ee:30:e2:cf:77:37:9c:0d:
+                    89:6d:ca:81:dd:32:1a:52:82:5e:31:7a:f1:b2:6d:
+                    1e:df:60:c1:33:1a:98:6b:e1:61:5d:ba:cb:67:f8:
+                    c2:f8:30:2d:ba:ad:c0:53:14:84:d6:ab:21:41:62:
+                    21:cc:15:fa:7c:b3:f7:c7:d6:c4:ed:7e:73:73:3e:
+                    58:93:d4:c0:64:a6:dd:3e:ff:9f:e6:7b:1d:4d:1d:
+                    6f:f9:35:55:d5:9e:72:3b:0b:f1:d9:3f:25:5f:99:
+                    31:2c:33:5e:e5:74:b2:48:ea:ff:07:a0:c9:4a:9c:
+                    76:0e:87:97:d3:28:1b:e0:3f:b2:fc:d1:86:36:44:
+                    39:bd:30:f4:8a:a9:71:87:13:16:c8:13:ad:75:eb:
+                    f2:e5:0a:6d:fc:85:e4:e4:a3:96:6b:e4:3c:80:08:
+                    2c:61:20:37:fb:04:b2:2a:d4:18:b2:ef:b9:4f:36:
+                    07:67:0d:79:39:6b:09:46:8f:a0:be:eb:78:89:8e:
+                    c5:37
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            Netscape Cert Type: 
+                SSL Client, SSL Server, S/MIME, Object Signing
+    Signature Algorithm: sha1WithRSAEncryption
+        7f:bd:36:25:0c:f6:ab:8c:65:43:2a:4c:c4:13:b7:d1:be:fc:
+        50:65:c1:bc:dd:9f:e0:0a:32:ad:e0:31:6f:a4:b7:6a:17:00:
+        42:6f:9e:98:16:be:ea:91:47:1d:3c:95:26:ef:0e:d0:06:74:
+        9e:3b:d6:4c:6c:d6:21:a3:42:79:da:6a:b6:86:32:2c:60:59:
+        02:d3:70:2a:90:cb:7b:13:ce:f9:d7:41:de:0a:29:23:ad:b8:
+        b8:c2:0a:0a:1a:58:7f:9c:20:e3:38:38:e3:9a:62:b3:7f:0b:
+        12:61:cf:8e:b6:80:2a:8b:c3:e9:54:ea:98:9a:5e:ba:8d:39:
+        d4:dd
+-----BEGIN CERTIFICATE-----
+MIICsDCCAhmgAwIBAgIDAIe6MA0GCSqGSIb3DQEBBQUAME0xDTALBgNVBAoTBEVT
+R0YxETAPBgNVBAsTCEVTR0YuT1JHMQ0wCwYDVQQLEwRES1JaMRowGAYDVQQDExFl
+c2dmLWRhdGEuZGtyei5kZTAeFw0xNDA5MTEwNzIyMTBaFw0xNTA5MTEwNzIyMTBa
+MFIxDTALBgNVBAoTBEVTR0YxETAPBgNVBAsTCEVTR0YuT1JHMQ0wCwYDVQQLEwRE
+S1JaMR8wHQYDVQQDExZob3N0L2VzZ2YtZGF0YS5ka3J6LmRlMIIBIjANBgkqhkiG
+9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyw/oMhtsHEEPyT0/mrEOc9KHGNTB4Jxx/2kH
+WWKDkXo07rLk2UsSlJwL46AgKGmyC3D+I0cQvPbBY4dV3zvKpLUV7jDiz3c3nA2J
+bcqB3TIaUoJeMXrxsm0e32DBMxqYa+FhXbrLZ/jC+DAtuq3AUxSE1qshQWIhzBX6
+fLP3x9bE7X5zcz5Yk9TAZKbdPv+f5nsdTR1v+TVV1Z5yOwvx2T8lX5kxLDNe5XSy
+SOr/B6DJSpx2DoeX0ygb4D+y/NGGNkQ5vTD0iqlxhxMWyBOtdevy5Qpt/IXk5KOW
+a+Q8gAgsYSA3+wSyKtQYsu+5TzYHZw15OWsJRo+gvut4iY7FNwIDAQABoxUwEzAR
+BglghkgBhvhCAQEEBAMCBPAwDQYJKoZIhvcNAQEFBQADgYEAf702JQz2q4xlQypM
+xBO30b78UGXBvN2f4AoyreAxb6S3ahcAQm+emBa+6pFHHTyVJu8O0AZ0njvWTGzW
+IaNCedpqtoYyLGBZAtNwKpDLexPO+ddB3gopI624uMIKChpYf5wg4zg445pis38L
+EmHPjraAKovD6VTqmJpeuo051N0=
+-----END CERTIFICATE-----
+</Cert>
+        </PEMCert>
+    </Node>
+    <Node organization="badc" namespace="uk.ac.ceda" nodePeerGroup="esgf-prod" supportEmail="Stephen.Pascoe@stfc.ac.uk" hostname="esgf-data1.ceda.ac.uk" ip="130.246.142.220" dn="/O=ESGF/OU=ESGF.ORG/CN=esgf-data1.ceda.ac.uk" shortName="BADC_replica_data_node" longName="BADC Replica Data Node" timeStamp="1432213785142" version="v1.7.0-phoenix-release-master" release="phoenix" nodeType="36" adminPeer="pcmdi9.llnl.gov" defaultPeer="pcmdi9.llnl.gov">
+        <CA hash="dunno" endpoint="esgf-data1.ceda.ac.uk" dn="dunno"/>
+        <GeoLocation lat="53.349998" lon="-2.550000" city="Appleton"/>
+        <NodeManager endpoint="https://esgf-data1.ceda.ac.uk/esgf-node-manager/node"/>
+        <AuthorizationService endpoint="https://esgf-data1.ceda.ac.uk/esg-orp/saml/soap/secure/authorizationService.htm"/>
+        <ThreddsService endpoint="http://esgf-data1.ceda.ac.uk/thredds"/>
+        <GridFTPService endpoint="gsiftp://esgf-data1.ceda.ac.uk">
+            <Configuration serviceType="Replication" port="2812"/>
+            <Configuration serviceType="Download" port="2811"/>
+        </GridFTPService>
+        <RelyingPartyService endpoint="https://esgf-data1.ceda.ac.uk/esg-orp/html.htm"/>
+        <PEMCert>
+            <Cert>NOT_AVAILABLE</Cert>
+        </PEMCert>
+    </Node>
+    <Node organization="IPSL" namespace="fr.ipsl.esgf-node" nodePeerGroup="esgf-prod" supportEmail="prodiguer@ipsl.jussieu.fr" hostname="esgf-node.ipsl.fr" ip="134.157.176.115" dn="/O=Grid/OU=GlobusTest/OU=simpleCA-esgf-node.ipsl.fr/CN=esgf-node.ipsl.fr" shortName="IPSL Index Peer" longName="IPSL Index Peer" timeStamp="1432633389582" version="v1.8.1" release="Griffin" nodeType="60" adminPeer="esgf-node.ipsl.fr" defaultPeer="pcmdi9.llnl.gov">
+        <CA hash="dunno" endpoint="esgf-node.ipsl.fr" dn="dunno"/>
+        <GeoLocation lat="48.866699" lon="2.333300" city="Paris"/>
+        <NodeManager endpoint="https://esgf-node.ipsl.fr/esgf-node-manager/node"/>
+        <OpenIDProvider endpoint="https://esgf-node.ipsl.fr/esgf-idp/idp/openidServer.htm"/>
+        <FrontEnd endpoint="http://esgf-node.ipsl.fr/esgf-web-fe/"/>
+        <IndexService port="8983" endpoint="http://esgf-node.ipsl.fr/esg-search/search"/>
+        <AttributeService endpoint="https://esgf-node.ipsl.fr/esgf-idp/saml/soap/secure/attributeService.htm">
+            <Group name="CNRM-CERFACS" description="Persons belonging to the CNRM-CERFACS institute"/>
+            <Group name="wheel" description="Administrator Group"/>
+            <Group name="IPSL" description="Persons belonging to the IPSL institute"/>
+            <Group name="UCAN" description="Persons belonging to Univeristy of Cantabria"/>
+        </AttributeService>
+        <AuthorizationService endpoint="https://esgf-node.ipsl.fr/esg-orp/saml/soap/secure/authorizationService.htm"/>
+        <RegistrationService endpoint="https://esgf-node.ipsl.fr/esgf-idp/secure/registrationService.htm"/>
+        <ThreddsService endpoint="http://esgf-node.ipsl.fr/thredds"/>
+        <GridFTPService endpoint="gsiftp://esgf-node.ipsl.fr">
+            <Configuration serviceType="Replication" port="2812"/>
+            <Configuration serviceType="Download" port="2811"/>
+        </GridFTPService>
+        <Metrics>
+            <DownloadedData count="0" size="0" users="0"/>
+            <RegisteredUsers count="338"/>
+        </Metrics>
+        <RSSFeeds>
+            <RSSFeed url="http://esgf-node.ipsl.fr/esg-search/feed/node.rss" title="IPSL Index Peer RSS"/>
+        </RSSFeeds>
+        <LASService endpoint="http://esgf-node.ipsl.fr/las"/>
+        <MyProxyService endpoint="esgf-node.ipsl.fr"/>
+        <PublishingService endpoint="https://esgf-node.ipsl.fr/esg-search/remote/secure/client-cert/hessian/publishingService"/>
+        <RelyingPartyService endpoint="https://esgf-node.ipsl.fr/esg-orp/html.htm"/>
+        <PEMCert>
+            <Cert>Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 24781 (0x60cd)
+        Signature Algorithm: sha1WithRSAEncryption
+        Issuer: O=Grid, OU=GlobusTest, OU=simpleCA-esgf-node.ipsl.fr, CN=Globus Simple CA
+        Validity
+            Not Before: May 26 09:39:07 2015 GMT
+            Not After : May 25 09:39:07 2016 GMT
+        Subject: O=Grid, OU=GlobusTest, OU=simpleCA-esgf-node.ipsl.fr, CN=esgf-node.ipsl.fr
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (1024 bit)
+                Modulus (1024 bit):
+                    00:ad:96:18:5b:48:0e:56:66:75:52:dc:9c:80:28:
+                    1b:b9:62:be:34:90:37:5e:d3:52:4f:02:c3:8e:4b:
+                    6b:ab:20:4b:b6:34:47:3e:f5:32:70:9f:63:cc:40:
+                    c2:08:7f:b2:93:1f:78:1a:3e:b5:a5:7b:3c:6e:83:
+                    2a:5f:cd:b4:35:e5:3d:f6:06:3e:4f:8f:a8:c2:c9:
+                    98:12:45:e5:03:69:92:7a:8e:e7:9c:fb:75:04:75:
+                    f1:7e:d6:67:ae:ad:b7:94:56:ca:db:b4:72:af:96:
+                    98:b4:98:57:91:7e:ff:3b:ab:7c:ea:aa:31:12:9a:
+                    f8:d0:31:2f:29:06:6f:ce:53
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            Netscape Cert Type: 
+                SSL Client, SSL Server, S/MIME, Object Signing
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            X509v3 Key Usage: 
+                Digital Signature, Non Repudiation, Key Encipherment
+            X509v3 Subject Alternative Name: 
+                DNS:esgf-node.ipsl.fr, DNS:vesg5.ipsl.jussieu.fr
+    Signature Algorithm: sha1WithRSAEncryption
+        80:c2:eb:ba:c8:7c:15:6e:59:c9:93:90:dd:aa:ee:07:00:61:
+        59:49:c5:1f:43:21:79:03:5d:8a:15:a9:b8:5f:e1:42:d3:c1:
+        77:08:66:9f:ed:cd:66:0b:b9:94:fc:f4:4d:4e:6d:a7:f0:31:
+        36:3b:46:39:5d:ec:14:8a:b9:dd:1e:06:1f:85:65:f3:52:f9:
+        9e:7a:15:fa:3a:25:af:c7:15:65:25:2f:46:a0:6c:c2:56:b0:
+        b7:19:4c:94:7c:dd:a4:71:3c:b0:1d:07:e0:bd:7c:b3:4c:90:
+        41:bd:56:84:4c:c8:1e:4d:c0:d3:86:50:ec:12:82:ab:9c:f2:
+        84:c9
+-----BEGIN CERTIFICATE-----
+MIICojCCAgugAwIBAgICYM0wDQYJKoZIhvcNAQEFBQAwZDENMAsGA1UEChMER3Jp
+ZDETMBEGA1UECxMKR2xvYnVzVGVzdDEjMCEGA1UECxMac2ltcGxlQ0EtZXNnZi1u
+b2RlLmlwc2wuZnIxGTAXBgNVBAMTEEdsb2J1cyBTaW1wbGUgQ0EwHhcNMTUwNTI2
+MDkzOTA3WhcNMTYwNTI1MDkzOTA3WjBlMQ0wCwYDVQQKEwRHcmlkMRMwEQYDVQQL
+EwpHbG9idXNUZXN0MSMwIQYDVQQLExpzaW1wbGVDQS1lc2dmLW5vZGUuaXBzbC5m
+cjEaMBgGA1UEAxMRZXNnZi1ub2RlLmlwc2wuZnIwgZ8wDQYJKoZIhvcNAQEBBQAD
+gY0AMIGJAoGBAK2WGFtIDlZmdVLcnIAoG7livjSQN17TUk8Cw45La6sgS7Y0Rz71
+MnCfY8xAwgh/spMfeBo+taV7PG6DKl/NtDXlPfYGPk+PqMLJmBJF5QNpknqO55z7
+dQR18X7WZ66tt5RWytu0cq+WmLSYV5F+/zurfOqqMRKa+NAxLykGb85TAgMBAAGj
+YjBgMBEGCWCGSAGG+EIBAQQEAwIE8DAJBgNVHRMEAjAAMAsGA1UdDwQEAwIF4DAz
+BgNVHREELDAqghFlc2dmLW5vZGUuaXBzbC5mcoIVdmVzZzUuaXBzbC5qdXNzaWV1
+LmZyMA0GCSqGSIb3DQEBBQUAA4GBAIDC67rIfBVuWcmTkN2q7gcAYVlJxR9DIXkD
+XYoVqbhf4ULTwXcIZp/tzWYLuZT89E1ObafwMTY7Rjld7BSKud0eBh+FZfNS+Z56
+Ffo6Ja/HFWUlL0agbMJWsLcZTJR83aRxPLAdB+C9fLNMkEG9VoRMyB5NwNOGUOwS
+gquc8oTJ
+-----END CERTIFICATE-----
+</Cert>
+        </PEMCert>
+    </Node>
+    <Node organization="dkrz" namespace="de.dkrz" nodePeerGroup="esgf-prod" supportEmail="ramthun@dkrz.de" hostname="euclipse1.dkrz.de" ip="136.172.30.13" dn="/O=ESGF/OU=ESGF.ORG/CN=host/euclipse1.dkrz.de" shortName="Euclipse" longName="Euclipse Data Node" timeStamp="1432622637243" version="v1.8.1" release="Griffin" nodeType="60" adminPeer="euclipse1.dkrz.de" defaultPeer="pcmdi9.llnl.gov">
+        <CA hash="dunno" endpoint="euclipse1.dkrz.de" dn="dunno"/>
+        <GeoLocation lat="53.549999" lon="10.000000" city="Hamburg"/>
+        <NodeManager endpoint="https://euclipse1.dkrz.de/esgf-node-manager/node"/>
+        <OpenIDProvider endpoint="https://euclipse1.dkrz.de/esgf-idp/idp/openidServer.htm"/>
+        <FrontEnd endpoint="http://euclipse1.dkrz.de/esgf-web-fe/"/>
+        <IndexService port="8983" endpoint="http://euclipse1.dkrz.de/esg-search/search"/>
+        <AttributeService endpoint="https://euclipse1.dkrz.de/esgf-idp/saml/soap/secure/attributeService.htm">
+            <Group name="CMIP6" description="Group for cross publishing"/>
+            <Group name="wheel" description="Administrator Group"/>
+            <Group name="Euclipse" description="Member is able to read or publish/unpublish data to the p2p gateway"/>
+            <Group name="Other" description="Other Group"/>
+            <Group name="PMIP3" description="Member is able to read or publish PMIP3 data"/>
+        </AttributeService>
+        <AuthorizationService endpoint="https://euclipse1.dkrz.de/esg-orp/saml/soap/secure/authorizationService.htm"/>
+        <RegistrationService endpoint="https://euclipse1.dkrz.de/esgf-idp/secure/registrationService.htm"/>
+        <ThreddsService endpoint="http://euclipse1.dkrz.de/thredds"/>
+        <GridFTPService endpoint="gsiftp://euclipse1.dkrz.de">
+            <Configuration serviceType="Replication" port="2812"/>
+            <Configuration serviceType="Download" port="2811"/>
+        </GridFTPService>
+        <Metrics>
+            <DownloadedData count="0" size="0" users="0"/>
+            <RegisteredUsers count="125"/>
+        </Metrics>
+        <RSSFeeds>
+            <RSSFeed url="http://euclipse1.dkrz.de/esg-search/feed/node.rss" title="Euclipse RSS"/>
+        </RSSFeeds>
+        <LASService endpoint="http://euclipse1.dkrz.de/las"/>
+        <MyProxyService endpoint="euclipse1.dkrz.de"/>
+        <PublishingService endpoint="https://euclipse1.dkrz.de/esg-search/remote/secure/client-cert/hessian/publishingService"/>
+        <RelyingPartyService endpoint="https://euclipse1.dkrz.de/esg-orp/html.htm"/>
+        <PEMCert>
+            <Cert>Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 47131 (0xb81b)
+        Signature Algorithm: sha1WithRSAEncryption
+        Issuer: O=ESGF, OU=ESGF.ORG, OU=DKRZ, CN=esgf-data.dkrz.de
+        Validity
+            Not Before: Apr 10 07:58:17 2015 GMT
+            Not After : Apr  9 07:58:17 2016 GMT
+        Subject: O=ESGF, OU=ESGF.ORG, OU=DKRZ, CN=host/euclipse1.dkrz.de
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (2048 bit)
+                Modulus (2048 bit):
+                    00:d6:6b:18:eb:61:b3:c0:08:e8:4d:8c:bd:fd:8c:
+                    f1:c5:c9:1a:16:82:3f:8c:7c:4f:06:30:97:6d:c9:
+                    d8:4a:ee:61:97:8e:22:58:3a:73:12:f0:19:1d:2f:
+                    a0:ee:97:1a:c4:06:3c:f6:7d:3d:f1:b6:e0:0a:b6:
+                    7a:08:c6:11:2a:5b:30:db:e8:58:02:b1:2b:43:05:
+                    3e:09:4b:9a:9a:35:2c:56:24:c7:2f:40:c2:df:21:
+                    f8:ac:99:8e:4c:b6:97:fa:56:f6:45:03:6d:29:51:
+                    f4:9d:1a:02:73:25:ea:05:04:eb:5f:20:f3:76:90:
+                    89:a5:e6:60:63:51:fd:5b:3c:62:c7:4e:81:b7:ff:
+                    9c:e8:50:d5:b0:d0:76:c9:6a:72:61:ef:84:01:0e:
+                    81:28:c2:58:18:8a:f6:b5:d5:6c:df:15:f9:69:ae:
+                    42:bc:09:30:64:2f:45:b9:f6:be:81:f0:30:50:dd:
+                    0d:ad:d4:a7:d6:c2:63:bb:1d:a3:8b:37:05:3e:c5:
+                    21:4a:11:ff:88:a5:ff:66:ce:61:1b:47:b5:c2:87:
+                    ff:e6:e9:8e:6b:47:88:97:83:ab:a8:ba:f1:52:09:
+                    33:65:64:91:a3:11:67:c5:30:1c:45:80:91:73:3c:
+                    d6:3b:7e:72:9d:91:7d:a5:f6:b6:a2:49:3a:1f:ea:
+                    e0:83
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            Netscape Cert Type: 
+                SSL Client, SSL Server, S/MIME, Object Signing
+    Signature Algorithm: sha1WithRSAEncryption
+        95:bd:7d:21:03:05:60:30:60:80:27:24:5d:54:9d:88:05:06:
+        3d:63:52:82:a2:ff:76:a6:68:51:b0:d0:68:9a:34:61:21:b9:
+        3f:24:c2:3f:bb:dc:7c:be:f9:91:32:63:c6:97:87:65:8b:89:
+        25:b1:10:b7:fa:2a:56:c4:e4:6c:cb:9f:99:97:b2:5a:d5:1a:
+        e0:e4:4f:db:41:54:42:fa:f7:07:b5:ce:3a:5a:7c:0a:02:69:
+        f5:b0:3a:d9:6e:78:59:8b:a2:ca:e5:15:9f:cf:d0:0e:73:c3:
+        af:5c:3e:07:f0:83:e1:39:ff:96:fc:ac:6e:4f:d6:57:2a:87:
+        3d:cc
+-----BEGIN CERTIFICATE-----
+MIICsDCCAhmgAwIBAgIDALgbMA0GCSqGSIb3DQEBBQUAME0xDTALBgNVBAoTBEVT
+R0YxETAPBgNVBAsTCEVTR0YuT1JHMQ0wCwYDVQQLEwRES1JaMRowGAYDVQQDExFl
+c2dmLWRhdGEuZGtyei5kZTAeFw0xNTA0MTAwNzU4MTdaFw0xNjA0MDkwNzU4MTda
+MFIxDTALBgNVBAoTBEVTR0YxETAPBgNVBAsTCEVTR0YuT1JHMQ0wCwYDVQQLEwRE
+S1JaMR8wHQYDVQQDExZob3N0L2V1Y2xpcHNlMS5ka3J6LmRlMIIBIjANBgkqhkiG
+9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1msY62GzwAjoTYy9/YzxxckaFoI/jHxPBjCX
+bcnYSu5hl44iWDpzEvAZHS+g7pcaxAY89n098bbgCrZ6CMYRKlsw2+hYArErQwU+
+CUuamjUsViTHL0DC3yH4rJmOTLaX+lb2RQNtKVH0nRoCcyXqBQTrXyDzdpCJpeZg
+Y1H9Wzxix06Bt/+c6FDVsNB2yWpyYe+EAQ6BKMJYGIr2tdVs3xX5aa5CvAkwZC9F
+ufa+gfAwUN0NrdSn1sJjux2jizcFPsUhShH/iKX/Zs5hG0e1wof/5umOa0eIl4Or
+qLrxUgkzZWSRoxFnxTAcRYCRczzWO35ynZF9pfa2okk6H+rggwIDAQABoxUwEzAR
+BglghkgBhvhCAQEEBAMCBPAwDQYJKoZIhvcNAQEFBQADgYEAlb19IQMFYDBggCck
+XVSdiAUGPWNSgqL/dqZoUbDQaJo0YSG5PyTCP7vcfL75kTJjxpeHZYuJJbEQt/oq
+VsTkbMufmZeyWtUa4ORP20FUQvr3B7XOOlp8CgJp9bA62W54WYuiyuUVn8/QDnPD
+r1w+B/CD4Tn/lvysbk/WVyqHPcw=
+-----END CERTIFICATE-----
+</Cert>
+        </PEMCert>
+    </Node>
+    <Node organization="llnl" namespace="gov.llnl" nodePeerGroup="esgf-prod,esgf-test,cssef" supportEmail="pcmdi-node-admin@llnl.gov" hostname="pcmdi9.llnl.gov" ip="198.128.245.159" dn="/O=Grid/OU=GlobusTest/OU=simpleCA-pcmdi9.llnl.gov/CN=host/pcmdi9.llnl.gov" shortName="esgf-pcmdi-9" longName="PCMDI ESGF P2P NODE 9" timeStamp="1432230204248" version="v1.8.1" release="Griffin" nodeType="60" adminPeer="pcmdi9.llnl.gov" defaultPeer="pcmdi9.llnl.gov">
+        <CA hash="dunno" endpoint="pcmdi9.llnl.gov" dn="dunno"/>
+        <GeoLocation lat="37.412192" lon="-121.425586" city="Livermore"/>
+        <NodeManager endpoint="https://pcmdi9.llnl.gov/esgf-node-manager/node"/>
+        <OpenIDProvider endpoint="https://pcmdi9.llnl.gov/esgf-idp/idp/openidServer.htm"/>
+        <FrontEnd endpoint="http://pcmdi9.llnl.gov/esgf-web-fe/"/>
+        <IndexService port="8983" endpoint="http://pcmdi9.llnl.gov/esg-search/search"/>
+        <AttributeService endpoint="https://pcmdi9.llnl.gov/esgf-idp/saml/soap/secure/attributeService.htm">
+            <Group name="CNRM-CERFACS" description="CNRM-CERFACS"/>
+            <Group name="WACCM" description="WACCM (Whole Atmosphere Community Climate Model) users"/>
+            <Group name="CLOUD-CRYO" description="Polar Simulations"/>
+            <Group name="wheel" description="Administrator Group"/>
+            <Group name="IAP-LASG" description="Institute of Atmospheric Physics"/>
+            <Group name="PCM" description="PCM (Parallel Climate Model) users"/>
+            <Group name="PCMDI" description="PCMDI publishers"/>
+            <Group name="CCCMA" description="CCCMA group: Please do not apply for membership in this group. Data will be made available to CMIP5 users in the near future."/>
+            <Group name="CCSM" description="CCSM (Community Climate System Model) users"/>
+            <Group name="CSSEF-Group" description="User for the CSSEF project"/>
+            <Group name="Test" description="Test group"/>
+            <Group name="BCCR" description=""/>
+            <Group name="JPL" description="JPL AIRS"/>
+            <Group name="IPSL" description="IPSL"/>
+            <Group name="CloudCryoGroup" description="Cloud-Cryo Group"/>
+            <Group name="IHOPE" description="IHOPE users"/>
+            <Group name="PNNL" description="Pacific Northwest National Lab"/>
+            <Group name="BDM" description="Bulk Data Movement"/>
+            <Group name="DIAS" description="Data Integration and Analysis System"/>
+            <Group name="LUCID" description="LUCID-CMIP5 group"/>
+            <Group name="Dynamical Core" description="DyCore Workshop users"/>
+            <Group name="GFDL" description="GFDL Publishers"/>
+            <Group name="CMIP5 Commercial" description="Users of CMIP5 data possibly for commercial purposes"/>
+            <Group name="NARCCAP" description="NARCCAP (North American Regional Climate Change Assessment Program) users"/>
+            <Group name="CES" description="CES (Climate End Station) users"/>
+            <Group name="CMIP5 Research" description="Users of CMIP5 data for non-commercial research purposes only"/>
+            <Group name="NCL" description="NCL (NCAR Command Language) users"/>
+            <Group name="PyNIO" description="PyNIO users"/>
+            <Group name="NCDC" description="National Climatic Data Center"/>
+            <Group name="PyNGL" description="PyNGL (Python NCAR Graphic Language) users"/>
+            <Group name="BCC" description="Beijing Climate Center"/>
+            <Group name="NCC" description="Norwegian Climate Centre"/>
+            <Group name="CMCC" description="CMCC"/>
+            <Group name="ESMF" description="ESMF (Earth System Modeling Framework) users"/>
+            <Group name="NCCS" description="NASA Center for Climate Simulation: Please do not apply for membership in this group. Data will be made available to CMIP5 users in the near future."/>
+        </AttributeService>
+        <AuthorizationService endpoint="https://pcmdi9.llnl.gov/esg-orp/saml/soap/secure/authorizationService.htm"/>
+        <RegistrationService endpoint="https://pcmdi9.llnl.gov/esgf-idp/secure/registrationService.htm"/>
+        <ThreddsService endpoint="http://pcmdi9.llnl.gov/thredds"/>
+        <GridFTPService endpoint="gsiftp://pcmdi9.llnl.gov">
+            <Configuration serviceType="Replication" port="2812"/>
+            <Configuration serviceType="Download" port="2811"/>
+        </GridFTPService>
+        <Metrics>
+            <DownloadedData count="0" size="0" users="0"/>
+            <RegisteredUsers count="11913"/>
+        </Metrics>
+        <RSSFeeds>
+            <RSSFeed url="http://pcmdi9.llnl.gov/esg-search/feed/node.rss" title="esgf-pcmdi-9 RSS"/>
+        </RSSFeeds>
+        <LASService endpoint="http://pcmdi9.llnl.gov/las"/>
+        <MyProxyService endpoint="pcmdi9.llnl.gov"/>
+        <PublishingService endpoint="https://pcmdi9.llnl.gov/esg-search/remote/secure/client-cert/hessian/publishingService"/>
+        <RelyingPartyService endpoint="https://pcmdi9.llnl.gov/esg-orp/html.htm"/>
+        <PEMCert>
+            <Cert>Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 1097 (0x449)
+        Signature Algorithm: sha1WithRSAEncryption
+        Issuer: O=ESGF, OU=ESGF.ORG, CN=NSC Simple CA
+        Validity
+            Not Before: Apr  9 08:17:20 2015 GMT
+            Not After : Apr  8 08:17:20 2016 GMT
+        Subject: O=ESGF, OU=ESGF.ORG, CN=host/pcmdi9.llnl.gov
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (4096 bit)
+                Modulus (4096 bit):
+                    00:b7:2f:ad:8e:83:75:27:68:7e:e5:9c:60:e9:8e:
+                    c2:2f:fa:de:f5:17:de:32:41:48:18:3c:2f:d4:52:
+                    45:f6:5b:7e:d5:44:32:b5:93:5d:e6:8b:17:fe:7c:
+                    c3:3e:fa:c1:28:d2:d4:50:d2:62:b2:60:11:a3:c3:
+                    bc:35:f4:53:15:f7:27:c2:d1:49:01:12:6b:75:a6:
+                    4c:ba:6a:02:0c:e8:c1:c1:ee:27:56:54:ce:f5:09:
+                    63:a3:9d:be:c5:9e:cd:4a:63:c6:9d:6e:cc:39:c9:
+                    c5:56:9b:c1:4c:ed:3e:85:b8:72:4e:4d:3c:05:8a:
+                    c8:2e:21:8f:b9:fa:f6:35:9f:53:f5:c3:21:d3:f5:
+                    b8:bc:cc:40:ba:75:ac:0c:2d:14:f4:d6:39:d1:82:
+                    ab:80:e5:80:c0:21:49:29:4a:84:fc:20:60:9b:76:
+                    d6:92:09:75:b0:0b:e9:79:cc:9c:8f:6e:80:f5:37:
+                    89:2a:d4:80:7a:ec:34:6b:91:a6:d1:52:0d:0e:b5:
+                    89:27:85:04:a2:b5:74:cb:9c:8e:31:9f:9b:60:86:
+                    ff:d2:9d:a0:33:92:f1:8c:b9:7d:22:c3:cc:75:be:
+                    76:a1:5f:7c:33:78:0f:79:fb:50:d1:da:fe:b0:b3:
+                    44:be:58:42:12:e8:4c:c0:af:da:af:2c:41:f6:64:
+                    05:dd:ad:e0:be:f7:99:97:4b:5a:35:55:b6:64:ba:
+                    5e:ab:bd:d6:1f:39:0f:8f:36:d2:3a:a6:bd:11:b7:
+                    5f:04:aa:5d:0c:eb:39:57:32:f4:3a:44:d3:8e:f5:
+                    b9:7b:6c:a3:cd:ad:e2:0f:73:f6:ed:a5:10:39:40:
+                    5d:44:b3:af:db:53:83:4d:f2:fa:31:88:4d:6c:13:
+                    ea:91:e8:52:d9:e5:42:5c:f6:40:bc:68:43:83:6c:
+                    9b:f4:87:d0:b5:8e:18:15:c0:23:2e:d7:34:ae:20:
+                    0c:b4:c1:39:13:c4:7c:28:78:bb:1b:f5:5b:21:9e:
+                    48:08:83:6c:cb:73:c4:ee:e5:9d:a7:be:e9:0b:5c:
+                    81:ce:be:e4:16:1c:80:3c:6a:b2:f4:90:5a:ce:4f:
+                    16:fa:db:37:f1:b6:73:da:b4:00:9c:0a:fd:fd:9c:
+                    ac:61:d3:81:19:a0:b9:05:0f:29:4d:81:45:49:dd:
+                    ff:c4:9b:b0:ed:f3:72:03:10:28:bd:c4:d8:0e:ea:
+                    6e:96:a7:48:85:8a:80:c4:5d:65:81:74:0b:d2:af:
+                    55:96:02:da:fb:0a:fc:c1:5c:df:e6:35:f8:7f:7a:
+                    ba:c6:2e:f6:22:05:c7:75:af:95:34:70:21:96:1a:
+                    bc:d6:83:da:ac:08:7d:17:a2:e0:9b:34:96:ec:a3:
+                    b6:98:19
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            Netscape Cert Type: 
+                SSL Client, SSL Server, S/MIME, Object Signing
+    Signature Algorithm: sha1WithRSAEncryption
+        a3:05:be:24:6a:51:f9:4d:79:45:ea:61:5c:1f:8f:99:be:f1:
+        96:45:bc:6a:a0:4c:30:2b:3e:a5:70:f8:7c:eb:23:07:36:8e:
+        22:bb:e7:11:2d:a4:88:4a:ce:14:51:bc:fe:0c:ec:01:7b:f9:
+        75:ff:a9:4e:0d:1a:31:ee:c0:0c:04:ff:9c:1e:6b:77:a9:a3:
+        c4:fb:a4:66:e0:8a:11:60:ba:94:ba:6f:d8:fd:75:5c:a7:7b:
+        51:d8:fb:2c:eb:93:5e:ea:1a:74:23:9e:90:63:66:a9:4a:fa:
+        bf:7d:fe:c3:3a:7b:2b:92:b7:71:09:8b:34:89:a8:c7:df:b8:
+        17:be
+-----BEGIN CERTIFICATE-----
+MIIDizCCAvSgAwIBAgICBEkwDQYJKoZIhvcNAQEFBQAwOjENMAsGA1UEChMERVNH
+RjERMA8GA1UECxMIRVNHRi5PUkcxFjAUBgNVBAMTDU5TQyBTaW1wbGUgQ0EwHhcN
+MTUwNDA5MDgxNzIwWhcNMTYwNDA4MDgxNzIwWjBBMQ0wCwYDVQQKEwRFU0dGMREw
+DwYDVQQLEwhFU0dGLk9SRzEdMBsGA1UEAxMUaG9zdC9wY21kaTkubGxubC5nb3Yw
+ggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQC3L62Og3UnaH7lnGDpjsIv
++t71F94yQUgYPC/UUkX2W37VRDK1k13mixf+fMM++sEo0tRQ0mKyYBGjw7w19FMV
+9yfC0UkBEmt1pky6agIM6MHB7idWVM71CWOjnb7Fns1KY8adbsw5ycVWm8FM7T6F
+uHJOTTwFisguIY+5+vY1n1P1wyHT9bi8zEC6dawMLRT01jnRgquA5YDAIUkpSoT8
+IGCbdtaSCXWwC+l5zJyPboD1N4kq1IB67DRrkabRUg0OtYknhQSitXTLnI4xn5tg
+hv/SnaAzkvGMuX0iw8x1vnahX3wzeA95+1DR2v6ws0S+WEIS6EzAr9qvLEH2ZAXd
+reC+95mXS1o1VbZkul6rvdYfOQ+PNtI6pr0Rt18Eql0M6zlXMvQ6RNOO9bl7bKPN
+reIPc/btpRA5QF1Es6/bU4NN8voxiE1sE+qR6FLZ5UJc9kC8aEODbJv0h9C1jhgV
+wCMu1zSuIAy0wTkTxHwoeLsb9VshnkgIg2zLc8Tu5Z2nvukLXIHOvuQWHIA8arL0
+kFrOTxb62zfxtnPatACcCv39nKxh04EZoLkFDylNgUVJ3f/Em7Dt83IDECi9xNgO
+6m6Wp0iFioDEXWWBdAvSr1WWAtr7CvzBXN/mNfh/errGLvYiBcd1r5U0cCGWGrzW
+g9qsCH0XouCbNJbso7aYGQIDAQABoxUwEzARBglghkgBhvhCAQEEBAMCBPAwDQYJ
+KoZIhvcNAQEFBQADgYEAowW+JGpR+U15RephXB+Pmb7xlkW8aqBMMCs+pXD4fOsj
+BzaOIrvnES2kiErOFFG8/gzsAXv5df+pTg0aMe7ADAT/nB5rd6mjxPukZuCKEWC6
+lLpv2P11XKd7Udj7LOuTXuoadCOekGNmqUr6v33+wzp7K5K3cQmLNImox9+4F74=
+-----END CERTIFICATE-----
+</Cert>
+        </PEMCert>
+    </Node>
+    <Node organization="nasa" namespace="jpl.nasa.gov" nodePeerGroup="esgf-test" supportEmail="luca.cinquini@jpl.nasa.gov" hostname="test-datanode.jpl.nasa.gov" ip="137.78.210.101" dn="/O=Grid/OU=GlobusTest/OU=simpleCA-esg-vm2.jpl.nasa.gov/CN=host/esg-vm2.jpl.nasa.gov" shortName="JPL_Test_Data_Node" longName="NASA JPL Test Data Node" timeStamp="1432551093602" version="v1.8.0-devel" release="Griffin" nodeType="60" adminPeer="pcmdi9.llnl.gov" defaultPeer="esg.ccs.ornl.gov">
+        <CA hash="dunno" endpoint="test-datanode.jpl.nasa.gov" dn="dunno"/>
+        <GeoLocation lat="34.320999" lon="-118.383003" city="Sylmar"/>
+        <NodeManager endpoint="https://test-datanode.jpl.nasa.gov/esgf-node-manager/node"/>
+        <OpenIDProvider endpoint="https://test-datanode.jpl.nasa.gov/esgf-idp/idp/openidServer.htm"/>
+        <FrontEnd endpoint="http://test-datanode.jpl.nasa.gov/esgf-web-fe/"/>
+        <IndexService port="8983" endpoint="http://test-datanode.jpl.nasa.gov/esg-search/search"/>
+        <AttributeService endpoint="https://test-datanode.jpl.nasa.gov/esgf-idp/saml/soap/secure/attributeService.htm">
+            <Group name="wheel" description="Administrator Group"/>
+            <Group name="NASA Test" description="NASA Test Group"/>
+            <Group name="NASA OBS" description="NASA Observations"/>
+        </AttributeService>
+        <AuthorizationService endpoint="https://test-datanode.jpl.nasa.gov/esg-orp/saml/soap/secure/authorizationService.htm"/>
+        <RegistrationService endpoint="https://test-datanode.jpl.nasa.gov/esgf-idp/secure/registrationService.htm"/>
+        <ThreddsService endpoint="http://test-datanode.jpl.nasa.gov/thredds"/>
+        <GridFTPService endpoint="gsiftp://test-datanode.jpl.nasa.gov">
+            <Configuration serviceType="Replication" port="2812"/>
+            <Configuration serviceType="Download" port="2811"/>
+        </GridFTPService>
+        <Metrics>
+            <DownloadedData count="0" size="0" users="0"/>
+            <RegisteredUsers count="31"/>
+        </Metrics>
+        <RSSFeeds>
+            <RSSFeed url="http://test-datanode.jpl.nasa.gov/esg-search/feed/node.rss" title="JPL_Test_Data_Node RSS"/>
+        </RSSFeeds>
+        <LASService endpoint="http://test-datanode.jpl.nasa.gov/las"/>
+        <MyProxyService endpoint="pcmdi9.llnl.gov"/>
+        <PublishingService endpoint="https://test-datanode.jpl.nasa.gov/esg-search/remote/secure/client-cert/hessian/publishingService"/>
+        <RelyingPartyService endpoint="https://test-datanode.jpl.nasa.gov/esg-orp/html.htm"/>
+        <PEMCert>
+            <Cert>Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 1115 (0x45b)
+        Signature Algorithm: sha1WithRSAEncryption
+        Issuer: O=ESGF, OU=ESGF.ORG, CN=NSC Simple CA
+        Validity
+            Not Before: Apr 17 10:00:50 2015 GMT
+            Not After : Apr 16 10:00:50 2016 GMT
+        Subject: O=ESGF, OU=ESGF.ORG, CN=host/test-datanode.jpl.nasa.gov
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (4096 bit)
+                Modulus (4096 bit):
+                    00:aa:c7:10:3c:ec:7e:02:ba:86:aa:42:77:d8:f5:
+                    5e:3a:19:e8:fd:f0:c6:70:0b:f3:f1:61:c8:16:c6:
+                    70:5d:45:49:6b:d2:ff:36:73:77:23:f5:4c:e5:d1:
+                    3e:86:67:2b:87:9c:c7:19:6f:27:07:37:04:7d:5d:
+                    3c:b3:60:a2:27:1d:35:c8:9c:65:3d:bb:ad:d2:35:
+                    97:94:1b:49:28:a1:1e:a7:b4:d5:c9:35:ff:c9:af:
+                    e3:38:62:9e:75:3a:91:c9:17:c7:64:af:1c:c1:e5:
+                    a6:a6:49:8f:8f:00:cc:b5:e2:45:81:1a:fb:10:78:
+                    70:4f:17:98:11:1a:48:3c:30:51:be:28:e5:61:57:
+                    d8:ae:e4:90:da:f1:d8:c6:2e:6e:b8:7d:46:73:83:
+                    47:ae:e2:36:8c:25:38:4c:ee:ea:c1:46:7c:ef:b7:
+                    85:16:44:1f:a2:ad:57:2d:1f:44:93:cb:23:47:74:
+                    b7:ac:ed:92:4e:a0:a0:20:72:0e:2e:07:b2:1a:41:
+                    d8:33:64:ee:85:3c:db:0f:f6:52:e3:e6:25:41:d2:
+                    fb:a7:62:44:75:81:af:a7:55:f8:8b:5d:b1:d5:0d:
+                    cf:5f:4e:e8:d8:ca:5c:e9:31:7f:d6:7b:9e:0e:34:
+                    85:0c:2b:4d:ca:76:d6:86:81:63:9a:f8:6a:05:ec:
+                    ce:46:ea:38:db:7d:d1:89:3b:96:97:f9:1e:c3:85:
+                    e9:c9:f8:e1:8f:a5:b3:a6:53:a9:89:3b:8d:2e:ab:
+                    38:7d:57:d8:81:0e:9a:5e:24:e5:89:ce:68:53:41:
+                    13:85:8e:34:18:ab:78:a6:16:44:48:51:cf:ee:f7:
+                    16:2c:06:a2:5a:f0:6c:3a:30:47:48:1f:a8:37:5c:
+                    49:f7:be:11:a7:15:9a:f8:e7:a9:02:c2:0d:3b:5b:
+                    3e:57:ed:2b:f0:6b:43:7d:10:8a:e2:3c:e6:3f:3c:
+                    ea:a7:02:71:c2:df:ed:0c:ed:64:d6:04:28:85:12:
+                    40:6f:74:3a:ce:8a:07:d6:8c:45:66:ed:a4:78:96:
+                    cf:27:e1:dd:b6:ae:93:57:dc:72:d3:16:a7:45:0a:
+                    17:05:83:28:49:79:6f:ec:7c:4f:d9:7d:b5:ad:af:
+                    44:b8:41:bc:d1:de:f2:7d:c3:88:36:cb:4f:84:fa:
+                    c6:a3:cb:36:80:6d:dc:79:c3:67:b5:ae:51:6e:69:
+                    8d:66:5a:de:29:ed:43:df:aa:e0:14:c9:31:c2:bf:
+                    69:fd:a2:bf:00:ec:fd:69:19:22:92:d5:44:12:ff:
+                    3e:f8:2c:2e:0c:a0:d1:fd:12:86:95:9c:06:45:41:
+                    72:cd:cb:18:b5:8f:5b:b0:83:57:3a:d6:a3:5f:43:
+                    45:34:e7
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            Netscape Cert Type: 
+                SSL Client, SSL Server, S/MIME, Object Signing
+    Signature Algorithm: sha1WithRSAEncryption
+        8f:3b:94:d9:0f:ff:3c:0b:d4:ca:09:df:4b:d2:85:7d:a6:4d:
+        87:0b:a4:12:98:24:58:62:d6:7c:f6:a3:1a:73:ed:2d:7a:c0:
+        62:a9:29:2b:fb:84:58:70:c8:44:8b:54:be:17:04:7e:fc:fc:
+        9c:76:6b:eb:06:ae:50:46:07:34:a7:7a:90:7c:6b:5e:f4:56:
+        0f:03:05:50:76:87:b0:c8:a6:43:ae:e4:3e:22:1b:60:72:04:
+        70:fb:e9:26:6f:d1:1d:60:7b:a8:36:cf:2c:c9:25:42:9f:74:
+        2d:f8:0c:d6:b1:f5:39:fe:f6:1c:51:5b:2e:14:b7:f9:b2:ed:
+        d4:73
+-----BEGIN CERTIFICATE-----
+MIIDljCCAv+gAwIBAgICBFswDQYJKoZIhvcNAQEFBQAwOjENMAsGA1UEChMERVNH
+RjERMA8GA1UECxMIRVNHRi5PUkcxFjAUBgNVBAMTDU5TQyBTaW1wbGUgQ0EwHhcN
+MTUwNDE3MTAwMDUwWhcNMTYwNDE2MTAwMDUwWjBMMQ0wCwYDVQQKEwRFU0dGMREw
+DwYDVQQLEwhFU0dGLk9SRzEoMCYGA1UEAxMfaG9zdC90ZXN0LWRhdGFub2RlLmpw
+bC5uYXNhLmdvdjCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCCAgoCggIBAKrHEDzs
+fgK6hqpCd9j1XjoZ6P3wxnAL8/FhyBbGcF1FSWvS/zZzdyP1TOXRPoZnK4ecxxlv
+Jwc3BH1dPLNgoicdNcicZT27rdI1l5QbSSihHqe01ck1/8mv4zhinnU6kckXx2Sv
+HMHlpqZJj48AzLXiRYEa+xB4cE8XmBEaSDwwUb4o5WFX2K7kkNrx2MYubrh9RnOD
+R67iNowlOEzu6sFGfO+3hRZEH6KtVy0fRJPLI0d0t6ztkk6goCByDi4HshpB2DNk
+7oU82w/2UuPmJUHS+6diRHWBr6dV+ItdsdUNz19O6NjKXOkxf9Z7ng40hQwrTcp2
+1oaBY5r4agXszkbqONt90Yk7lpf5HsOF6cn44Y+ls6ZTqYk7jS6rOH1X2IEOml4k
+5YnOaFNBE4WONBireKYWREhRz+73FiwGolrwbDowR0gfqDdcSfe+EacVmvjnqQLC
+DTtbPlftK/BrQ30QiuI85j886qcCccLf7QztZNYEKIUSQG90Os6KB9aMRWbtpHiW
+zyfh3bauk1fcctMWp0UKFwWDKEl5b+x8T9l9ta2vRLhBvNHe8n3DiDbLT4T6xqPL
+NoBt3HnDZ7WuUW5pjWZa3intQ9+q4BTJMcK/af2ivwDs/WkZIpLVRBL/PvgsLgyg
+0f0ShpWcBkVBcs3LGLWPW7CDVzrWo19DRTTnAgMBAAGjFTATMBEGCWCGSAGG+EIB
+AQQEAwIE8DANBgkqhkiG9w0BAQUFAAOBgQCPO5TZD/88C9TKCd9L0oV9pk2HC6QS
+mCRYYtZ89qMac+0tesBiqSkr+4RYcMhEi1S+FwR+/PycdmvrBq5QRgc0p3qQfGte
+9FYPAwVQdoewyKZDruQ+IhtgcgRw++kmb9EdYHuoNs8sySVCn3Qt+AzWsfU5/vYc
+UVsuFLf5su3Ucw==
+-----END CERTIFICATE-----
+</Cert>
+        </PEMCert>
+    </Node>
+</Registration>

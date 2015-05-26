@@ -366,10 +366,9 @@ $(document).ready(function(){
 	    	var data = {
 	    		node: id
 	    	}
-	    	data = JSON.stringify(data);
-	    	get_data('node_info/', 'POST', data, function(){
+	    	get_data('node_info/', 'POST', data, function(response){
 	    		spinner.stop();
-				var node_data = jQuery.parseJSON(response);
+				var node_data = response;
 				var data = '';
 				var text_style = '';
 				$('#nodeSelect_window').find('.tile-contents').append('<table id=node-info></table>');
@@ -443,10 +442,9 @@ $(document).ready(function(){
 				node:'http://'+hostname+'/esg-search/',
 				test_connection: true
 			};
-			var data = JSON.stringify(data);
-			get_data('node_search/', 'POST', data, function(){
+			get_data('node_search/', 'POST', data, function(response){
 				spinner.stop();
-				var facet_options = JSON.parse(response);
+				var facet_options = response;
 				searchWindow.empty();
 				var form = ['<form>',
 							'Facet options<br>',
@@ -521,8 +519,7 @@ $(document).ready(function(){
 	    	var spinner = new Spinner(opts).spin();
 	    	document.getElementById('nodeSearch_window').appendChild(spinner.el);
 			searchTerms['node'] = 'http://'+hostname+'/esg-search/';
-			var data = JSON.stringify(searchTerms);
-			get_data('node_search/', 'POST', data, function(){
+			get_data('node_search/', 'POST', searchTerms, function(){
 				spinner.stop();
 				console.log(JSON.parse(response));
 				response = JSON.parse(response);
@@ -1893,7 +1890,7 @@ Left slide menu
 	function get_data(url, type, jsonObj, success_callback, fail_callback){
 		var csrftoken = get_csrf();
 
-		// var jsonObj = new Object;
+		// var jsonObj = new Object;®
 		// jsonObj.result = '';
 		// jsonObj.data = '';
 		data = JSON.stringify(jsonObj);

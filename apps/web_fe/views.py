@@ -374,6 +374,7 @@ def node_info(request):
             from xml.etree.ElementTree import parse
             tree = parse('scripts/registration.xml')
             root = tree.getroot()
+
             name = json.loads(request.body)['node']
 
             response = {}
