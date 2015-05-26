@@ -290,7 +290,7 @@ def grid(request):
                     For production, uncomment
                     res = velo_api.init(c.service_user_name, c.password)
                     '''
-            except:
+            except Exception as e:
                 import traceback
                 print '1', e.__doc__
                 print '2', sys.exc_info()
