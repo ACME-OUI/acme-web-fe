@@ -268,13 +268,13 @@ def grid(request):
     if len(creds) != 0:
         for c in creds:
             try:
+                '''
                 if c.service == 'esgf':
                     import pyesgf
                     from pyesgf import LogonManager
                     lm = LogonManager()
                     lm.logon_with_openid(c.service_user_name, c.password)
                     if lm.is_logged_on():
-                        request.session['esgf_login'] = lm
                         print 'esgf log in successful'
                 if c.service == 'velo':
                     lib_path = os.path.abspath(os.path.join('apps', 'velo'))
@@ -284,12 +284,10 @@ def grid(request):
                     velo_api = VeloAPI.Velo()
                     velo_api.start_jvm()
                     res = velo_api.init_velo('acmetest', 'acmetest')
-                    request.session['velo_login'] = res
+
                     print 'velo log in successful'
-                    '''
-                    For production, uncomment
-                    res = velo_api.init(c.service_user_name, c.password)
-                    '''
+                '''
+                print 'starting a new session'
             except Exception as e:
                 import traceback
                 print '1', e.__doc__
