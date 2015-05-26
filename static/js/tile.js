@@ -197,7 +197,7 @@ $(document).ready(function(){
 			}
 
 			if(name == 'velo'){
-				initVeloConnection();
+				//initVeloConnection();
 				initFileTree();
 			}
 
@@ -318,7 +318,7 @@ $(document).ready(function(){
 	    	var data = {
 	    		connection: 'init'
 	    	}
-	    	get_data('velo/', 'POST', data, function(){
+	    	get_data('velo/', 'POST', data, function(response){
 	    		spinner.stop();
 				alert(jQuery.parseJSON(response));
 	    	}, function(){
