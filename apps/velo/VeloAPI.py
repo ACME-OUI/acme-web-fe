@@ -137,10 +137,10 @@ class Velo:
         Folder = JPackage("gov").pnnl.cat.core.resources.IFolder
         cmsparentPath = cms(parentPath)
         ress = resMgr.getChildren(cmsparentPath)
-        for resource in ress:
-            print resource
-            if isinstance(resource, Folder):
-                Velo.get_resources(self, resource.toString())
+        for i in range(len(ress)):
+            print ress[i]
+            if isinstance(ress[i], Folder):
+                Velo.get_resources(self, ress[i].toString())
 
     # returns all the subfolders in users' home folder
     def get_homefolder_resources(self):

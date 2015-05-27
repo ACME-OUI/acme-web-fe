@@ -24,6 +24,9 @@ import time
 import datetime
 
 
+sys.path.insert(0, os.getcwd() + '/apps/velo')
+import VeloAPI
+
 # General
 def render_template(request, template, context):
     template = loader.get_template(template)
@@ -128,7 +131,6 @@ def check_credentials(request):
                             lib_path = os.path.abspath(
                                 os.path.join('apps', 'velo'))
                             sys.path.append(lib_path)
-                            import VeloAPI
 
                             velo_api = VeloAPI.Velo()
                             velo_api.start_jvm()
@@ -277,9 +279,7 @@ def grid(request):
                     if lm.is_logged_on():
                         print 'esgf log in successful'
                 if c.service == 'velo':
-                    lib_path = os.path.abspath(os.path.join('apps', 'velo'))
-                    sys.path.append(lib_path)
-                    import VeloAPI
+
 
                     velo_api = VeloAPI.Velo()
                     velo_api.start_jvm()
@@ -488,10 +488,10 @@ def node_search(request):
 def get_home_folder(request):
     if request.method == 'POST':
         try:
-            import VeloAPI
             velo_api = VeloAPI.velo()
             rm = velo_api.init('acmetest', 'acmetest')
-            return HttpResponse(json.dumps(rm.get_homefolder_resources()))
+
+            return HttpResponse(json.dumps(velo.get_homefolder_resources()))
 
         except Exception as e:
             import traceback
@@ -535,7 +535,6 @@ def credential_check_existance(request):
 @login_required
 def velo(request):
     if request.method == 'POST':
-        from velo import VeloAPI
         try:
             velo_api = VeloAPI.Velo()
             velo_api.start_jvm()
