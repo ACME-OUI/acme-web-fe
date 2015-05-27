@@ -146,8 +146,10 @@ class Velo:
     def get_homefolder_resources(self):
         folder = resMgr.getHomeFolder()
         ress = resMgr.getChildren(folder.getPath())
-        for resource in ress:
-            print resource
+        ret = []
+        for i in range(len(ress)):
+            ret.append(ress[i])
+        return ret
         # Velo.get_resources(self,folder.toString())
 
     def get_homefolder(self):  # get user's home folder
