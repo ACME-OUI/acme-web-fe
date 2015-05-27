@@ -17,7 +17,7 @@ class Velo:
     def start_jvm(self):
         # include the velo python API jar file here
         jpype.startJVM(
-            jvmPath, "-Djava.class.path=/home/sterling/projects/acme-web-fe/static/java/VeloAPI.jar")
+            jvmPath, "-Djava.class.path=/home/baldwin/acme-web-fe/static/java/VeloAPI.jar")
         global velo, cms, jobConfig, fileObj, tifConstants, fileServerMap, filesToDownload
         velo = JPackage("velo").mgr.VeloManager
         cms = JPackage("gov").pnnl.velo.model.CmsPath
@@ -148,7 +148,7 @@ class Velo:
         ress = resMgr.getChildren(folder.getPath())
         ret = []
         for i in range(len(ress)):
-            ret.append(ress[i])
+            ret.append(ress[i].toString())
         return ret
         # Velo.get_resources(self,folder.toString())
 

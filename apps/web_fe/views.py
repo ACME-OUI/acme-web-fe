@@ -488,8 +488,9 @@ def node_search(request):
 def get_home_folder(request):
     if request.method == 'POST':
         try:
-            velo_api = VeloAPI.velo()
-            rm = velo_api.init('acmetest', 'acmetest')
+            velo = VeloAPI.Velo()
+	    velo.start_jvm()
+	    rm = velo.init_velo('acmetest', 'acmetest')
 
             return HttpResponse(json.dumps(velo.get_homefolder_resources()))
 
