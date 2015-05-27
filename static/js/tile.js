@@ -251,6 +251,7 @@ $(document).ready(function(){
     function initFileTree(){
 		$.getScript('static/filetree/jqueryFileTree.js', function(){
 			get_data('get_home_folder/', 'POST', {}, function(response){
+				console.log(response);
 				$('#velo-file-tree').fileTree({
 					root: response
 				}, function(file){
