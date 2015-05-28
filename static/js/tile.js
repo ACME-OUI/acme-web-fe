@@ -301,7 +301,7 @@ $(document).ready(function(){
 					console.log(response[i]);
 					if(isFolder(response[i])){
 						path = response[i].split('/');
-						if(path.length > 2){
+						if(path.length > 3){
 							var parentFolder = $('#'+path[path.length-3]);
 							if(parentFolder.length == 0){
 								$('.mtree').append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ path[path.length-2] +'"></ul></li>');
