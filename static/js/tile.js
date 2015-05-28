@@ -309,7 +309,7 @@ $(document).ready(function(){
 							} 
 							$('#'+path[path.length-2]).append('<li><a href="#">' + response[i].split('/').pop() + '</a><ul id="'+ response[i].split('/').pop() +'"></ul></li>');
 						} else {
-							$('.mtree').append('<li><a href="#">' + response[i].split('/').pop() + '</a><ul id="'+ response[i].split('/').pop() +'"></ul></li>');
+							$('.mtree').append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ path[path.length-2] +'"></ul></li>');
 						}
 						
 					} else {
