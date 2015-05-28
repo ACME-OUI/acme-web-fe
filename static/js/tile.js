@@ -301,7 +301,11 @@ $(document).ready(function(){
 					if(isFolder(response[i])){
 						path = response[i].split('/');
 						if(path.length > 3){
-							var parentFolder = $('#'+path[path.length-3]);
+							var parentFolder = '';
+							for(j = 1; j < path.length-3){
+								parentFolder += path[j] + '/';
+							}
+							parentFolder = $('#'+parentFolder);
 							if(parentFolder.length == 0){
 								$('.mtree').append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ path[path.length-2] +'"></ul></li>');
 							}
