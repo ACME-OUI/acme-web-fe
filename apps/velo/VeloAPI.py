@@ -136,7 +136,10 @@ class Velo:
     def get_resources(self, parentPath):
         Folder = JPackage("gov").pnnl.cat.core.resources.IFolder
         cmsparentPath = cms(parentPath)
-        ress = resMgr.getChildren(cmsparentPath)
+        try:
+            ress = resMgr.getChildren(cmsparentPath)
+        except:
+            print 'resource does not exist'
         for i in range(len(ress)):
             print ress[i]
             if isinstance(ress[i], Folder):

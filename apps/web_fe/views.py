@@ -485,14 +485,14 @@ def node_search(request):
 
 
 @login_required
-def get_home_folder(request):
+def get_folder(request):
     if request.method == 'POST':
         try:
             velo = VeloAPI.Velo()
-	    velo.start_jvm()
-	    rm = velo.init_velo('acmetest', 'acmetest')
+            velo.start_jvm()
+            rm = velo.init_velo('acmetest', 'acmetest')
 
-            return HttpResponse(json.dumps(velo.get_homefolder_resources()))
+        return HttpResponse(json.dumps(velo.get_homefolder_resources()))
 
         except Exception as e:
             import traceback

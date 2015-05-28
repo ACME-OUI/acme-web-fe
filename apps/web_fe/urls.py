@@ -14,7 +14,7 @@ urlpatterns = patterns('',
                        url(r'^workflow/?$', views.workflow),
                        url(r'^grid/?$', views.grid, name='grid'),
                        url(r'^credential_check_existance/', views.credential_check_existance),
-                       url(r'^get_home_folder/', views.get_home_folder),
+                       url(r'^get_folder/', views.get_folder),
 
                        url(r'^save_layout/', views.save_layout, name='save_layout'),
                        url(r'^load_layout/', views.load_layout, name='load_layout'),
