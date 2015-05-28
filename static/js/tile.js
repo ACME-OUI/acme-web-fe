@@ -294,22 +294,26 @@ $(document).ready(function(){
 				
 				for(var i = 0; i < response.length; i++){
 					var path = response[i].split('/');
-					response[i] = '';
+					response[i] = '/';
 					for(var j = 2; j < path.length; j++){
 						response[i] += path[j]+'/';
 					}
 					console.log(response[i]);
 					if(isFolder(response[i])){
-						if(response[i].split('/').length > 1){
-
+						path = response[i].split('/');
+						if(path.length > 1){
+							var parentFolder = $('#'+path[path.length-2]);
+							if(parentFolder.length == 0){
+								$('.mtree').append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ path[path.length-2] +'"></ul></li>');
+							} 
+							$('#'+path[path.length-2]).append('<li><a href="#">' + response[i].split('/').pop() + '</a><ul id="'+ response[i].split('/').pop() +'"></ul></li>');
 						} else {
-
+							$('.mtree').append('<li><a href="#">' + response[i].split('/').pop() + '</a><ul id="'+ response[i].split('/').pop() +'"></ul></li>');
 						}
-						$('.mtree').append('<li><a href="#">' + response[i] + '</a><ul id="'+ response[i].split('/').pop() +'"></ul></li>');
+						
 					} else {
 						var path = response[i].split('/');
-						console.log(response[i] + '    ' + path[path.length-2])
-						$('#'+path[path.length-2]).append('<li><a href="#">'+response[i]+'</a></li>');
+						$('#'+path[path.length-2]).append('<li><a href="#">' + response[i] + '</a></li>');
 					}
 				}
 			},	function(){
