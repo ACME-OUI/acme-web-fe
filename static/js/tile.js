@@ -262,7 +262,7 @@ $(document).ready(function(){
 				var lastFolderIndex = 0;
 				if(isFolder(response[i])){
 					lastFolderIndex = i;
-					$('.mtree').append('<li><a href="#">' + response[i] + '</a><ul id="folder_"'+lastFolderIndex+'></ul></li>');
+					$('.mtree').append('<li><a href="#">' + response[i] + '</a><ul id="folder_'+lastFolderIndex+'""></ul></li>');
 				} else {
 					$('#folder_'+lastFolderIndex).append('<li><a href="#">'+response[i]+'</a></li>');
 				}
