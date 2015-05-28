@@ -305,7 +305,7 @@ $(document).ready(function(){
 							for(j = 1; j < path.length-2; j++){
 								parentFolder += path[j] + '/';
 							}
-							parentFolder = $('#'+parentFolder.splice(parentFolder.length-2, 1));
+							parentFolder = $('#'+parentFolder.substring(0, parentFolder.length - 1));
 							if(parentFolder.length == 0){
 								$('.mtree').append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ path[path.length-2] +'"></ul></li>');
 							}
