@@ -309,7 +309,7 @@ $(document).ready(function(){
 							}
 							parentFolder = $('#'+parentFolder.substring(0, parentFolder.length - 1));
 							if(parentFolder.length == 0){
-								$('.mtree').append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ path[path.length-2] +'"></ul></li>');
+								$('.mtree').append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ parentFolder +'"></ul></li>');
 							}
 							var folderName = '';
 							for(j=0; j<path.length-1; j++){
