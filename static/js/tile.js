@@ -259,10 +259,12 @@ $(document).ready(function(){
 		get_data('get_folder/', 'POST', request, function(response){
 			console.log(response);
 			for(var i = 0; i < response.length; i++){
+				var lastFolderIndex = 0;
 				if(isFolder(response[i])){
-					$('.mtree').append('<li><a href="#">' + response[i] + '</a></li>');
+					lastFolderIndex = i;
+					$('.mtree').append('<li><a href="#">' + response[i] + '</a><ul id="folder_"'+lastFolderIndex+'></ul></li>');
 				} else {
-
+					$('#folder_'+lastFolderIndex).append('<li><a href="#">'+response[i]+'</a></li>');
 				}
 			}
 		},	function(){
