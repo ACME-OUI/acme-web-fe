@@ -291,11 +291,21 @@ $(document).ready(function(){
 			$('.mtree').addClass(mtree_style);
 			get_data('get_folder/', 'POST', request, function(response){
 				spinner.stop();
-				console.log(response);
+				
 				for(var i = 0; i < response.length; i++){
-					var lastFolderIndex = 0;
+					var path = response.split('/');
+					response[i] = '';
+					path = path.splice(0, 1);
+					for(var j = 0; j < path.length; j++){
+						response[i] += path[j];
+					}
+					console.log(response[1]);
 					if(isFolder(response[i])){
-						lastFolderIndex = i;
+						if(response.split('/').length > 1){
+
+						} else {
+
+						}
 						$('.mtree').append('<li><a href="#">' + response[i] + '</a><ul id="'+ response[i].split('/').pop() +'"></ul></li>');
 					} else {
 						var path = response[i].split('/');
