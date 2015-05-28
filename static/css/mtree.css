@@ -2,6 +2,7 @@ ul.mtree {
   opacity: 0;
   margin-left: 0;
   padding: 1.2em;
+  height: 100%;
 }
 ul.mtree ul {
   margin-left: 1em;
