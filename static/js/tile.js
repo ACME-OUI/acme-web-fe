@@ -250,25 +250,25 @@ $(document).ready(function(){
     }
 
     function initFileTree(){
-		$.getScript('static/js/mtree.js', function(){
-			/*
-				This is going to have to change, to /User Documents/CURRENT_USER, but right now there is just the one acmetest user
-			*/
-			request = {'file':'/User Documents/acmetest'}
+		
+		/*
+			This is going to have to change, to /User Documents/CURRENT_USER, but right now there is just the one acmetest user
+		*/
+		request = {'file':'/User Documents/acmetest'}
 
-			get_data('get_folder/', 'POST', request, function(response){
-				console.log(response);
-				for(var i = 0; i < response.length; i++){
-					if(isFolder(response[i])){
-						$('.mtree').append('<li>a href="#">' + response[i] + '</a></li>');
-					} else {
+		get_data('get_folder/', 'POST', request, function(response){
+			console.log(response);
+			for(var i = 0; i < response.length; i++){
+				if(isFolder(response[i])){
+					$('.mtree').append('<li><a href="#">' + response[i] + '</a></li>');
+				} else {
 
-					}
 				}
-			},	function(){
-				alert('error getting home folder');
-			});
+			}
+		},	function(){
+			alert('error getting home folder');
 		});
+		$.getScript('static/js/mtree.js', function(){});
     }
 
     function isFolder(file){
