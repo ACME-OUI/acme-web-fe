@@ -277,23 +277,27 @@ $(document).ready(function(){
      * service_name -> the name of the service to check credentials for
      */
     function check_credentials(service_name){
+    	if(service_name == 'velo'){
+    		return true;
+    	}
     	var data = {
     		'service': service_name
     	};
     	var exists = false;
     	
-    	$.when(ajax()).done(function(){return exists})
+    	$.when(ajax()).done(function(exists){return exists})
 
     	function ajax(){
     		return $.ajax({
 	    		url:'credential_check_existance/',
 	    		data: JSON.stringify(data),
 	    		type:'POST',
+	    		dataType:'json',
 	    		success: function(){
-	    			exists = true;
+	    			return exists = true;
 	    		},
 	    		error: function(){
-	    			exists = false;
+	    			return exists = false;
 	    		}
 	    	});
     	}
