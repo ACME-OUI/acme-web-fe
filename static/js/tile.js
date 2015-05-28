@@ -302,7 +302,7 @@ $(document).ready(function(){
 					}
 					if(isFolder(response[i])){
 						path = response[i].split('_');
-						if(path.length > 3){
+						if(path.length > 4){
 							var parentFolder = '';
 							for(j = 1; j < path.length-2; j++){
 								parentFolder += path[j] + '_';
