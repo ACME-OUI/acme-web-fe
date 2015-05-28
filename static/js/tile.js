@@ -270,6 +270,7 @@ $(document).ready(function(){
 					$('.mtree').append('<li><a href="#">' + response[i] + '</a><ul id="'+ response[i].split('/').pop() +'"></ul></li>');
 				} else {
 					var path = response[i].split('/');
+					console.log(response[i] + '    ' + path[path.length-2])
 					$('#'+path[path.length-2]).append('<li><a href="#">'+response[i]+'</a></li>');
 				}
 			}
