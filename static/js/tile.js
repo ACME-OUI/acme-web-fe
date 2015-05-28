@@ -250,34 +250,65 @@ $(document).ready(function(){
     }
 
     function initFileTree(){
-		
-		/*
-			This is going to have to change, to /User Documents/CURRENT_USER, but right now there is just the one acmetest user
-		*/
-		request = {'file':'/User Documents/acmetest'}
-		if(mode == 'day'){
-			var mtree_style = 'bubba';
-		} else {
-			mtree_style = 'transit';
-		}
-		$('.mtree').addClass(mtree_style);
-		get_data('get_folder/', 'POST', request, function(response){
-			console.log(response);
-			for(var i = 0; i < response.length; i++){
-				var lastFolderIndex = 0;
-				if(isFolder(response[i])){
-					lastFolderIndex = i;
-					$('.mtree').append('<li><a href="#">' + response[i] + '</a><ul id="'+ response[i].split('/').pop() +'"></ul></li>');
-				} else {
-					var path = response[i].split('/');
-					console.log(response[i] + '    ' + path[path.length-2])
-					$('#'+path[path.length-2]).append('<li><a href="#">'+response[i]+'</a></li>');
-				}
+    	
+		$.getScript("static/js/spin.js", function(){
+    		if(mode == 'night'){
+				var color = '#fff';
+			} else {
+				color = '#000';
 			}
-		},	function(){
-			alert('error getting home folder');
-		});
-		updateMTree();
+			var opts = {
+				lines: 17, // The number of lines to draw
+				length: 40, // The length of each line
+				width: 10, // The line thickness
+				radius: 30, // The radius of the inner circle
+				corners: 1, // Corner roundness (0..1)
+				rotate: 0, // The rotation offset
+				direction: 1, // 1: clockwise, -1: counterclockwise
+				color: color, // #rgb or #rrggbb or array of colors
+				speed: 1, // Rounds per second
+				trail: 100, // Afterglow percentage
+				shadow: false, // Whether to render a shadow
+				hwaccel: false, // Whether to use hardware acceleration
+				className: 'spinner', // The CSS class to assign to the spinner
+				zIndex: 2e9, // The z-index (defaults to 2000000000)
+				top: '50%', // Top position relative to parent
+				left: '50%' // Left position relative to parent
+			};
+	    	var spinner = new Spinner(opts).spin();
+	    	document.getElementById('velo_window').appendChild(spinner.el);
+
+			/*
+				This is going to have to change, to /User Documents/CURRENT_USER, but right now there is just the one acmetest user
+			*/
+
+	    	request = {'file':'/User Documents/acmetest'}
+			if(mode == 'day'){
+				var mtree_style = 'bubba';
+			} else {
+				mtree_style = 'transit';
+			}
+			$('.mtree').addClass(mtree_style);
+			get_data('get_folder/', 'POST', request, function(response){
+				spinner.stop();
+				console.log(response);
+				for(var i = 0; i < response.length; i++){
+					var lastFolderIndex = 0;
+					if(isFolder(response[i])){
+						lastFolderIndex = i;
+						$('.mtree').append('<li><a href="#">' + response[i] + '</a><ul id="'+ response[i].split('/').pop() +'"></ul></li>');
+					} else {
+						var path = response[i].split('/');
+						console.log(response[i] + '    ' + path[path.length-2])
+						$('#'+path[path.length-2]).append('<li><a href="#">'+response[i]+'</a></li>');
+					}
+				}
+			},	function(){
+				spinner.stop();
+				alert('error getting home folder');
+			});
+			updateMTree();
+    	});
     }
 
     function folderName(file){
