@@ -2,7 +2,7 @@
 Library       Selenium Library
 
 *** Testcases ***
-Login Should Succeed When the Correct Username and Password are Entered
+Testing if the server is up and running
   Start Selenium Server
   Open Browser  http://localhost:8000/acme/  
   Maximize Browser Window
