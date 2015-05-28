@@ -293,7 +293,6 @@ $(document).ready(function(){
 				spinner.stop();
 				
 				for(var i = 0; i < response.length; i++){
-					console.log(response[i]);
 					var path = response[i].split('/');
 					response[i] = '/';
 					for(var j = 2; j < path.length; j++){
