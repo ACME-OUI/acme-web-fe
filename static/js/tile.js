@@ -291,19 +291,21 @@ $(document).ready(function(){
 			$('.mtree').addClass(mtree_style);
 			get_data('get_folder/', 'POST', request, function(response){
 				spinner.stop();
-				
+
 				for(var i = 0; i < response.length; i++){
-					var path = response[i].split('/');
-					response[i] = '/';
+					response[i] = response[i].replace(' ', '-');
+					response[i] = response[i].replace('/', '_');
+					var path = response[i].split('_');
+					response[i] = '_';
 					for(var j = 2; j < path.length; j++){
-						response[i] += path[j]+'/';
+						response[i] += path[j]+'_';
 					}
 					if(isFolder(response[i])){
-						path = response[i].split('/');
+						path = response[i].split('_');
 						if(path.length > 3){
 							var parentFolder = '';
 							for(j = 1; j < path.length-2; j++){
-								parentFolder += path[j] + '/';
+								parentFolder += path[j] + '_';
 							}
 							parentFolder = $('#'+parentFolder.substring(0, parentFolder.length - 1));
 							if(parentFolder.length == 0){
@@ -311,7 +313,7 @@ $(document).ready(function(){
 							}
 							var folderName = '';
 							for(j=0; j<path.length-1; j++){
-								folderName += path[j] + '/';
+								folderName += path[j] + '_';
 							}
 							console.log('creating folder '+  folderName ) 
 							parentFolder.append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ folderName +'"></ul></li>');
@@ -322,10 +324,10 @@ $(document).ready(function(){
 						}
 						
 					} else {
-						var path = response[i].split('/');
+						var path = response[i].split('_');
 						parentFolder = '';
 						for(j = 1; j < path.length-2; j++){
-							parentFolder += path[j];
+							parentFolder += path[j] + '_';
 						}
 						console.log('adding ' + path[path.length-2] +' to folder ' + parentFolder)
 						$('#'+parentFolder).append('<li><a href="#">' + path[path.length-2] + '</a></li>');
