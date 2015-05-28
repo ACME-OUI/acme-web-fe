@@ -282,7 +282,7 @@ $(document).ready(function(){
     	};
     	var exists = false;
     	
-    	$.when(ajax()).done(return exists)
+    	$.when(ajax()).done(function(){return exists})
 
     	function ajax(){
     		return $.ajax({
@@ -298,6 +298,7 @@ $(document).ready(function(){
 	    	});
     	}
     	
+    	return exists;
     }
 
     /* Initializes the connection to the velo api
