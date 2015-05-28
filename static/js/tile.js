@@ -281,11 +281,15 @@ $(document).ready(function(){
     		'service': service_name
     	};
     	var exists = false;
-    	$.when(get_data('credential_check_existance/', 'POST', data, function(){
-    		exists = true;
-    	}, function(){
-    		exists = false;
-    	})).done();
+    	
+    	setTimeout(function(){
+    		get_data('credential_check_existance/', 'POST', data, function(){
+	    		exists = true;
+	    	}, function(){
+	    		exists = false;
+	    	});
+    	}, 100);
+    	
     	return exists;
     }
 
