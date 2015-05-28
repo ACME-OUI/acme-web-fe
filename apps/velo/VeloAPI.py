@@ -139,7 +139,7 @@ class Velo:
         try:
             ress = resMgr.getChildren(cmsparentPath)
         except:
-            print 'resource does not exist'
+            print 'resource ', parentPath, 'does not exist'
         for i in range(len(ress)):
             print ress[i]
             if isinstance(ress[i], Folder):

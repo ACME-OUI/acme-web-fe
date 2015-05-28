@@ -250,10 +250,15 @@ $(document).ready(function(){
 
     function initFileTree(){
 		$.getScript('static/filetree/jqueryFileTree.js', function(){
-			get_data('get_home_folder/', 'POST', {}, function(response){
+			/*
+				This is going to have to change, to /User Documents/CURRENT_USER, but right now there is just the one acmetest user
+			*/
+			request = {'file':'/User Documents/acmetest'}
+
+			get_data('get_folder/', 'POST', request, function(response){
 				console.log(response);
 				$('#velo-file-tree').fileTree({
-					root: 'home/'
+					root: '/User Documents/acmetest'
 				}, function(file){
 					populateFile(file);
 				});

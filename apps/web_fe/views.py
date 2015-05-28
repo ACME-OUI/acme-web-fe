@@ -28,6 +28,8 @@ sys.path.insert(0, os.getcwd() + '/apps/velo')
 import VeloAPI
 
 # General
+
+
 def render_template(request, template, context):
     template = loader.get_template(template)
     context = RequestContext(request, context)
@@ -487,12 +489,12 @@ def node_search(request):
 @login_required
 def get_folder(request):
     if request.method == 'POST':
+        folder = json.loads(request.body)
         try:
             velo = VeloAPI.Velo()
             velo.start_jvm()
             rm = velo.init_velo('acmetest', 'acmetest')
-
-        return HttpResponse(json.dumps(velo.get_homefolder_resources()))
+            return HttpResponse(json.dumps(velo.get_resources(folder.file)))
 
         except Exception as e:
             import traceback
