@@ -305,17 +305,29 @@ $(document).ready(function(){
 							if(parentFolder.length == 0){
 								$('.mtree').append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ path[path.length-2] +'"></ul></li>');
 							}
-							console.log('creating folder '+  path.splice(1,path.length-2) ) 
-							parentFolder.append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ path.splice(1,path.length-2) +'"></ul></li>');
+							var folderName = '';
+							for(j=0; j<path.length-1; j++){
+								folderName += path[j] + '/';
+							}
+							console.log('creating folder '+  folderName ) 
+							parentFolder.append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ folderName +'"></ul></li>');
 						} else {
+							var folderName = '';
+							for(j=0; j<path.length-1; j++){
+								folderName += path[j] + '/';
+							}
 							console.log('creating folder '+ path[path.length-2])
-							$('.mtree').append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ path[path.length-2] +'"></ul></li>');
+							$('.mtree').append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ folderName +'"></ul></li>');
 						}
 						
 					} else {
 						var path = response[i].split('/');
-						console.log('adding ' + path[path.length-2] +' to folder ' + path.splice(1, path.length-3))
-						$('#'+path.splice(1, path.length-3)).append('<li><a href="#">' + path[path.length-2] + '</a></li>');
+						parentFolder = '';
+						for(j = 1; j < path.length-2; j++){
+							parentFolder += path[j];
+						}
+						console.log('adding ' + path[path.length-2] +' to folder ' + parentFolder)
+						$('#'+parentFolder).append('<li><a href="#">' + path[path.length-2] + '</a></li>');
 					}
 				}
 			},	function(){
