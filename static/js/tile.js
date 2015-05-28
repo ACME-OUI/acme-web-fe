@@ -294,7 +294,7 @@ $(document).ready(function(){
 
 				for(var i = 0; i < response.length; i++){
 					response[i] = response[i].replace(' ', '-');
-					response[i] = response[i].replace('/', '_');
+					response[i] = response[i].replace(/\//g, '_');
 					var path = response[i].split('_');
 					response[i] = '_';
 					for(var j = 2; j < path.length; j++){
