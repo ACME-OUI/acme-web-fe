@@ -305,14 +305,17 @@ $(document).ready(function(){
 							var parentFolder = $('#'+path[path.length-3]);
 							if(parentFolder.length == 0){
 								$('.mtree').append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ path[path.length-2] +'"></ul></li>');
-							} 
+							}
+							console.log('creating folder '+  path.splice(1,path.length-2) ) 
 							parentFolder.append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ path.splice(1,path.length-2) +'"></ul></li>');
 						} else {
+							console.log('creating folder '+ path[path.length-2])
 							$('.mtree').append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ path[path.length-2] +'"></ul></li>');
 						}
 						
 					} else {
 						var path = response[i].split('/');
+						console.log('adding ' + path[path.length-2] +' to folder ' + path.splice(1, path.length-3))
 						$('#'+path.splice(1, path.length-3)).append('<li><a href="#">' + path[path.length-2] + '</a></li>');
 					}
 				}
