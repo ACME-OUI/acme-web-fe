@@ -25,11 +25,7 @@ import datetime
 
 
 sys.path.insert(0, os.getcwd() + '/apps/velo')
-print sys.path
 import VeloAPI
-global velo_api
-velo_api = VeloAPI.Velo()
-velo_api.start_jvm()
 
 # General
 
@@ -492,8 +488,10 @@ def get_folder(request):
     if request.method == 'POST':
         folder = json.loads(request.body)
         try:
-            # velo_api = VeloAPI.Velo()
-            # velo_api.start_jvm()
+            velo_api = VeloAPI.Velo()
+            if jpype.isJVMStarted():
+                return
+            velo_api.start_jvm()
             rm = velo_api.init_velo('acmetest', 'acmetest')
             response = velo_api.get_resources(folder['file'])
             response.insert(0, folder['file'])
