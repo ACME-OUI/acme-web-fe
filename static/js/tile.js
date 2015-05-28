@@ -257,7 +257,7 @@ $(document).ready(function(){
 			get_data('get_folder/', 'POST', request, function(response){
 				console.log(response);
 				$('#velo-file-tree').fileTree({
-					root: '/User Documents/acmetest'
+					root: '/'
 				}, function(file){
 					populateFile(file);
 				});
