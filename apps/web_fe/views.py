@@ -27,8 +27,9 @@ import datetime
 sys.path.insert(0, os.getcwd() + '/apps/velo')
 print sys.path
 import VeloAPI
-# velo = VeloAPI.Velo()
-# velo.start_jvm()
+global velo_api
+velo_api = VeloAPI.Velo()
+velo_api.start_jvm()
 
 # General
 
@@ -491,10 +492,10 @@ def get_folder(request):
     if request.method == 'POST':
         folder = json.loads(request.body)
         try:
-            velo = VeloAPI.Velo()
-            velo.start_jvm()
-            rm = velo.init_velo('acmetest', 'acmetest')
-            response = velo.get_resources(folder['file'])
+            # velo_api = VeloAPI.Velo()
+            # velo_api.start_jvm()
+            rm = velo_api.init_velo('acmetest', 'acmetest')
+            response = velo_api.get_resources(folder['file'])
             response.insert(0, folder['file'])
             return HttpResponse(json.dumps(response))
 
@@ -541,7 +542,7 @@ def credential_check_existance(request):
 def velo(request):
     if request.method == 'POST':
         try:
-            rm = velo.init_velo("acmetest", "acmetest")
+            rm = velo_api.init_velo("acmetest", "acmetest")
             if rm.getRepositoryUrlBase() == 'http://acmetest.ornl.gov:80/alfresco':
                 foo = {'0': 'success I guess'}
 
