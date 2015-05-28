@@ -302,7 +302,7 @@ $(document).ready(function(){
 						path = response[i].split('/');
 						if(path.length > 3){
 							var parentFolder = '';
-							for(j = 1; j < path.length-3){
+							for(j = 1; j < path.length-3; j++){
 								parentFolder += path[j] + '/';
 							}
 							parentFolder = $('#'+parentFolder);
