@@ -293,7 +293,7 @@ $(document).ready(function(){
 				spinner.stop();
 
 				for(var i = 0; i < response.length; i++){
-					response[i] = response[i].replace(' ', '-');
+					response[i] = response[i].replace(/\ /g, '-');
 					response[i] = response[i].replace(/\//g, '_');
 					var path = response[i].split('_');
 					response[i] = '_';
