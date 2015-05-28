@@ -301,7 +301,7 @@ $(document).ready(function(){
 					}
 					console.log(response[1]);
 					if(isFolder(response[i])){
-						if(response.split('/').length > 1){
+						if(response[i].split('/').length > 1){
 
 						} else {
 
