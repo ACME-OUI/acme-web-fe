@@ -14,7 +14,7 @@ class Velo:
     def __init__(self):
         pass
 
-    def isJVMStarted():
+    def isJVMStarted(self):
         return jpype.isJVMStarted()
 
     def start_jvm(self):

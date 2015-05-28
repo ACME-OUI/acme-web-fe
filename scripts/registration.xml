@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Registration xmlns="http://www.esgf.org/registry" timeStamp="1432820679347" version="v0.0.1">
+<Registration xmlns="http://www.esgf.org/registry" timeStamp="1432840839396" version="v0.0.1">
     <Node organization="llnl" namespace="gov.llnl" nodePeerGroup="esgf-prod,esgf-test,cssef" supportEmail="pcmdi-node-admin@llnl.gov" hostname="pcmdi9.llnl.gov" ip="198.128.245.159" dn="/O=Grid/OU=GlobusTest/OU=simpleCA-pcmdi9.llnl.gov/CN=host/pcmdi9.llnl.gov" shortName="esgf-pcmdi-9" longName="PCMDI ESGF P2P NODE 9" timeStamp="1432767447678" version="v1.8.1" release="Griffin" nodeType="60" adminPeer="pcmdi9.llnl.gov" defaultPeer="pcmdi9.llnl.gov">
         <CA hash="dunno" endpoint="pcmdi9.llnl.gov" dn="dunno"/>
         <GeoLocation lat="37.412192" lon="-121.425586" city="Livermore"/>
