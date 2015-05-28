@@ -260,7 +260,7 @@ $(document).ready(function(){
 				console.log(response);
 				for(var i = 0; i < response.length; i++){
 					if(isFolder(response[i])){
-
+						$('.mtree').append('<li>a href="#">' + response[i] + '</a></li>');
 					} else {
 
 					}
