@@ -302,9 +302,10 @@ $(document).ready(function(){
 					if(isFolder(response[i])){
 						path = response[i].split('/');
 						if(path.length > 2){
-							var parentFolder = $('#'+path[path.length-2]);
+							var parentFolder = $('#'+path[path.length-3]);
 							if(parentFolder.length == 0){
 								$('.mtree').append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ path[path.length-2] +'"></ul></li>');
+								console.log('creating folder ' + path[path.length-2] + ' under mtree');
 							} 
 							$('#'+path[path.length-2]).append('<li><a href="#">' + response[i].split('/').pop() + '</a><ul id="'+ response[i].split('/').pop() +'"></ul></li>');
 						} else {
