@@ -307,7 +307,7 @@ $(document).ready(function(){
 								$('.mtree').append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ path[path.length-2] +'"></ul></li>');
 								console.log('creating folder ' + path[path.length-2] + ' under mtree');
 							} 
-							parentFolder[0].append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ path[path.length-2] +'"></ul></li>');
+							parentFolder.append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ path[path.length-2] +'"></ul></li>');
 						} else {
 							$('.mtree').append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ path[path.length-2] +'"></ul></li>');
 						}
