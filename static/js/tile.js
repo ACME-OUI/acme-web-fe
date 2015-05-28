@@ -293,19 +293,18 @@ $(document).ready(function(){
 				spinner.stop();
 				
 				for(var i = 0; i < response.length; i++){
+					console.log(response[i]);
 					var path = response[i].split('/');
 					response[i] = '/';
 					for(var j = 2; j < path.length; j++){
 						response[i] += path[j]+'/';
 					}
-					console.log(response[i]);
 					if(isFolder(response[i])){
 						path = response[i].split('/');
 						if(path.length > 3){
 							var parentFolder = $('#'+path[path.length-3]);
 							if(parentFolder.length == 0){
 								$('.mtree').append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ path[path.length-2] +'"></ul></li>');
-								console.log('creating folder ' + path[path.length-2] + ' under mtree');
 							} 
 							parentFolder.append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ path[path.length-2] +'"></ul></li>');
 						} else {
