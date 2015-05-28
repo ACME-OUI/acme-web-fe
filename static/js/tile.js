@@ -197,7 +197,6 @@ $(document).ready(function(){
 			}
 
 			if(name == 'velo'){
-				//initVeloConnection();
 				initFileTree();
 			}
 
@@ -281,12 +280,13 @@ $(document).ready(function(){
     	var data = {
     		'service': service_name
     	};
-
-    	get_data('credential_check_existance/', 'POST', data, function(){
-    		return true;
+    	var exists = false;
+    	$.when(get_data('credential_check_existance/', 'POST', data, function(){
+    		exists = true;
     	}, function(){
-    		return false;
-    	});
+    		exists = false;
+    	})).done();
+    	return exists;
     }
 
     /* Initializes the connection to the velo api
