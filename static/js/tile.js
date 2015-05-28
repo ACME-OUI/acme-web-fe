@@ -164,6 +164,8 @@ $(document).ready(function(){
 
 						if( check_credentials('velo') ){
 							content = [	'<div id="velo-file-tree">',
+										'	<ul class="mtree">',
+										'	</ul>',
 										'</div>',
 										'<div id="velo-text-edit"',
 										'</div>'
@@ -248,7 +250,7 @@ $(document).ready(function(){
     }
 
     function initFileTree(){
-		$.getScript('static/filetree/jqueryFileTree.js', function(){
+		$.getScript('static/js/mtree.js', function(){
 			/*
 				This is going to have to change, to /User Documents/CURRENT_USER, but right now there is just the one acmetest user
 			*/
@@ -256,15 +258,25 @@ $(document).ready(function(){
 
 			get_data('get_folder/', 'POST', request, function(response){
 				console.log(response);
-				$('#velo-file-tree').fileTree({
-					root: '/'
-				}, function(file){
-					populateFile(file);
-				});
+				for(var i = 0; i < response.length; i++){
+					if(isFolder(response[i])){
+
+					} else {
+
+					}
+				}
 			},	function(){
 				alert('error getting home folder');
 			});
 		});
+    }
+
+    function isFolder(file){
+    	if(file.split('.').pop() != file){
+    		return false;
+    	} else {
+    		return true;
+    	}
     }
 
     function populateFile(file){
