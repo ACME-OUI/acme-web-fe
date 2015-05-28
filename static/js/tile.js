@@ -306,14 +306,14 @@ $(document).ready(function(){
 							if(parentFolder.length == 0){
 								$('.mtree').append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ path[path.length-2] +'"></ul></li>');
 							} 
-							parentFolder.append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ path[path.length-2] +'"></ul></li>');
+							parentFolder.append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ path.splice(1,path.length-2) +'"></ul></li>');
 						} else {
 							$('.mtree').append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ path[path.length-2] +'"></ul></li>');
 						}
 						
 					} else {
 						var path = response[i].split('/');
-						$('#'+path[path.length-3]).append('<li><a href="#">' + path[path.length-2] + '</a></li>');
+						$('#'+path.splice(1, path.length-3).append('<li><a href="#">' + path[path.length-2] + '</a></li>');
 					}
 				}
 			},	function(){
