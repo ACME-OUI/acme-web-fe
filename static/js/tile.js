@@ -282,13 +282,18 @@ $(document).ready(function(){
     	};
     	var exists = false;
     	
-    	setTimeout(function(){
-    		get_data('credential_check_existance/', 'POST', data, function(){
-	    		exists = true;
-	    	}, function(){
-	    		exists = false;
-	    	});
-    	}, 100);
+    	$.ajax({
+    		url:'credential_check_existance/',
+    		data: JSON.stringify(data),
+    		async: false,
+    		type:'POST',
+    		success: function(){
+    			exists = true;
+    		},
+    		error: function(){
+    			exists = false;
+    		}
+    	});
     	
     	return exists;
     }
