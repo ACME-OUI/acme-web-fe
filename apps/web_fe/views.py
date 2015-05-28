@@ -489,7 +489,7 @@ def get_folder(request):
         folder = json.loads(request.body)
         try:
             velo_api = VeloAPI.Velo()
-            if jpype.isJVMStarted():
+            if velo.isJVMStarted():
                 return
             velo_api.start_jvm()
             rm = velo_api.init_velo('acmetest', 'acmetest')
