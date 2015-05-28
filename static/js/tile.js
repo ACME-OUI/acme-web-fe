@@ -295,7 +295,7 @@ $(document).ready(function(){
 				for(var i = 0; i < response.length; i++){
 					response[i] = response[i].replace(/\ /g, '-');
 					response[i] = response[i].replace(/\//g, '_');
-					response[i] = response[i].replace('User_Documents_', '_');
+					response[i] = response[i].replace('_User-Documents_', '_');
 					var path = response[i].split('_');
 					response[i] = '_';
 					for(var j = 1; j < path.length; j++){
