@@ -297,7 +297,7 @@ $(document).ready(function(){
 					response[i] = response[i].replace(/\//g, '_');
 					var path = response[i].split('_');
 					response[i] = '_';
-					for(var j = 2; j < path.length; j++){
+					for(var j = 1; j < path.length; j++){
 						response[i] += path[j]+'_';
 					}
 					if(isFolder(response[i])){
