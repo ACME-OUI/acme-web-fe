@@ -143,10 +143,10 @@ class Velo:
             print 'resource ', parentPath, 'does not exist'
         for i in range(len(ress)):
             print ress[i]
-            ret.append(ress[i])
+            ret.append(ress[i].toString())
             if isinstance(ress[i], Folder):
                 Velo.get_resources(self, ress[i].toString())
-	return ret
+        return ret
 
     # returns all the subfolders in users' home folder
     def get_homefolder_resources(self):
