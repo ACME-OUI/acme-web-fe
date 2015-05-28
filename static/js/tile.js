@@ -255,7 +255,12 @@ $(document).ready(function(){
 			This is going to have to change, to /User Documents/CURRENT_USER, but right now there is just the one acmetest user
 		*/
 		request = {'file':'/User Documents/acmetest'}
-
+		if(mode == 'day'){
+			var mtree_style = 'bubba';
+		} else {
+			mtree_style = 'transit';
+		}
+		$('.mtree').addClass(mtree_style);
 		get_data('get_folder/', 'POST', request, function(response){
 			console.log(response);
 			for(var i = 0; i < response.length; i++){
@@ -264,7 +269,7 @@ $(document).ready(function(){
 					lastFolderIndex = i;
 					$('.mtree').append('<li><a href="#">' + response[i] + '</a><ul id="'+ response[i].split('/').pop() +'""></ul></li>');
 				} else {
-					var path = response[i].split('/').pop();
+					var path = response[i].split('/');
 					$('#'+path[path.length-2]).append('<li><a href="#">'+response[i]+'</a></li>');
 				}
 			}
