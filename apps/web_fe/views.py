@@ -27,7 +27,8 @@ import datetime
 sys.path.insert(0, os.getcwd() + '/apps/velo')
 print sys.path
 import VeloAPI
-
+velo = VeloAPI.Velo()
+velo.start_jvm()
 
 # General
 
@@ -539,9 +540,7 @@ def credential_check_existance(request):
 def velo(request):
     if request.method == 'POST':
         try:
-            velo = VeloAPI.Velo()
-            velo.start_jvm()
-            rm = velo_api.init_velo("acmetest", "acmetest")
+            rm = velo.init_velo("acmetest", "acmetest")
             if rm.getRepositoryUrlBase() == 'http://acmetest.ornl.gov:80/alfresco':
                 foo = {'0': 'success I guess'}
 
