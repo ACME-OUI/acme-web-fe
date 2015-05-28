@@ -282,20 +282,22 @@ $(document).ready(function(){
     	};
     	var exists = false;
     	
-    	$.ajax({
-    		url:'credential_check_existance/',
-    		data: JSON.stringify(data),
-    		async: false,
-    		type:'POST',
-    		success: function(){
-    			exists = true;
-    		},
-    		error: function(){
-    			exists = false;
-    		}
-    	});
+    	$.when(ajax()).done(return exists)
+
+    	function ajax(){
+    		return $.ajax({
+	    		url:'credential_check_existance/',
+	    		data: JSON.stringify(data),
+	    		type:'POST',
+	    		success: function(){
+	    			exists = true;
+	    		},
+	    		error: function(){
+	    			exists = false;
+	    		}
+	    	});
+    	}
     	
-    	return exists;
     }
 
     /* Initializes the connection to the velo api
