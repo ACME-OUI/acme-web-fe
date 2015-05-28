@@ -295,11 +295,10 @@ $(document).ready(function(){
 				for(var i = 0; i < response.length; i++){
 					var path = response[i].split('/');
 					response[i] = '';
-					path = path.splice(0, 1);
-					for(var j = 0; j < path.length; j++){
+					for(var j = 1; j < path.length; j++){
 						response[i] += path[j];
 					}
-					console.log(response[1]);
+					console.log(response[i]);
 					if(isFolder(response[i])){
 						if(response[i].split('/').length > 1){
 
