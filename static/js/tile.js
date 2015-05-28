@@ -313,7 +313,7 @@ $(document).ready(function(){
 						
 					} else {
 						var path = response[i].split('/');
-						$('#'+path.splice(1, path.length-3).append('<li><a href="#">' + path[path.length-2] + '</a></li>');
+						$('#'+path.splice(1, path.length-3)).append('<li><a href="#">' + path[path.length-2] + '</a></li>');
 					}
 				}
 			},	function(){
