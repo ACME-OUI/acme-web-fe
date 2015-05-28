@@ -494,7 +494,7 @@ def get_folder(request):
             velo = VeloAPI.Velo()
             velo.start_jvm()
             rm = velo.init_velo('acmetest', 'acmetest')
-            return HttpResponse(json.dumps(velo.get_resources(folder.file)))
+            return HttpResponse(json.dumps(velo.get_resources(folder['file'])))
 
         except Exception as e:
             import traceback
