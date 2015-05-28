@@ -146,6 +146,7 @@ class Velo:
             ret.append(ress[i])
             if isinstance(ress[i], Folder):
                 Velo.get_resources(self, ress[i].toString())
+	return ret
 
     # returns all the subfolders in users' home folder
     def get_homefolder_resources(self):

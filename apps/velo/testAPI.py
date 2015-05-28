@@ -14,7 +14,7 @@ velo_api.init_velo("acmetest", "acmetest")
 #velo_api.get_homefolder_resources()  # get directory from user home folder
 print " "
 # get resources from the specified path
-filepath = "/User Documents/admin/fake_acme_case_04-03-2015_16-11-27"
+filepath = "/User Documents/acmetest/fake_acme_case_2015-04-28_07-45-44"
 print 'retrieving resource at', filepath
 velo_api.get_resources(filepath)
 print 'creating test folder'
