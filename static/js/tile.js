@@ -267,7 +267,7 @@ $(document).ready(function(){
 				var lastFolderIndex = 0;
 				if(isFolder(response[i])){
 					lastFolderIndex = i;
-					$('.mtree').append('<li><a href="#">' + response[i] + '</a><ul id="'+ response[i].split('/').pop() +'""></ul></li>');
+					$('.mtree').append('<li><a href="#">' + response[i] + '</a><ul id="'+ response[i].split('/').pop() +'"></ul></li>');
 				} else {
 					var path = response[i].split('/');
 					$('#'+path[path.length-2]).append('<li><a href="#">'+response[i]+'</a></li>');
