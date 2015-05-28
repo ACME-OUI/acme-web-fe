@@ -312,12 +312,9 @@ $(document).ready(function(){
 							console.log('creating folder '+  folderName ) 
 							parentFolder.append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ folderName +'"></ul></li>');
 						} else {
-							var folderName = '';
-							for(j=0; j<path.length-1; j++){
-								folderName += path[j] + '/';
-							}
+							
 							console.log('creating folder '+ path[path.length-2])
-							$('.mtree').append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ folderName +'"></ul></li>');
+							$('.mtree').append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ path[path.length-2] +'"></ul></li>');
 						}
 						
 					} else {
