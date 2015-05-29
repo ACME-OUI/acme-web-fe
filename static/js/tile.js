@@ -328,7 +328,7 @@ $(document).ready(function(){
 						
 					} else {
 						var path = response[i].split('_');
-						parentFolder = '';
+						parentFolder = '_';
 						for(j = 1; j < path.length-2; j++){
 							parentFolder += path[j] + '_';
 						}
