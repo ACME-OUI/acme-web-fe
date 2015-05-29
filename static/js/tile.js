@@ -318,11 +318,12 @@ $(document).ready(function(){
 							for(j=0; j<path.length-1; j++){
 								folderName += path[j] + '_';
 							}
-							console.log('creating folder '+  folderName ) 
+							console.log('creating folder '+  folderName );
+							if(parentFolder.length == 0) 
+								alert('cant find ' + parentFolder.selector);
 							parentFolder.append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ folderName +'"></ul></li>');
 						} else {
-							
-							console.log('creating folder '+ path[path.length-2])
+							console.log('creating folder '+ path[path.length-2]);
 							$('.mtree').append('<li><a href="#">' + path[path.length-2] + '</a><ul id="_'+ path[path.length-2] +'_"></ul></li>');
 						}
 						
@@ -332,7 +333,9 @@ $(document).ready(function(){
 						for(j = 1; j < path.length-2; j++){
 							parentFolder += path[j] + '_';
 						}
-						console.log('adding ' + path[path.length-2] +' to folder ' + parentFolder)
+						console.log('adding ' + path[path.length-2] +' to folder ' + parentFolder);
+						if($('#'+parentFolder).length == 0) 
+								alert('cant find ' + parentFolder);
 						$('#'+parentFolder).append('<li><a href="#">' + path[path.length-2] + '</a></li>');
 					}
 				}
