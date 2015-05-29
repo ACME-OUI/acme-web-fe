@@ -306,7 +306,7 @@ $(document).ready(function(){
 					if(isFolder(response[i])){
 						path = response[i].split('_');
 						if(path.length > 3){
-							var parentFolder = '';
+							var parentFolder = '_';
 							for(j = 1; j < path.length-2; j++){
 								parentFolder += path[j] + '_';
 							}
