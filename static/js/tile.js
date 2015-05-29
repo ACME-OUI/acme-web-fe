@@ -323,7 +323,7 @@ $(document).ready(function(){
 						} else {
 							
 							console.log('creating folder '+ path[path.length-2])
-							$('.mtree').append('<li><a href="#">' + path[path.length-2] + '</a><ul id="'+ path[path.length-2] +'_"></ul></li>');
+							$('.mtree').append('<li><a href="#">' + path[path.length-2] + '</a><ul id="_'+ path[path.length-2] +'_"></ul></li>');
 						}
 						
 					} else {
