@@ -74,11 +74,15 @@ class Velo:
         resMgr.bulkDownload(filesToDownload, destFolder)
 
     def download_file(self, filepath, location):  # download file from velo
-        destFolder = jpype.java.io.File(location)
-        cmsfilepath = cms(filepath)
-        filesToDownload.add(cmsfilepath)
-        resMgr.bulkDownload(filesToDownload, destFolder)
-        print "File downloaded"
+        try:
+            destFolder = jpype.java.io.File(location)
+            cmsfilepath = cms(filepath)
+            filesToDownload.add(cmsfilepath)
+            resMgr.bulkDownload(filesToDownload, destFolder)
+            return True
+        except:
+            return False
+            raise
 
     # download the job outputs
     def download_job_outputs(self, contextPathName, location):

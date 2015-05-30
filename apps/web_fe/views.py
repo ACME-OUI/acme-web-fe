@@ -509,6 +509,39 @@ def get_folder(request):
     else:
         return HttpResponse(status=404)
 
+@login_required
+def velo_get_file(request):
+    if request.method == 'POST':
+        try:
+            import VeloAPI
+            velo_api = VeloAPI.Velo()
+            if not velo_api.isJVMStarted():
+                velo_api.start_jvm()
+            path = os.getcwd() + '/userdata/' + request.user
+            if not os.path.isdir(path):
+                os.makedirs(path)
+
+            file_to_get = json.loads(request.body)
+            if velo.download_file(file_to_get['path'], path + file_to_get['filename']):
+                content = open(path + file_to_get['filename']).read()
+                return HttpResponse(content, content_type='text/plain')
+            else:
+                return HttpResponse(status=500)
+
+        except Exception as e:
+            import traceback
+            print '1', e.__doc__
+            print '2', sys.exc_info()
+            print '3', sys.exc_info()[0]
+            print '4', sys.exc_info()[1]
+            print '5', traceback.tb_lineno(sys.exc_info()[2])
+            ex_type, ex, tb = sys.exc_info()
+            print '6', traceback.print_tb(tb)
+            return HttpResponse(status=500)
+    else:
+        return HttpResponse(status=404)
+
+
 
 @login_required
 def credential_check_existance(request):

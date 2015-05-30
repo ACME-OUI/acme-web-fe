@@ -15,6 +15,7 @@ urlpatterns = patterns('',
                        url(r'^grid/?$', views.grid, name='grid'),
                        url(r'^credential_check_existance/', views.credential_check_existance),
                        url(r'^get_folder/', views.get_folder),
+                       url(r'^velo_get_file/', views.velo_get_file),
 
                        url(r'^save_layout/', views.save_layout, name='save_layout'),
                        url(r'^load_layout/', views.load_layout, name='load_layout'),
