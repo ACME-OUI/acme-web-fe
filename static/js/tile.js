@@ -253,6 +253,11 @@ $(document).ready(function() {
 		});
 	}
 
+
+	function getFile(id){
+		console.log(id);
+	}
+
 	function initFileTree() {
 
 		$.getScript("static/js/spin.js", function() {
@@ -350,7 +355,12 @@ $(document).ready(function() {
 						}
 						console.log('adding ' + path[path.length - 2] + ' to folder ' + parentFolder);
 
-						$('#' + parentFolder).append('<li><a href="#">' + path[path.length - 2] + '</a></li>');
+						$('#' + parentFolder).append('<li><a href="#" id=' + response[i] + '>' + path[path.length - 2] + '</a></li>');
+						response[i] = response[i].replace('.', '\\\.');
+						console.log('#' + response[i]);
+						$('#' + response[i]).click(function(event){
+							alert(event.target.id);
+						});
 					}
 				}
 
@@ -511,6 +521,8 @@ $(document).ready(function() {
 
 		});
 	}
+
+
 
 	function folderName(file) {
 		return file.split('/').pop();

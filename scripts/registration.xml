@@ -1,5 +1,101 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Registration xmlns="http://www.esgf.org/registry" timeStamp="1432917160070" version="v0.0.1">
+<Registration xmlns="http://www.esgf.org/registry" timeStamp="1433038000456" version="v0.0.1">
+    <Node organization="cccma" namespace="cccma.ec.gc.ca" nodePeerGroup="esgf-prod" supportEmail="cccma_info@ec.gc.ca" hostname="dapp2p.cccma.ec.gc.ca" ip="142.104.195.18" dn="/O=ESGF/OU=ESGF.ORG/CN=dapp2p.cccma.ec.gc.ca" shortName="dapp2p-cccma" longName="Canadian Centre for Climate Modelling and Analysis [CCCma] data node" timeStamp="1433012656646" version="v1.5.0-brower_park-release-3-g9a0c6de-master" release="brower_park" nodeType="4" adminPeer="pcmdi9.llnl.gov" defaultPeer="pcmdi9.llnl.gov">
+        <CA hash="dunno" endpoint="dapp2p.cccma.ec.gc.ca" dn="dunno"/>
+        <GeoLocation lat="48.433300" lon="-123.349998" city="Victoria"/>
+        <NodeManager endpoint="https://dapp2p.cccma.ec.gc.ca/esgf-node-manager/node"/>
+        <AuthorizationService endpoint="https://dapp2p.cccma.ec.gc.ca/esg-orp/saml/soap/secure/authorizationService.htm"/>
+        <ThreddsService endpoint="http://dapp2p.cccma.ec.gc.ca/thredds"/>
+        <GridFTPService endpoint="gsiftp://dapp2p.cccma.ec.gc.ca">
+            <Configuration serviceType="Replication" port="2812"/>
+            <Configuration serviceType="Download" port="2811"/>
+        </GridFTPService>
+        <Metrics>
+            <DownloadedData count="0" size="0" users="0"/>
+            <RegisteredUsers count="0"/>
+        </Metrics>
+        <RelyingPartyService endpoint="https://dapp2p.cccma.ec.gc.ca/esg-orp/html.htm"/>
+        <PEMCert>
+            <Cert>NOT_AVAILABLE</Cert>
+        </PEMCert>
+    </Node>
+    <Node organization="cnrm-game-meteo" namespace="fr.cnrm-game-meteo" nodePeerGroup="esgf-prod" supportEmail="esgf@cnrm-game-meteo.fr" hostname="esg.cnrm-game-meteo.fr" ip="193.49.97.164" shortName="cnrm-game-meteo" longName="esg data for french meteorological office" timeStamp="1433037879083" version="v1.8.1" release="Griffin" nodeType="4" adminPeer="pcmdi9.llnl.gov" defaultPeer="pcmdi9.llnl.gov">
+        <CA hash="dunno" endpoint="esg.cnrm-game-meteo.fr" dn="dunno"/>
+        <GeoLocation lat="43.575292" lon="1.374657" city="Toulouse"/>
+        <NodeManager endpoint="https://esg.cnrm-game-meteo.fr/esgf-node-manager/node"/>
+        <AuthorizationService endpoint="https://esg.cnrm-game-meteo.fr/esg-orp/saml/soap/secure/authorizationService.htm"/>
+        <ThreddsService endpoint="http://esg.cnrm-game-meteo.fr/thredds"/>
+        <GridFTPService endpoint="gsiftp://esg.cnrm-game-meteo.fr">
+            <Configuration serviceType="Replication" port="2812"/>
+            <Configuration serviceType="Download" port="2811"/>
+        </GridFTPService>
+        <Metrics>
+            <DownloadedData count="0" size="0" users="0"/>
+            <RegisteredUsers count="0"/>
+        </Metrics>
+        <RelyingPartyService endpoint="https://esg.cnrm-game-meteo.fr/esg-orp/html.htm"/>
+        <PEMCert>
+            <Cert>Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 19078 (0x4a86)
+        Signature Algorithm: sha1WithRSAEncryption
+        Issuer: O=Grid, OU=GlobusTest, OU=simpleCA-esgf-node.ipsl.fr, CN=Globus Simple CA
+        Validity
+            Not Before: Jan 13 10:04:29 2015 GMT
+            Not After : Jan 13 10:04:29 2016 GMT
+        Subject: O=Grid, OU=GlobusTest, OU=simpleCA-esgf-node.ipsl.fr, CN=esg.cnrm-game-meteo.fr
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (1024 bit)
+                Modulus (1024 bit):
+                    00:cf:2d:89:79:f3:06:76:9e:be:cd:70:f4:10:02:
+                    6d:31:23:18:5f:52:e8:eb:44:c0:74:19:ed:2b:c8:
+                    74:63:85:ab:87:ae:90:ba:14:fa:a6:6f:f0:bf:2a:
+                    04:f7:2d:e9:ba:db:4d:8b:d4:45:c9:9d:14:25:f2:
+                    cb:66:b6:4c:66:3b:cb:fb:25:ce:ac:57:ea:90:33:
+                    c5:03:8c:52:94:71:4e:fd:6d:a8:6d:ba:b2:e6:cf:
+                    a1:f2:78:8e:c9:25:3b:61:28:2b:23:91:0b:24:16:
+                    47:c8:cf:7b:03:8a:01:b9:8d:cb:63:04:2d:57:89:
+                    2e:7a:c8:de:4d:89:d9:25:01
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            Netscape Cert Type: 
+                SSL Client, SSL Server, S/MIME, Object Signing
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            X509v3 Key Usage: 
+                Digital Signature, Non Repudiation, Key Encipherment
+            X509v3 Subject Alternative Name: 
+                email:noc@example.com
+    Signature Algorithm: sha1WithRSAEncryption
+        5c:41:4d:63:90:85:6f:4d:50:37:95:a1:22:8b:38:8b:8f:14:
+        03:e0:05:18:8c:e9:e0:1a:d5:f8:a4:31:6a:cc:e2:82:ee:16:
+        36:8f:24:38:87:7e:0f:1f:89:b0:6c:c0:8d:50:36:2a:b5:6c:
+        92:5b:91:70:45:bb:c1:71:08:c9:36:af:23:e0:d8:6a:01:79:
+        89:51:03:05:c7:51:48:20:99:26:c0:c9:65:0a:5a:05:8e:11:
+        1a:f5:1d:2a:6b:6d:f9:20:22:95:17:7b:3c:ce:69:b1:c1:f1:
+        49:45:7d:c9:8d:eb:81:6a:a8:ef:ab:f1:c9:60:9b:90:a5:36:
+        39:4d
+-----BEGIN CERTIFICATE-----
+MIICjjCCAfegAwIBAgICSoYwDQYJKoZIhvcNAQEFBQAwZDENMAsGA1UEChMER3Jp
+ZDETMBEGA1UECxMKR2xvYnVzVGVzdDEjMCEGA1UECxMac2ltcGxlQ0EtZXNnZi1u
+b2RlLmlwc2wuZnIxGTAXBgNVBAMTEEdsb2J1cyBTaW1wbGUgQ0EwHhcNMTUwMTEz
+MTAwNDI5WhcNMTYwMTEzMTAwNDI5WjBqMQ0wCwYDVQQKEwRHcmlkMRMwEQYDVQQL
+EwpHbG9idXNUZXN0MSMwIQYDVQQLExpzaW1wbGVDQS1lc2dmLW5vZGUuaXBzbC5m
+cjEfMB0GA1UEAxMWZXNnLmNucm0tZ2FtZS1tZXRlby5mcjCBnzANBgkqhkiG9w0B
+AQEFAAOBjQAwgYkCgYEAzy2JefMGdp6+zXD0EAJtMSMYX1Lo60TAdBntK8h0Y4Wr
+h66QuhT6pm/wvyoE9y3puttNi9RFyZ0UJfLLZrZMZjvL+yXOrFfqkDPFA4xSlHFO
+/W2obbqy5s+h8niOySU7YSgrI5ELJBZHyM97A4oBuY3LYwQtV4kuesjeTYnZJQEC
+AwEAAaNJMEcwEQYJYIZIAYb4QgEBBAQDAgTwMAkGA1UdEwQCMAAwCwYDVR0PBAQD
+AgXgMBoGA1UdEQQTMBGBD25vY0BleGFtcGxlLmNvbTANBgkqhkiG9w0BAQUFAAOB
+gQBcQU1jkIVvTVA3laEiiziLjxQD4AUYjOngGtX4pDFqzOKC7hY2jyQ4h34PH4mw
+bMCNUDYqtWySW5FwRbvBcQjJNq8j4NhqAXmJUQMFx1FIIJkmwMllCloFjhEa9R0q
+a235ICKVF3s8zmmxwfFJRX3JjeuBaqjvq/HJYJuQpTY5TQ==
+-----END CERTIFICATE-----
+</Cert>
+        </PEMCert>
+    </Node>
     <Node organization="llnl" namespace="gov.llnl" nodePeerGroup="esgf-prod,esgf-test,cssef" supportEmail="pcmdi-node-admin@llnl.gov" hostname="pcmdi9.llnl.gov" ip="198.128.245.159" dn="/O=Grid/OU=GlobusTest/OU=simpleCA-pcmdi9.llnl.gov/CN=host/pcmdi9.llnl.gov" shortName="esgf-pcmdi-9" longName="PCMDI ESGF P2P NODE 9" timeStamp="1432767447678" version="v1.8.1" release="Griffin" nodeType="60" adminPeer="pcmdi9.llnl.gov" defaultPeer="pcmdi9.llnl.gov">
         <CA hash="dunno" endpoint="pcmdi9.llnl.gov" dn="dunno"/>
         <GeoLocation lat="37.412192" lon="-121.425586" city="Livermore"/>

@@ -10,8 +10,8 @@ velo_api.start_jvm()  # start jvm
 # provide velo username and password
 print 'starting velo initialization'
 velo_api.init_velo("acmetest", "acmetest")
-#print 'retrieving home folder resources'
-#velo_api.get_homefolder_resources()  # get directory from user home folder
+print 'retrieving home folder resources'
+velo_api.get_homefolder_resources()  # get directory from user home folder
 print " "
 # get resources from the specified path
 filepath = "/User Documents/acmetest/fake_acme_case_2015-04-28_07-45-44"

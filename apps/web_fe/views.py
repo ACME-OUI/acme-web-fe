@@ -23,9 +23,9 @@ import base64
 import time
 import datetime
 
-
 sys.path.insert(0, os.getcwd() + '/apps/velo')
 import VeloAPI
+
 
 # General
 
@@ -490,7 +490,10 @@ def get_folder(request):
         try:
             velo_api = VeloAPI.Velo()
             if not velo_api.isJVMStarted():
+                print 'starting jvm in get folder'
                 velo_api.start_jvm()
+            else:
+                print 'JVM was already started'
             rm = velo_api.init_velo('acmetest', 'acmetest')
             response = velo_api.get_resources(folder['file'])
             response.insert(0, folder['file'])
@@ -509,11 +512,12 @@ def get_folder(request):
     else:
         return HttpResponse(status=404)
 
+
 @login_required
 def velo_get_file(request):
     if request.method == 'POST':
         try:
-            import VeloAPI
+            
             velo_api = VeloAPI.Velo()
             if not velo_api.isJVMStarted():
                 velo_api.start_jvm()
@@ -540,7 +544,6 @@ def velo_get_file(request):
             return HttpResponse(status=500)
     else:
         return HttpResponse(status=404)
-
 
 
 @login_required
