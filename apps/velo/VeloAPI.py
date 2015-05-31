@@ -146,15 +146,16 @@ class Velo:
         ret = []
         try:
             ress = resMgr.getChildren(cmsparentPath)
+            for i in range(len(ress)):
+                print ress[i]
+                ret.append(ress[i].toString())
+                if isinstance(ress[i], Folder):
+                    sub = Velo.get_resources(self, ress[i].toString())
+                    for r in sub:
+                        ret.append(r)
         except:
             print 'resource ', parentPath, 'does not exist'
-        for i in range(len(ress)):
-            print ress[i]
-            ret.append(ress[i].toString())
-            if isinstance(ress[i], Folder):
-                sub = Velo.get_resources(self, ress[i].toString())
-                for r in sub:
-                    ret.append(r)
+        
         return ret
 
     # returns all the subfolders in users' home folder

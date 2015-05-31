@@ -308,6 +308,7 @@ $(document).ready(function() {
 			$('.mtree').addClass(mtree_style);
 			get_data('get_folder/', 'POST', request, function(response) {
 				spinner.stop();
+				console.log(response);
 
 				for (var i = 0; i < response.length; i++) {
 					response[i] = response[i].replace(/-/g, 'Z');

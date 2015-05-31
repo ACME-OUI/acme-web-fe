@@ -22,9 +22,7 @@ import urllib2
 import base64
 import time
 import datetime
-
-sys.path.insert(0, os.getcwd() + '/apps/velo')
-import VeloAPI
+from subprocess import Popen, PIPE
 
 
 # General
@@ -488,16 +486,13 @@ def get_folder(request):
     if request.method == 'POST':
         folder = json.loads(request.body)
         try:
-            velo_api = VeloAPI.Velo()
-            if not velo_api.isJVMStarted():
-                print 'starting jvm in get folder'
-                velo_api.start_jvm()
-            else:
-                print 'JVM was already started'
-            rm = velo_api.init_velo('acmetest', 'acmetest')
-            response = velo_api.get_resources(folder['file'])
-            response.insert(0, folder['file'])
-            return HttpResponse(json.dumps(response))
+            print 'getting folder from velo ', folder['file']
+            process = Popen(['python', './apps/velo/get_folder.py', folder['file'] ], stdout=PIPE)
+            (out, err) = process.communicate()
+            out = out.splitlines(False)  
+            print out[1:]
+            exit_code = process.wait()
+            return HttpResponse(json.dumps(out[1:]))
 
         except Exception as e:
             import traceback
@@ -517,7 +512,7 @@ def get_folder(request):
 def velo_get_file(request):
     if request.method == 'POST':
         try:
-            
+
             velo_api = VeloAPI.Velo()
             if not velo_api.isJVMStarted():
                 velo_api.start_jvm()
