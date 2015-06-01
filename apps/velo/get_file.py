@@ -19,7 +19,7 @@ def get_file(remote_file_path, filename, site_user, velo_username, password):
         if not os.path.isdir(prefix):
             os.makedirs(prefix)
 
-    for i in range(remote_folder_index, len(remote_path) - 2):
+    for i in range(remote_folder_index, len(remote_path) - 1):
         if not os.path.isdir(prefix + remote_path[i]):
             prefix += remote_path[i] + '/'
             print 'making new dir ', prefix
