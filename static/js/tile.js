@@ -255,7 +255,20 @@ $(document).ready(function() {
 
 
 	function getFile(id){
-		console.log(id);
+		id = id.replace(/_/g, '/');
+		id = id.replace(/-/g, ' ');
+		id = id.replace(/X/g, '_');
+		id = id.replace(/Z/g, '-');
+		id = id.substring(0, id.length -1);
+		console.log('attempting to get file:'+id);
+		data = {
+			'file':id
+		}
+		get_data('get_file/', 'POST', data, function(response){
+			console.log(response);
+		}, function(response){
+			alert('Faild to retrieve file from server');
+		} );
 	}
 
 	function initFileTree() {
@@ -329,7 +342,7 @@ $(document).ready(function() {
 							}
 							parentFolder = $('#' + parentFolder);
 							if (parentFolder.length == 0) {
-								console.log('creating new root folder with id='+parentFolder.selector.substr(1) + '_' + path[path.length - 2] + ' and text=' + path[path.length - 2]);
+								//console.log('creating new root folder with id='+parentFolder.selector.substr(1) + '_' + path[path.length - 2] + ' and text=' + path[path.length - 2]);
 								$('.mtree').append('<li><a href="#">' + path[path.length - 2] + '</a><ul id="' + parentFolder.selector.substr(1) + '_' + path[path.length - 2] + '"></ul></li>');
 							}
 							var folderName = '';
@@ -341,10 +354,10 @@ $(document).ready(function() {
 							newFolderName = newFolderName.replace(/-/g, ' ');
 							newFolderName = newFolderName.replace(/X/g, '_');
 							newFolderName = newFolderName.replace(/Z/g, '-');
-							console.log('creating folder with id=' + folderName + ' and text=' + newFolderName + ' appending to ' + parentFolder.selector);
+							//console.log('creating folder with id=' + folderName + ' and text=' + newFolderName + ' appending to ' + parentFolder.selector);
 							parentFolder.append('<li><a href="#">' + newFolderName + '</a><ul id="' + folderName + '"></ul></li>');
 						} else {
-							console.log('creating new root folder ' + path[path.length - 2] + ' with id=_'+path[path.length - 2]+'_');
+							//console.log('creating new root folder ' + path[path.length - 2] + ' with id=_'+path[path.length - 2]+'_');
 							$('.mtree').append('<li><a href="#">' + path[path.length - 2] + '</a><ul id="_' + path[path.length - 2] + '_"></ul></li>');
 						}
 
@@ -354,13 +367,13 @@ $(document).ready(function() {
 						for (j = 1; j < path.length - 2; j++) {
 							parentFolder += path[j] + '_';
 						}
-						console.log('creating new non-folder with id=' + response[i] + ' and text=' + path[path.length - 2]+ ' appending it to ' + parentFolder);
+						//console.log('creating new non-folder with id=' + response[i] + ' and text=' + path[path.length - 2]+ ' appending it to ' + parentFolder);
 
 						$('#' + parentFolder).append('<li><a href="#" id=' + response[i] + '>' + path[path.length - 2] + '</a></li>');
 						response[i] = response[i].replace('.', '\\\.');
-						console.log('#' + response[i]);
+						//console.log('#' + response[i]);
 						$('#' + response[i]).click(function(event){
-							alert(event.target.id);
+							getFile(event.target.id);
 						});
 					}
 				}

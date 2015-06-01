@@ -487,11 +487,11 @@ def get_folder(request):
         folder = json.loads(request.body)
         try:
             print 'getting folder from velo ', folder['file']
-            process = Popen(['python', './apps/velo/get_folder.py', folder['file'] ], stdout=PIPE)
+            process = Popen(
+                ['python', './apps/velo/get_folder.py', folder['file']], stdout=PIPE)
             (out, err) = process.communicate()
             out = out.splitlines(False)
-            out[0] = folder['file']  
-            print out
+            out[0] = folder['file']
 
             exit_code = process.wait()
             return HttpResponse(json.dumps(out))
@@ -511,23 +511,17 @@ def get_folder(request):
 
 
 @login_required
-def velo_get_file(request):
+def get_file(request):
     if request.method == 'POST':
         try:
-
-            velo_api = VeloAPI.Velo()
-            if not velo_api.isJVMStarted():
-                velo_api.start_jvm()
-            path = os.getcwd() + '/userdata/' + request.user
-            if not os.path.isdir(path):
-                os.makedirs(path)
-
-            file_to_get = json.loads(request.body)
-            if velo.download_file(file_to_get['path'], path + file_to_get['filename']):
-                content = open(path + file_to_get['filename']).read()
-                return HttpResponse(content, content_type='text/plain')
-            else:
-                return HttpResponse(status=500)
+            file_to_fetch = '/User Documents' + json.loads(request.body)['file']
+            print 'Getting file ', file_to_fetch
+            process = Popen(
+                ['python', './apps/velo/get_file.py', file_to_fetch], stdout=PIPE)
+            (out, err) = process.communicate()
+            exit_code = process.wait()
+            print out
+            return HttpResponse(out, content_type='text/plain')
 
         except Exception as e:
             import traceback

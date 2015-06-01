@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Registration xmlns="http://www.esgf.org/registry" timeStamp="1433038000456" version="v0.0.1">
+<Registration xmlns="http://www.esgf.org/registry" timeStamp="1433123560479" version="v0.0.1">
     <Node organization="cccma" namespace="cccma.ec.gc.ca" nodePeerGroup="esgf-prod" supportEmail="cccma_info@ec.gc.ca" hostname="dapp2p.cccma.ec.gc.ca" ip="142.104.195.18" dn="/O=ESGF/OU=ESGF.ORG/CN=dapp2p.cccma.ec.gc.ca" shortName="dapp2p-cccma" longName="Canadian Centre for Climate Modelling and Analysis [CCCma] data node" timeStamp="1433012656646" version="v1.5.0-brower_park-release-3-g9a0c6de-master" release="brower_park" nodeType="4" adminPeer="pcmdi9.llnl.gov" defaultPeer="pcmdi9.llnl.gov">
         <CA hash="dunno" endpoint="dapp2p.cccma.ec.gc.ca" dn="dunno"/>
         <GeoLocation lat="48.433300" lon="-123.349998" city="Victoria"/>
