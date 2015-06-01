@@ -250,7 +250,7 @@ $(document).ready(function() {
 				'theme': theme,
 				'dragDrop': 'false'
 			});
-			codemirror.setValue(text);
+			codeMirror.setValue(text);
 		});
 	}
 
