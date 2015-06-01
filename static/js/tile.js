@@ -297,9 +297,11 @@ $(document).ready(function() {
 				'file':id
 			}
 			get_data('get_file/', 'POST', data, function(response){
+				spinner.stop();
 				console.log(response.responseText);
 				initCodeMirror();
 			}, function(response){
+				spinner.stop();
 				alert('Faild to retrieve file from server');
 			} );
 		});
