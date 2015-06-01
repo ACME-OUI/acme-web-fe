@@ -518,7 +518,7 @@ def get_file(request):
                 json.loads(request.body)['file']
             print 'Getting file ', file_to_fetch
             process = Popen(
-                ['python', './apps/velo/get_file.py', file_to_fetch], stdout=PIPE)
+                ['python', './apps/velo/get_file.py', file_to_fetch, 'acmetest', 'acmetest'], stdout=PIPE)
             (out, err) = process.communicate()
             exit_code = process.wait()
             print out
