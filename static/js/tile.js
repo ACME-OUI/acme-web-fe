@@ -249,7 +249,10 @@ $(document).ready(function() {
 				'theme': theme,
 				'dragDrop': false,
 				'lineNumbers': true,
-				'showCursorWhenSelecting': true
+				'showCursorWhenSelecting': true,
+				'mode': {
+					name:'python'
+				}
 			});
 			codeMirror.setValue(text);
 		});
