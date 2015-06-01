@@ -533,7 +533,8 @@ def get_file(request):
                     print 'creating new folder1 ', prefix
                     os.makedirs(prefix)
 
-            for i in range(remote_folder_index, len(remote_path)):
+            for i in range(remote_folder_index, len(remote_path) - 1):
+                print 'checking if dir exists ', prefix + remote_path[i]
                 if not os.path.isdir(prefix + remote_path[i]):
                     prefix += remote_path[i] + '/'
                     print 'creating new folder2 ', prefix
