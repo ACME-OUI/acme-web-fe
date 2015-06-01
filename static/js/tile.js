@@ -298,6 +298,7 @@ $(document).ready(function() {
 			}
 			get_data('get_file/', 'POST', data, function(response){
 				spinner.stop();
+				$('#velo-text-edit').empty();
 				initCodeMirror(response.responseText);
 			}, function(response){
 				spinner.stop();
