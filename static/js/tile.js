@@ -260,6 +260,12 @@ $(document).ready(function() {
 		id = id.replace(/X/g, '_');
 		id = id.replace(/Z/g, '-');
 		id = id.substring(0, id.length -1);
+		var path = id.split('/');
+		id = '';
+		for(var i = 1; i < path.length; i++){
+			id += path[i] + '/';
+		}
+		id = id.substring(0, id.length -1);
 		console.log('attempting to get file:'+id);
 		data = {
 			'file':id
