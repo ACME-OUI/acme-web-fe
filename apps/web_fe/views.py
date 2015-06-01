@@ -516,10 +516,12 @@ def get_file(request):
         try:
             filename = json.loads(request.body)['file']
             # uncomment for production remote_file_path = '/User Documents/' + str(request.user) + '/' + filename
+            # site_user = request.user
+            site_user = 'acmetest'
             remote_file_path = '/User Documents/' + 'acmetest' + '/' + filename
             print 'fatching ', filename, ' from ', remote_file_path
             process = Popen(
-                ['python', './apps/velo/get_file.py', remote_file_path, filename, str(request.user), 'acmetest', 'acmetest'], stdout=PIPE)
+                ['python', './apps/velo/get_file.py', remote_file_path, filename, site_user, 'acmetest', 'acmetest'], stdout=PIPE)
             (out, err) = process.communicate()
             exit_code = process.wait()
             out = out.splitlines(False)[1:]

@@ -12,12 +12,12 @@ def get_file(remote_file_path, filename, site_user, velo_username, password):
 
     path = local_path.split('/')
     remote_path = remote_file_path.split('/')
-    user_folder_index = remote_path.index(velo_username)
+    remote_folder_index = remote_path.index(site_user)
     prefix = ''
     for i in range(path.index(site_user)):
         prefix += path[i] + '/'
 
-    for i in range(user_folder_index, len(remote_path) - 1):
+    for i in range(remote_folder_index, len(remote_path) - 2):
         if not os.path.isdir(prefix + remote_path[i]):
             prefix += remote_path[i] + '/'
             print 'making new dir ', prefix
