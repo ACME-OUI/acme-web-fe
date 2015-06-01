@@ -13,6 +13,16 @@ def get_file(remote_file_path, filename, site_user, velo_username, password):
     if not os.path.isdir(local_path):
         os.makedirs(local_path)
 
+    path = local_path.split('/')
+    prefix = ''
+    for i in range(len(path.index(site_user))):
+        prefix += path[i] + '/'
+
+    for i in range(path.index(site_user), len(path) - 1):
+        if not os.path.isdir(prefix + path[i]):
+            prefix += path[i] + '/'
+            os.makedirs(prefix)
+
     if velo_api.download_file(remote_file_path, local_path):
         content = open(local_path + '/' + filename).read()
         print content

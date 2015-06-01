@@ -522,7 +522,7 @@ def get_file(request):
                 ['python', './apps/velo/get_file.py', remote_file_path, filename, str(request.user), 'acmetest', 'acmetest'], stdout=PIPE)
             (out, err) = process.communicate()
             exit_code = process.wait()
-            out = out.splitlines(False)[0:]
+            out = out.splitlines(False)[1:]
             return HttpResponse(out, content_type='text/plain')
 
         except Exception as e:
