@@ -250,9 +250,7 @@ $(document).ready(function() {
 				'dragDrop': false,
 				'lineNumbers': true,
 				'showCursorWhenSelecting': true,
-				'mode': {
-					name:'python'
-				}
+				'mode': 'python'
 			});
 			codeMirror.setValue(text);
 		});
