@@ -262,7 +262,7 @@ $(document).ready(function() {
 		id = id.substring(0, id.length -1);
 		var path = id.split('/');
 		id = '';
-		for(var i = 1; i < path.length; i++){
+		for(var i = 2; i < path.length; i++){
 			id += path[i] + '/';
 		}
 		id = id.substring(0, id.length -1);
