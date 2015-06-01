@@ -19,4 +19,8 @@ def get_file(filename, user, username, password):
     else:
         return -1
 
+
+for arg in sys.argv:
+	print arg
+	
 get_file(sys.argv[1], sys.argv[2], sys.argv[3])
