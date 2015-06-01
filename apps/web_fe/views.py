@@ -514,7 +514,8 @@ def get_folder(request):
 def get_file(request):
     if request.method == 'POST':
         try:
-            file_to_fetch = '/User Documents' + json.loads(request.body)['file']
+            file_to_fetch = '/User Documents' + \
+                json.loads(request.body)['file']
             print 'Getting file ', file_to_fetch
             process = Popen(
                 ['python', './apps/velo/get_file.py', file_to_fetch], stdout=PIPE)
