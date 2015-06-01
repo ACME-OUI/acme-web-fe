@@ -245,7 +245,7 @@ $(document).ready(function() {
 			} else {
 				theme = '3024-day';
 			}
-			var codeMirror = CodeMirror(document.getElementById('velo-text-edit'), {
+			codeMirror = CodeMirror(document.getElementById('velo-text-edit'), {
 				'theme': theme,
 				'dragDrop': false,
 				'lineNumbers': true,
@@ -2020,6 +2020,9 @@ $(document).ready(function() {
 			$('#velo-text-edit').css({
 				'background-color': '#141414'
 			});
+			text = codeMirror.getValue();
+			$('#velo-text-edit').empty();
+			initCodeMirror(text);
 		}
 	}
 
@@ -2050,6 +2053,9 @@ $(document).ready(function() {
 			$('#velo-text-edit').css({
 				'background-color': '#f7f7f7'
 			});
+			text = codeMirror.getValue();
+			$('#velo-text-edit').empty();
+			initCodeMirror(text);
 		}
 		
 	}
