@@ -12,7 +12,7 @@ def get_file(remote_file_path, filename, site_user, velo_username, password):
 
     path = local_path.split('/')
     remote_path = remote_file_path.split('/')
-    user_folder_index = remote_path.index(site_user)
+    user_folder_index = remote_path.index(velo_username)
     prefix = ''
     for i in range(path.index(site_user)):
         prefix += path[i] + '/'
