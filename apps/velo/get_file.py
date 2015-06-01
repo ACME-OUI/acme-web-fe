@@ -25,7 +25,7 @@ def get_file(remote_file_path, filename, site_user, velo_username, password):
             print 'making new dir ', prefix
             os.makedirs(prefix)
 
-    if velo_api.download_file(remote_file_path, local_path):
+    if velo_api.download_file(remote_file_path, prefix):
         content = open(local_path + '/' + filename).read()
         print content
     else:
