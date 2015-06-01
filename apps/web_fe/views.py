@@ -514,11 +514,11 @@ def get_folder(request):
 def get_file(request):
     if request.method == 'POST':
         try:
-            file_to_fetch = '/User Documents' + \
-                json.loads(request.body)['file']
-            print 'Getting file ', file_to_fetch
+            filename = json.loads(request.body)['file']
+            file_to_fetch = '/User Documents' + filename
+
             process = Popen(
-                ['python', './apps/velo/get_file.py', file_to_fetch, 'acmetest', 'acmetest'], stdout=PIPE)
+                ['python', './apps/velo/get_file.py', remote_file_path, file_name, request.user, 'acmetest', 'acmetest'], stdout=PIPE)
             (out, err) = process.communicate()
             exit_code = process.wait()
             print out
