@@ -520,7 +520,7 @@ def get_file(request):
             site_user = 'acmetest'
             remote_file_path = '/User Documents/' + site_user + '/' + filename
 
-            print 'setting up local directory to recieve file'
+            print '     setting up local directory to recieve file'
 
             local_path = os.getcwd() + '/userdata/' + site_user
             path = local_path.split('/')
@@ -530,16 +530,17 @@ def get_file(request):
             for i in range(path.index(site_user)):
                 prefix += path[i] + '/'
                 if not os.path.isdir(prefix):
-                    print 'creating new folder1 ', prefix
+                    print '     creating new folder1 ', prefix
                     os.makedirs(prefix)
 
             for i in range(remote_folder_index, len(remote_path) - 1):
-                print 'checking if dir exists ', prefix + remote_path[i]
+                print '     checking if dir exists ', prefix + remote_path[i]
                 if not os.path.isdir(prefix + remote_path[i]):
                     prefix += remote_path[i] + '/'
-                    print 'creating new folder2 ', prefix
+                    print '     creating new folder2 ', prefix
                     os.makedirs(prefix)
 
+            prefix += filename
             print 'fatching ', filename, ' from ', remote_file_path, ' and copying it to local directory ', prefix
             process = Popen(
                 ['python', './apps/velo/get_file.py', remote_file_path, prefix, site_user, 'acmetest', 'acmetest'], stdout=PIPE)
