@@ -530,13 +530,13 @@ def get_file(request):
             for i in range(path.index(site_user)):
                 prefix += path[i] + '/'
                 if not os.path.isdir(prefix):
-                    print 'creating new folder ', prefix
+                    print 'creating new folder1 ', prefix
                     os.makedirs(prefix)
 
             for i in range(remote_folder_index, len(remote_path)):
                 if not os.path.isdir(prefix + remote_path[i]):
                     prefix += remote_path[i] + '/'
-                    print 'creating new folder ', prefix
+                    print 'creating new folder2 ', prefix
                     os.makedirs(prefix)
 
             print 'fatching ', filename, ' from ', remote_file_path, ' and copying it to local directory ', prefix
