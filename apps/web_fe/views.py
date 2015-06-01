@@ -515,7 +515,7 @@ def get_file(request):
     if request.method == 'POST':
         try:
             filename = json.loads(request.body)['file']
-            remote_file_path = '/User Documents' + filename
+            remote_file_path = '/User Documents' + request.user + '/' + filename
             print 'fatching ', filename, ' from ', remote_file_path
             process = Popen(
                 ['python', './apps/velo/get_file.py', remote_file_path, filename, request.user, 'acmetest', 'acmetest'], stdout=PIPE)
