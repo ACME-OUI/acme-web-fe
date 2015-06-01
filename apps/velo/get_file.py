@@ -14,7 +14,7 @@ def get_file(remote_file_path, filename, site_user, velo_username, password):
         os.makedirs(local_path)
 
     if velo_api.download_file(remote_file_path, local_path):
-        content = open(local_path + filename).read()
+        content = open(local_path + '/' + filename).read()
         print content
     else:
         return -1
