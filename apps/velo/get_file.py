@@ -22,7 +22,6 @@ def get_file(remote_file_path, filename, site_user, velo_username, password):
     for i in range(remote_folder_index, len(remote_path) - 1):
         if not os.path.isdir(prefix + remote_path[i]):
             prefix += remote_path[i] + '/'
-            print 'making new dir ', prefix
             os.makedirs(prefix)
 
     if velo_api.download_file(remote_file_path, prefix):
