@@ -271,7 +271,7 @@ $(document).ready(function() {
 			'file':id
 		}
 		get_data('get_file/', 'POST', data, function(response){
-			console.log(response.response_text);
+			console.log(response);
 		}, function(response){
 			alert('Faild to retrieve file from server');
 		} );
