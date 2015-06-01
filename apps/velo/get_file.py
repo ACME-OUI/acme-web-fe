@@ -9,7 +9,7 @@ def get_file(remote_file_path, filename, site_user, velo_username, password):
         velo_api.start_jvm()
     rs = velo_api.init_velo(velo_username, password)
     local_path = os.getcwd() + '/userdata/' + site_user
-    print 'path to file ', local_path
+
     if not os.path.isdir(local_path):
         os.makedirs(local_path)
 

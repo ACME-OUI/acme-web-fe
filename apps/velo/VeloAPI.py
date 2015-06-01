@@ -90,7 +90,6 @@ class Velo:
             ex_type, ex, tb = sys.exc_info()
             print '6', traceback.print_tb(tb)
             return False
-            raise
 
     # download the job outputs
     def download_job_outputs(self, contextPathName, location):
