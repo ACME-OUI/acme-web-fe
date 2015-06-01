@@ -2,7 +2,7 @@ import VeloAPI
 import os
 
 
-def get_file(filename, filepath, username, password):
+def get_file(filename, username, password):
     velo_api = VeloAPI.Velo()
     if not velo_api.isJVMStarted():
         velo_api.start_jvm()
