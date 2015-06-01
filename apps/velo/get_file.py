@@ -16,6 +16,8 @@ def get_file(remote_file_path, filename, site_user, velo_username, password):
     prefix = ''
     for i in range(path.index(site_user)):
         prefix += path[i] + '/'
+        if not os.path.isdir(prefix):
+            os.makedirs(prefix)
 
     for i in range(remote_folder_index, len(remote_path) - 2):
         if not os.path.isdir(prefix + remote_path[i]):
