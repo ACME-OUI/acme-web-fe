@@ -346,12 +346,18 @@ $(document).ready(function() {
 			if (mode == 'day') {
 				var mtree_style = 'jet';
 				$('#velo-file-tree').css({
-					'background-color': '#D1FFFF'
+					'background-color': '#FAFFFF'
+				});
+				$('#velo-text-edit').css({
+					'background-color': '#f7f7f7'
 				});
 			} else {
 				mtree_style = 'transit';
 				$('#velo-file-tree').css({
 					'background-color': '#111'
+				});
+				$('#velo-text-edit').css({
+					'background-color': '#141414'
 				});
 			}
 			$('.mtree').addClass(mtree_style);
