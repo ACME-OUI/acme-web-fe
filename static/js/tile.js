@@ -240,7 +240,6 @@ $(document).ready(function() {
 
 	function initCodeMirror(text) {
 		$.getScript("static/js/codemirror.js", function() {
-			initCodeMirror();
 			if (mode == 'night') {
 				var theme = 'twilight';
 			} else {
