@@ -547,7 +547,8 @@ def get_file(request):
             (out, err) = process.communicate()
             exit_code = process.wait()
             out = out.splitlines(True)[1:]
-            print out
+            print 'sending text file to server \n', out
+
             return HttpResponse(out, content_type='text/plain')
 
         except Exception as e:
