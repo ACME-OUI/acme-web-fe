@@ -515,10 +515,10 @@ def get_file(request):
     if request.method == 'POST':
         try:
             filename = json.loads(request.body)['file']
-            file_to_fetch = '/User Documents' + filename
+            remote_file_path = '/User Documents' + filename
 
             process = Popen(
-                ['python', './apps/velo/get_file.py', remote_file_path, file_name, request.user, 'acmetest', 'acmetest'], stdout=PIPE)
+                ['python', './apps/velo/get_file.py', remote_file_path, filename, request.user, 'acmetest', 'acmetest'], stdout=PIPE)
             (out, err) = process.communicate()
             exit_code = process.wait()
             print out
