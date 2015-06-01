@@ -515,10 +515,30 @@ def get_file(request):
     if request.method == 'POST':
         try:
             filename = json.loads(request.body)['file']
-            # uncomment for production remote_file_path = '/User Documents/' + str(request.user) + '/' + filename
             # site_user = request.user
+            # uncomment for production
             site_user = 'acmetest'
-            remote_file_path = '/User Documents/' + 'acmetest' + '/' + filename
+            remote_file_path = '/User Documents/' + site_user + '/' + filename
+
+            print 'setting up local directory to recieve file'
+
+            local_path = os.getcwd() + '/userdata/' + site_user
+            path = local_path.split('/')
+            remote_path = remote_file_path.split('/')
+            remote_folder_index = remote_path.index(site_user)
+            prefix = ''
+            for i in range(path.index(site_user)):
+                prefix += path[i] + '/'
+                if not os.path.isdir(prefix):
+                    print 'creating new folder ', prefix
+                    os.makedirs(prefix)
+
+            for i in range(remote_folder_index, len(remote_path) - 1):
+                if not os.path.isdir(prefix + remote_path[i]):
+                    prefix += remote_path[i] + '/'
+                    print 'creating new folder ', prefix
+                    os.makedirs(prefix)
+
             print 'fatching ', filename, ' from ', remote_file_path
             process = Popen(
                 ['python', './apps/velo/get_file.py', remote_file_path, filename, site_user, 'acmetest', 'acmetest'], stdout=PIPE)
