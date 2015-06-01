@@ -12,7 +12,9 @@ def get_file(remote_file_path, local_path, filename, site_user, velo_username, p
 
         if velo_api.download_file(remote_file_path, local_path):
             content = open(local_path + filename).read()
-            print content.splitlines(True)
+            c = content.splitlines(True)
+            for line in c:
+                print line
         else:
             return -1
     except:
