@@ -250,7 +250,7 @@ $(document).ready(function() {
 				'dragDrop': false,
 				'lineNumbers': true,
 				'showCursorWhenSelecting': true,
-				'mode': 'python'
+				'mode': 'text/python'
 			});
 			codeMirror.setValue(text);
 		});
