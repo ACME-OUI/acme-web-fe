@@ -2020,7 +2020,7 @@ $(document).ready(function() {
 			$('#velo-text-edit').css({
 				'background-color': '#141414'
 			});
-			codeMirror.setOption('theme', '3024-day');
+			codeMirror.setOption('theme', 'twilight');
 		}
 	}
 
@@ -2051,7 +2051,7 @@ $(document).ready(function() {
 			$('#velo-text-edit').css({
 				'background-color': '#f7f7f7'
 			});
-			codeMirror.setOption('theme', 'twilight');
+			codeMirror.setOption('theme', '3024-day');
 		}
 		
 	}
