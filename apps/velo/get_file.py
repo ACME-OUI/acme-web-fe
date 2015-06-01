@@ -1,5 +1,6 @@
 import VeloAPI
 import os
+import sys
 
 
 def get_file(filename, user, username, password):
@@ -17,3 +18,5 @@ def get_file(filename, user, username, password):
         print content
     else:
         return -1
+
+get_file(sys.argv[1], sys.argv[2], sys.argv[3])
