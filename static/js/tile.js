@@ -247,7 +247,9 @@ $(document).ready(function() {
 			}
 			var codeMirror = CodeMirror(document.getElementById('velo-text-edit'), {
 				'theme': theme,
-				'dragDrop': 'false'
+				'dragDrop': false,
+				'lineNumbers': true,
+				'showCursorWhenSelecting': true
 			});
 			codeMirror.setValue(text);
 		});
