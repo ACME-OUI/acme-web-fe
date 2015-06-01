@@ -540,7 +540,7 @@ def get_file(request):
                     print '     creating new folder2 ', prefix
                     os.makedirs(prefix)
 
-            prefix += filename
+            #prefix += filename
             print 'fatching ', filename, ' from ', remote_file_path, ' and copying it to local directory ', prefix
             process = Popen(
                 ['python', './apps/velo/get_file.py', remote_file_path, prefix, site_user, 'acmetest', 'acmetest'], stdout=PIPE)
