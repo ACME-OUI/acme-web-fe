@@ -489,10 +489,12 @@ def get_folder(request):
             print 'getting folder from velo ', folder['file']
             process = Popen(['python', './apps/velo/get_folder.py', folder['file'] ], stdout=PIPE)
             (out, err) = process.communicate()
-            out = out.splitlines(False)  
-            print out[1:]
+            out = out.splitlines(False)
+            out[0] = folder['file']  
+            print out
+
             exit_code = process.wait()
-            return HttpResponse(json.dumps(out[1:]))
+            return HttpResponse(json.dumps(out))
 
         except Exception as e:
             import traceback

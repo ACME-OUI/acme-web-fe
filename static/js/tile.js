@@ -308,7 +308,6 @@ $(document).ready(function() {
 			$('.mtree').addClass(mtree_style);
 			get_data('get_folder/', 'POST', request, function(response) {
 				spinner.stop();
-				console.log(response);
 
 				for (var i = 0; i < response.length; i++) {
 					response[i] = response[i].replace(/-/g, 'Z');
@@ -330,21 +329,22 @@ $(document).ready(function() {
 							}
 							parentFolder = $('#' + parentFolder);
 							if (parentFolder.length == 0) {
+								console.log('creating new root folder with id='+parentFolder.selector.substr(1) + '_' + path[path.length - 2] + ' and text=' + path[path.length - 2]);
 								$('.mtree').append('<li><a href="#">' + path[path.length - 2] + '</a><ul id="' + parentFolder.selector.substr(1) + '_' + path[path.length - 2] + '"></ul></li>');
 							}
 							var folderName = '';
 							for (j = 0; j < path.length - 1; j++) {
 								folderName += path[j] + '_';
 							}
-							console.log('creating folder ' + folderName);
 							var newFolderName = path[path.length - 2];
 							newFolderName = newFolderName.replace(/_/g, '/');
 							newFolderName = newFolderName.replace(/-/g, ' ');
 							newFolderName = newFolderName.replace(/X/g, '_');
 							newFolderName = newFolderName.replace(/Z/g, '-');
+							console.log('creating folder with id=' + folderName + ' and text=' + newFolderName + ' appending to ' + parentFolder.selector);
 							parentFolder.append('<li><a href="#">' + newFolderName + '</a><ul id="' + folderName + '"></ul></li>');
 						} else {
-							console.log('creating folder ' + path[path.length - 2]);
+							console.log('creating new root folder ' + path[path.length - 2] + ' with id=_'+path[path.length - 2]+'_');
 							$('.mtree').append('<li><a href="#">' + path[path.length - 2] + '</a><ul id="_' + path[path.length - 2] + '_"></ul></li>');
 						}
 
@@ -354,7 +354,7 @@ $(document).ready(function() {
 						for (j = 1; j < path.length - 2; j++) {
 							parentFolder += path[j] + '_';
 						}
-						console.log('adding ' + path[path.length - 2] + ' to folder ' + parentFolder);
+						console.log('creating new non-folder with id=' + response[i] + ' and text=' + path[path.length - 2]+ ' appending it to ' + parentFolder);
 
 						$('#' + parentFolder).append('<li><a href="#" id=' + response[i] + '>' + path[path.length - 2] + '</a></li>');
 						response[i] = response[i].replace('.', '\\\.');
