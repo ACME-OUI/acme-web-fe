@@ -162,27 +162,34 @@ $(document).ready(function() {
 
 				case 'velo':
 
-					if ($('#velo_window').length == 0) {
-
-						if (check_credentials('velo')) {
-							content = ['<div id="velo-file-tree">',
+					content = ['<div id="velo-file-tree">',
 								'	<ul class="mtree">',
 								'	</ul>',
 								'</div>',
 								'<div id="velo-text-edit"',
-								'</div>'
-							].join('');
-						} else {
-							content = ['<form id="velo_login">',
-								'<h2 class="form-signin-heading">Please Sign In</h2>',
-								'<label for="velo_username" class="sr-only">User name:</label>',
-								'<input type="text" id="velo_username" name="velo_username" class="form-control" placeholder="User Name">',
-								'<label for="velo_password" class="sr-only">Password:</label>',
-								'<input type="text" id="velo_username" name="velo_password" class="form-control" placeholder="Password">',
-								'<a onclick="submit-velo-user()"  href="javascript:void(0);"><button class="btn btn-success">Submit</button></a>'
+								'</div>'].join('');
+								
+					if ($('#velo_window').length == 0) {
 
-							].join('');
-						}
+						// if (check_credentials('velo')) {
+						// 	content = ['<div id="velo-file-tree">',
+						// 		'	<ul class="mtree">',
+						// 		'	</ul>',
+						// 		'</div>',
+						// 		'<div id="velo-text-edit"',
+						// 		'</div>'
+						// 	].join('');
+						// } else {
+						// 	content = ['<form id="velo_login">',
+						// 		'<h2 class="form-signin-heading">Please Sign In</h2>',
+						// 		'<label for="velo_username" class="sr-only">User name:</label>',
+						// 		'<input type="text" id="velo_username" name="velo_username" class="form-control" placeholder="User Name">',
+						// 		'<label for="velo_password" class="sr-only">Password:</label>',
+						// 		'<input type="text" id="velo_username" name="velo_password" class="form-control" placeholder="Password">',
+						// 		'<a onclick="submit-velo-user()"  href="javascript:void(0);"><button class="btn btn-success">Submit</button></a>'
+
+						// 	].join('');
+						// }
 					}
 					break;
 
