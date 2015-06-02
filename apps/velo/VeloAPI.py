@@ -66,7 +66,7 @@ class Velo:
             # velo.uploadFile(location, filename , fileServerMap, None)
             resMgr.bulkUpload(fileServerMap, None)
             return 0
-        except:
+        except Exception as e:
             import traceback
             print '1', e.__doc__
             print '2', sys.exc_info()
