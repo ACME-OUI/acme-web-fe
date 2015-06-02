@@ -260,12 +260,15 @@ $(document).ready(function() {
 	}
 
 	function codeMirrorTextChanged(event){
-		var save_button = '<button class="fa fa-floppy-o" id="velo-save-button" style="float: right;"></button>'
-		$('.mtree-active').children().append(save_button);
-		$('#velo-save-button').click(function(event){
-			event.stopPropagation();
-			velo_save_file();
-		})
+		if( $('#velo-save-button').length == 0 ){
+			var save_button = '<button class="fa fa-floppy-o" id="velo-save-button" style="float: right;"></button>'
+			$('.mtree-active').children().append(save_button);
+			$('#velo-save-button').click(function(event){
+				event.stopPropagation();
+				velo_save_file();
+			})
+		}
+		
 	}
 
 	function velo_save_file(){
