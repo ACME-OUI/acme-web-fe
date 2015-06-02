@@ -253,7 +253,14 @@ $(document).ready(function() {
 				'mode': 'text/python'
 			});
 			codeMirror.setValue(text);
+			codeMirror.on('change', function(event){
+				codeMirrorTextChanged(event);
+			});
 		});
+	}
+
+	function codeMirrorTextChanged(event){
+		alert(event.target.id);
 	}
 
 
