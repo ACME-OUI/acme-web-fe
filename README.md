@@ -71,6 +71,9 @@ acme-site
     If the Jpype install fails because of missing Python.h, you're missing the python dev tools. 
     Simply: sudo apt-get install python-dev
 
+**Selenium**
+    Follow the directions [here](https://code.google.com/p/robotframework-seleniumlibrary/wiki/InstallationInstructions) to install the Selenium library to work with the robotframework.
+
 **setup db**
 
     python manage.py syncdb

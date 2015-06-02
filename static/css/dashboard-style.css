@@ -38,6 +38,31 @@ body {
 }
 
 /*============================================================================
+    Velo window
+  ============================================================================*/
+
+  #velo-file-tree {
+    float: left;
+    width: 25%;
+    height: 100%;
+    overflow-y: auto;
+    border: 1px solid black;
+    border-radius: 5px;
+  }
+
+  #velo-text-edit {
+    float: right;
+    width: 74%;
+    padding-left: 1%;
+    padding-right: 1%;
+    height: 100%;
+    overflow-y: auto;
+    border: 1px solid black;
+    border-radius: 5px;
+  }
+
+
+/*============================================================================
    Drop down menu 
   ============================================================================*/
 
@@ -61,19 +86,6 @@ body {
 	margin-left: 45px;
 	margin-right: -15px;
 }
-
-/*#node-holder {
-    border: 1px solid;
-    list-style: none;
-    -webkit-transition: all 0.5s ease-in-out;
-    -moz-transition: all 0.5s ease-in-out;
-    -o-transition: all 0.5s ease-in-out;
-    -ms-transition: all 0.5s ease-in-out;
-    transition: all 0.5s ease-in-out;
-    z-index: 21!important;
-}*/
-
-
 
 .item-holder  { 
     border-radius: 25px;

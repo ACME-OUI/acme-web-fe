@@ -22,9 +22,12 @@ import urllib2
 import base64
 import time
 import datetime
+from subprocess import Popen, PIPE
 
 
 # General
+
+
 def render_template(request, template, context):
     template = loader.get_template(template)
     context = RequestContext(request, context)
@@ -45,14 +48,17 @@ def user_login(request):
     context = RequestContext(request)
 
     if request.method == 'POST':
-        user = authenticate(username=request.POST['username'], password=request.POST['password'])
+        user = authenticate(
+            username=request.POST['username'], password=request.POST['password'])
         if user:
             if user.is_active:
                 login(request, user)
-                messages.success(request, 'User: ' + request.POST['username'] + ' successfully loged in')
+                messages.success(
+                    request, 'User: ' + request.POST['username'] + ' successfully loged in')
                 return HttpResponseRedirect(request.POST.get('next'))
             else:
-                messages.error(request, 'User: ' + request.POST['username'] + ' is a disactivated account')
+                messages.error(
+                    request, 'User: ' + request.POST['username'] + ' is a disactivated account')
                 return HttpResponseRedirect('login')
         else:
             messages.error(request, "Username or password incorrect")
@@ -64,7 +70,8 @@ def user_login(request):
         else:
             redirect = ''
         print 'redirect:' + redirect
-        response = HttpResponse(render_template(request, "web_fe/login.html", {"next": redirect}))
+        response = HttpResponse(
+            render_template(request, "web_fe/login.html", {"next": redirect}))
         return response
 
 
@@ -75,16 +82,20 @@ def add_credentials(request):
         try:
             data = json.loads(request.body)
             for s in data:
-                creds = Credential.objects.filter(service=s, site_user_name=str(request.user))
+                creds = Credential.objects.filter(
+                    service=s, site_user_name=str(request.user))
                 if len(creds) != 0:
                     for i in creds:
+                        print 'changing credentials for ', request.user
                         i.password = data[s]['password']
                         i.service_user_name = data[s]['username']
                         i.save()
                 else:
                     print 'Getting new credential for ' + str(request.user)
-                    c = Credential(service_user_name=data[s]['username'], password=data[s]['password'], service=s, site_user_name=str(request.user))
+                    c = Credential(service_user_name=data[s]['username'], password=data[s][
+                                   'password'], service=s, site_user_name=str(request.user))
                     c.save()
+
             return HttpResponse(render_template(request, 'web_fe/add_credentials.html', {'added': 'true'}))
         except Exception as e:
             print 'Error creating new credentials:', repr(e)
@@ -99,37 +110,68 @@ def check_credentials(request):
         try:
             data = json.loads(request.body)
             response = {}
-            for s in data:
-                if s == 'esgf':
-                    import pyesgf
-                    from pyesgf.logon import LogonManager
+            creds = Credential.objects.filter(site_user_name=request.user)
+            velo_started = False
+            if len(creds) != 0:
+                for c in creds:
+                    try:
+                        if c.service == 'esgf':
+                            import pyesgf
+                            from pyesgf.logon import LogonManager
+                            lm = LogonManager()
+                            lm.logon_with_openid(
+                                c.service_user_name, c.password)
+                            if lm.is_logged_on():
+                                response[s] = 'success'
+                                print 'esgf log in successful'
+                            else:
+                                print 'esgf log in failed'
+                                response[s] = 'fail'
+                        if c.service == 'velo':
+                            lib_path = os.path.abspath(
+                                os.path.join('apps', 'velo'))
+                            sys.path.append(lib_path)
 
-                    lm = LogonManager()
-                    lm.logon_with_openid(data[s]['username'], data[s]['password'])
-                    if lm.is_logged_on() != True:
-                        response[s] = 'failed'
-                    else:
-                        response[s] = 'success'
-                if s == 'velo':
-                    lib_path = os.path.abspath(os.path.join('apps', 'velo'))
-                    sys.path.append(lib_path)
-                    import VeloAPI
+                            '''
+                            For production, replace below with:
+                            rm = velo_api.init(c.service_user_name, c.password)
+                            '''
+                            rm = velo_api.init('acmetest', 'acmetest')
+                            if rm.getRepositoryUrlBase() == 'u\'http://acmetest.ornl.gov:80/alfresco\'':
+                                response[s] = 'success'
+                                velo_api.shutdown_jvm()
+                                print 'velo log in successful'
+                            else:
+                                velo_api.shutdown_jvm()
+                                response[s] = 'fail'
+                                print 'Error in velo initialization', rm.getRepositoryUrlBase()
 
-                    velo_api = VeloAPI.Velo()
-                    velo_api.start_jvm()
-                    '''
-                    Using the test credentials for the time being, simply uncomment to
-                    use the users credentials
-                    velo_api.init_velo(data[s]['username'], data[s]['password'])
-                    '''
-                    # res = velo_api.init_velo("acmetest", "acmetest")
-                    response[s] = 'success'
-                    '''
-                    if res.logged_on() != True:
-                        resonse[s] = 'failed'
-                    else:
-                        response[s] = 'success
-                    '''
+                        if c.service == 'github':
+                            import github3
+                            from github3 import login
+                            gh = login(c.site_user_name, password=c.password)
+                            if gh.user() == c.site_user_name:
+                                print 'Github login successful'
+                                response[s] = 'success'
+                            else:
+                                print 'Github login failure'
+                                response[s] = 'fail'
+
+                        if c.service == 'jira':
+                            print 'Working on jira....'
+                    except:
+                        if velo_started:
+                            velo_api.shutdown_jvm()
+                        import traceback
+                        print '1', e.__doc__
+                        print '2', sys.exc_info()
+                        print '3', sys.exc_info()[0]
+                        print '4', sys.exc_info()[1]
+                        print '5', traceback.tb_lineno(sys.exc_info()[2])
+                        ex_type, ex, tb = sys.exc_info()
+                        print '6', traceback.print_tb(tb)
+                        return HttpResponse(status=500)
+
             return HttpResponse(json.dumps(response))
 
         except Exception as e:
@@ -195,7 +237,8 @@ def grid(request):
     from StringIO import StringIO
 
     try:
-        r = requests.get('http://pcmdi9.llnl.gov/esgf-node-manager/registration.xml')
+        r = requests.get(
+            'http://pcmdi9.llnl.gov/esgf-node-manager/registration.xml')
         f = StringIO(r.content)
         out = open('scripts/registration.xml', 'w')
         out.write(f.read())
@@ -217,35 +260,32 @@ def grid(request):
         for child in node:
             if child.tag[-11:] == "GeoLocation":
                 node_location_list.append(child.attrib["city"])
-    node_list = zip(node_peer_list, node_url_list, node_name_list, node_location_list)
+    node_list = zip(
+        node_peer_list, node_url_list, node_name_list, node_location_list)
 
     creds = Credential.objects.filter(site_user_name=request.user)
     if len(creds) != 0:
         for c in creds:
             try:
+                '''
                 if c.service == 'esgf':
                     import pyesgf
                     from pyesgf import LogonManager
                     lm = LogonManager()
                     lm.logon_with_openid(c.service_user_name, c.password)
                     if lm.is_logged_on():
-                        request.session['esgf_login'] = lm
                         print 'esgf log in successful'
                 if c.service == 'velo':
-                    lib_path = os.path.abspath(os.path.join('apps', 'velo'))
-                    sys.path.append(lib_path)
-                    import VeloAPI
+
 
                     velo_api = VeloAPI.Velo()
                     velo_api.start_jvm()
-                    res = velo_api.init('acmetest', 'acmetest')
-                    request.session['velo_login'] = res
+                    res = velo_api.init_velo('acmetest', 'acmetest')
+
                     print 'velo log in successful'
-                    '''
-                    For production, uncomment
-                    res = velo_api.init(c.service_user_name, c.password)
-                    '''
-            except:
+                '''
+                print 'starting a new session'
+            except Exception as e:
                 import traceback
                 print '1', e.__doc__
                 print '2', sys.exc_info()
@@ -265,23 +305,33 @@ def save_layout(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
+
             if len(TileLayout.objects.filter(layout_name=data['name'])) == 0:
                 if data['default_layout'] == 1:
                     print 'got a new default'
-                    isDefault = TileLayout.objects.filter(user_name=request.user, default=1)
+                    isDefault = TileLayout.objects.filter(
+                        user_name=request.user, default=1)
                     if isDefault:
                         for i in isDefault:
                             print 'found old default named ' + i.layout_name
                             i.default = 0
                             i.save()
 
-                layout = TileLayout(user_name=request.user, layout_name=data['name'], board_layout=json.dumps(data['layout']), mode=data['mode'], default=data['default_layout'])
+                layout = TileLayout(user_name=request.user, layout_name=data['name'], board_layout=json.dumps(
+                    data['layout']), mode=data['mode'], default=data['default_layout'])
                 layout.save()
                 return HttpResponse(status=200)
             else:
                 return HttpResponse(status=422)
         except Exception as e:
-            print "Unexpected error:", repr(e)
+            import traceback
+            print '1', e.__doc__
+            print '2', sys.exc_info()
+            print '3', sys.exc_info()[0]
+            print '4', sys.exc_info()[1]
+            print '5', traceback.tb_lineno(sys.exc_info()[2])
+            ex_type, ex, tb = sys.exc_info()
+            print '6', traceback.print_tb(tb)
             return HttpResponse(status=500)
 
 
@@ -321,20 +371,30 @@ def node_info(request):
             from xml.etree.ElementTree import parse
             tree = parse('scripts/registration.xml')
             root = tree.getroot()
+
             name = json.loads(request.body)['node']
 
             response = {}
             for node in root:
                 if node.attrib['shortName'] == name:
-                    response['org'] = node.attrib['organization']
-                    response['namespace'] = node.attrib['namespace']
-                    response['email'] = node.attrib['supportEmail']
-                    response['ip'] = node.attrib['ip']
-                    response['longName'] = node.attrib['longName']
-                    response['version'] = node.attrib['version']
-                    response['shortName'] = name
-                    response['adminPeer'] = node.attrib['adminPeer']
-                    response['hostname'] = node.attrib['hostname']
+                    if 'organization' in node.attrib:
+                        response['org'] = node.attrib['organization']
+                    if 'namespace' in node.attrib:
+                        response['namespace'] = node.attrib['namespace']
+                    if 'supportEmail' in node.attrib:
+                        response['email'] = node.attrib['supportEmail']
+                    if 'ip' in node.attrib:
+                        response['ip'] = node.attrib['ip']
+                    if 'longName' in node.attrib:
+                        response['longName'] = node.attrib['longName']
+                    if 'version' in node.attrib:
+                        response['version'] = node.attrib['version']
+                    if 'shortNamep' in node.attrib:
+                        response['shortName'] = name
+                    if 'adminPeer' in node.attrib:
+                        response['adminPeer'] = node.attrib['adminPeer']
+                    if 'hostname' in node.attrib:
+                        response['hostname'] = node.attrib['hostname']
 
                     for child in list(node):
                         if child.tag[-len('AuthorizationService'):] == "AuthorizationService":
@@ -344,15 +404,20 @@ def node_info(request):
                         if child.tag[-len('Metrics'):] == "Metrics":
                             for gchild in list(child):
                                 if gchild.tag[-len('DownloadedData'):] == "DownloadedData":
-                                    response['dataDownCount'] = gchild.attrib['count']
-                                    response['dataDownSize'] = gchild.attrib['size']
-                                    response['dataDownUsers'] = gchild.attrib['users']
+                                    response['dataDownCount'] = gchild.attrib[
+                                        'count']
+                                    response['dataDownSize'] = gchild.attrib[
+                                        'size']
+                                    response['dataDownUsers'] = gchild.attrib[
+                                        'users']
                                 if gchild.tag[-len('RegisteredUsers'):] == "RegisteredUsers":
-                                    response['registeredUsers'] = gchild.attrib['count']
+                                    response['registeredUsers'] = gchild.attrib[
+                                        'count']
 
                     from pyesgf.search import SearchConnection
                     print 'attempting to connect to ' + 'http://' + response['hostname'] + 'esg-search/'
-                    conn = SearchConnection('http://' + response['hostname'] + '/esg-search/', distrib=True)
+                    conn = SearchConnection(
+                        'http://' + response['hostname'] + '/esg-search/', distrib=True)
                     try:
                         conn.get_shard_list()
                         response['status'] = 'up'
@@ -417,16 +482,131 @@ def node_search(request):
 
 
 @login_required
+def get_folder(request):
+    if request.method == 'POST':
+        folder = json.loads(request.body)
+        try:
+            print 'getting folder from velo ', folder['file']
+            process = Popen(
+                ['python', './apps/velo/get_folder.py', folder['file']], stdout=PIPE)
+            (out, err) = process.communicate()
+            out = out.splitlines(False)
+            out[0] = folder['file']
+
+            exit_code = process.wait()
+            return HttpResponse(json.dumps(out))
+
+        except Exception as e:
+            import traceback
+            print '1', e.__doc__
+            print '2', sys.exc_info()
+            print '3', sys.exc_info()[0]
+            print '4', sys.exc_info()[1]
+            print '5', traceback.tb_lineno(sys.exc_info()[2])
+            ex_type, ex, tb = sys.exc_info()
+            print '6', traceback.print_tb(tb)
+            return HttpResponse(status=500)
+    else:
+        return HttpResponse(status=404)
+
+
+@login_required
+def get_file(request):
+    if request.method == 'POST':
+        try:
+            filename = json.loads(request.body)['file']
+            # site_user = request.user
+            # uncomment for production
+            site_user = 'acmetest'
+            remote_file_path = '/User Documents/' + site_user + '/' + filename
+
+            print '     setting up local directory to recieve file'
+
+            local_path = os.getcwd() + '/userdata/' + site_user
+            path = local_path.split('/')
+            remote_path = remote_file_path.split('/')
+            remote_folder_index = remote_path.index(site_user)
+            prefix = ''
+            for i in range(path.index(site_user)):
+                prefix += path[i] + '/'
+                if not os.path.isdir(prefix):
+                    print '     creating new folder1 ', prefix
+                    os.makedirs(prefix)
+
+            for i in range(remote_folder_index, len(remote_path) - 1):
+                print '     checking if dir exists ', prefix + remote_path[i]
+                if not os.path.isdir(prefix + remote_path[i]):
+                    prefix += remote_path[i] + '/'
+                    print '     creating new folder2 ', prefix
+                    os.makedirs(prefix)
+
+            print 'fatching ', filename, ' from ', remote_file_path, ' and copying it to local directory ', prefix
+            process = Popen(
+                ['python', './apps/velo/get_file.py', remote_file_path, prefix, filename, site_user, 'acmetest', 'acmetest'], stdout=PIPE)
+            (out, err) = process.communicate()
+            exit_code = process.wait()
+            out = out.splitlines(True)[1:]
+            print 'sending text file to server \n', out
+
+            return HttpResponse(out, content_type='text/plain')
+
+        except Exception as e:
+            import traceback
+            print '1', e.__doc__
+            print '2', sys.exc_info()
+            print '3', sys.exc_info()[0]
+            print '4', sys.exc_info()[1]
+            print '5', traceback.tb_lineno(sys.exc_info()[2])
+            ex_type, ex, tb = sys.exc_info()
+            print '6', traceback.print_tb(tb)
+            return HttpResponse(status=500)
+    else:
+        return HttpResponse(status=404)
+
+
+@login_required
+def credential_check_existance(request):
+    if request.method == 'POST':
+        try:
+            service = json.loads(request.body)['service']
+            cred = Credential.objects.filter(
+                site_user_name=request.user, service=service)
+            if len(cred) != 0:
+                return HttpResponse(status=200)
+            else:
+                return HttpResponse(status=500)
+        except Exception as e:
+            import traceback
+            print '1', e.__doc__
+            print '2', sys.exc_info()
+            print '3', sys.exc_info()[0]
+            print '4', sys.exc_info()[1]
+            print '5', traceback.tb_lineno(sys.exc_info()[2])
+            ex_type, ex, tb = sys.exc_info()
+            print '6', traceback.print_tb(tb)
+            return HttpResponse(status=500)
+    else:
+        return HttpResponse(status=404)
+
+
+@login_required
 def velo(request):
     if request.method == 'POST':
-        from velo import VeloAPI
         try:
-            velo_api = VeloAPI.Velo()
-            velo_api.start_jvm()
-            barr = velo_api.init_velo("acmetest", "acmetest")
-            foo = {'0': 'success I guess'}
-            return HttpResponse(json.dumps(foo))
+            rm = velo_api.init_velo("acmetest", "acmetest")
+            if rm.getRepositoryUrlBase() == 'http://acmetest.ornl.gov:80/alfresco':
+                foo = {'0': 'success I guess'}
+
+                print 'success initializing velo connection'
+                velo_api.shutdown_jvm()
+                return HttpResponse(json.dumps(foo))
+            else:
+                velo_api.shutdown_jvm()
+                print 'failed connecting to velo', barr.getRepositoryUrlBase()
+                return HttpResponse(status=500)
+
         except Exception as e:
+            velo_api.shutdown_jvm()
             print "Error connecting to velo:", repr(e)
             return HttpResponse(status=500)
 
@@ -445,7 +625,8 @@ def gettemplates(request):
 
         username = inputjson['username']
         password = inputjson['password']
-        base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
+        base64string = base64.encodestring(
+            '%s:%s' % (username, password)).replace('\n', '')
 
         url = "https://acmetest.ornl.gov/alfresco/service/cssef/listWorkflowPackageTemplates"
         request = urllib2.Request(url)
@@ -471,10 +652,12 @@ def clonetemplates(request):
         username = inputjson['username']
         password = inputjson['password']
         template = inputjson['template']
-        case = template + "_" + username + "_" + datetime.datetime.now().isoformat()
+        case = template + "_" + username + "_" + \
+            datetime.datetime.now().isoformat()
         data_args = {'caseName': case, 'templateName': template}
         data = urllib.urlencode(data_args)
-        base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
+        base64string = base64.encodestring(
+            '%s:%s' % (username, password)).replace('\n', '')
 
         url = "https://acmetest.ornl.gov/alfresco/service/cssef/cloneWorkflowPackageTemplate"
         request = urllib2.Request(url, data)
@@ -501,9 +684,11 @@ def getchildren(request):
         username = inputjson['username']
         password = inputjson['password']
         path = inputjson['path']
-        base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
+        base64string = base64.encodestring(
+            '%s:%s' % (username, password)).replace('\n', '')
 
-        url = "https://acmetest.ornl.gov/alfresco/service/cat/getChildren?path=" + path
+        url = "https://acmetest.ornl.gov/alfresco/service/cat/getChildren?path=" + \
+            path
         request = urllib2.Request(url)
         request.add_header("Authorization", "Basic %s" % base64string)
         response = urllib2.urlopen(request)
@@ -528,9 +713,11 @@ def getfile(request):
         username = inputjson['username']
         password = inputjson['password']
         path = inputjson['path']
-        base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
+        base64string = base64.encodestring(
+            '%s:%s' % (username, password)).replace('\n', '')
 
-        url = "https://acmetest.ornl.gov/alfresco/service/cat/getFileContents?path=" + path
+        url = "https://acmetest.ornl.gov/alfresco/service/cat/getFileContents?path=" + \
+            path
         request = urllib2.Request(url)
         request.add_header("Authorization", "Basic %s" % base64string)
         response = urllib2.urlopen(request)
@@ -559,7 +746,8 @@ def savefile(request):
 
         data_args = {'path': path, 'content': content}
         data = urllib.urlencode(data_args)
-        base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
+        base64string = base64.encodestring(
+            '%s:%s' % (username, password)).replace('\n', '')
 
         url = "https://acmetest.ornl.gov/alfresco/service/cat/upload"
 
@@ -587,9 +775,11 @@ def getresource(request):
         username = inputjson['username']
         password = inputjson['password']
         path = inputjson['path']
-        base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
+        base64string = base64.encodestring(
+            '%s:%s' % (username, password)).replace('\n', '')
 
-        url = "https://acmetest.ornl.gov/alfresco/service/cssef/getResource?path=" + path
+        url = "https://acmetest.ornl.gov/alfresco/service/cssef/getResource?path=" + \
+            path
         print url
         request = urllib2.Request(url)
         request.add_header("Authorization", "Basic %s" % base64string)
@@ -613,14 +803,17 @@ def filetree(request):
     r = ['<ul class="jqueryFileTree" style="display: none;">']
     try:
         r = ['<ul class="jqueryFileTree" style="display: none;">']
-        d = urllib.unquote(request.POST.get('dir', '/Users/harris112/Projects/aims/acme-site'))
+        d = urllib.unquote(
+            request.POST.get('dir', '/Users/harris112/Projects/aims/acme-site'))
         for f in os.listdir(d):
             ff = os.path.join(d, f)
             if os.path.isdir(ff):
-                r.append('<li class="directory collapsed"><a href="#" rel="%s/">%s</a></li>' % (ff, f))
+                r.append(
+                    '<li class="directory collapsed"><a href="#" rel="%s/">%s</a></li>' % (ff, f))
             else:
                 e = os.path.splitext(f)[1][1:]  # get .ext and remove dot
-                r.append('<li class="file ext_%s"><a href="#" rel="%s">%s</a></li>' % (e, ff, f))
+                r.append(
+                    '<li class="file ext_%s"><a href="#" rel="%s">%s</a></li>' % (e, ff, f))
         r.append('</ul>')
     except Exception, e:
         r.append('Could not load directory: %s' % str(e))

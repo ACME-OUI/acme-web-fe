@@ -2,6 +2,7 @@ import os.path
 from local_settings import *
 from django.contrib.messages import constants as message_constants
 
+
 # Django settings for admin project.
 
 DEBUG = True
@@ -80,14 +81,14 @@ STATIC_URL = '/static/'
 # various locations.
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder'
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
 
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader'
+    'django.template.loaders.app_directories.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -152,12 +153,11 @@ LOGGING = {
     }
 }
 
-LOGIN_URL = "/acme/login"
+MESSAGE_TAGS = {message_constants.DEBUG: 'debug',
+                message_constants.INFO: 'info',
+                message_constants.SUCCESS: 'success',
+                message_constants.WARNING: 'warning',
+                message_constants.ERROR: 'danger',
+                }
 
-MESSAGE_TAGS = {
-    message_constants.DEBUG: 'alert-debug',
-    message_constants.INFO: 'alert-info',
-    message_constants.SUCCESS: 'alert-success',
-    message_constants.WARNING: 'alert-warning',
-    message_constants.ERROR: 'alert-danger',
-}
+LOGIN_URL = "/acme/login"

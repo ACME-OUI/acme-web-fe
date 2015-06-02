@@ -14,10 +14,13 @@ class Velo:
     def __init__(self):
         pass
 
+    def isJVMStarted(self):
+        return jpype.isJVMStarted()
+
     def start_jvm(self):
         # include the velo python API jar file here
         jpype.startJVM(
-            jvmPath, "-Djava.class.path=/Users/baldwin32/projects/acme-web-fe/static/java/VeloAPI.jar")
+            jvmPath, "-Djava.class.path=/home/sterling/projects/acme-web-fe/static/java/VeloAPI.jar")
         global velo, cms, jobConfig, fileObj, tifConstants, fileServerMap, filesToDownload
         velo = JPackage("velo").mgr.VeloManager
         cms = JPackage("gov").pnnl.velo.model.CmsPath
@@ -71,11 +74,22 @@ class Velo:
         resMgr.bulkDownload(filesToDownload, destFolder)
 
     def download_file(self, filepath, location):  # download file from velo
-        destFolder = jpype.java.io.File(location)
-        cmsfilepath = cms(filepath)
-        filesToDownload.add(cmsfilepath)
-        resMgr.bulkDownload(filesToDownload, destFolder)
-        print "File downloaded"
+        try:
+            destFolder = jpype.java.io.File(location)
+            cmsfilepath = cms(filepath)
+            filesToDownload.add(cmsfilepath)
+            resMgr.bulkDownload(filesToDownload, destFolder)
+            return True
+        except Exception as e:
+            import traceback
+            print '1', e.__doc__
+            print '2', sys.exc_info()
+            print '3', sys.exc_info()[0]
+            print '4', sys.exc_info()[1]
+            print '5', traceback.tb_lineno(sys.exc_info()[2])
+            ex_type, ex, tb = sys.exc_info()
+            print '6', traceback.print_tb(tb)
+            return False
 
     # download the job outputs
     def download_job_outputs(self, contextPathName, location):
@@ -136,18 +150,29 @@ class Velo:
     def get_resources(self, parentPath):
         Folder = JPackage("gov").pnnl.cat.core.resources.IFolder
         cmsparentPath = cms(parentPath)
-        ress = resMgr.getChildren(cmsparentPath)
-        for resource in ress:
-            print resource
-            if isinstance(resource, Folder):
-                Velo.get_resources(self, resource.toString())
+        ret = []
+        try:
+            ress = resMgr.getChildren(cmsparentPath)
+            for i in range(len(ress)):
+                print ress[i]
+                ret.append(ress[i].toString())
+                if isinstance(ress[i], Folder):
+                    sub = Velo.get_resources(self, ress[i].toString())
+                    for r in sub:
+                        ret.append(r)
+        except:
+            print 'resource ', parentPath, 'does not exist'
+
+        return ret
 
     # returns all the subfolders in users' home folder
     def get_homefolder_resources(self):
         folder = resMgr.getHomeFolder()
         ress = resMgr.getChildren(folder.getPath())
-        for resource in ress:
-            print resource
+        ret = []
+        for i in range(len(ress)):
+            ret.append(ress[i].toString())
+        return ret
         # Velo.get_resources(self,folder.toString())
 
     def get_homefolder(self):  # get user's home folder
