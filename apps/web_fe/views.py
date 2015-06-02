@@ -363,7 +363,7 @@ def load_layout(request):
         return HttpResponse(json.dumps(layouts))
 
 
-@login_required
+@login_required(login_url='login')
 def node_info(request):
     if request.method == 'POST':
         ''' For demo purposes this is loading a local file '''
@@ -441,7 +441,7 @@ def node_info(request):
         return HttpResponse(status=500)
 
 
-@login_required
+@login_required(login_url='login')
 def node_search(request):
     if request.method == 'POST':
         from pyesgf.search import SearchConnection
@@ -481,7 +481,7 @@ def node_search(request):
         return HttpResponse(status=500)
 
 
-@login_required
+@login_required(login_url='login')
 def get_folder(request):
     if request.method == 'POST':
         folder = json.loads(request.body)
@@ -510,7 +510,7 @@ def get_folder(request):
         return HttpResponse(status=404)
 
 
-@login_required
+@login_required(login_url='login')
 def get_file(request):
     if request.method == 'POST':
         try:
@@ -564,7 +564,42 @@ def get_file(request):
         return HttpResponse(status=404)
 
 
-@login_required
+@login_required(login_url='login')
+def velo_save_file(request):
+    if request.method == 'POST':
+        try:
+            incomming_file = json.loads(request.body)
+            remote_path = incomming_file['remote_path']
+            filename = incomming_file['filename']
+            text = incomming_file['text']
+            site_user = 'acmetest'
+            velo_user = 'acmetest'
+            velo_pass = 'acmetest'
+            process = Popen(
+                ['python', './apps/velo/save_file.py', text, local_path, remote_path, site_user, velo_user, velo_pass, filename], stdout=PIPE)
+            (out, err) = process.communicate()
+            exit_code = process.wait()
+            out = out.splitlines(True)[1:]
+            print out
+            if exit_code == 0:
+                return HttpResponse(status=200)
+            else:
+                return HttpResponse(status=500)
+        except Exception as e:
+            import traceback
+            print '1', e.__doc__
+            print '2', sys.exc_info()
+            print '3', sys.exc_info()[0]
+            print '4', sys.exc_info()[1]
+            print '5', traceback.tb_lineno(sys.exc_info()[2])
+            ex_type, ex, tb = sys.exc_info()
+            print '6', traceback.print_tb(tb)
+            return HttpResponse(status=500)
+    else:
+        return HttpResponse(status=404)
+
+
+@login_required(login_url='login')
 def credential_check_existance(request):
     if request.method == 'POST':
         try:

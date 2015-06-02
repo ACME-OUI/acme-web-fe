@@ -269,7 +269,12 @@ $(document).ready(function() {
 	}
 
 	function velo_save_file(){
-		alert('save event thrown');
+		var text = codeMirror.getValue();
+		get_data('velo_save_file/', 'POST', text, function(){
+			alert('file saved!');
+		}, function(){
+			alert('failed to save file :(');
+		});
 	}
 
 

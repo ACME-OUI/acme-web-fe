@@ -58,12 +58,16 @@ class Velo:
         resMgr.createFolder(cmspath)
 
     def upload_file(self, location, filename):  # upload file in velo
-        fileObj = jpype.java.io.File(location + "/" + filename)
-        homeFolder = Velo.get_homefolder(self)
-        cmspath = homeFolder.append(filename)
-        fileServerMap.put(fileObj, cmspath)
-        # velo.uploadFile(location, filename , fileServerMap, None)
-        resMgr.bulkUpload(fileServerMap, None)
+        try:
+            fileObj = jpype.java.io.File(location + "/" + filename)
+            homeFolder = Velo.get_homefolder(self)
+            cmspath = homeFolder.append(filename)
+            fileServerMap.put(fileObj, cmspath)
+            # velo.uploadFile(location, filename , fileServerMap, None)
+            resMgr.bulkUpload(fileServerMap, None)
+            return 0
+        except:
+            return -1
 
     # download file from velo
     def download_userhome_file(self, filename, location):
