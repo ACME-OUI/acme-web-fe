@@ -260,7 +260,12 @@ $(document).ready(function() {
 	}
 
 	function codeMirrorTextChanged(event){
-		alert(event.target.id);
+		var save_button = '<button class="fa fa-floppy-o>" onclick="velo_save_file()" style="float: left;"></button>'
+		$('.mtree-active').append(save_button);
+	}
+
+	function velo_save_file(){
+		alert('save event thrown');
 	}
 
 
