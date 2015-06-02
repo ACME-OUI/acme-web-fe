@@ -261,7 +261,7 @@ $(document).ready(function() {
 
 	function codeMirrorTextChanged(event){
 		var save_button = '<button class="fa fa-floppy-o>" onclick="velo_save_file()" style="float: left;"></button>'
-		$('.mtree-active').append(save_button);
+		$('.mtree-active').children().append(save_button);
 	}
 
 	function velo_save_file(){
