@@ -272,8 +272,17 @@ $(document).ready(function() {
 	}
 
 	function velo_save_file(){
+		var filename = $('.mtree-active:first-child').text();
+		var remote_path = $('.mtree-active:first-child').attr('id');
+		remote_path = remote_path.replace('_', '/');
 		var text = codeMirror.getValue();
-		get_data('velo_save_file/', 'POST', text, function(){
+		var outgoing_request = {
+			text: text,
+			remote_path: remote_path,
+			filename: filename
+		}
+		
+		get_data('velo_save_file/', 'POST', outgoing_request, function(){
 			alert('file saved!');
 		}, function(){
 			alert('failed to save file :(');
