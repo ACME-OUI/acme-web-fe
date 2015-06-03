@@ -8,4 +8,4 @@ Suite Teardown    Close Browser
 
 *** Testcases ***
 
-Check Page  http://${SERVER}acme/  acme-link
+Check Page  ${HOME_PAGE}  acme-link

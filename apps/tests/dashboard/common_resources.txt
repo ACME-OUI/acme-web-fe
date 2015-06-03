@@ -12,9 +12,6 @@ ${LOGIN URL}		http://${SERVER}/acme/login
 ${BROWSER}			firefox
 ${VALID_USER}		testuser
 ${VALID_PASS}		testpass
-${INVALID_USER}		asdfqwer
-${INVALID_PASS} 	lkjasdkf
-${OVERFLOW}			asdflkjasdkfjflasdkjhqewkjhdjkfhnals asdjkfhjdhfiuOUIY&^^RIHUGO(@#(*%&JDhfkjalskdjh;))[]'/.[][p90q938409823341-029'flkajshdfonaefnaskdjfnlaowiernpaisdf|}}{POOL}{}||}|=/*-+6RTD@!@$%RTY	
 
 
 *** Keywords ***

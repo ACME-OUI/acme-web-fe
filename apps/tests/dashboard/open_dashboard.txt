@@ -1,12 +1,11 @@
 *** Settings ***
 
 Documentation   A test suite containing tests related to valid login.
-Suite Setup     Open Browser To Login Page
+Suite Setup     Open Browser And Log In
 Suite Teardown  Close Browser
 Resource        common_resources.txt
 
 *** Testcases ***
-Tests Valid User Login
-  Input Username  ${VALID_USER}
-  Input Password  ${VALID_PASS}
-  Check Login Success
+Test The Dashboard Is Running
+  Go To  ${HOME_PAGE}
+  Open Dashboard
