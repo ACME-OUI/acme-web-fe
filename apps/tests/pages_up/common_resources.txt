@@ -1,14 +1,15 @@
 *** Settings ***
 
 Documentation  Resources needed to test if all the pages are up and running.
-Library SeleniumLibrary
+Library        SeleniumLibrary
 
 
 
 *** Variables ***
 
-${SERVER}			acme-devel.llnl.gov
-${HOME_PAGE}		http://${SERVER}/acme/
+${SERVER}			localhost:8000
+${HOMEPAGE}			http://${SERVER}/acme/
+${LOGIN URL}		${HOMEPAGE}login/
 ${BROWSER}			firefox
 ${VALID_USER}		testuser
 ${VALID_PASS}		testpass
@@ -16,7 +17,7 @@ ${VALID_PASS}		testpass
 *** Keywords ***
 
 Open Browser And Log In
-	Open Browser  ${LOGIN URL}  ${BROWSER}
+	Open Browser  ${LOGIN URL}
 	Maximize Browser Window
 	Title Should Be	 login
 	Input Text  username  testuser

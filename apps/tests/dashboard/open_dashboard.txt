@@ -1,11 +1,13 @@
 *** Settings ***
 
-Documentation   A test suite containing tests related to valid login.
-Suite Setup     Open Browser And Log In
-Suite Teardown  Close Browser
+Documentation   A test suite for the dashboard
 Resource        common_resources.txt
+Suite Setup     Start Selenium Server
+Suite Teardown  Stop Selenium Server
 
 *** Testcases ***
 Test The Dashboard Is Running
-  Go To  ${HOME_PAGE}
-  Open Dashboard
+  Open Browser And Log In
+  Go To  ${DASHBOARD}
+  Page Should Contain Element  toggle-left-a
+  Close Browser
