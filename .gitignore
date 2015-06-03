@@ -29,6 +29,9 @@ update.py
 *.sublime-workspace
 db
 
-/apps/tests/output.xml
-/apps/tests/log.html
-/apps/tests/report.html
+/log.html
+/output.xml
+/report.html
+/selenium-screenshot-1.png
+/selenium_server_log.txt
+/migrations
