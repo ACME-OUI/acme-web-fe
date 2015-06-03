@@ -28,3 +28,7 @@ update.py
 *.sublime-project
 *.sublime-workspace
 db
+
+/apps/tests/output.xml
+/apps/tests/log.html
+/apps/tests/report.html

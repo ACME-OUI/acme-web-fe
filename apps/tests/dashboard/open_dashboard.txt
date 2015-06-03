@@ -1,0 +1,11 @@
+*** Settings ***
+
+Documentation   A test suite containing tests related to valid login.
+Suite Setup     Open Browser And Log In
+Suite Teardown  Close Browser
+Resource        common_resources.txt
+
+*** Testcases ***
+Test The Dashboard Is Running
+  Go To  ${HOME_PAGE}
+  Open Dashboard

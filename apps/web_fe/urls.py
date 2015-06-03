@@ -17,6 +17,7 @@ urlpatterns = patterns('',
                            views.credential_check_existance),
                        url(r'^get_folder/', views.get_folder),
                        url(r'^get_file/', views.get_file),
+                       url(r'^velo_save_file/', views.velo_save_file),
 
                        url(r'^save_layout/', views.save_layout,
                            name='save_layout'),
