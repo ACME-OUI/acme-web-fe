@@ -1,25 +1,11 @@
 *** Settings ***
-Library       Selenium Library
-${SERVER}     http://acme-devel.llnl.gov/acme/
+
+Documentation     A test suite to check that all our URLs are up and running.
+Suite Setup       Open Browser And Log In
+Suite Teardown    Close Browser
+
+
 
 *** Testcases ***
-Testing if the server is up and running
-  Start Selenium Server
-  Open Browser  ${SERVER}
-  Maximize Browser Window
-  Page Should Contain  The company name in the Road Runner cartoons is ironic
-  Close Browser
-  Stop Selenium Server
 
-
-
-Tests user login, not working yet
-  Start Selenium Server
-  Open Browser  ${SERVER}login/
-  Maximize Browser Window
-  Input Text  testuser  username
-  Input Text  testpass  password
-  Click Button  sign-in
-  Page Should Contain  successfully loged in
-  Close Browser
-  Stop Selenium Server
+Check Page  http://${SERVER}acme/  acme-link
