@@ -10,5 +10,5 @@ import sys
 sys.path.append(os.path.join(os.getcwd(), 'apps'))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "admin.settings")
 
-from django.core.wsgi import get_wsgi_application
+from django.core.wsgi import get_wsgi_application  # noqa
 application = get_wsgi_application()
