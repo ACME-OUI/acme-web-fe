@@ -490,10 +490,10 @@ def get_folder(request):
             process = Popen(
                 ['python', './apps/velo/get_folder.py', folder['file']], stdout=PIPE)
             (out, err) = process.communicate()
+            exit_code = process.wait()
             out = out.splitlines(False)
             out[0] = folder['file']
 
-            exit_code = process.wait()
             return HttpResponse(json.dumps(out))
 
         except Exception as e:
