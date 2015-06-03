@@ -162,27 +162,34 @@ $(document).ready(function() {
 
 				case 'velo':
 
-					if ($('#velo_window').length == 0) {
-
-						if (check_credentials('velo')) {
-							content = ['<div id="velo-file-tree">',
+					content = ['<div id="velo-file-tree">',
 								'	<ul class="mtree">',
 								'	</ul>',
 								'</div>',
 								'<div id="velo-text-edit"',
-								'</div>'
-							].join('');
-						} else {
-							content = ['<form id="velo_login">',
-								'<h2 class="form-signin-heading">Please Sign In</h2>',
-								'<label for="velo_username" class="sr-only">User name:</label>',
-								'<input type="text" id="velo_username" name="velo_username" class="form-control" placeholder="User Name">',
-								'<label for="velo_password" class="sr-only">Password:</label>',
-								'<input type="text" id="velo_username" name="velo_password" class="form-control" placeholder="Password">',
-								'<a onclick="submit-velo-user()"  href="javascript:void(0);"><button class="btn btn-success">Submit</button></a>'
+								'</div>'].join('');
+								
+					if ($('#velo_window').length == 0) {
 
-							].join('');
-						}
+						// if (check_credentials('velo')) {
+						// 	content = ['<div id="velo-file-tree">',
+						// 		'	<ul class="mtree">',
+						// 		'	</ul>',
+						// 		'</div>',
+						// 		'<div id="velo-text-edit"',
+						// 		'</div>'
+						// 	].join('');
+						// } else {
+						// 	content = ['<form id="velo_login">',
+						// 		'<h2 class="form-signin-heading">Please Sign In</h2>',
+						// 		'<label for="velo_username" class="sr-only">User name:</label>',
+						// 		'<input type="text" id="velo_username" name="velo_username" class="form-control" placeholder="User Name">',
+						// 		'<label for="velo_password" class="sr-only">Password:</label>',
+						// 		'<input type="text" id="velo_username" name="velo_password" class="form-control" placeholder="Password">',
+						// 		'<a onclick="submit-velo-user()"  href="javascript:void(0);"><button class="btn btn-success">Submit</button></a>'
+
+						// 	].join('');
+						// }
 					}
 					break;
 
@@ -253,6 +260,39 @@ $(document).ready(function() {
 				'mode': 'text/python'
 			});
 			codeMirror.setValue(text);
+			codeMirror.on('change', function(event){
+				codeMirrorTextChanged(event);
+			});
+		});
+	}
+
+	function codeMirrorTextChanged(event){
+		if( $('#velo-save-button').length == 0 ){
+			var save_button = '<button class="fa fa-floppy-o" id="velo-save-button" style="float: right;"></button>'
+			$('.mtree-active').children().append(save_button);
+			$('#velo-save-button').click(function(event){
+				event.stopPropagation();
+				velo_save_file();
+			})
+		}
+		
+	}
+
+	function velo_save_file(){
+		var filename = $('.mtree-active:first-child').text();
+		var remote_path = $('.mtree-active:first-child').attr('id');
+		remote_path = remote_path.replace('_', '/');
+		var text = codeMirror.getValue();
+		var outgoing_request = {
+			text: text,
+			remote_path: remote_path,
+			filename: filename
+		}
+		
+		get_data('velo_save_file/', 'POST', outgoing_request, function(){
+			alert('file saved!');
+		}, function(){
+			alert('failed to save file :(');
 		});
 	}
 
