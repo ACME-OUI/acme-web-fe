@@ -1,0 +1,34 @@
+*** Settings ***
+
+Documentation  Resources needed by the dashboard test suite.
+Library SeleniumLibrary
+
+
+
+*** Variables ***
+
+${SERVER}			acme-devel.llnl.gov
+${LOGIN URL}		http://${SERVER}/acme/login
+${BROWSER}			firefox
+${VALID_USER}		testuser
+${VALID_PASS}		testpass
+${INVALID_USER}		asdfqwer
+${INVALID_PASS} 	lkjasdkf
+${OVERFLOW}			asdflkjasdkfjflasdkjhqewkjhdjkfhnals asdjkfhjdhfiuOUIY&^^RIHUGO(@#(*%&JDhfkjalskdjh;))[]'/.[][p90q938409823341-029'flkajshdfonaefnaskdjfnlaowiernpaisdf|}}{POOL}{}||}|=/*-+6RTD@!@$%RTY	
+
+
+*** Keywords ***
+
+Open Browser And Log In
+	Open Browser  ${LOGIN URL}  ${BROWSER}
+	Maximize Browser Window
+	Title Should Be	 login
+	Input Text  username  testuser
+	Input Text  password  testpass
+	Click Button  sign-in
+	Page Should Contain  successfully loged in
+
+
+Open Dashboard
+	Click Button  Dashboard
+	Page Should Contain Element  toggle-left-a
