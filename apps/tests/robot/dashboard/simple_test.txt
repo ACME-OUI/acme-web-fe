@@ -1,0 +1,12 @@
+*** Settings ***
+
+Documentation   A test suite for the dashboard
+Library   		SeleniumLibrary
+
+*** Testcases ***
+A Simple Test Case
+  Start Selenium Server
+  Open Browser  http://localhost:8000 
+  Page Should Contain  Acme
+  Close Browser
+  Stop Selenium Server
