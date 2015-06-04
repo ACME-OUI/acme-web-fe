@@ -1,0 +1,31 @@
+*** Settings ***
+
+Documentation  Resources needed to test if all the pages are up and running.
+Library        SeleniumLibrary
+
+
+
+*** Variables ***
+
+${SERVER}			localhost:8000
+${HOMEPAGE}			http://${SERVER}/acme/
+${LOGIN URL}		${HOMEPAGE}login/
+${BROWSER}			firefox
+${VALID_USER}		testuser
+${VALID_PASS}		testpass
+
+*** Keywords ***
+
+Open Browser And Log In
+	Open Browser  ${LOGIN URL}
+	Maximize Browser Window
+	Title Should Be	 login
+	Input Text  username  testuser
+	Input Text  password  testpass
+	Click Button  sign-in
+	Page Should Contain  successfully loged in
+
+
+Check Page  [Arguments]  ${page_url}  ${element_to_check}
+	Go To  ${page_url}
+	Page Should Contain Element  ${element_to_check}

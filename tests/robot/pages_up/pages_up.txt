@@ -1,0 +1,15 @@
+*** Settings ***
+
+Documentation     A test suite to check that all our URLs are up and running.
+Resource 		  common_resources.txt
+Suite Setup		  Start Selenium Server
+Suite Teardown    Stop Selenium Server
+
+
+
+*** Testcases ***
+
+test1  
+	Open Browser  ${HOMEPAGE}  ${BROWSER}
+	Page Should Contain Element  acme-link
+	Close Browser
