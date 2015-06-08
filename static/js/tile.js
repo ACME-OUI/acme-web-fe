@@ -970,6 +970,13 @@ $(document).ready(function() {
 			'z-index': 1,
 			'opacity': 0
 		});
+		console.log('setting options button id to ' + id + '_window_options');
+	 	$(w).find('.fa-cog').attr({ 
+	 		'id': id + '_options'
+	 	});
+	 	$(w).find('.fa-times').attr({ 
+	 		'id': id + '_close'
+	 	});
 
 		$(w).draggable({
 			//containment: '.tile-board',

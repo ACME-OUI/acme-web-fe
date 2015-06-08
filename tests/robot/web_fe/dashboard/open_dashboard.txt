@@ -2,12 +2,13 @@
 
 Documentation   A test suite for the dashboard
 Resource        common_resources.txt
-Suite Setup     Start Selenium Server
-Suite Teardown  Stop Selenium Server
+Suite Setup     Open Browser And Log In
+Test Teardown   Clear dashboard
 
 *** Testcases ***
 Test The Dashboard Is Running
-  Open Browser And Log In
   Go To  ${DASHBOARD}
   Page Should Contain Element  toggle-left-a
-  Close Browser
+
+
+

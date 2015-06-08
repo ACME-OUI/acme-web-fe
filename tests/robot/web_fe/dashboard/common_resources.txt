@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation  Resources needed by the dashboard test suite.
-Library        SeleniumLibrary
+Library        Selenium2Library  timeout=10  implicit_wait=0.5
 
 
 
@@ -10,9 +10,11 @@ Library        SeleniumLibrary
 ${SERVER}			localhost:8000
 ${DASHBOARD}		http://${SERVER}/acme/grid/
 ${LOGIN URL}		http://${SERVER}/acme/login?next=/acme/
-${BROWSER}			googlechrome
+${BROWSER}			ff
 ${VALID_USER}		testuser
 ${VALID_PASS}		testpass
+${DELAY}            1000
+${DASHBOARD}		http://${SERVER}/acme/grid/
 
 
 *** Keywords ***
@@ -25,4 +27,10 @@ Open Browser And Log In
 	Input Text  password  testpass
 	Click Button  Sign In
 	Page Should Contain  successfully loged in
+	Click Element  xpath=/html/body/div[1]/div/div[2]/ul/li[3]/a
+
+
+Close Tile  [Arguments]  ${tilename}
+    Click Button  ${tilename}_close
+    Page Should Not Contain  ${tilename}
 
