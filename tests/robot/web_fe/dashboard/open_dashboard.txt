@@ -3,12 +3,12 @@
 Documentation   A test suite for the dashboard
 Resource        common_resources.txt
 Suite Setup     Open Browser And Log In
-Test Teardown   Clear dashboard
+Suite Teardown   Close Browser
 
 *** Testcases ***
 Test The Dashboard Is Running
-  Go To  ${DASHBOARD}
-  Page Should Contain Element  toggle-left-a
+  Click Element  xpath=/html/body/div[1]/div/div[2]/ul/li[3]/a
+  Page Should Contain Element  xpath=/html/body/div[1]/div/div[2]/ul/li[1]/a
 
 
 

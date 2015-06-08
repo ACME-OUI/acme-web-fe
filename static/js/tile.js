@@ -971,11 +971,11 @@ $(document).ready(function() {
 			'opacity': 0
 		});
 		console.log('setting options button id to ' + id + '_window_options');
-	 	$(w).find('.fa-cog').attr({ 
-	 		'id': id + '_options'
+	 	$(w).find('.fa-cog').parent().attr({ 
+	 		id: id + '_options'
 	 	});
-	 	$(w).find('.fa-times').attr({ 
-	 		'id': id + '_close'
+	 	$(w).find('.fa-times').parent().attr({ 
+	 		id: id + '_close'
 	 	});
 
 		$(w).draggable({
