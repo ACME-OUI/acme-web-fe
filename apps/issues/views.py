@@ -126,7 +126,7 @@ def render_template(request, template, context):
 
 # Actual views
 @login_required
-@can_add("Issue")
+@can_add("issue")
 def issue_form(request):
     """
     Renders the form for submitting new issues
@@ -138,7 +138,7 @@ def issue_form(request):
 
 
 @post_only
-@can_add("Issue")
+@can_add("issue")
 def make_issue(request):
     c_id = request.POST["category"]
     title = request.POST["summary"]
@@ -214,8 +214,8 @@ def get_next(request, id):
         return json_error("Question %d has no %s value" % (int(id), yesno))
 
 
-@can_add("CategoryQuestion")
-@can_edit("CategoryQuestion")
+@can_add("categoryquestion")
+@can_edit("categoryquestion")
 def show_question(request, source):
     """
     Displays the question-builder
@@ -237,7 +237,7 @@ def show_question(request, source):
 
 
 @post_only
-@can_edit("CategoryQuestion")
+@can_edit("categoryquestion")
 def add_category_to_question(request, id):
     try:
         q = CategoryQuestion.objects.get(id=id)
@@ -269,7 +269,7 @@ def add_category_to_question(request, id):
 
 
 @post_only
-@can_remove("CategoryQuestion")
+@can_remove("categoryquestion")
 def delete_question(request, id):
     try:
         c = CategoryQuestion.objects.get(id=id)
@@ -282,7 +282,7 @@ def delete_question(request, id):
 
 @post_only
 @expects_json
-@can_add("CategoryQuestion")
+@can_add("categoryquestion")
 def create_question(request, json_data=None):
     if json_data is None:
         return json_error("No data provided for new question.")

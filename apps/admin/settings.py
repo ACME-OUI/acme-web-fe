@@ -170,3 +170,16 @@ MESSAGE_TAGS = {message_constants.DEBUG: 'debug',
                 }
 
 LOGIN_URL = "/acme/login"
+
+DEFAULT_GROUPS = {
+    "Default": ["add_issue"],  # Magic name that will be applied to all users
+    "Issue Admin": ["*_issue", "*_categoryquestion", "*_issuesource"]
+}
+
+MESSAGE_TAGS = {
+    message_constants.DEBUG: 'alert-debug',
+    message_constants.INFO: 'alert-info',
+    message_constants.SUCCESS: 'alert-success',
+    message_constants.WARNING: 'alert-warning',
+    message_constants.ERROR: 'alert-danger',
+}
