@@ -21,6 +21,7 @@ ${DASHBOARD}		http://${SERVER}/acme/grid/
 
 Open Browser And Log In
 	Open Browser  ${LOGIN URL}  ${BROWSER}
+	Set Browser Implicit Wait  0.5
 	Maximize Browser Window
 	Title Should Be	 login
 	Input Text  username  testuser
