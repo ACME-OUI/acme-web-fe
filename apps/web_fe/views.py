@@ -79,6 +79,7 @@ def user_login(request):
 @login_required(login_url='login')
 def add_credentials(request):
     if request.method == 'POST':
+        print request.body
         try:
             data = json.loads(request.body)
             for s in data:

@@ -113,7 +113,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'apps.web_fe',
+    'web_fe',
     'django.contrib.admin',
     'south',
     'captcha',
@@ -126,7 +126,8 @@ INSTALLED_APPS = (
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_ARGS = [
     '--with-coverage',
-    '--cover-package=apps.web_fe'
+    '--cover-package=apps.web_fe',
+    '--cover-html'
 ]
 
 
