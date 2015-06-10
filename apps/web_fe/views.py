@@ -204,16 +204,15 @@ def register(request):
         user_form = UserCreationForm(data=request.POST)
         if user_form.is_valid():
             user = user_form.save()
-            user.save()
 
             try:
                 group = Group.objects.get(name="Default")
-                group.user_set.add(user)
-                group.save()
+                user.groups.add(group)
             except Group.DoesNotExist:
                 # Don't do anything, no default set up
                 pass
 
+            user.save()
             registered = True
         else:
             print user_form.errors
