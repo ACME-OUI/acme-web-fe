@@ -18,16 +18,16 @@ class Command(BaseCommand):
                 g.save()
 
             if g.name == "Default":
-                g.user_set = User.objects.all()
+                g.users = User.objects.all()
 
-            p_set = []
+            g.permissions = []
             for permission in groups[groupname]:
                 try:
                     p = Permission.objects.get(codename=permission)
-                    p_set.append(p)
+                    g.permissions.add(p)
                 except Permission.DoesNotExist:
                     if permission[0] == "*":
                         permissions = Permission.objects.filter(content_type__model=permission.split("_")[1])
-                        p_set.extend(permissions)
-            g.permission_set = p_set
+                        for p in permissions:
+                            g.permissions.add(p)
             g.save()
