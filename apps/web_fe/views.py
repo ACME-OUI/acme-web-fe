@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.files import File
 from forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import Group
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
@@ -203,6 +204,14 @@ def register(request):
         user_form = UserCreationForm(data=request.POST)
         if user_form.is_valid():
             user = user_form.save()
+
+            try:
+                group = Group.objects.get(name="Default")
+                user.groups.add(group)
+            except Group.DoesNotExist:
+                # Don't do anything, no default set up
+                pass
+
             user.save()
             registered = True
         else:
