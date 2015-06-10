@@ -84,29 +84,50 @@ $(document).ready(function() {
 		jsonObj.data = '';
 
 		get_data('load_layout/', 'GET', jsonObj, function(request) {
+			var found_default = false;
 			$.each(request, function(k, v) {
 				if (v.default == true) {
-					for (var i = 0; i < v.layout.length; i++) {
-						v.layout[i] = layoutFix(v.layout[i]);
-						if (v.layout[i].x == 1) {
-							needsFixXBool = false;
-						} else {
-							if (v.layout[i].x < fixValX) {
-								fixValX = v.layout[i].x;
-							}
-						}
-						if (v.layout[i].y == 1) {
-							needsFixYBool = false;
-						} else {
-							if (v.layout[i].y < fixValY) {
-								fixValY = v.layout[i].y;
-							}
-						}
-					}
+					found_default = true;
+					getFixVal(v.layout);
 					loadLayout(v.layout, v.mode);
 				}
 			});
+			if(!found_default){
+				fixValY = 0;
+				fixValX = 0;
+				mode = 'day';
+			}
+		}, function(request){
+			fixValY = 0;
+			fixValX = 0;
+			mode = 'day';
 		});
+	}
+
+	function getFixVal(layouts){
+		if(layouts.length == 0){
+			fixValY = 0;
+			fixValX = 0;
+			mode = 'day';
+			return;
+		}
+		for (var i = 0; i < layouts.length; i++) {
+			layouts[i] = layoutFix(layouts[i]);
+			if (layouts[i].x == 1) {
+				needsFixXBool = false;
+			} else {
+				if (layouts[i].x < fixValX) {
+					fixValX = layouts[i].x;
+				}
+			}
+			if (layouts[i].y == 1) {
+				needsFixYBool = false;
+			} else {
+				if (layouts[i].y < fixValY) {
+					fixValY = layouts[i].y;
+				}
+			}
+		}
 	}
 
 
@@ -1951,7 +1972,7 @@ $(document).ready(function() {
 			loadMenuHtml += '<form name="load-layout-form" id="save-form">';
 			loadMenuHtml += 'Select Layout:<br><select id="select-layout">';
 			$.each(options, function(k, v) {
-				loadMenuHtml += '<option value="' + v.nane + '">' + v.name + '</option>';
+				loadMenuHtml += '<option value="' + v.name + '" id="layout-' + v.name + '">' + v.name + '</option>';
 			});
 			loadMenuHtml += '</select><input type="submit" value="Load" id="load-button">';
 			loadMenuHtml += '</form></div><div class="bevel bl br"></div>';

@@ -20,6 +20,7 @@ ${DASHBOARD}		http://${SERVER}/acme/grid/
 *** Keywords ***
 
 Open Browser And Log In
+	[Documentation]  Logs in and goes to the dashboard
 	Open Browser  ${LOGIN URL}  ${BROWSER}
 	Set Browser Implicit Wait  0.5
 	Maximize Browser Window

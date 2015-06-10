@@ -8,19 +8,18 @@ Test Teardown    Close Browser
 
 *** Testcases ***
 Test The Dashboard Is Running
-  Click Element  xpath=/html/body/div[1]/div/div[2]/ul/li[3]/a
   Page Should Contain Element  xpath=/html/body/div[1]/div/div[2]/ul/li[1]/a
 
 
 
-
 Load Layout
-  Click Element  xpath=/html/body/div[1]/div/div[2]/ul/li[3]/a
-  Click Element  xpath=/html/body/div[1]/div/div[2]/ul/li[1]/a
-  Click Button  id=load-layout
+  Click Element  id=toggle-left-a
+  Click Button   id=load-layout
   Page Should Contain  Select Layout:
   Click Element  select-layout
-  Click Element  xpath=/html/body/div[6]/div[2]/form/select/option[4]  
-  Page Should Contain  provenance_window  status_window  science_window   
-
+  Click Element  id=layout-b
+  Click Element  id=load-button
+  Page Should Contain Element  id=provenance_window
+  Page Should Contain Element  id=status_window 
+  Page Should Contain Element  id=science_window
 

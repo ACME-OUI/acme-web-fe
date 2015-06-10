@@ -18,7 +18,7 @@ Open Each Tile
     Check Tile    charting    9
 
 Open All Tiles At Once
-    Click Element    xpath=/html/body/div[1]/div/div[2]/ul/li[1]/a
+    Click Element  id=toggle-left-a
     Click Button    xpath=/html/body/nav/ul/li[1]/button
     Click Button    xpath=/html/body/nav/ul/li[2]/button
     Click Button    xpath=/html/body/nav/ul/li[3]/button
@@ -41,8 +41,9 @@ Open All Tiles At Once
 
 *** Keywords ***
 Check Tile  [Arguments]    ${tilename}    ${tilenumber}
-    Click Element    xpath=/html/body/div[1]/div/div[2]/ul/li[1]/a
+    Click Element  id=toggle-left-a
     Click Button    xpath=/html/body/nav/ul/li[${tilenumber}]/button
-    Click Element    xpath=/html/body/div[1]/div/div[2]/ul/li[1]/a
+    Click Element  id=toggle-left-a
+    Wait Until Element Is Visible  ${tilename}_window
     Page Should Contain Element    ${tilename}_window
     Close Tile    ${tilename}_window

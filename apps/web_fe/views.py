@@ -492,7 +492,7 @@ def get_folder(request):
             (out, err) = process.communicate()
             exit_code = process.wait()
             out = out.splitlines(False)
-            out[0] = folder['file']
+            out.insert(0, folder['file'])
 
             return HttpResponse(json.dumps(out))
 
