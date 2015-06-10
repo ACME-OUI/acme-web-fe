@@ -21,3 +21,5 @@ xmltodict==0.9.2
 MyProxyClient
 robotframework==2.8.7
 robotframework-selenium2library
+coverage
+django-nose

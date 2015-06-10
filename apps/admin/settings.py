@@ -113,13 +113,21 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'web_fe',
+    'apps.web_fe',
     'django.contrib.admin',
     'south',
     'captcha',
-    'issues'
+    'issues',
+    'django_nose'
     # 'django.contrib.admindocs',
 )
+
+# Use nose to run all tests
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+NOSE_ARGS = [
+    '--with-coverage',
+    '--cover-package=apps.web_fe'
+]
 
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'

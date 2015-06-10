@@ -3,13 +3,13 @@ from django.test.client import Client
 import json
 
 
-class credentialTest(unittest.TestCase):
+class CredentialTest(unittest.TestCase):
 
     def setUp(self):
         self.client = Client()
+        client.login(username='testuser', password='testpass')
 
     def save_credentials(self):
-        client.login(username='testuser', password='testpass')
 
         new_credential = {
             'esgf': {
@@ -18,4 +18,16 @@ class credentialTest(unittest.TestCase):
             }
         }
 
-        response = client.post('add_credentials/')
+        response = client.post('add_credentials/', json.dumps(new_credential))
+        self.assertEquals(response.status_code, 200)
+
+
+class GridTest(unittest.TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        client.login(username='testuser', password='testpass')
+
+    def load_grid(self):
+        response = client.get('grid/')
+        self.assertEquals(response.status_code, 200)
