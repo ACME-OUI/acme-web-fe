@@ -18,7 +18,7 @@ class Command(BaseCommand):
                 g.save()
 
             if g.name == "Default":
-                g.users = User.objects.all()
+                g.user_set = User.objects.all()
 
             g.permissions = []
             for permission in groups[groupname]:
