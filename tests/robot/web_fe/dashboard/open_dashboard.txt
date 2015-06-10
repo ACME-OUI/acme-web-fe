@@ -10,16 +10,3 @@ Test Teardown    Close Browser
 Test The Dashboard Is Running
   Page Should Contain Element  xpath=/html/body/div[1]/div/div[2]/ul/li[1]/a
 
-
-
-Load Layout
-  Click Element  id=toggle-left-a
-  Click Button   id=load-layout
-  Page Should Contain  Select Layout:
-  Click Element  select-layout
-  Click Element  id=layout-b
-  Click Element  id=load-button
-  Page Should Contain Element  id=provenance_window
-  Page Should Contain Element  id=status_window 
-  Page Should Contain Element  id=science_window
-
