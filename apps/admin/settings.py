@@ -28,9 +28,7 @@ if os.getenv('build_on_travis', None):
 
     VELO_PATH = 'static/java/Velo.jar'
 else:
-    from local_settings import * # noqa
-
-
+    from local_settings import *  # noqa
 
 
 # Django settings for admin project.
