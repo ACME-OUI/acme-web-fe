@@ -5,8 +5,8 @@ install:
     - pip install -r requirements.txt
     - pip install pep8 --use-mirrors
 env:
-	global:
-     	- build_on_travis=true
+    global:
+        - build_on_travis=true
 sudo:
     - false
 before_script:
