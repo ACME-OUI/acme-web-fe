@@ -58,7 +58,7 @@ class NodeInfoTest(unittest.TestCase):
 
     def test_node_info(self):
 
-        node = 'esgdata'
+        node = 'esgf-pcmdi-9'
         response = self.client.post(
             '/acme/node_info/', content_type='application/json', data=json.dumps({'node': node}))
 
@@ -68,7 +68,65 @@ class NodeInfoTest(unittest.TestCase):
         content = json.loads(response.content)
         print content['ip']
         # Check that the node info is there
-        self.assertEquals(content['ip'], '140.208.31.117')
+        # This IP address is hard coded as the value for the ESG data node as
+        # of 6/11/15
+        self.assertEquals(content['ip'], '198.128.245.159')
+
+    def test_bogus_node_name(self):
+
+        node = 'BOGUS_NODE'
+        response = self.client.post(
+            '/acme/node_info/', content_type='application/json', data=json.dumps({'node': node}))
+
+        # Check that the server responeded with success
+        self.assertEquals(response.status_code, 501)
+
+    def test_no_node(self):
+
+        response = self.client.post(
+            '/acme/node_info/', content_type='application/json', data=json.dumps({}))
+
+        # Check that the server responeded with success
+        self.assertEquals(response.status_code, 500)
+
+
+class TestNodeSearch(unittest.TestCase):
+
+    def setUp(self):
+        userSetup(self)
+
+    def tearDown(self):
+        User.objects.filter(username='testuser').delete()
+
+    def test_node_connection(self):
+
+        request = {
+            'node': 'http://pcmdi9.llnl.gov/esg-search/',
+            'test_connection': 'True'
+        }
+        request = json.dumps(request)
+        response = self.client.post(
+            '/acme/node_search/', content_type='application/json', data=request)
+        response_data = json.loads(response.content)
+
+        self.assertEquals(response.status_code, 200)
+        # hits as of 6/11/15
+        self.assertEquals(response_data['institute']['LLNL'], 736)
+
+    def test_node_search(self):
+
+        request = {
+            'node': 'http://pcmdi9.llnl.gov/esg-search/',
+            'institute': 'LLNL'
+        }
+        request = json.dumps(request)
+        response = self.client.post(
+            '/acme/node_search/', content_type='application/json', data=request)
+        response_data = json.loads(response.content)
+
+        self.assertEquals(response.status_code, 200)
+        # hits as of 6/11/15
+        self.assertEquals(response_data['hits'], 736)
 
 
 class GridTest(unittest.TestCase):

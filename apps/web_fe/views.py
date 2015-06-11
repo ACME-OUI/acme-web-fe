@@ -387,10 +387,16 @@ def node_info(request):
             tree = parse('scripts/registration.xml')
             root = tree.getroot()
 
-            name = json.loads(request.body)['node']
+            request_data = json.loads(request.body)
+            if 'node' not in request_data:
+                return HttpResponse(status=500)
+            name = request_data['node']
+
             response = {}
+            found_node = False
             for node in root:
                 if node.attrib['shortName'] == name:
+                    found_node = True
                     if 'organization' in node.attrib:
                         response['org'] = node.attrib['organization']
                     if 'namespace' in node.attrib:
@@ -440,6 +446,8 @@ def node_info(request):
                         response['status'] = 'down'
 
                     return HttpResponse(json.dumps(response))
+            if not found_node:
+                return HttpResponse(status=501)
         except Exception as e:
             import traceback
             print '1', e.__doc__
@@ -464,6 +472,8 @@ def node_search(request):
         print searchString
         if 'node' in searchString:
             if 'test_connection' in searchString:
+                if not searchString['test_connection']:
+                    return HttpResponse(status=500)
                 try:
                     print 'testing connection to', searchString['node']
                     conn = SearchConnection(searchString['node'], distrib=True)
@@ -485,6 +495,7 @@ def node_search(request):
                     searchResponse['hits'] = context.hit_count
                     for i in range(8):
                         searchResponse[str(i)] = rs[i].json
+
                     return HttpResponse(json.dumps(searchResponse))
                 except Exception as e:
                     print "Unexpected error:", repr(e)
