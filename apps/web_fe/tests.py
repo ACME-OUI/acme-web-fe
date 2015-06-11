@@ -4,7 +4,7 @@ import json
 from django.contrib.auth.models import User
 
 
-def testUserSetup():
+def testUserSetup(self):
     # First create a new user
     self.test_user = User.objects.create_user(
         'testuser', 'test@test.test', 'testpass')
@@ -15,7 +15,7 @@ def testUserSetup():
 class CredentialTest(unittest.TestCase):
 
     def setUp(self):
-        testUserSetup()
+        testUserSetup(self)
 
     def tearDown(self):
         User.objects.filter(username='testuser').delete()
@@ -50,7 +50,7 @@ class CredentialTest(unittest.TestCase):
 class NodeInfoTest(unittest.TestCase):
 
     def setUp(self):
-        testUserSetup()
+        testUserSetup(self)
 
     def tearDown(self):
         User.objects.filter(username='testuser').delete()
@@ -60,7 +60,7 @@ class NodeInfoTest(unittest.TestCase):
 class GridTest(unittest.TestCase):
 
     def setUp(self):
-        testUserSetup()
+        testUserSetup(self)
 
     def tearDown(self):
         User.objects.filter(username='testuser').delete()
@@ -78,7 +78,7 @@ class GridTest(unittest.TestCase):
 class LayoutTest(unittest.TestCase):
 
     def setUp(self):
-        testUserSetup()
+        testUserSetup(self)
 
     def tearDown(self):
         User.objects.filter(username='testuser').delete()
