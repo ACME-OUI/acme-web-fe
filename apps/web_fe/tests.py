@@ -4,13 +4,18 @@ import json
 from django.contrib.auth.models import User
 
 
+def testUserSetup():
+    # First create a new user
+    self.test_user = User.objects.create_user(
+        'testuser', 'test@test.test', 'testpass')
+    # Now login as that user
+    self.client = Client()
+    self.client.login(username='testuser', password='testpass')
+
 class CredentialTest(unittest.TestCase):
 
     def setUp(self):
-        self.test_user = User.objects.create_user(
-            'testuser', 'test@test.test', 'testpass')
-        self.client = Client()
-        self.client.login(username='testuser', password='testpass')
+        testUserSetup()
 
     def tearDown(self):
         User.objects.filter(username='testuser').delete()
@@ -42,15 +47,20 @@ class CredentialTest(unittest.TestCase):
         self.assertEquals(response.context['added'], 'false')
 
 
+class NodeInfoTest(unittest.TestCase):
+
+    def setUp(self):
+        testUserSetup()
+
+    def tearDown(self):
+        User.objects.filter(username='testuser').delete()
+
+
+
 class GridTest(unittest.TestCase):
 
     def setUp(self):
-        # First create a new user
-        self.test_user = User.objects.create_user(
-            'testuser', 'test@test.test', 'testpass')
-        # Now login as that user
-        self.client = Client()
-        self.client.login(username='testuser', password='testpass')
+        testUserSetup()
 
     def tearDown(self):
         User.objects.filter(username='testuser').delete()
@@ -68,12 +78,7 @@ class GridTest(unittest.TestCase):
 class LayoutTest(unittest.TestCase):
 
     def setUp(self):
-        # First create a new user
-        self.test_user = User.objects.create_user(
-            'testuser', 'test@test.test', 'testpass')
-        # Now login as that user
-        self.client = Client()
-        self.client.login(username='testuser', password='testpass')
+        testUserSetup()
 
     def tearDown(self):
         User.objects.filter(username='testuser').delete()

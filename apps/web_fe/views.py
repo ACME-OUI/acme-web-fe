@@ -382,7 +382,6 @@ def load_layout(request):
 @login_required(login_url='login')
 def node_info(request):
     if request.method == 'POST':
-        ''' For demo purposes this is loading a local file '''
         try:
             from xml.etree.ElementTree import parse
             tree = parse('scripts/registration.xml')
