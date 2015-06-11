@@ -83,22 +83,25 @@ def add_credentials(request):
         print request.body
         try:
             data = json.loads(request.body)
-            for s in data:
-                creds = Credential.objects.filter(
-                    service=s, site_user_name=str(request.user))
-                if len(creds) != 0:
-                    for i in creds:
-                        print 'changing credentials for ', request.user
-                        i.password = data[s]['password']
-                        i.service_user_name = data[s]['username']
-                        i.save()
-                else:
-                    print 'Getting new credential for ' + str(request.user)
-                    c = Credential(service_user_name=data[s]['username'], password=data[s][
-                                   'password'], service=s, site_user_name=str(request.user))
-                    c.save()
+            if len(data) != 0:
+                for s in data:
+                    creds = Credential.objects.filter(
+                        service=s, site_user_name=str(request.user))
+                    if len(creds) != 0:
+                        for i in creds:
+                            print 'changing credentials for ', request.user
+                            i.password = data[s]['password']
+                            i.service_user_name = data[s]['username']
+                            i.save()
+                    else:
+                        print 'Getting new credential for ' + str(request.user)
+                        c = Credential(service_user_name=data[s]['username'], password=data[s][
+                                       'password'], service=s, site_user_name=str(request.user))
+                        c.save()
 
-            return HttpResponse(render_template(request, 'web_fe/add_credentials.html', {'added': 'true'}))
+                return HttpResponse(render_template(request, 'web_fe/add_credentials.html', {'added': 'true'}))
+            else:
+                return HttpResponse(render_template(request, 'web_fe/add_credentials.html', {'added': 'false'}))
         except Exception as e:
             print 'Error creating new credentials:', repr(e)
             return HttpResponse(status=500)
@@ -306,7 +309,6 @@ def grid(request):
                 print '6', traceback.print_tb(tb)
                 return HttpResponse(status=500)
 
-    print node_list
     return HttpResponse(render_template(request, "web_fe/grid.html", {'nodes': node_list}))
 
 
@@ -352,6 +354,9 @@ def load_layout(request):
         try:
             data = json.loads(request.body)
             layout = TileLayout.objects.filter(layout_name=data['layout_name'])
+            if len(layout) == 0:
+                return HttpResponse(status=500)
+
             j = {}
             for i in layout:
                 j['board_layout'] = json.loads(i.board_layout)
