@@ -41,5 +41,5 @@ class GridTest(unittest.TestCase):
 
     def test_load_grid(self):
         response = self.client.get('/acme/grid/')
-        print response.status_code
+        self.assertEquals(response.data = 'somedata')
         self.assertEquals(response.status_code, 200)
