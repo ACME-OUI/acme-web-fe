@@ -4,7 +4,7 @@ import json
 from django.contrib.auth.models import User
 
 
-def testUserSetup(self):
+def userSetup(self):
     # First create a new user
     self.test_user = User.objects.create_user(
         'testuser', 'test@test.test', 'testpass')
@@ -16,7 +16,7 @@ def testUserSetup(self):
 class CredentialTest(unittest.TestCase):
 
     def setUp(self):
-        testUserSetup(self)
+        userSetup(self)
 
     def tearDown(self):
         User.objects.filter(username='testuser').delete()
@@ -51,28 +51,30 @@ class CredentialTest(unittest.TestCase):
 class NodeInfoTest(unittest.TestCase):
 
     def setUp(self):
-        testUserSetup(self)
+        userSetup(self)
 
     def tearDown(self):
         User.objects.filter(username='testuser').delete()
 
     def test_node_info(self):
 
-        node = 'esgdata.gfdl.noaa.gov'
+        node = 'esgdata'
         response = self.client.post(
             '/acme/node_info/', content_type='application/json', data=json.dumps({'node': node}))
 
         # Check that the server responeded with success
         self.assertEquals(response.status_code, 200)
 
+        content = json.loads(response.content)
+        print content['ip']
         # Check that the node info is there
-        self.assertTrue(response.context['ip'] not None)
+        self.assertEquals(content['ip'], '140.208.31.117')
 
 
 class GridTest(unittest.TestCase):
 
     def setUp(self):
-        testUserSetup(self)
+        userSetup(self)
 
     def tearDown(self):
         User.objects.filter(username='testuser').delete()
@@ -90,7 +92,7 @@ class GridTest(unittest.TestCase):
 class LayoutTest(unittest.TestCase):
 
     def setUp(self):
-        testUserSetup(self)
+        userSetup(self)
 
     def tearDown(self):
         User.objects.filter(username='testuser').delete()

@@ -388,7 +388,6 @@ def node_info(request):
             root = tree.getroot()
 
             name = json.loads(request.body)['node']
-
             response = {}
             for node in root:
                 if node.attrib['shortName'] == name:
@@ -430,7 +429,7 @@ def node_info(request):
                                         'count']
 
                     from pyesgf.search import SearchConnection
-                    print 'attempting to connect to ' + 'http://' + response['hostname'] + 'esg-search/'
+                    print 'attempting to connect to ' + 'http://' + response['hostname'] + '/esg-search/'
                     conn = SearchConnection(
                         'http://' + response['hostname'] + '/esg-search/', distrib=True)
                     try:
