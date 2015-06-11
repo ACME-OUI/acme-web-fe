@@ -4,6 +4,9 @@ python:
 install:
     - pip install -r requirements.txt
     - pip install pep8 --use-mirrors
+env:
+	global:
+     	- build_on_travis=true
 before_script:
     - "pep8 --exclude=migrations --config=.pep8 apps"
 script:

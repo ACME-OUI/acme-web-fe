@@ -1,5 +1,33 @@
 import os.path
-from local_settings import *
+import os
+if os.getenv('build_on_travis', None):
+    DATABASES = {
+        'default': {
+            # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(os.path.abspath("."), 'db.sqlite3'),
+            'USER': '',
+            'PASSWORD': '',
+            'HOST': '',
+            'PORT': '',
+        }
+    }
+
+    # Get a key from the google registration page
+    RECAPTCHA_PUBLIC_KEY = ''
+    RECAPTCHA_PRIVATE_KEY = ''
+
+    SECRET_KEY = 'THIS_IS_A_SECRET'
+
+    STATICFILES_DIRS = (
+        'static',
+    )
+
+    VELO_PATH = 'static/java/Velo.jar'
+else:
+    from local_settings import *
+
+
 from django.contrib.messages import constants as message_constants
 
 
