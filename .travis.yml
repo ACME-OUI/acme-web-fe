@@ -7,6 +7,8 @@ install:
 env:
 	global:
      	- build_on_travis=true
+sudo:
+    - false
 before_script:
     - "pep8 --exclude=migrations --config=.pep8 apps"
 script:
