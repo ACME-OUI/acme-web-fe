@@ -12,6 +12,7 @@ def testUserSetup(self):
     self.client = Client()
     self.client.login(username='testuser', password='testpass')
 
+
 class CredentialTest(unittest.TestCase):
 
     def setUp(self):
@@ -55,6 +56,17 @@ class NodeInfoTest(unittest.TestCase):
     def tearDown(self):
         User.objects.filter(username='testuser').delete()
 
+    def test_node_info(self):
+
+        node = 'esgdata.gfdl.noaa.gov'
+        response = self.client.post(
+            '/acme/node_info/', content_type='application/json', data=json.dumps({'node': node}))
+
+        # Check that the server responeded with success
+        self.assertEquals(response.status_code, 200)
+
+        # Check that the node info is there
+        self.assertTrue(response.context['ip'] not None)
 
 
 class GridTest(unittest.TestCase):
