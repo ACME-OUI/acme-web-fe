@@ -79,7 +79,8 @@ def expects_json(f):
     Decorator that parses HTTP body and passes it in as a kwarg (json_data=)
     """
     def wrapper(request, *args, **kwargs):
-        if request.META.get("CONTENT_TYPE", None) == "application/json":
+        # Firefox appends "; charset utf8" to content type header, so we'll just do this in a slightly smarter way...
+        if "application/json" in request.META.get("CONTENT_TYPE", ''):
             data = request.body
             try:
                 data = json.loads(data)
