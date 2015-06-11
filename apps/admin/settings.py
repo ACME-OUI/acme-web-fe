@@ -1,5 +1,8 @@
 import os.path
 import os
+from django.contrib.messages import constants as message_constants
+
+# This is for travis to run the tests
 if os.getenv('build_on_travis', None):
     DATABASES = {
         'default': {
@@ -25,10 +28,9 @@ if os.getenv('build_on_travis', None):
 
     VELO_PATH = 'static/java/Velo.jar'
 else:
-    from local_settings import *
+    from local_settings import * # noqa
 
 
-from django.contrib.messages import constants as message_constants
 
 
 # Django settings for admin project.
