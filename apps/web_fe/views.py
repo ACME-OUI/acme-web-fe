@@ -306,6 +306,7 @@ def grid(request):
                 print '6', traceback.print_tb(tb)
                 return HttpResponse(status=500)
 
+    print node_list
     return HttpResponse(render_template(request, "web_fe/grid.html", {'nodes': node_list}))
 
 

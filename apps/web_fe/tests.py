@@ -22,7 +22,7 @@ class CredentialTest(unittest.TestCase):
         credentials['esgf']['password'] = 'testpass'
 
         data = json.dumps(credentials)
-        response = self.client.post('/acme/add_credentials/', data)
+        response = self.client.post('/acme/add_credentials/', content_type='application/json', data=data)
         self.assertEquals(response.status_code, 200)
 
 
@@ -41,5 +41,5 @@ class GridTest(unittest.TestCase):
 
     def test_load_grid(self):
         response = self.client.get('/acme/grid/')
-        print response
+        print response.status_code
         self.assertEquals(response.status_code, 200)
