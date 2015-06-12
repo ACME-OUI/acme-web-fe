@@ -285,6 +285,9 @@ class Issue(models.Model):
             self._api_cache = self.source.get_issue(self)
         return self._api_cache.web_url
 
+    def create_issue(self, json):
+        pass
+
     def subscribe(self, user):
         self.subscribers.add(user)
 
