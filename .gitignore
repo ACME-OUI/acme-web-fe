@@ -37,3 +37,9 @@ selenium_server_log.txt
 /migrations
 
 .coverage
+
+log.html
+output.xmlit
+report.html
+selesnium-screenshot-*.png
+selenium_server_log.txt

@@ -2,6 +2,7 @@ from django.utils import unittest
 from django.test.client import Client
 import json
 from django.contrib.auth.models import User
+from web_fe.views import *
 
 
 def userSetup(self):
@@ -12,8 +13,34 @@ def userSetup(self):
     self.client = Client()
     self.client.login(username='testuser', password='testpass')
 
+class VeloServiceTest(unittest.TestCase):
 
-class CredentialTest(unittest.TestCase):
+    def setUp(self):
+        userSetup(self)
+    def tearDown(self):
+        User.objects.filter(username='testuser').delete()
+
+    def test_get_folder(self):
+
+        # Check first that a valid response returns correctly
+        data = json.dumps({
+            'file': '/User Documents/acmetest/'
+            })
+        response = self.client.post('/acme/get_folder/', content_type='application/json', data=data)
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue(json.loads(data)['file'] in json.loads(response.content))
+
+        # Check that a request for an invalid user fails
+        data = json.dumps({
+            'file': '/User Documents/SOME_OTHER_USER/'
+            })
+        response = self.client.post('/acme/get_folder/', content_type='application/json', data=data)
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue('resource  /User Documents/SOME_OTHER_USER/ does not exist' in json.loads(response.content))
+
+
+
+class ServiceCredentialTest(unittest.TestCase):
 
     def setUp(self):
         userSetup(self)
@@ -189,3 +216,22 @@ class LayoutTest(unittest.TestCase):
 
         self.assertEquals(response.status_code, 500)
         self.assertEquals(len(response.content), 0)
+
+class UserLoginTest(unittest.TestCase):
+
+    def setUp(self):
+        userSetup(self)
+
+    def tearDown(self):
+        User.objects.filter(username='testuser').delete()
+
+    def test_user_login_success(self):
+        user = {
+            'username': 'testuser',
+            'password': 'testpass'
+        }
+        response = self.client.post('/acme/login/', {'username': user['username'], 'password': user['password']})
+
+        self.assertEquals(response.status_code, 302)
+
+    # TODO: make this so it checks the destination
