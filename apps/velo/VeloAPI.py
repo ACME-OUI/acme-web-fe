@@ -6,6 +6,7 @@ Created on Mar 16, 2015
 import jpype
 import time
 from jpype import *
+import os
 jvmPath = jpype.getDefaultJVMPath()
 
 
@@ -19,8 +20,13 @@ class Velo:
 
     def start_jvm(self):
         # include the velo python API jar file here
+        path = os.getcwd()
+        acme = 'acme-web-fe'
+        index = path.find(acme)
+        path = path[:index]
+
         jpype.startJVM(
-            jvmPath, "-Djava.class.path=/Users/baldwin32/projects/acme-web-fe/static/java/VeloAPI.jar")
+            jvmPath, "-Djava.class.path=" + path + "acme-web-fe/static/java/VeloAPI.jar")
         global velo, cms, jobConfig, fileObj, tifConstants, fileServerMap, filesToDownload
         velo = JPackage("velo").mgr.VeloManager
         cms = JPackage("gov").pnnl.velo.model.CmsPath
