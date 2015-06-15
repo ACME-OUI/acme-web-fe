@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Registration xmlns="http://www.esgf.org/registry" timeStamp="1434142156252" version="v0.0.1">
+<Registration xmlns="http://www.esgf.org/registry" timeStamp="1434211741287" version="v0.0.1">
     <Node organization="llnl" namespace="gov.llnl" nodePeerGroup="esgf-prod" supportEmail="harris112@llnl.gov" hostname="aims3.llnl.gov" ip="198.128.245.183" dn="/O=ESGF/OU=ESGF.ORG/CN=aims3.llnl.gov" shortName="bio" longName="esgf bio node" timeStamp="1434141566352" version="v1.8.1" release="Griffin" nodeType="4" adminPeer="pcmdi9.llnl.gov" defaultPeer="pcmdi9.llnl.gov">
         <CA hash="dunno" endpoint="aims3.llnl.gov" dn="dunno"/>
         <GeoLocation lat="37.503799" lon="-121.525299" city="Livermore"/>
@@ -566,6 +566,155 @@ BglghkgBhvhCAQEEBAMCBPAwDQYJKoZIhvcNAQEFBQADgYEAf702JQz2q4xlQypM
 xBO30b78UGXBvN2f4AoyreAxb6S3ahcAQm+emBa+6pFHHTyVJu8O0AZ0njvWTGzW
 IaNCedpqtoYyLGBZAtNwKpDLexPO+ddB3gopI624uMIKChpYf5wg4zg445pis38L
 EmHPjraAKovD6VTqmJpeuo051N0=
+-----END CERTIFICATE-----
+</Cert>
+        </PEMCert>
+    </Node>
+    <Node organization="badc" namespace="uk.ac.ceda" nodePeerGroup="esgf-prod" supportEmail="Stephen.Pascoe@stfc.ac.uk" hostname="esgf-data1.ceda.ac.uk" ip="130.246.142.220" dn="/O=ESGF/OU=ESGF.ORG/CN=esgf-data1.ceda.ac.uk" shortName="BADC_replica_data_node" longName="BADC Replica Data Node" timeStamp="1434193083947" version="v1.7.0-phoenix-release-master" release="phoenix" nodeType="36" adminPeer="pcmdi9.llnl.gov" defaultPeer="pcmdi9.llnl.gov">
+        <CA hash="dunno" endpoint="esgf-data1.ceda.ac.uk" dn="dunno"/>
+        <GeoLocation lat="53.349998" lon="-2.550000" city="Appleton"/>
+        <NodeManager endpoint="https://esgf-data1.ceda.ac.uk/esgf-node-manager/node"/>
+        <AuthorizationService endpoint="https://esgf-data1.ceda.ac.uk/esg-orp/saml/soap/secure/authorizationService.htm"/>
+        <ThreddsService endpoint="http://esgf-data1.ceda.ac.uk/thredds"/>
+        <GridFTPService endpoint="gsiftp://esgf-data1.ceda.ac.uk">
+            <Configuration serviceType="Replication" port="2812"/>
+            <Configuration serviceType="Download" port="2811"/>
+        </GridFTPService>
+        <RelyingPartyService endpoint="https://esgf-data1.ceda.ac.uk/esg-orp/html.htm"/>
+        <PEMCert>
+            <Cert>NOT_AVAILABLE</Cert>
+        </PEMCert>
+    </Node>
+    <Node organization="badc" namespace="uk.ac.ceda" nodePeerGroup="esgf-prod" supportEmail="support@ceda.ac.uk" hostname="esgf-data2.ceda.ac.uk" ip="130.246.142.221" shortName="BADC_datanode_2" longName="BADC datanode esgf-data2" timeStamp="1434191808078" version="v1.7.1-phoenix-release-master" release="Phoenix" nodeType="36" adminPeer="pcmdi9.llnl.gov" defaultPeer="esgf-index1.ceda.ac.uk">
+        <CA hash="dunno" endpoint="esgf-data2.ceda.ac.uk" dn="dunno"/>
+        <GeoLocation lat="53.349998" lon="-2.550000" city="Appleton"/>
+        <NodeManager endpoint="https://esgf-data2.ceda.ac.uk/esgf-node-manager/node"/>
+        <AuthorizationService endpoint="https://esgf-data2.ceda.ac.uk/esg-orp/saml/soap/secure/authorizationService.htm"/>
+        <ThreddsService endpoint="http://esgf-data2.ceda.ac.uk/thredds"/>
+        <GridFTPService endpoint="gsiftp://esgf-data2.ceda.ac.uk">
+            <Configuration serviceType="Replication" port="2812"/>
+            <Configuration serviceType="Download" port="2811"/>
+        </GridFTPService>
+        <RelyingPartyService endpoint="https://esgf-data2.ceda.ac.uk/esg-orp/html.htm"/>
+        <PEMCert>
+            <Cert>NOT_AVAILABLE</Cert>
+        </PEMCert>
+    </Node>
+    <Node organization="badc" namespace="uk.ac.ceda" nodePeerGroup="esgf-prod" supportEmail="Stephen.Pascoe@stfc.ac.uk" hostname="esgf-index1.ceda.ac.uk" ip="130.246.142.222" dn="/O=Grid/OU=GlobusTest/OU=simpleCA-esgf-index1.ceda.ac.uk/CN=host/esgf-index1.ceda.ac.uk" shortName="BADC_P2P_INDEX" longName="BADC ESGF Index Node" timeStamp="1434191920821" version="v1.5.0-brower_park-release-3-g9a0c6de-master" release="brower_park" nodeType="60" adminPeer="pcmdi9.llnl.gov" defaultPeer="pcmdi9.llnl.gov">
+        <CA hash="dunno" endpoint="esgf-index1.ceda.ac.uk" dn="dunno"/>
+        <GeoLocation lat="53.349998" lon="-2.550000" city="Appleton"/>
+        <NodeManager endpoint="https://esgf-index1.ceda.ac.uk/esgf-node-manager/node"/>
+        <OpenIDProvider endpoint="https://esgf-index1.ceda.ac.uk/esgf-idp/idp/openidServer.htm"/>
+        <FrontEnd endpoint="http://esgf-index1.ceda.ac.uk/esgf-web-fe/"/>
+        <IndexService port="8983" endpoint="http://esgf-index1.ceda.ac.uk/esg-search/search"/>
+        <AttributeService endpoint="https://esgf-index1.ceda.ac.uk/esgf-idp/saml/soap/secure/attributeService.htm">
+            <Group name="CNRM-CERFACS" description="CNRM-CERFACS"/>
+            <Group name="WACCM" description="WACCM (Whole Atmosphere Community Climate Model) users"/>
+            <Group name="CLOUD-CRYO" description="Polar Simulations"/>
+            <Group name="wheel" description="Administrator Group"/>
+            <Group name="ichec" description="ICHEC publishers"/>
+            <Group name="IAP-LASG" description="Institute of Atmospheric Physics"/>
+            <Group name="PCM" description="PCM (Parallel Climate Model) users"/>
+            <Group name="PCMDI" description="PCMDI publishers"/>
+            <Group name="CCCMA" description="CCCMA group: Please do not apply for membership in this group. Data will be made available to CMIP5 users in the near future."/>
+            <Group name="CCSM" description="CCSM (Community Climate System Model) users"/>
+            <Group name="CSSEF-Group" description="User for the CSSEF project"/>
+            <Group name="Test" description="Test group"/>
+            <Group name="BCCR" description=""/>
+            <Group name="badc_admin" description="Local publishing role for BADC"/>
+            <Group name="JPL" description="JPL AIRS"/>
+            <Group name="IPSL" description="IPSL"/>
+            <Group name="SPECS" description="Users of SPECS data"/>
+            <Group name="CloudCryoGroup" description="Cloud-Cryo Group"/>
+            <Group name="IHOPE" description="IHOPE users"/>
+            <Group name="PNNL" description="Pacific Northwest National Lab"/>
+            <Group name="BDM" description="Bulk Data Movement"/>
+            <Group name="DIAS" description="Data Integration and Analysis System"/>
+            <Group name="LUCID" description="LUCID-CMIP5 group"/>
+            <Group name="Dynamical Core" description="DyCore Workshop users"/>
+            <Group name="GFDL" description="GFDL Publishers"/>
+            <Group name="CMIP5 Commercial" description="Users of CMIP5 data possibly for commercial purposes"/>
+            <Group name="NARCCAP" description="NARCCAP (North American Regional Climate Change Assessment Program) users"/>
+            <Group name="CES" description="CES (Climate End Station) users"/>
+            <Group name="CMIP5 Research" description="Users of CMIP5 data for non-commercial research purposes only"/>
+            <Group name="NCL" description="NCL (NCAR Command Language) users"/>
+            <Group name="PyNIO" description="PyNIO users"/>
+            <Group name="NCDC" description="National Climatic Data Center"/>
+            <Group name="PyNGL" description="PyNGL (Python NCAR Graphic Language) users"/>
+            <Group name="BCC" description="Beijing Climate Center"/>
+            <Group name="NCC" description="Norwegian Climate Centre"/>
+            <Group name="CMCC" description="CMCC"/>
+            <Group name="ESMF" description="ESMF (Earth System Modeling Framework) users"/>
+            <Group name="NCCS" description="NASA Center for Climate Simulation: Please do not apply for membership in this group. Data will be made available to CMIP5 users in the near future."/>
+        </AttributeService>
+        <AuthorizationService endpoint="https://esgf-index1.ceda.ac.uk/esg-orp/saml/soap/secure/authorizationService.htm"/>
+        <RegistrationService endpoint="https://esgf-index1.ceda.ac.uk/esgf-idp/secure/registrationService.htm"/>
+        <ThreddsService endpoint="http://esgf-index1.ceda.ac.uk/thredds"/>
+        <GridFTPService endpoint="gsiftp://esgf-index1.ceda.ac.uk">
+            <Configuration serviceType="Replication" port="2812"/>
+            <Configuration serviceType="Download" port="2811"/>
+        </GridFTPService>
+        <Metrics>
+            <DownloadedData count="0" size="0" users="0"/>
+            <RegisteredUsers count="73"/>
+        </Metrics>
+        <RSSFeeds>
+            <RSSFeed url="http://esgf-index1.ceda.ac.uk/esg-search/feed/node.rss" title="BADC_P2P_INDEX RSS"/>
+        </RSSFeeds>
+        <MyProxyService endpoint="pcmdi9.llnl.gov"/>
+        <PublishingService endpoint="https://esgf-index1.ceda.ac.uk/esg-search/remote/secure/client-cert/hessian/publishingService"/>
+        <RelyingPartyService endpoint="https://esgf-index1.ceda.ac.uk/esg-orp/html.htm"/>
+        <PEMCert>
+            <Cert>Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 1 (0x1)
+        Signature Algorithm: sha1WithRSAEncryption
+        Issuer: O=Grid, OU=GlobusTest, OU=simpleCA-esgf-index1.ceda.ac.uk, CN=Globus Simple CA
+        Validity
+            Not Before: Jun 20 09:44:27 2012 GMT
+            Not After : Jun 20 09:44:27 2013 GMT
+        Subject: O=Grid, OU=GlobusTest, OU=simpleCA-esgf-index1.ceda.ac.uk, CN=host/esgf-index1.ceda.ac.uk
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (1024 bit)
+                Modulus (1024 bit):
+                    00:ba:b9:29:f0:3d:3c:05:78:a0:81:df:76:07:e2:
+                    30:b7:7d:e9:d1:f4:f5:8f:4c:0b:b1:66:92:9a:39:
+                    9b:8b:f2:ae:f5:c6:3a:78:9b:a4:34:a9:4a:fe:7e:
+                    06:b1:3c:de:ba:a2:b4:d7:81:cf:4b:37:29:0d:bd:
+                    23:03:12:fe:34:c1:7a:b0:41:09:b9:ed:98:1c:bf:
+                    76:d7:b0:38:42:55:c4:ef:af:34:06:82:6d:b9:41:
+                    dd:2e:5a:6c:c4:3c:20:e5:4b:50:41:52:0a:9e:89:
+                    ab:be:a2:92:50:83:89:a1:19:98:ff:3e:43:b2:67:
+                    71:fd:2e:db:3d:41:dc:17:9b
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            Netscape Cert Type: 
+                SSL Client, SSL Server, S/MIME, Object Signing
+    Signature Algorithm: sha1WithRSAEncryption
+        66:c4:3b:65:95:34:2c:82:c7:72:4f:df:00:5a:59:c6:f3:a6:
+        94:b0:36:40:ae:26:3c:c4:9e:05:63:f7:45:d3:12:c9:e5:51:
+        33:90:98:8f:bf:33:9b:0c:93:66:28:b3:7c:d3:50:d4:b8:92:
+        41:da:d3:f4:e2:f8:f7:1a:86:07:f1:cb:09:70:75:d9:2a:a7:
+        57:9d:bd:3d:a8:b3:e7:01:11:ca:09:0c:84:51:fc:58:93:48:
+        cf:8e:42:5d:d3:a0:32:c1:ae:52:80:fd:f5:e3:9e:1f:42:60:
+        40:86:3f:bf:8d:6b:4b:7d:59:84:0a:fb:5f:b4:9a:6c:e7:66:
+        97:ef
+-----BEGIN CERTIFICATE-----
+MIICaDCCAdGgAwIBAgIBATANBgkqhkiG9w0BAQUFADBpMQ0wCwYDVQQKEwRHcmlk
+MRMwEQYDVQQLEwpHbG9idXNUZXN0MSgwJgYDVQQLEx9zaW1wbGVDQS1lc2dmLWlu
+ZGV4MS5jZWRhLmFjLnVrMRkwFwYDVQQDExBHbG9idXMgU2ltcGxlIENBMB4XDTEy
+MDYyMDA5NDQyN1oXDTEzMDYyMDA5NDQyN1owdDENMAsGA1UEChMER3JpZDETMBEG
+A1UECxMKR2xvYnVzVGVzdDEoMCYGA1UECxMfc2ltcGxlQ0EtZXNnZi1pbmRleDEu
+Y2VkYS5hYy51azEkMCIGA1UEAxMbaG9zdC9lc2dmLWluZGV4MS5jZWRhLmFjLnVr
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC6uSnwPTwFeKCB33YH4jC3fenR
+9PWPTAuxZpKaOZuL8q71xjp4m6Q0qUr+fgaxPN66orTXgc9LNykNvSMDEv40wXqw
+QQm57Zgcv3bXsDhCVcTvrzQGgm25Qd0uWmzEPCDlS1BBUgqeiau+opJQg4mhGZj/
+PkOyZ3H9Lts9QdwXmwIDAQABoxUwEzARBglghkgBhvhCAQEEBAMCBPAwDQYJKoZI
+hvcNAQEFBQADgYEAZsQ7ZZU0LILHck/fAFpZxvOmlLA2QK4mPMSeBWP3RdMSyeVR
+M5CYj78zmwyTZiizfNNQ1LiSQdrT9OL49xqGB/HLCXB12SqnV529Paiz5wERygkM
+hFH8WJNIz45CXdOgMsGuUoD99eOeH0JgQIY/v41rS31ZhAr7X7SabOdml+8=
 -----END CERTIFICATE-----
 </Cert>
         </PEMCert>

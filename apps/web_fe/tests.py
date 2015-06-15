@@ -13,10 +13,12 @@ def userSetup(self):
     self.client = Client()
     self.client.login(username='testuser', password='testpass')
 
+
 class VeloServiceTest(unittest.TestCase):
 
     def setUp(self):
         userSetup(self)
+
     def tearDown(self):
         User.objects.filter(username='testuser').delete()
 
@@ -25,19 +27,22 @@ class VeloServiceTest(unittest.TestCase):
         # Check first that a valid response returns correctly
         data = json.dumps({
             'file': '/User Documents/acmetest/'
-            })
-        response = self.client.post('/acme/get_folder/', content_type='application/json', data=data)
+        })
+        response = self.client.post(
+            '/acme/get_folder/', content_type='application/json', data=data)
         self.assertEquals(response.status_code, 200)
-        self.assertTrue(json.loads(data)['file'] in json.loads(response.content))
+        self.assertTrue(
+            json.loads(data)['file'] in json.loads(response.content))
 
         # Check that a request for an invalid user fails
         data = json.dumps({
             'file': '/User Documents/SOME_OTHER_USER/'
-            })
-        response = self.client.post('/acme/get_folder/', content_type='application/json', data=data)
+        })
+        response = self.client.post(
+            '/acme/get_folder/', content_type='application/json', data=data)
         self.assertEquals(response.status_code, 200)
-        self.assertTrue('resource  /User Documents/SOME_OTHER_USER/ does not exist' in json.loads(response.content))
-
+        self.assertTrue(
+            'resource  /User Documents/SOME_OTHER_USER/ does not exist' in json.loads(response.content))
 
 
 class ServiceCredentialTest(unittest.TestCase):
@@ -138,7 +143,7 @@ class TestNodeSearch(unittest.TestCase):
 
         self.assertEquals(response.status_code, 200)
         # hits as of 6/11/15
-        self.assertEquals(response_data['institute']['LLNL'], 736)
+        self.assertEquals(response_data['institute']['LLNL'], 612)
 
     def test_node_search(self):
 
@@ -153,7 +158,7 @@ class TestNodeSearch(unittest.TestCase):
 
         self.assertEquals(response.status_code, 200)
         # hits as of 6/11/15
-        self.assertEquals(response_data['hits'], 736)
+        self.assertEquals(response_data['hits'], 612)
 
 
 class GridTest(unittest.TestCase):
@@ -217,6 +222,7 @@ class LayoutTest(unittest.TestCase):
         self.assertEquals(response.status_code, 500)
         self.assertEquals(len(response.content), 0)
 
+
 class UserLoginTest(unittest.TestCase):
 
     def setUp(self):
@@ -230,7 +236,8 @@ class UserLoginTest(unittest.TestCase):
             'username': 'testuser',
             'password': 'testpass'
         }
-        response = self.client.post('/acme/login/', {'username': user['username'], 'password': user['password']})
+        response = self.client.post(
+            '/acme/login/', {'username': user['username'], 'password': user['password']})
 
         self.assertEquals(response.status_code, 302)
 
