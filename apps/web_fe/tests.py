@@ -13,7 +13,7 @@ def userSetup(self):
     self.client = Client()
     self.client.login(username='testuser', password='testpass')
 
-'''
+
 class VeloServiceTest(unittest.TestCase):
 
     def setUp(self):
@@ -43,7 +43,24 @@ class VeloServiceTest(unittest.TestCase):
         self.assertEquals(response.status_code, 200)
         self.assertTrue(
             'resource  /User Documents/SOME_OTHER_USER/ does not exist' in json.loads(response.content))
-'''
+
+    def test_get_valid_file(self):
+
+        data = json.dumps({
+            'file': 'testAPI.py'
+        })
+        response = self.client.post(
+            '/acme/get_file/', content_type='application/json', data=data)
+        self.assertEquals(response.status_code, 200)
+
+    def test_get_bogus_file(self):
+
+        data = json.dumps({
+            'file': 'THIS_FILE_DOES_NOT_EXIST'
+        })
+        response = self.client.post(
+            '/acme/get_file/', content_type='application/json', data=data)
+        self.assertTrue('NO SUCH FILE' in response.content)
 
 
 class ServiceCredentialTest(unittest.TestCase):
@@ -144,7 +161,7 @@ class TestNodeSearch(unittest.TestCase):
 
         self.assertEquals(response.status_code, 200)
         # hits as of 6/11/15
-        self.assertEquals(response_data['institute']['LLNL'], 736)
+        self.assertTrue(response_data['institute']['LLNL'] >= 612)
 
     def test_node_search(self):
 
@@ -158,8 +175,6 @@ class TestNodeSearch(unittest.TestCase):
         response_data = json.loads(response.content)
 
         self.assertEquals(response.status_code, 200)
-        # hits as of 6/11/15
-        self.assertEquals(response_data['hits'], 736)
 
 
 class GridTest(unittest.TestCase):
@@ -222,6 +237,13 @@ class LayoutTest(unittest.TestCase):
 
         self.assertEquals(response.status_code, 500)
         self.assertEquals(len(response.content), 0)
+
+    def test_get_all_layouts(self):
+
+        response = self.client.get('/acme/load_layout/')
+
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue(len(response.content) > 0)
 
 
 class UserLoginTest(unittest.TestCase):

@@ -366,17 +366,20 @@ def load_layout(request):
             print "Unexpected error:", repr(e)
             return HttpResponse(status=500)
     elif request.method == 'GET':
-        all_layouts = TileLayout.objects.filter(user_name=request.user)
-        print all_layouts
-        layouts = []
-        for layout in all_layouts:
-            curlayout = {}
-            curlayout['name'] = layout.layout_name
-            curlayout['default'] = layout.default
-            curlayout['layout'] = json.loads(layout.board_layout)
-            curlayout['mode'] = layout.mode
-            layouts.append(curlayout)
-        return HttpResponse(json.dumps(layouts))
+        try:
+            all_layouts = TileLayout.objects.filter(user_name=request.user)
+            layouts = []
+            for layout in all_layouts:
+                curlayout = {}
+                curlayout['name'] = layout.layout_name
+                curlayout['default'] = layout.default
+                curlayout['layout'] = json.loads(layout.board_layout)
+                curlayout['mode'] = layout.mode
+                layouts.append(curlayout)
+            return HttpResponse(json.dumps(layouts))
+        except Exception as e:
+            print "Unexpected error:", repr(e)
+            return HttpResponse(status=500)
 
 
 @login_required(login_url='login')
@@ -540,12 +543,10 @@ def get_file(request):
     if request.method == 'POST':
         try:
             filename = json.loads(request.body)['file']
-            # site_user = request.user
+            # site_user = Credentials.objects.get(site_user=request.user)
             # uncomment for production
             site_user = 'acmetest'
             remote_file_path = '/User Documents/' + site_user + '/' + filename
-
-            print '     setting up local directory to recieve file'
 
             local_path = os.getcwd() + '/userdata/' + site_user
             path = local_path.split('/')
@@ -559,21 +560,23 @@ def get_file(request):
                     os.makedirs(prefix)
 
             for i in range(remote_folder_index, len(remote_path) - 1):
-                print '     checking if dir exists ', prefix + remote_path[i]
                 if not os.path.isdir(prefix + remote_path[i]):
                     prefix += remote_path[i] + '/'
-                    print '     creating new folder2 ', prefix
                     os.makedirs(prefix)
 
-            print 'fatching ', filename, ' from ', remote_file_path, ' and copying it to local directory ', prefix
+            print 'remote_file_path', remote_file_path
+            print 'prefix', prefix
+            print 'filename', filename
             process = Popen(
                 ['python', './apps/velo/get_file.py', remote_file_path, prefix, filename, site_user, 'acmetest', 'acmetest'], stdout=PIPE)
             (out, err) = process.communicate()
             exit_code = process.wait()
-            out = out.splitlines(True)[1:]
-            print 'sending text file to server \n', out
-
-            return HttpResponse(out, content_type='text/plain')
+            print 'exit code', exit_code
+            if exit_code == -1:
+                return HttpResponse(status=500)
+            else:
+                out = out.splitlines(True)[1:]
+                return HttpResponse(out, content_type='text/plain')
 
         except Exception as e:
             import traceback

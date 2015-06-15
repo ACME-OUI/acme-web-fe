@@ -10,14 +10,12 @@ def get_file(remote_file_path, local_path, filename, site_user, velo_username, p
             velo_api.start_jvm()
         rs = velo_api.init_velo(velo_username, password)
 
-        if velo_api.download_file(remote_file_path, local_path):
+        if velo_api.download_file(remote_file_path, local_path) >= 0:
             content = open(local_path + filename).read()
             print content
-            # c = content.splitlines(True)
-            # for line in c:
-            #     print line
+            return 0
         else:
-            return -1
+            print 'NO SUCH FILE'
     except:
         raise
 
