@@ -6,6 +6,7 @@ Created on Mar 16, 2015
 import jpype
 import time
 from jpype import *
+import os
 jvmPath = jpype.getDefaultJVMPath()
 
 
@@ -19,8 +20,13 @@ class Velo:
 
     def start_jvm(self):
         # include the velo python API jar file here
+        path = os.getcwd()
+        acme = 'acme-web-fe'
+        index = path.find(acme)
+        path = path[:index]
+
         jpype.startJVM(
-            jvmPath, "-Djava.class.path=/home/sterling/projects/acme-web-fe/static/java/VeloAPI.jar")
+            jvmPath, "-Djava.class.path=" + path + "acme-web-fe/static/java/VeloAPI.jar")
         global velo, cms, jobConfig, fileObj, tifConstants, fileServerMap, filesToDownload
         velo = JPackage("velo").mgr.VeloManager
         cms = JPackage("gov").pnnl.velo.model.CmsPath
@@ -91,17 +97,9 @@ class Velo:
             cmsfilepath = cms(filepath)
             filesToDownload.add(cmsfilepath)
             resMgr.bulkDownload(filesToDownload, destFolder)
-            return True
-        except Exception as e:
-            import traceback
-            print '1', e.__doc__
-            print '2', sys.exc_info()
-            print '3', sys.exc_info()[0]
-            print '4', sys.exc_info()[1]
-            print '5', traceback.tb_lineno(sys.exc_info()[2])
-            ex_type, ex, tb = sys.exc_info()
-            print '6', traceback.print_tb(tb)
-            return False
+            return 0
+        except:
+            return -1
 
     # download the job outputs
     def download_job_outputs(self, contextPathName, location):

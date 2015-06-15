@@ -17,7 +17,7 @@ if len(sys.argv) > 1:
 
 def run_tests(test):
     process = Popen(
-        ['pybot', '--outputdir', test,'--variable', 'SERVER:' + server, test], stdout=PIPE)
+        ['pybot', '--outputdir', test, '--variable', 'SERVER:' + server, test], stdout=PIPE)
     (out, err) = process.communicate()
     exit_code = process.wait()
     print out

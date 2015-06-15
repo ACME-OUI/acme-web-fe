@@ -29,9 +29,17 @@ update.py
 *.sublime-workspace
 db
 
-/log.html
-/output.xml
-/report.html
-/selenium-screenshot-1.png
-/selenium_server_log.txt
+log.html
+output.xml
+report.html
+selenium-screenshot-1.png
+selenium_server_log.txt
 /migrations
+
+.coverage
+
+log.html
+output.xmlit
+report.html
+selesnium-screenshot-*.png
+selenium_server_log.txt

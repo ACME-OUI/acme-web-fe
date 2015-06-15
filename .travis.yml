@@ -4,7 +4,13 @@ python:
 install:
     - pip install -r requirements.txt
     - pip install pep8 --use-mirrors
+env:
+    global:
+        - build_on_travis=true
+sudo:
+    - false
 before_script:
     - "pep8 --exclude=migrations --config=.pep8 apps"
 script:
-    - echo "Should do more stuff here"
+    - "./manage.py test apps.web_fe.tests -v 2"
+

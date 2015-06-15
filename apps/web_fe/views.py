@@ -80,24 +80,28 @@ def user_login(request):
 @login_required(login_url='login')
 def add_credentials(request):
     if request.method == 'POST':
+        print request.body
         try:
             data = json.loads(request.body)
-            for s in data:
-                creds = Credential.objects.filter(
-                    service=s, site_user_name=str(request.user))
-                if len(creds) != 0:
-                    for i in creds:
-                        print 'changing credentials for ', request.user
-                        i.password = data[s]['password']
-                        i.service_user_name = data[s]['username']
-                        i.save()
-                else:
-                    print 'Getting new credential for ' + str(request.user)
-                    c = Credential(service_user_name=data[s]['username'], password=data[s][
-                                   'password'], service=s, site_user_name=str(request.user))
-                    c.save()
+            if len(data) != 0:
+                for s in data:
+                    creds = Credential.objects.filter(
+                        service=s, site_user_name=str(request.user))
+                    if len(creds) != 0:
+                        for i in creds:
+                            print 'changing credentials for ', request.user
+                            i.password = data[s]['password']
+                            i.service_user_name = data[s]['username']
+                            i.save()
+                    else:
+                        print 'Getting new credential for ' + str(request.user)
+                        c = Credential(service_user_name=data[s]['username'], password=data[s][
+                                       'password'], service=s, site_user_name=str(request.user))
+                        c.save()
 
-            return HttpResponse(render_template(request, 'web_fe/add_credentials.html', {'added': 'true'}))
+                return HttpResponse(render_template(request, 'web_fe/add_credentials.html', {'added': 'true'}))
+            else:
+                return HttpResponse(render_template(request, 'web_fe/add_credentials.html', {'added': 'false'}))
         except Exception as e:
             print 'Error creating new credentials:', repr(e)
             return HttpResponse(status=500)
@@ -193,7 +197,7 @@ def check_credentials(request):
 def user_logout(request):
     logout(request)
     messages.success(request, 'Log out successful')
-    return HttpResponse(render_template(request, "web_fe/home.html", {}))
+    return HttpResponse(render_template(request, "web_fe/home.html", {'logout': 'success    '}))
 
 
 # Register new user
@@ -350,6 +354,9 @@ def load_layout(request):
         try:
             data = json.loads(request.body)
             layout = TileLayout.objects.filter(layout_name=data['layout_name'])
+            if len(layout) == 0:
+                return HttpResponse(status=500)
+
             j = {}
             for i in layout:
                 j['board_layout'] = json.loads(i.board_layout)
@@ -359,33 +366,40 @@ def load_layout(request):
             print "Unexpected error:", repr(e)
             return HttpResponse(status=500)
     elif request.method == 'GET':
-        all_layouts = TileLayout.objects.filter(user_name=request.user)
-        print all_layouts
-        layouts = []
-        for layout in all_layouts:
-            curlayout = {}
-            curlayout['name'] = layout.layout_name
-            curlayout['default'] = layout.default
-            curlayout['layout'] = json.loads(layout.board_layout)
-            curlayout['mode'] = layout.mode
-            layouts.append(curlayout)
-        return HttpResponse(json.dumps(layouts))
+        try:
+            all_layouts = TileLayout.objects.filter(user_name=request.user)
+            layouts = []
+            for layout in all_layouts:
+                curlayout = {}
+                curlayout['name'] = layout.layout_name
+                curlayout['default'] = layout.default
+                curlayout['layout'] = json.loads(layout.board_layout)
+                curlayout['mode'] = layout.mode
+                layouts.append(curlayout)
+            return HttpResponse(json.dumps(layouts))
+        except Exception as e:
+            print "Unexpected error:", repr(e)
+            return HttpResponse(status=500)
 
 
 @login_required(login_url='login')
 def node_info(request):
     if request.method == 'POST':
-        ''' For demo purposes this is loading a local file '''
         try:
             from xml.etree.ElementTree import parse
             tree = parse('scripts/registration.xml')
             root = tree.getroot()
 
-            name = json.loads(request.body)['node']
+            request_data = json.loads(request.body)
+            if 'node' not in request_data:
+                return HttpResponse(status=500)
+            name = request_data['node']
 
             response = {}
+            found_node = False
             for node in root:
                 if node.attrib['shortName'] == name:
+                    found_node = True
                     if 'organization' in node.attrib:
                         response['org'] = node.attrib['organization']
                     if 'namespace' in node.attrib:
@@ -424,7 +438,7 @@ def node_info(request):
                                         'count']
 
                     from pyesgf.search import SearchConnection
-                    print 'attempting to connect to ' + 'http://' + response['hostname'] + 'esg-search/'
+                    print 'attempting to connect to ' + 'http://' + response['hostname'] + '/esg-search/'
                     conn = SearchConnection(
                         'http://' + response['hostname'] + '/esg-search/', distrib=True)
                     try:
@@ -435,6 +449,8 @@ def node_info(request):
                         response['status'] = 'down'
 
                     return HttpResponse(json.dumps(response))
+            if not found_node:
+                return HttpResponse(status=501)
         except Exception as e:
             import traceback
             print '1', e.__doc__
@@ -459,6 +475,8 @@ def node_search(request):
         print searchString
         if 'node' in searchString:
             if 'test_connection' in searchString:
+                if not searchString['test_connection']:
+                    return HttpResponse(status=500)
                 try:
                     print 'testing connection to', searchString['node']
                     conn = SearchConnection(searchString['node'], distrib=True)
@@ -480,6 +498,7 @@ def node_search(request):
                     searchResponse['hits'] = context.hit_count
                     for i in range(8):
                         searchResponse[str(i)] = rs[i].json
+
                     return HttpResponse(json.dumps(searchResponse))
                 except Exception as e:
                     print "Unexpected error:", repr(e)
@@ -501,7 +520,7 @@ def get_folder(request):
             (out, err) = process.communicate()
             exit_code = process.wait()
             out = out.splitlines(False)
-            out[0] = folder['file']
+            out.insert(0, folder['file'])
 
             return HttpResponse(json.dumps(out))
 
@@ -524,12 +543,10 @@ def get_file(request):
     if request.method == 'POST':
         try:
             filename = json.loads(request.body)['file']
-            # site_user = request.user
+            # site_user = Credentials.objects.get(site_user=request.user)
             # uncomment for production
             site_user = 'acmetest'
             remote_file_path = '/User Documents/' + site_user + '/' + filename
-
-            print '     setting up local directory to recieve file'
 
             local_path = os.getcwd() + '/userdata/' + site_user
             path = local_path.split('/')
@@ -543,21 +560,23 @@ def get_file(request):
                     os.makedirs(prefix)
 
             for i in range(remote_folder_index, len(remote_path) - 1):
-                print '     checking if dir exists ', prefix + remote_path[i]
                 if not os.path.isdir(prefix + remote_path[i]):
                     prefix += remote_path[i] + '/'
-                    print '     creating new folder2 ', prefix
                     os.makedirs(prefix)
 
-            print 'fatching ', filename, ' from ', remote_file_path, ' and copying it to local directory ', prefix
+            print 'remote_file_path', remote_file_path
+            print 'prefix', prefix
+            print 'filename', filename
             process = Popen(
                 ['python', './apps/velo/get_file.py', remote_file_path, prefix, filename, site_user, 'acmetest', 'acmetest'], stdout=PIPE)
             (out, err) = process.communicate()
             exit_code = process.wait()
-            out = out.splitlines(True)[1:]
-            print 'sending text file to server \n', out
-
-            return HttpResponse(out, content_type='text/plain')
+            print 'exit code', exit_code
+            if exit_code == -1:
+                return HttpResponse(status=500)
+            else:
+                out = out.splitlines(True)[1:]
+                return HttpResponse(out, content_type='text/plain')
 
         except Exception as e:
             import traceback
