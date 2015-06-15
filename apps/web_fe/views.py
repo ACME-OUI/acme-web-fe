@@ -199,7 +199,7 @@ def user_logout(request):
     messages.success(request, 'Log out successful')
     return HttpResponse(render_template(request, "web_fe/home.html", {'logout': 'success    '}))
 
-    
+
 # Register new user
 def register(request):
     context = RequestContext(request)
