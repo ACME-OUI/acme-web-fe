@@ -354,19 +354,8 @@ def github_jira_sync(request, json_data=None):
     # Check if issue exists in DB
     try:
         i_model = Issue.objects.get(url=issue["url"])
+        i_model.update(issue)
     except Issue.DoesNotExist:
-        root_issue = Issue()
-        i_model = root_issue
-        while source is not None:
-            i_model.source = source
-            i_model.url = issue["url"]
-            i_model.create_issue(issue)
-            if i_model != root_issue:
-                i_model.matched_issue = root_issue
-            i_model.save()
-            source = source.linked
+        i_model = source.create_issue(issue)
 
-
-
-
-    
+    return HttpResponse("")
