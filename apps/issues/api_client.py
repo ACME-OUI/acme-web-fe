@@ -49,6 +49,9 @@ class APIClient(object):
             self.authenticate()
         return self._client
 
+    def update(self, model, issue):
+        raise NotImplementedError("update not implemented for %s" % type(self))
+
     def authenticate(self):
         raise NotImplementedError("authenticate not implemented for %s" % type(self))
 
@@ -193,6 +196,11 @@ class JIRAClient(APIClient):
         fields["labels"] = [category.name]
         i = self.client.create_issue(fields=fields)
         return DictBacked(url=i.self, api=i)
+
+    def update(self, model, issue):
+        i = self.get_issue(model)
+        i = i.api
+        i.api.update(summary=issue.title, description=issue.text, labels=issue.labels)
 
     def get_issue(self, issue):
         issue_id = urlparse.urlparse(issue.url).path.split("/")[-1]

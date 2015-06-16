@@ -325,24 +325,24 @@ def valid_webhook(request):
     secret = settings.GITHUB_WEBHOOK_SECRET
 
     if secret is None:
-	return "No secret"
+        return "No secret"
 
     h = hmac.new(secret, request.body, digestmod=sha1)
     d = h.hexdigest()
     digest = request.META.get("HTTP_X_HUB_SIGNATURE", None)
 
     if digest is None:
-	return "%s" % request.META
-	return "No digest found"
+        return "No digest found"
 
     if not hmac.compare_digest(d, digest[5:]):
-	return "Hashed: %s\nDigest: %s" % (d, digest)
+        return "Hashed: %s\nDigest: %s" % (d, digest)
 
     if request.META.get("HTTP_X_GITHUB_EVENT", None) != "issues":
-	return "Issue type wrong"
+        return "Issue type wrong"
 
     if not request.META.get("HTTP_USER_AGENT").startswith("GitHub-Hookshot/"):
-	return "User-Agent wrong"
+        return "User-Agent wrong"
+
     return True
 
 
@@ -352,7 +352,7 @@ def valid_webhook(request):
 def github_jira_sync(request, json_data=None):
 
     if valid_webhook(request) is not True:
-	return HttpResponse(valid_webhook(request))
+        return HttpResponse(valid_webhook(request))
 
     issue = json_data["issue"]
     repo = json_data["repository"]
@@ -367,7 +367,7 @@ def github_jira_sync(request, json_data=None):
     # Check if issue exists in DB
     try:
         i_model = Issue.objects.get(url=issue["url"])
-        #i_model.update(issue)
+        i_model.update(issue)
     except Issue.DoesNotExist:
         i_model = source.create_issue(issue)
 
