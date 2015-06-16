@@ -17,6 +17,8 @@ from models import (
 )
 from django.core.exceptions import PermissionDenied
 import json
+import hmac
+from django.conf import settings
 
 
 # Convenience functions / decorators
@@ -315,3 +317,46 @@ def create_question(request, json_data=None):
     response["question"] = q.question,
     response["html"] = render_question_tree(q)
     return HttpResponse(json.dumps(response))
+
+
+def valid_webhook(request):
+    secret = settings.get("GITHUB_WEBHOOK_SECRET", None)
+
+    if secret is None:
+        return False
+
+    h = hmac.new(secret, request.body)
+    if not hmac.compare_digest(h.digest(), request.META.get("X-Hub-Signature", '')):
+        return False
+
+    if request.META.get("X-Github-Event", None) != "issues":
+        return False
+
+    return request.META.get("User-Agent").startswith("GitHub-Hookshot/")
+
+
+# Webhook for issue creation on github
+@post_only
+@expects_json
+def github_jira_sync(request, json_data=None):
+    if not valid_webhook(request):
+        return HttpResponse("")
+
+    issue = json_data["issue"]
+    repo = json_data["repository"]
+
+    # Check if the repo is an "IssueSource"
+    try:
+        source = IssueSource.objects.get(url=repo["url"])
+    except IssueSource.DoesNotExist:
+        # We don't need to do anything
+        return HttpResponse("")
+
+    # Check if issue exists in DB
+    try:
+        i_model = Issue.objects.get(url=issue["url"])
+        i_model.update(issue)
+    except Issue.DoesNotExist:
+        i_model = source.create_issue(issue)
+
+    return HttpResponse("")
