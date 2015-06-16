@@ -168,7 +168,7 @@ class JIRAClient(APIClient):
         for issue in issues:
             for label in issue.fields.labels:
                 if label not in l_names:
-                    labels.append(DictBacked(api=label, source=self, name=label.name))
+                    labels.append(DictBacked(api={}, source=self, name=label))
                     l_names.add(label)
         return labels
 
