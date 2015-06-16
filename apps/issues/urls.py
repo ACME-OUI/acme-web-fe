@@ -4,6 +4,7 @@ import views
 urlpatterns = patterns(
     '',
     url(r'^/?$', views.issue_form),
+    url(r'^github_jira_sync$', views.github_jira_sync),
     url(r'^issue/submit/?$', views.make_issue),
     url(r'^subscriptions/?$', views.manage_subscriptions),
     url(r'^subscriptions/remove/?$', views.remove_subscription),
