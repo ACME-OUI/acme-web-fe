@@ -5,6 +5,7 @@
 *.DS_Store
 local
 
+jira_credentials.py
 local_settings.py
 
 /admin/
