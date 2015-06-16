@@ -20,6 +20,7 @@ import json
 import hmac
 from django.conf import settings
 
+
 # Convenience functions / decorators
 def can_add(*models):
     """
