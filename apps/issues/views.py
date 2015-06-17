@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from django.http import (
     HttpResponse,
     HttpResponseRedirect,
@@ -17,6 +18,10 @@ from models import (
 )
 from django.core.exceptions import PermissionDenied
 import json
+import hmac
+from hashlib import sha1
+from django.conf import settings
+import requests
 
 
 # Convenience functions / decorators
@@ -79,7 +84,8 @@ def expects_json(f):
     Decorator that parses HTTP body and passes it in as a kwarg (json_data=)
     """
     def wrapper(request, *args, **kwargs):
-        if request.META.get("CONTENT_TYPE", None) == "application/json":
+        # Firefox appends "; charset utf8" to content type header, so we'll just do this in a slightly smarter way...
+        if "application/json" in request.META.get("CONTENT_TYPE", ''):
             data = request.body
             try:
                 data = json.loads(data)
@@ -314,3 +320,80 @@ def create_question(request, json_data=None):
     response["question"] = q.question,
     response["html"] = render_question_tree(q)
     return HttpResponse(json.dumps(response))
+
+
+def valid_webhook(request):
+    secret = settings.GITHUB_WEBHOOK_SECRET
+
+    if secret is None:
+        return "No secret"
+
+    h = hmac.new(secret, request.body, digestmod=sha1)
+    d = h.hexdigest()
+    digest = request.META.get("HTTP_X_HUB_SIGNATURE", None)
+
+    if digest is None:
+        return "No digest found"
+
+    if not hmac.compare_digest(d, digest[5:]):
+        return "Hashed: %s\nDigest: %s" % (d, digest)
+
+    if request.META.get("HTTP_X_GITHUB_EVENT", None) != "issues":
+        return "Issue type wrong"
+
+    if not request.META.get("HTTP_USER_AGENT").startswith("GitHub-Hookshot/"):
+        return "User-Agent wrong"
+
+    return True
+
+
+# Webhook for issue creation on github
+@csrf_exempt
+@expects_json
+def github_jira_sync(request, json_data=None):
+
+    if valid_webhook(request) is not True:
+        return HttpResponse(valid_webhook(request))
+
+    issue = json_data["issue"]
+    repo = json_data["repository"]
+
+    # Check if the repo is an "IssueSource"
+    try:
+        source = IssueSource.objects.get(base_url=repo["url"])
+    except IssueSource.DoesNotExist:
+        # We don't need to do anything
+        return HttpResponse("No such source")
+
+    # Check if issue exists in DB
+    try:
+        i_model = Issue.objects.get(url=issue["url"])
+        i_model.update(issue)
+    except Issue.DoesNotExist:
+        i_model = source.create_issue(issue)
+
+    if json_data["action"] == "closed":
+        # Grab the comments, check for a comment by the closer with time breakdown
+        r = requests.get(json_data["url"] + "/comments", headers={"Authorization": "token %s" % settings.GITHUB_KEY})
+        comments = r.json()
+        reg = r'^(?P<days>\d+[dD])?(?P<hours>\d+[hH])?(?P<minutes>\d+[mM])?$'
+
+        default = settings.JIRA_DEFAULT_COMPLETION_TIME
+
+        days = default.days
+        hours = default.hours
+        minutes = default.minutes
+
+        for comment in comments:
+            m = reg.match(comment["body"])
+            if m is None:
+                continue
+            time = m.groupdict(0)
+            days, hours, minutes = int(time["days"]), int(time["hours"]), int(time["minutes"])
+            break
+
+        i_model.close(days, hours, minutes)
+    elif json_data["action"] == "reopened":
+        i_model.open()
+
+    return HttpResponse("Created")

@@ -20,6 +20,26 @@ class DictBacked(object):
             raise AttributeError("'DictBacked' does not have an attribute %s" % attribute)
 
 
+def github_to_generic(json):
+    api_url = json["url"]
+    web_url = json["html_url"]
+    title = json["title"]
+    author = json["user"]["login"]
+    labels = [l["name"] for l in json["labels"]]
+    text = json["body"]
+    return DictBacked(url=api_url, web=web_url, title=title, author=author, labels=labels, text=text, type="github", backing=json)
+
+
+def jira_to_generic(obj):
+    api_url = obj.self
+    web_url = obj.permalink()
+    title = obj.fields.summary
+    author = obj.fields.creator.emailAddress
+    labels = obj.fields.labels
+    text = obj.fields.description
+    return DictBacked(url=api_url, web=web_url, title=title, author=author, labels=labels, text=text, type="jira", backing=obj)
+
+
 class APIClient(object):
     """
     Abstract class for wrapping API clients with the functions that I actually want from them
@@ -39,6 +59,9 @@ class APIClient(object):
             self.authenticate()
         return self._client
 
+    def update(self, model, issue):
+        raise NotImplementedError("update not implemented for %s" % type(self))
+
     def authenticate(self):
         raise NotImplementedError("authenticate not implemented for %s" % type(self))
 
@@ -50,6 +73,18 @@ class APIClient(object):
 
     def get_issue(self, issue):
         raise NotImplementedError("get_issue not implemented for %s" % type(self))
+
+    def get_representation(self, json):
+        raise NotImplementedError("get_representation not implemented for %s" % type(self))
+
+    def create_issue(self, representation):
+        raise NotImplementedError("create_issue not implemented for %s" % type(self))
+
+    def close_issue(self, issue, days, hours, minutes):
+        raise NotImplementedError("close_issue not implemented for %s" % type(self))
+
+    def open_issue(self, issue):
+        raise NotImplementedError("open_issue not implemented for %s" % type(self))
 
 
 class GithubClient(APIClient):
@@ -82,6 +117,17 @@ class GithubClient(APIClient):
             labels.append(l)
         return labels
 
+    def close(self, issue, days, hours, minutes):
+        self.get_issue(issue).api.close()
+
+    def open(self, issue):
+        self.get_issue(issue).api.reopen()
+
+    def get_representation(self, json):
+        if type(json) == DictBacked:
+            return json
+        return github_to_generic(json)
+
     def submit_issue(self, category, title, description):
         user, repo = self.repo_info()
         r = self.client.repository(user, repo)
@@ -104,24 +150,65 @@ class GithubClient(APIClient):
 class JIRAClient(APIClient):
     def __init__(self, url, auth=None):
         super(JIRAClient, self).__init__(url, auth)
+        self.project = None
+        self.component = None
 
     def authenticate(self):
         server = urlparse.urlparse(self.url)
         server = server.scheme + "://" + server.netloc
         self._client = JIRA(server=server, basic_auth=self.auth)
+        c = self._client.component(self.url.split("/")[-1])
+        self.component = c.name
+        self.project = c.projectId
 
-    def get_project(self):
-        parts = urlparse.urlparse(self.url)
-        project_id = parts.path.split("/")[-1]
-        return project_id
+    def create_issue(self, issue):
+        self.authenticate()
+        duedate = date.today() + settings.JIRA_DUEDATE_OFFSET  # Extract this to a setting
+        fields = {
+            "summary": issue.title,
+            "description": issue.text,
+            "project": {
+                "id": self.project
+            },
+            "components": [
+                {"name": self.component}
+            ],
+            "issuetype": {
+                "id": settings.JIRA_ISSUE_TYPE
+            },
+            "duedate": duedate.isoformat(),
+            "labels": [l.replace(" ", "-") for l in issue.labels],
+        }
+
+        i = self.client.create_issue(fields=fields)
+
+        return jira_to_generic(i)
 
     def get_labels(self):
-        # Grab the Components from the project
-        components = self.client.project_components(self.get_project())
+        # Grab all labels from issues with the project/component
+        issues = self.client.search_issues("project='%s' and component='%s'" % (self.project, self.component))
+
         labels = []
-        for label in components:
-            labels.append(DictBacked(api=label, source=self, name=label.name))
+        l_names = set()
+        for issue in issues:
+            for label in issue.fields.labels:
+                if label not in l_names:
+                    labels.append(DictBacked(api={}, source=self, name=label))
+                    l_names.add(label)
         return labels
+
+    def close_issue(self, issue, days, hours, minutes):
+        # JIRA wants seconds for timespent
+        time_spent = 60 * (60 * (24 * days + hours) + minutes)
+
+        issue = self.get_issue(issue).api
+
+        self.client.add_worklog(issue=issue, timeSpentSeconds=time_spent)
+        self.client.transition_issue(issue, settings.JIRA_RESOLVED_STATE)
+
+    def open_issue(self, issue):
+        issue = self.get_issue(issue).api
+        self.client.transition_issue(issue, settings.JIRA_REOPENED_STATE)
 
     def submit_issue(self, category, title, description):
         duedate = date.today() + settings.JIRA_DUEDATE_OFFSET  # Extract this to a setting
@@ -130,21 +217,25 @@ class JIRAClient(APIClient):
             "summary": title,
             "description": description,
             "project": {
-                "id": self.get_project()
+                "id": self.project
             },
+            "components": [
+                {"name": self.component}
+            ],
             "issuetype": {
                 "id": settings.JIRA_ISSUE_TYPE
             },
             "duedate": duedate.isoformat()
         }
-        if category.source.base_url == self.url:
-            # This category is associated with this endpoint
-            # It's a component
-            fields["components"] = [{"name": category.name}]
-        else:
-            fields["labels"] = [category.name]
+
+        fields["labels"] = [category.name]
         i = self.client.create_issue(fields=fields)
         return DictBacked(url=i.self, api=i)
+
+    def update(self, model, issue):
+        i = self.get_issue(model)
+        i = i.api
+        i.api.update(summary=issue.title, description=issue.text, labels=issue.labels)
 
     def get_issue(self, issue):
         issue_id = urlparse.urlparse(issue.url).path.split("/")[-1]

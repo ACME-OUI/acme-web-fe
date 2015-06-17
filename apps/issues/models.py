@@ -88,6 +88,32 @@ class IssueSource(models.Model):
 
         return local_tracker
 
+    def create_issue(self, i, parent=None):
+        issue = Issue()
+
+        if parent is not None:
+            # Parent doesn't require a client issue to be created; it's the source of the JSON
+            i_repr = self.client.create_issue(i)
+        else:
+            i_repr = self.client.get_representation(i)
+
+        issue.url = i_repr.url
+        issue.source = self
+
+        if parent is not None:
+            issue.matched_issue = parent
+
+        issue.save()
+
+        issue.categories = self.issuecategory_set.filter(name__in=i_repr.labels)
+
+        issue.save()
+
+        if self.linked is not None:
+            self.linked.create_issue(i_repr, parent=issue)
+
+        return issue
+
     def get_issue(self, issue):
         return self.client.get_issue(issue)
 
@@ -272,6 +298,29 @@ class Issue(models.Model):
     def __init__(self, *args, **kwargs):
         super(Issue, self).__init__(*args, **kwargs)
         self._api_cache = None
+
+    def update(self, json):
+        i = self.source.client.get_representation(json)
+
+        self.source.client.update(self, i)
+
+        for issue in self.linked_issues():
+            issue.update(i)
+
+    def linked_issues(self):
+        return Issue.objects.filter(matched_issue=self)
+
+    def close(self, days, hours, minutes):
+        self.source.client.close_issue(self, days, hours, minutes)
+
+        for issue in self.linked_issues():
+            issue.close()
+
+    def open(self):
+        self.source.client.open_issue(self)
+
+        for issue in self.linked_issues():
+            issue.open()
 
     @property
     def name(self):
