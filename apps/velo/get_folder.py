@@ -2,14 +2,14 @@ import VeloAPI
 import sys
 
 
-def get_folder(folder):
+def get_folder(folder, username, password):
     velo_api = VeloAPI.Velo()
     if not velo_api.isJVMStarted():
         velo_api.start_jvm()
 
-    rm = velo_api.init_velo('acmetest', 'acmetest')
+    rm = velo_api.init_velo(username, password)
     response = velo_api.get_resources(folder)
 
     return response
 
-get_folder(sys.argv[1])
+get_folder(sys.argv[1], sys.argv[2], sys.argv[3])

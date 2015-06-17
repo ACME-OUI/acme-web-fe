@@ -299,28 +299,30 @@ class Issue(models.Model):
         super(Issue, self).__init__(*args, **kwargs)
         self._api_cache = None
 
-    def update(self, json):
+    def update_linked(self, json):
         i = self.source.client.get_representation(json)
-
-        self.source.client.update(self, i)
-
         for issue in self.linked_issues():
             issue.update(i)
+
+    def update(self, issue):
+        self.source.client.update(self, issue)
 
     def linked_issues(self):
         return Issue.objects.filter(matched_issue=self)
 
+    def close_linked(self, days, hours, minutes):
+        for issue in self.linked_issues():
+            issue.close(days, hours, minutes)
+
     def close(self, days, hours, minutes):
         self.source.client.close_issue(self, days, hours, minutes)
 
+    def open_linked(self):
         for issue in self.linked_issues():
-            issue.close()
+            issue.open()
 
     def open(self):
         self.source.client.open_issue(self)
-
-        for issue in self.linked_issues():
-            issue.open()
 
     @property
     def name(self):

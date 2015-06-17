@@ -41,6 +41,14 @@ body {
     Velo window
   ============================================================================*/
 
+  #velo-options-bar {
+    height: 35px;
+    width: 100%;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 30px;
+  }
+
   #velo-file-tree {
     float: left;
     width: 25%;
