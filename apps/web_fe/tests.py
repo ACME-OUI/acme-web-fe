@@ -111,7 +111,7 @@ class ServiceCredentialTest(unittest.TestCase):
         self.assertEquals(response.context['added'], 'false')
 
 
-class NodeInfoTest(unittest.TestCase):
+class TestNodeInfo(unittest.TestCase):
 
     def setUp(self):
         userSetup(self)
@@ -166,7 +166,7 @@ class TestNodeSearch(unittest.TestCase):
     def test_node_connection(self):
         request = {
             'node': 'http://pcmdi9.llnl.gov/esg-search/',
-            'test_connection': 'True'
+            'test_connection': 'true'
         }
         try:
             request = json.dumps(request)
