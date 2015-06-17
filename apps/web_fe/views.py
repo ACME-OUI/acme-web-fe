@@ -137,11 +137,8 @@ def check_credentials(request):
                                 os.path.join('apps', 'velo'))
                             sys.path.append(lib_path)
 
-                            '''
-                            For production, replace below with:
                             rm = velo_api.init(c.service_user_name, c.password)
-                            '''
-                            rm = velo_api.init('acmetest', 'acmetest')
+
                             if rm.getRepositoryUrlBase() == 'u\'http://acmetest.ornl.gov:80/alfresco\'':
                                 response[s] = 'success'
                                 velo_api.shutdown_jvm()
@@ -275,39 +272,6 @@ def grid(request):
                 node_location_list.append(child.attrib["city"])
     node_list = zip(
         node_peer_list, node_url_list, node_name_list, node_location_list)
-
-    creds = Credential.objects.filter(site_user_name=request.user)
-    if len(creds) != 0:
-        for c in creds:
-            try:
-                '''
-                if c.service == 'esgf':
-                    import pyesgf
-                    from pyesgf import LogonManager
-                    lm = LogonManager()
-                    lm.logon_with_openid(c.service_user_name, c.password)
-                    if lm.is_logged_on():
-                        print 'esgf log in successful'
-                if c.service == 'velo':
-
-
-                    velo_api = VeloAPI.Velo()
-                    velo_api.start_jvm()
-                    res = velo_api.init_velo('acmetest', 'acmetest')
-
-                    print 'velo log in successful'
-                '''
-                print 'starting a new session'
-            except Exception as e:
-                import traceback
-                print '1', e.__doc__
-                print '2', sys.exc_info()
-                print '3', sys.exc_info()[0]
-                print '4', sys.exc_info()[1]
-                print '5', traceback.tb_lineno(sys.exc_info()[2])
-                ex_type, ex, tb = sys.exc_info()
-                print '6', traceback.print_tb(tb)
-                return HttpResponse(status=500)
 
     return HttpResponse(render_template(request, "web_fe/grid.html", {'nodes': node_list}))
 
@@ -470,12 +434,11 @@ def node_info(request):
 def node_search(request):
     if request.method == 'POST':
         from pyesgf.search import SearchConnection
-        import random
         searchString = json.loads(request.body)
         print searchString
         if 'node' in searchString:
             if 'test_connection' in searchString:
-                if not searchString['test_connection']:
+                if searchString['test_connection'] != 'true':
                     return HttpResponse(status=500)
                 try:
                     print 'testing connection to', searchString['node']
@@ -515,8 +478,10 @@ def get_folder(request):
         folder = json.loads(request.body)
         try:
             print 'getting folder from velo ', folder['file']
+            cred = Credential.objects.get(
+                site_user_name=request.user, service='velo')
             process = Popen(
-                ['python', './apps/velo/get_folder.py', folder['file']], stdout=PIPE)
+                ['python', './apps/velo/get_folder.py', folder['file'], cred.service_user_name, cred.password], stdout=PIPE)
             (out, err) = process.communicate()
             exit_code = process.wait()
             out = out.splitlines(False)
@@ -543,17 +508,18 @@ def get_file(request):
     if request.method == 'POST':
         try:
             filename = json.loads(request.body)['file']
-            # site_user = Credentials.objects.get(site_user=request.user)
-            # uncomment for production
-            site_user = 'acmetest'
-            remote_file_path = '/User Documents/' + site_user + '/' + filename
+            cred = Credential.objects.get(
+                site_user_name=request.user, service='velo')
 
-            local_path = os.getcwd() + '/userdata/' + site_user
+            remote_file_path = '/User Documents/' + \
+                cred.service_user_name + '/' + filename
+            print remote_file_path
+            local_path = os.getcwd() + '/userdata/' + cred.site_user_name
             path = local_path.split('/')
             remote_path = remote_file_path.split('/')
-            remote_folder_index = remote_path.index(site_user)
+            remote_folder_index = remote_path.index(cred.service_user_name)
             prefix = ''
-            for i in range(path.index(site_user)):
+            for i in range(path.index(cred.site_user_name)):
                 prefix += path[i] + '/'
                 if not os.path.isdir(prefix):
                     print '     creating new folder1 ', prefix
@@ -568,7 +534,7 @@ def get_file(request):
             print 'prefix', prefix
             print 'filename', filename
             process = Popen(
-                ['python', './apps/velo/get_file.py', remote_file_path, prefix, filename, site_user, 'acmetest', 'acmetest'], stdout=PIPE)
+                ['python', './apps/velo/get_file.py', remote_file_path, prefix, filename, cred.site_user_name, cred.service_user_name, cred.password], stdout=PIPE)
             (out, err) = process.communicate()
             exit_code = process.wait()
             print 'exit code', exit_code

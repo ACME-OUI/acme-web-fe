@@ -70,6 +70,24 @@ $(document).ready(function() {
 	}
 	boardSetup(maxCols, maxHeight);
 	loadDefaultLayout();
+	var opts = {
+		lines: 17, // The number of lines to draw
+		length: 40, // The length of each line
+		width: 10, // The line thickness
+		radius: 30, // The radius of the inner circle
+		corners: 1, // Corner roundness (0..1)
+		rotate: 0, // The rotation offset
+		direction: 1, // 1: clockwise, -1: counterclockwise
+		color: '#000', // #rgb or #rrggbb or array of colors
+		speed: 1, // Rounds per second
+		trail: 100, // Afterglow percentage
+		shadow: false, // Whether to render a shadow
+		hwaccel: false, // Whether to use hardware acceleration
+		className: 'spinner', // The CSS class to assign to the spinner
+		zIndex: 2e9, // The z-index (defaults to 2000000000)
+		top: '50%', // Top position relative to parent
+		left: '50%' // Left position relative to parent
+	};
 
 	/****************************************
 	 	End setup variables
@@ -183,34 +201,93 @@ $(document).ready(function() {
 
 				case 'velo':
 
-					content = ['<div id="velo-file-tree">',
-								'	<ul class="mtree">',
-								'	</ul>',
-								'</div>',
-								'<div id="velo-text-edit"',
-								'</div>'].join('');
-								
 					if ($('#velo_window').length == 0) {
 
-						// if (check_credentials('velo')) {
-						// 	content = ['<div id="velo-file-tree">',
-						// 		'	<ul class="mtree">',
-						// 		'	</ul>',
-						// 		'</div>',
-						// 		'<div id="velo-text-edit"',
-						// 		'</div>'
-						// 	].join('');
-						// } else {
-						// 	content = ['<form id="velo_login">',
-						// 		'<h2 class="form-signin-heading">Please Sign In</h2>',
-						// 		'<label for="velo_username" class="sr-only">User name:</label>',
-						// 		'<input type="text" id="velo_username" name="velo_username" class="form-control" placeholder="User Name">',
-						// 		'<label for="velo_password" class="sr-only">Password:</label>',
-						// 		'<input type="text" id="velo_username" name="velo_password" class="form-control" placeholder="Password">',
-						// 		'<a onclick="submit-velo-user()"  href="javascript:void(0);"><button class="btn btn-success">Submit</button></a>'
-
-						// 	].join('');
-						// }
+						check_credentials('velo', function(code){
+							if(code == 200){
+								content = [ '<div id="velo-file-tree">',
+											'   <div id="velo-options-bar">',
+											'       <button class="fa fa-floppy-o" id="velo-options-bar-save" title="Save"></button>',
+											'       <button class="fa fa-file-text-o" id="velo-options-bar-save" title="New File"></button>',
+											'       <button class="fa fa-folder-o" id="velo-options-bar-save" title="New Folder"></button>',
+											'       <button class="fa fa-play-circle" id="velo-options-bar-save" title="Start Run"></button>',
+											'   </div>',
+											'	<ul class="mtree">',
+											'	</ul>',
+											'</div>',
+											'<div id="velo-text-edit"',
+											'</div>'].join('');
+											initFileTree();
+											var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + content + header3 + '</li>';
+											add_tile(new_tile, name + '_window', {
+												ignore: 'true'
+											}, function() {
+												$('#search-btn').click(function() {
+													nodeSearch(document.getElementById("node-search-name").value);
+												});
+											});
+									
+							} else {
+								content = [ '<form id="velo_login">',
+											'<h2 class="form-signin-heading">Please Sign In</h2>',
+											'<label for="velo_username" class="sr-only">User name:</label>',
+											'<input type="text" id="velo_username" name="velo_username" class="form-control" placeholder="User Name">',
+											'<label for="velo_password" class="sr-only">Password:</label>',
+											'<input type="text" id="velo_password" name="velo_password" class="form-control" placeholder="Password">',
+											'<a id="submit_velo_user" class="btn btn-success" href="javascript:void(0);">Submit</a>'
+										].join('');
+										var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + content + header3 + '</li>';
+										add_tile(new_tile, name + '_window', {
+											ignore: 'true'
+										}, function() {
+											$('#search-btn').click(function() {
+												nodeSearch(document.getElementById("node-search-name").value);
+											});
+										});
+										$('#submit_velo_user').click(function(){
+											var data = {};
+											var cred = {
+												'username': document.getElementById('velo_username').value,
+												'password': document.getElementById('velo_password').value
+											};
+											data['velo'] = cred;
+											get_data(
+												'add_credentials/',
+												'POST',
+												data,
+												function(){
+													alert('saved velo credentials');
+													$('#velo_window').remove();
+													removeHelper('velo_window');
+													content = [ '<div id="velo-file-tree">',
+																'   <div id="velo-options-bar">',
+																'       <button class="fa fa-floppy-o" id="velo-options-bar-save" title="Save"></button>',
+																'       <button class="fa fa-file-text-o" id="velo-options-bar-save" title="New File"></button>',
+																'       <button class="fa fa-folder-o" id="velo-options-bar-save" title="New Folder"></button>',
+																'       <button class="fa fa-play-circle" id="velo-options-bar-save" title="Start Run"></button>',
+																'   </div>',
+																'	<ul class="mtree">',
+																'	</ul>',
+																'</div>',
+																'<div id="velo-text-edit"',
+																'</div>'].join('');
+													initFileTree();
+													var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + content + header3 + '</li>';
+													add_tile(new_tile, name + '_window', {
+														ignore: 'true'
+													}, function() {
+														$('#search-btn').click(function() {
+															nodeSearch(document.getElementById("node-search-name").value);
+														});
+													});
+												},
+												function(){
+													alert('failed to save credentials');
+												});
+										})
+							}
+						});
+						return;
 					}
 					break;
 
@@ -230,12 +307,6 @@ $(document).ready(function() {
 					});
 				});
 			}
-
-			if (name == 'velo') {
-				initFileTree();
-			}
-
-
 		});
 	});
 
@@ -325,24 +396,7 @@ $(document).ready(function() {
 			} else {
 				color = '#000';
 			}
-			var opts = {
-				lines: 17, // The number of lines to draw
-				length: 40, // The length of each line
-				width: 10, // The line thickness
-				radius: 30, // The radius of the inner circle
-				corners: 1, // Corner roundness (0..1)
-				rotate: 0, // The rotation offset
-				direction: 1, // 1: clockwise, -1: counterclockwise
-				color: color, // #rgb or #rrggbb or array of colors
-				speed: 1, // Rounds per second
-				trail: 100, // Afterglow percentage
-				shadow: false, // Whether to render a shadow
-				hwaccel: false, // Whether to use hardware acceleration
-				className: 'spinner', // The CSS class to assign to the spinner
-				zIndex: 2e9, // The z-index (defaults to 2000000000)
-				top: '50%', // Top position relative to parent
-				left: '50%' // Left position relative to parent
-			};
+			opts.color = color; 
 			var spinner = new Spinner(opts).spin();
 			document.getElementById('velo-text-edit').appendChild(spinner.el);
 			id = id.replace(/_/g, '/');
@@ -379,33 +433,15 @@ $(document).ready(function() {
 			} else {
 				color = '#000';
 			}
-			var opts = {
-				lines: 17, // The number of lines to draw
-				length: 40, // The length of each line
-				width: 10, // The line thickness
-				radius: 30, // The radius of the inner circle
-				corners: 1, // Corner roundness (0..1)
-				rotate: 0, // The rotation offset
-				direction: 1, // 1: clockwise, -1: counterclockwise
-				color: color, // #rgb or #rrggbb or array of colors
-				speed: 1, // Rounds per second
-				trail: 100, // Afterglow percentage
-				shadow: false, // Whether to render a shadow
-				hwaccel: false, // Whether to use hardware acceleration
-				className: 'spinner', // The CSS class to assign to the spinner
-				zIndex: 2e9, // The z-index (defaults to 2000000000)
-				top: '50%', // Top position relative to parent
-				left: '50%' // Left position relative to parent
-			};
+			opts.color = color; 
 			var spinner = new Spinner(opts).spin();
 			document.getElementById('velo_window').appendChild(spinner.el);
 
 			/*
-				This is going to have to change, to /User Documents/CURRENT_USER, but right now there is just the one acmetest user
+				The server adds the CURRENT_USER/velo_credentials to the end of the folder request
 			*/
-
 			request = {
-				'file': '/User Documents/acmetest'
+				'file': '/User Documents/'
 			}
 			if (mode == 'day') {
 				var mtree_style = 'jet';
@@ -665,37 +701,36 @@ $(document).ready(function() {
 	 *
 	 * service_name -> the name of the service to check credentials for
 	 */
-	function check_credentials(service_name) {
-		if (service_name == 'velo') {
-			return true;
-		}
+	function check_credentials(service_name, cb) {
 		var data = {
 			'service': service_name
 		};
 		var exists = false;
+		var done = false;
+		var csrftoken = get_csrf();
 
-		$.when(ajax()).done(function(exists) {
-			return exists
-		})
-
-		function ajax() {
-			return $.ajax({
-				url: 'credential_check_existance/',
-				data: JSON.stringify(data),
-				type: 'POST',
-				dataType: 'json',
-				success: function() {
-					return exists = true;
+		$.ajax({
+			url: 'credential_check_existance/',
+			data: JSON.stringify(data),
+			type: 'POST',
+			dataType: 'json',
+			statusCode: {
+				200: function(response){
+					cb(response.status);
 				},
-				error: function() {
-					return exists = false;
+				500: function(response){
+					cb(response.status);
 				}
-			});
-		}
+			},
+			headers: {
+				"X-CSRFToken": csrftoken
+			}
+		});
 
 		return exists;
 	}
 
+	
 	/* Initializes the connection to the velo api
 	 *
 	 *
@@ -708,24 +743,7 @@ $(document).ready(function() {
 			} else {
 				color = '#000';
 			}
-			var opts = {
-				lines: 17, // The number of lines to draw
-				length: 40, // The length of each line
-				width: 10, // The line thickness
-				radius: 30, // The radius of the inner circle
-				corners: 1, // Corner roundness (0..1)
-				rotate: 0, // The rotation offset
-				direction: 1, // 1: clockwise, -1: counterclockwise
-				color: color, // #rgb or #rrggbb or array of colors
-				speed: 1, // Rounds per second
-				trail: 100, // Afterglow percentage
-				shadow: false, // Whether to render a shadow
-				hwaccel: false, // Whether to use hardware acceleration
-				className: 'spinner', // The CSS class to assign to the spinner
-				zIndex: 2e9, // The z-index (defaults to 2000000000)
-				top: '50%', // Top position relative to parent
-				left: '50%' // Left position relative to parent
-			};
+			opts.color = color; 
 			var spinner = new Spinner(opts).spin();
 			document.getElementById('velo_window').appendChild(spinner.el);
 			var data = {
@@ -754,24 +772,7 @@ $(document).ready(function() {
 			} else {
 				color = '#000';
 			}
-			var opts = {
-				lines: 17, // The number of lines to draw
-				length: 40, // The length of each line
-				width: 10, // The line thickness
-				radius: 30, // The radius of the inner circle
-				corners: 1, // Corner roundness (0..1)
-				rotate: 0, // The rotation offset
-				direction: 1, // 1: clockwise, -1: counterclockwise
-				color: color, // #rgb or #rrggbb or array of colors
-				speed: 1, // Rounds per second
-				trail: 100, // Afterglow percentage
-				shadow: false, // Whether to render a shadow
-				hwaccel: false, // Whether to use hardware acceleration
-				className: 'spinner', // The CSS class to assign to the spinner
-				zIndex: 2e9, // The z-index (defaults to 2000000000)
-				top: '50%', // Top position relative to parent
-				left: '50%' // Left position relative to parent
-			};
+			opts.color = color; 
 			var spinner = new Spinner(opts).spin();
 			document.getElementById('nodeSelect_window').appendChild(spinner.el);
 			var data = {
@@ -830,24 +831,7 @@ $(document).ready(function() {
 				add_tile(new_tile, "nodeSearch_window");
 			}
 			var searchWindow = $('#nodeSearch_window').find('.tile-contents');
-			var opts = {
-				lines: 17, // The number of lines to draw
-				length: 40, // The length of each line
-				width: 10, // The line thickness
-				radius: 30, // The radius of the inner circle
-				corners: 1, // Corner roundness (0..1)
-				rotate: 0, // The rotation offset
-				direction: 1, // 1: clockwise, -1: counterclockwise
-				color: color, // #rgb or #rrggbb or array of colors
-				speed: 1, // Rounds per second
-				trail: 100, // Afterglow percentage
-				shadow: false, // Whether to render a shadow
-				hwaccel: false, // Whether to use hardware acceleration
-				className: 'spinner', // The CSS class to assign to the spinner
-				zIndex: 2e9, // The z-index (defaults to 2000000000)
-				top: '50%', // Top position relative to parent
-				left: '50%' // Left position relative to parent
-			};
+			opts.color = color; 
 			var spinner = new Spinner(opts).spin();
 			document.getElementById('nodeSearch_window').appendChild(spinner.el);
 			var data = {
@@ -910,28 +894,11 @@ $(document).ready(function() {
 			} else {
 				color = '#000';
 			}
-			var opts = {
-				lines: 17, // The number of lines to draw
-				length: 40, // The length of each line
-				width: 10, // The line thickness
-				radius: 30, // The radius of the inner circle
-				corners: 1, // Corner roundness (0..1)
-				rotate: 0, // The rotation offset
-				direction: 1, // 1: clockwise, -1: counterclockwise
-				color: color, // #rgb or #rrggbb or array of colors
-				speed: 1, // Rounds per second
-				trail: 100, // Afterglow percentage
-				shadow: false, // Whether to render a shadow
-				hwaccel: false, // Whether to use hardware acceleration
-				className: 'spinner', // The CSS class to assign to the spinner
-				zIndex: 2e9, // The z-index (defaults to 2000000000)
-				top: '50%', // Top position relative to parent
-				left: '50%' // Left position relative to parent
-			};
+			opts.color = color; 
 			var spinner = new Spinner(opts).spin();
 			document.getElementById('nodeSearch_window').appendChild(spinner.el);
 			searchTerms['node'] = 'http://' + hostname + '/esg-search/';
-			get_data('node_search/', 'POST', searchTerms, function() {
+			get_data('node_search/', 'POST', searchTerms, function(response) {
 				spinner.stop();
 				console.log(JSON.parse(response));
 				response = JSON.parse(response);
