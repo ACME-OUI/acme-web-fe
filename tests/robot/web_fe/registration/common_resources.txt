@@ -34,3 +34,5 @@ Open Browser And Register  [Arguments]  ${browser}
   Click Element  xpath=//*[@id="user_form"]/button
   Page Should Contain  Incorrect, please try again.
 
+  Close Browser
+
