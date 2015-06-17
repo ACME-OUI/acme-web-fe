@@ -512,14 +512,14 @@ def get_file(request):
                 site_user_name=request.user, service='velo')
 
             remote_file_path = '/User Documents/' + \
-                cred.site_user_name + '/' + filename
-
-            local_path = os.getcwd() + '/userdata/' + site_user
+                cred.service_user_name + '/' + filename
+            print remote_file_path
+            local_path = os.getcwd() + '/userdata/' + cred.site_user_name
             path = local_path.split('/')
             remote_path = remote_file_path.split('/')
-            remote_folder_index = remote_path.index(site_user)
+            remote_folder_index = remote_path.index(cred.service_user_name)
             prefix = ''
-            for i in range(path.index(site_user)):
+            for i in range(path.index(cred.site_user_name)):
                 prefix += path[i] + '/'
                 if not os.path.isdir(prefix):
                     print '     creating new folder1 ', prefix
@@ -534,7 +534,7 @@ def get_file(request):
             print 'prefix', prefix
             print 'filename', filename
             process = Popen(
-                ['python', './apps/velo/get_file.py', remote_file_path, prefix, filename, site_user, cred.service_user_name, cred.password], stdout=PIPE)
+                ['python', './apps/velo/get_file.py', remote_file_path, prefix, filename, cred.site_user_name, cred.service_user_name, cred.password], stdout=PIPE)
             (out, err) = process.communicate()
             exit_code = process.wait()
             print 'exit code', exit_code
