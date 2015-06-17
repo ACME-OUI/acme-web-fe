@@ -92,9 +92,8 @@ class IssueSource(models.Model):
         issue = Issue()
 
         if parent is not None:
-            i_repr = i
             # Parent doesn't require a client issue to be created; it's the source of the JSON
-            self.client.create_issue(i_repr)
+            i_repr = self.client.create_issue(i)
         else:
             i_repr = self.client.get_representation(i)
 

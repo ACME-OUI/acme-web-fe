@@ -30,6 +30,16 @@ def github_to_generic(json):
     return DictBacked(url=api_url, web=web_url, title=title, author=author, labels=labels, text=text, type="github", backing=json)
 
 
+def jira_to_generic(obj):
+    api_url = obj.self
+    web_url = obj.permalink()
+    title = obj.fields.summary
+    author = obj.fields.creator.emailAddress
+    labels = obj.fields.labels
+    text = obj.fields.description
+    return DictBacked(url=api_url, web=web_url, title=title, author=author, labels=labels, text=text, type="jira", backing=obj)
+
+
 class APIClient(object):
     """
     Abstract class for wrapping API clients with the functions that I actually want from them
@@ -160,7 +170,7 @@ class JIRAClient(APIClient):
 
         i = self.client.create_issue(fields=fields)
 
-        return DictBacked(name=i.fields.summary, web_url=i.permalink(), api=i)
+        return jira_to_generic(i)
 
     def get_labels(self):
         # Grab all labels from issues with the project/component
