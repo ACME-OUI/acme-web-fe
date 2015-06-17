@@ -22,6 +22,7 @@ import hmac
 from hashlib import sha1
 from django.conf import settings
 import requests
+import re
 
 
 # Convenience functions / decorators
@@ -376,7 +377,7 @@ def github_jira_sync(request, json_data=None):
         # Grab the comments, check for a comment by the closer with time breakdown
         r = requests.get(issue["url"] + "/comments", headers={"Authorization": "token %s" % settings.GITHUB_KEY})
         comments = r.json()
-	import re
+
         reg = re.compile(r'^((?P<days>\d+)[dD])?((?P<hours>\d+)[hH])?((?P<minutes>\d+)[mM])?$')
 
         default = settings.JIRA_DEFAULT_COMPLETION_TIME
