@@ -288,6 +288,7 @@ class UserLoginTest(unittest.TestCase):
 
     # TODO: make this so it checks the destination
 
+
 class TestUserRegistration(unittest.TestCase):
 
     def setUp(self):
