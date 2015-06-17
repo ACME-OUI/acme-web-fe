@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from django.http import (
     HttpResponse,
     HttpResponseRedirect,
@@ -18,6 +19,7 @@ from models import (
 from django.core.exceptions import PermissionDenied
 import json
 import hmac
+from hashlib import sha1
 from django.conf import settings
 
 
@@ -320,37 +322,47 @@ def create_question(request, json_data=None):
 
 
 def valid_webhook(request):
-    secret = settings.get("GITHUB_WEBHOOK_SECRET", None)
+    secret = settings.GITHUB_WEBHOOK_SECRET
 
     if secret is None:
-        return False
+        return "No secret"
 
-    h = hmac.new(secret, request.body)
-    if not hmac.compare_digest(h.digest(), request.META.get("X-Hub-Signature", '')):
-        return False
+    h = hmac.new(secret, request.body, digestmod=sha1)
+    d = h.hexdigest()
+    digest = request.META.get("HTTP_X_HUB_SIGNATURE", None)
 
-    if request.META.get("X-Github-Event", None) != "issues":
-        return False
+    if digest is None:
+        return "No digest found"
 
-    return request.META.get("User-Agent").startswith("GitHub-Hookshot/")
+    if not hmac.compare_digest(d, digest[5:]):
+        return "Hashed: %s\nDigest: %s" % (d, digest)
+
+    if request.META.get("HTTP_X_GITHUB_EVENT", None) != "issues":
+        return "Issue type wrong"
+
+    if not request.META.get("HTTP_USER_AGENT").startswith("GitHub-Hookshot/"):
+        return "User-Agent wrong"
+
+    return True
 
 
 # Webhook for issue creation on github
-@post_only
+@csrf_exempt
 @expects_json
 def github_jira_sync(request, json_data=None):
-    if not valid_webhook(request):
-        return HttpResponse("")
+
+    if valid_webhook(request) is not True:
+        return HttpResponse(valid_webhook(request))
 
     issue = json_data["issue"]
     repo = json_data["repository"]
 
     # Check if the repo is an "IssueSource"
     try:
-        source = IssueSource.objects.get(url=repo["url"])
+        source = IssueSource.objects.get(base_url=repo["url"])
     except IssueSource.DoesNotExist:
         # We don't need to do anything
-        return HttpResponse("")
+        return HttpResponse("No such source")
 
     # Check if issue exists in DB
     try:
@@ -359,4 +371,4 @@ def github_jira_sync(request, json_data=None):
     except Issue.DoesNotExist:
         i_model = source.create_issue(issue)
 
-    return HttpResponse("")
+    return HttpResponse("Created")

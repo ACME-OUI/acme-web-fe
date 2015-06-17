@@ -300,6 +300,17 @@ class Issue(models.Model):
         super(Issue, self).__init__(*args, **kwargs)
         self._api_cache = None
 
+    def update(self, json):
+        i = self.source.client.get_representation(json)
+
+        self.source.client.update(self, i)
+
+        for issue in self.linked_issues():
+            issue.update(i)
+
+    def linked_issues(self):
+        return Issue.objects.filter(matched_issue=self)
+
     @property
     def name(self):
         if self._api_cache is None:
