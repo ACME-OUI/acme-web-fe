@@ -70,6 +70,12 @@ class APIClient(object):
     def create_issue(self, representation):
         raise NotImplementedError("create_issue not implemented for %s" % type(self))
 
+    def close_issue(self, issue, days, hours, minutes):
+        raise NotImplementedError("close_issue not implemented for %s" % type(self))
+
+    def open_issue(self, issue):
+        raise NotImplementedError("open_issue not implemented for %s" % type(self))
+
 
 class GithubClient(APIClient):
     def __init__(self, url, auth=None):
@@ -100,6 +106,12 @@ class GithubClient(APIClient):
             l = DictBacked(name=label.name, api=label, source=self)
             labels.append(l)
         return labels
+
+    def close(self, issue, days, hours, minutes):
+        self.get_issue(issue).api.close()
+
+    def open(self, issue):
+        self.get_issue(issue).api.reopen()
 
     def get_representation(self, json):
         if type(json) == DictBacked:
@@ -174,6 +186,19 @@ class JIRAClient(APIClient):
                     labels.append(DictBacked(api={}, source=self, name=label))
                     l_names.add(label)
         return labels
+
+    def close_issue(self, issue, days, hours, minutes):
+        # JIRA wants seconds for timespent
+        time_spent = 60 * (60 * (24 * days + hours) + minutes)
+
+        issue = self.get_issue(issue).api
+
+        self.client.add_worklog(issue=issue, timeSpentSeconds=time_spent)
+        self.client.transition_issue(issue, settings.JIRA_RESOLVED_STATE)
+
+    def open_issue(self, issue):
+        issue = self.get_issue(issue).api
+        self.client.transition_issue(issue, settings.JIRA_REOPENED_STATE)
 
     def submit_issue(self, category, title, description):
         duedate = date.today() + settings.JIRA_DUEDATE_OFFSET  # Extract this to a setting

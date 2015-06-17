@@ -311,6 +311,18 @@ class Issue(models.Model):
     def linked_issues(self):
         return Issue.objects.filter(matched_issue=self)
 
+    def close(self, days, hours, minutes):
+        self.source.client.close_issue(self, days, hours, minutes)
+
+        for issue in self.linked_issues():
+            issue.close()
+
+    def open(self):
+        self.source.client.open_issue(self)
+
+        for issue in self.linked_issues():
+            issue.open()
+
     @property
     def name(self):
         if self._api_cache is None:
