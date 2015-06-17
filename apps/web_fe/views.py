@@ -470,12 +470,11 @@ def node_info(request):
 def node_search(request):
     if request.method == 'POST':
         from pyesgf.search import SearchConnection
-        import random
         searchString = json.loads(request.body)
         print searchString
         if 'node' in searchString:
             if 'test_connection' in searchString:
-                if not searchString['test_connection']:
+                if searchString['test_connection'] != 'true':
                     return HttpResponse(status=500)
                 try:
                     print 'testing connection to', searchString['node']
