@@ -18,6 +18,14 @@ class VeloServiceTest(unittest.TestCase):
 
     def setUp(self):
         userSetup(self)
+        credentials = {}
+        credentials['velo'] = {}
+        credentials['velo']['username'] = 'acmetest'
+        credentials['velo']['password'] = 'acmetest'
+
+        data = json.dumps(credentials)
+        response = self.client.post(
+            '/acme/add_credentials/', content_type='application/json', data=data)
 
     def tearDown(self):
         User.objects.filter(username='testuser').delete()
@@ -38,11 +46,14 @@ class VeloServiceTest(unittest.TestCase):
         data = json.dumps({
             'file': '/User Documents/SOME_OTHER_USER/'
         })
-        response = self.client.post(
-            '/acme/get_folder/', content_type='application/json', data=data)
-        self.assertEquals(response.status_code, 200)
-        self.assertTrue(
-            'resource  /User Documents/SOME_OTHER_USER/ does not exist' in json.loads(response.content))
+        try:
+            response = self.client.post(
+                '/acme/get_folder/', content_type='application/json', data=data)
+            self.assertEquals(response.status_code, 200)
+            self.assertTrue(
+                'resource  /User Documents/SOME_OTHER_USER/ does not exist' in json.loads(response.content))
+        except:
+            self.assertTrue(False)
 
     def test_get_valid_file(self):
 
@@ -76,8 +87,10 @@ class ServiceCredentialTest(unittest.TestCase):
         credentials['esgf'] = {}
         credentials['esgf']['username'] = 'testuser'
         credentials['esgf']['password'] = 'testpass'
-
-        data = json.dumps(credentials)
+        try:
+            data = json.dumps(credentials)
+        except:
+            self.assertTrue(False)
         response = self.client.post(
             '/acme/add_credentials/', content_type='application/json', data=data)
 
@@ -114,8 +127,10 @@ class NodeInfoTest(unittest.TestCase):
 
         # Check that the server responeded with success
         self.assertEquals(response.status_code, 200)
-
-        content = json.loads(response.content)
+        try:
+            content = json.loads(response.content)
+        except:
+            self.assertTrue(False)
         print content['ip']
         # Check that the node info is there
         # This IP address is hard coded as the value for the ESG data node as
@@ -149,12 +164,15 @@ class TestNodeSearch(unittest.TestCase):
         User.objects.filter(username='testuser').delete()
 
     def test_node_connection(self):
-
         request = {
             'node': 'http://pcmdi9.llnl.gov/esg-search/',
             'test_connection': 'True'
         }
-        request = json.dumps(request)
+        try:
+            request = json.dumps(request)
+        except:
+            self.assertTrue(False)
+
         response = self.client.post(
             '/acme/node_search/', content_type='application/json', data=request)
         response_data = json.loads(response.content)
@@ -172,8 +190,10 @@ class TestNodeSearch(unittest.TestCase):
         request = json.dumps(request)
         response = self.client.post(
             '/acme/node_search/', content_type='application/json', data=request)
-        response_data = json.loads(response.content)
-
+        try:
+            response_data = json.loads(response.content)
+        except:
+            self.assertTrue(False)
         self.assertEquals(response.status_code, 200)
 
 
@@ -209,8 +229,10 @@ class LayoutTest(unittest.TestCase):
                  {"y": 0.5166666666666667, "x": 0.1, "sizex": 0.5,
                      "tileName": "status", "sizey": 0.5},
                  {"y": 0.5166666666666667, "x": 0.6, "sizex": 0.5, "tileName": "science", "sizey": 0.5}]
-
-        tiles = json.dumps(tiles)
+        try:
+            tiles = json.dumps(tiles)
+        except:
+            self.assertTrue(False)
         layout = {
             'name': 'testlayout',
             'layout': tiles,
