@@ -224,7 +224,6 @@ class JIRAClient(APIClient):
 
     def update(self, model, issue):
         i = self.get_issue(model)
-        i = i.api
         i.api.update(summary=issue.title, description=issue.text, labels=issue.labels)
 
     def get_issue(self, issue):

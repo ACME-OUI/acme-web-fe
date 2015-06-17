@@ -368,21 +368,22 @@ def github_jira_sync(request, json_data=None):
     # Check if issue exists in DB
     try:
         i_model = Issue.objects.get(url=issue["url"])
-        i_model.update(issue)
+        i_model.update_linked(issue)
     except Issue.DoesNotExist:
         i_model = source.create_issue(issue)
 
     if json_data["action"] == "closed":
         # Grab the comments, check for a comment by the closer with time breakdown
-        r = requests.get(json_data["url"] + "/comments", headers={"Authorization": "token %s" % settings.GITHUB_KEY})
+        r = requests.get(issue["url"] + "/comments", headers={"Authorization": "token %s" % settings.GITHUB_KEY})
         comments = r.json()
-        reg = r'^(?P<days>\d+[dD])?(?P<hours>\d+[hH])?(?P<minutes>\d+[mM])?$'
+	import re
+        reg = re.compile(r'^((?P<days>\d+)[dD])?((?P<hours>\d+)[hH])?((?P<minutes>\d+)[mM])?$')
 
         default = settings.JIRA_DEFAULT_COMPLETION_TIME
 
         days = default.days
-        hours = default.hours
-        minutes = default.minutes
+        hours = default.seconds / 60 / 60
+        minutes = default.seconds / 60
 
         for comment in comments:
             m = reg.match(comment["body"])
@@ -392,8 +393,8 @@ def github_jira_sync(request, json_data=None):
             days, hours, minutes = int(time["days"]), int(time["hours"]), int(time["minutes"])
             break
 
-        i_model.close(days, hours, minutes)
+        i_model.close_linked(days, hours, minutes)
     elif json_data["action"] == "reopened":
-        i_model.open()
+        i_model.open_linked()
 
     return HttpResponse("Created")
