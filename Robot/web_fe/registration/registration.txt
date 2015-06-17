@@ -7,4 +7,3 @@ Resource        common_resources.txt
 Test The registration page captcha is failing
   Open Browser And Register  ${FIREFOX}
   Open Browser And Register  ${CHROME}
-
