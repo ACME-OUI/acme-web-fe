@@ -103,7 +103,11 @@ def add_credentials(request):
             print 'Error creating new credentials:', repr(e)
             return HttpResponse(status=500)
     else:
-        return HttpResponse(render_template(request, 'web_fe/add_credentials.html', {'added': 'false'}))
+        creds = Credential.objects.filter(site_user_name=str(request.user))
+        stored_credentials = []
+        for s in creds:
+            stored_credentials.append(s.service)
+        return HttpResponse(render_template(request, 'web_fe/add_credentials.html', {'added': 'false', 'stored_credentials': stored_credentials}))
 
 
 @login_required(login_url='login')
