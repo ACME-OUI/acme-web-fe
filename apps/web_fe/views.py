@@ -70,7 +70,6 @@ def user_login(request):
 
         else:
             redirect = ''
-        print 'redirect:' + redirect
         response = HttpResponse(
             render_template(request, "web_fe/login.html", {"next": redirect}))
         return response
@@ -89,12 +88,10 @@ def add_credentials(request):
                         service=s, site_user_name=str(request.user))
                     if len(creds) != 0:
                         for i in creds:
-                            print 'changing credentials for ', request.user
                             i.password = data[s]['password']
                             i.service_user_name = data[s]['username']
                             i.save()
                     else:
-                        print 'Getting new credential for ' + str(request.user)
                         c = Credential(service_user_name=data[s]['username'], password=data[s][
                                        'password'], service=s, site_user_name=str(request.user))
                         c.save()
@@ -205,7 +202,6 @@ def register(request):
         user_form = UserCreationForm(data=request.POST)
         if user_form.is_valid():
             user = user_form.save()
-
             try:
                 group = Group.objects.get(name="Default")
                 user.groups.add(group)
@@ -215,6 +211,12 @@ def register(request):
 
             user.save()
             registered = True
+            user = authenticate(
+                username=request.POST['username'], password=request.POST['password1'])
+            if user:
+                login(request, user)
+                messages.success(
+                    request, 'User: ' + request.POST['username'] + ' successfully created an account and logged in')
         else:
             print user_form.errors
     else:
@@ -278,19 +280,16 @@ def grid(request):
 
 @login_required(login_url='login')
 def save_layout(request):
-    print 'got a save request'
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
 
             if len(TileLayout.objects.filter(layout_name=data['name'])) == 0:
                 if data['default_layout'] == 1:
-                    print 'got a new default'
                     isDefault = TileLayout.objects.filter(
                         user_name=request.user, default=1)
                     if isDefault:
                         for i in isDefault:
-                            print 'found old default named ' + i.layout_name
                             i.default = 0
                             i.save()
 
@@ -402,7 +401,6 @@ def node_info(request):
                                         'count']
 
                     from pyesgf.search import SearchConnection
-                    print 'attempting to connect to ' + 'http://' + response['hostname'] + '/esg-search/'
                     conn = SearchConnection(
                         'http://' + response['hostname'] + '/esg-search/', distrib=True)
                     try:
@@ -435,13 +433,11 @@ def node_search(request):
     if request.method == 'POST':
         from pyesgf.search import SearchConnection
         searchString = json.loads(request.body)
-        print searchString
         if 'node' in searchString:
             if 'test_connection' in searchString:
                 if searchString['test_connection'] != 'true':
                     return HttpResponse(status=500)
                 try:
-                    print 'testing connection to', searchString['node']
                     conn = SearchConnection(searchString['node'], distrib=True)
                     context = conn.new_context()
                     response = {}
@@ -454,7 +450,6 @@ def node_search(request):
                 try:
                     conn = SearchConnection(searchString['node'], distrib=True)
                     del searchString["node"]
-                    print 'Searching:', searchString
                     context = conn.new_context(**searchString)
                     rs = context.search()
                     searchResponse = {}
@@ -477,7 +472,6 @@ def get_folder(request):
     if request.method == 'POST':
         folder = json.loads(request.body)
         try:
-            print 'getting folder from velo ', folder['file']
             cred = Credential.objects.get(
                 site_user_name=request.user, service='velo')
             process = Popen(
@@ -513,7 +507,6 @@ def get_file(request):
 
             remote_file_path = '/User Documents/' + \
                 cred.service_user_name + '/' + filename
-            print remote_file_path
             local_path = os.getcwd() + '/userdata/' + cred.site_user_name
             path = local_path.split('/')
             remote_path = remote_file_path.split('/')
@@ -522,7 +515,6 @@ def get_file(request):
             for i in range(path.index(cred.site_user_name)):
                 prefix += path[i] + '/'
                 if not os.path.isdir(prefix):
-                    print '     creating new folder1 ', prefix
                     os.makedirs(prefix)
 
             for i in range(remote_folder_index, len(remote_path) - 1):
@@ -530,14 +522,10 @@ def get_file(request):
                     prefix += remote_path[i] + '/'
                     os.makedirs(prefix)
 
-            print 'remote_file_path', remote_file_path
-            print 'prefix', prefix
-            print 'filename', filename
             process = Popen(
                 ['python', './apps/velo/get_file.py', remote_file_path, prefix, filename, cred.site_user_name, cred.service_user_name, cred.password], stdout=PIPE)
             (out, err) = process.communicate()
             exit_code = process.wait()
-            print 'exit code', exit_code
             if exit_code == -1:
                 return HttpResponse(status=500)
             else:
@@ -574,7 +562,6 @@ def velo_save_file(request):
             (out, err) = process.communicate()
             exit_code = process.wait()
             out = out.splitlines(True)[1:]
-            print out
             if exit_code == 0:
                 return HttpResponse(status=200)
             else:
@@ -626,7 +613,6 @@ def velo(request):
             if rm.getRepositoryUrlBase() == 'http://acmetest.ornl.gov:80/alfresco':
                 foo = {'0': 'success I guess'}
 
-                print 'success initializing velo connection'
                 velo_api.shutdown_jvm()
                 return HttpResponse(json.dumps(foo))
             else:
