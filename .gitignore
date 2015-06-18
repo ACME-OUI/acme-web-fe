@@ -36,7 +36,7 @@ report.html
 selenium-screenshot-1.png
 selenium_server_log.txt
 /migrations
-
+cover
 .coverage
 
 log.html
