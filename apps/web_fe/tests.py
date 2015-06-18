@@ -285,5 +285,15 @@ class UserLoginTest(unittest.TestCase):
             '/acme/login/', {'username': user['username'], 'password': user['password']})
 
         self.assertEquals(response.status_code, 302)
+        self.assertTrue(response.url.split('/').pop() != 'login')
 
-    # TODO: make this so it checks the destination
+    def test_user_login_failure(self):
+        user = {
+            'username': 'NOT_A_USER',
+            'password': 'NOT_A_PASSWORD'
+        }
+        response = self.client.post(
+            '/acme/login/', {'username': user['username'], 'password': user['password']})
+
+        self.assertEquals(response.status_code, 302)
+        self.assertEquals(response.url.split('/').pop(), 'login')
