@@ -5,13 +5,13 @@ from django.contrib.auth.models import User
 from web_fe.views import *
 
 
-def userSetup(self):
+def userSetup(current_test):
     # First create a new user
-    self.test_user = User.objects.create_user(
+    current_test.test_user = User.objects.create_user(
         'testuser', 'test@test.test', 'testpass')
     # Now login as that user
-    self.client = Client()
-    self.client.login(username='testuser', password='testpass')
+    current_test.client = Client()
+    current_test.client.login(username='testuser', password='testpass')
 
 
 class VeloServiceTest(unittest.TestCase):

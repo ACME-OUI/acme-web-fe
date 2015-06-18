@@ -10,7 +10,7 @@ Library        Selenium2Library  timeout=10  implicit_wait=0.5
 ${SERVER}			localhost:8000
 ${DASHBOARD}		http://${SERVER}/acme/grid/
 ${LOGIN URL}		http://${SERVER}/acme/login?next=/acme/
-${BROWSER}			ff
+${BROWSER}			safari
 ${VALID_USER}		testuser
 ${VALID_PASS}		testpass
 ${DELAY}            1000

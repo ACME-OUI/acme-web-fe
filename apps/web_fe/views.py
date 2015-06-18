@@ -203,9 +203,9 @@ def register(request):
     registered = False
     if request.method == 'POST':
         user_form = UserCreationForm(data=request.POST)
+        print request.POST
         if user_form.is_valid():
             user = user_form.save()
-
             try:
                 group = Group.objects.get(name="Default")
                 user.groups.add(group)
@@ -215,6 +215,12 @@ def register(request):
 
             user.save()
             registered = True
+            user = authenticate(
+                username=request.POST['username'], password=request.POST['password1'])
+            if user:
+                login(request, user)
+                messages.success(
+                    request, 'User: ' + request.POST['username'] + ' successfully created an account and logged in')
         else:
             print user_form.errors
     else:
