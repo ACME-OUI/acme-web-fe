@@ -1,5 +1,6 @@
 from issues.api_client import APIClient, DictBacked
 
+
 class MockClient(APIClient):
     """
     Abstract class for wrapping API clients with the functions that I actually want from them
@@ -28,21 +29,47 @@ class MockClient(APIClient):
 
     def submit_issue(self, category, title, description):
         if self.type == "github":
-            return "https://api.github.com/repo/ACME-OUI/acme-web-fe/issues/86"
-        if self.type == 'jira':
-            return "https://acme-climate.atlassian.net/rest/api/2/issues/WG-111"
+            url = "https://api.github.com/repos/ACME-OUI/acme-web-fe/issues/81"
+        elif self.type == 'jira':
+            url = "https://acme-climate.atlassian.net/rest/api/2/issue/WG-111"
+
+        return DictBacked(url=url, api=None)
 
     def get_issue(self, issue):
-        raise NotImplementedError("get_issue not implemented for %s" % type(self))
+        if self.type == "github":
+            url = "https://github.com/ACME-OUI/acme-web-fe/issues/81"
+            title = "Testing Login"
+        elif self.type == "jira":
+            url = "https://acme-climate.atlassian.net/browse/WG-111"
+            title = "Testing Login"
+
+        return DictBacked(web_url=url, name=title, api=None)
 
     def get_representation(self, json):
-        raise NotImplementedError("get_representation not implemented for %s" % type(self))
+        title = "Testing Login"
+        text = """using [robot](http://robotframework.org) write a [Selenium](http://www.seleniumhq.org) test:
+
+    Valid user login
+    Non-valid user login
+    using [PyUnit](http://pyunit.sourceforge.net) write a unit test for:
+    Registration view [function](https://github.com/ACME-OUI/acme-web-fe/blob/master/apps/web_fe/views.py#L47)"""
+        if self.type == "github":
+            web_url = "https://github.com/ACME-OUI/acme-web-fe/issues/81"
+            api_url = "https://api.github.com/repos/ACME-OUI/acme-web-fe/issues/81"
+            author = "mattben"
+            labels = ["Sprint 2"]
+        elif self.type == "jira":
+            web_url = "https://acme-climate.atlassian.net/browse/WG-111"
+            api_url = "https://acme-climate.atlassian.net/rest/api/2/issue/WG-111"
+            author = "fries2@llnl.gov"
+            labels = ["Sprint-2"]
+        return DictBacked(url=api_url, web=web_url, title=title, author=author, labels=labels, text=text, type=self.type, backing=None)
 
     def create_issue(self, representation):
-        raise NotImplementedError("create_issue not implemented for %s" % type(self))
+        return self.get_representation(None)
 
     def close_issue(self, issue, days, hours, minutes):
-        raise NotImplementedError("close_issue not implemented for %s" % type(self))
+        return
 
     def open_issue(self, issue):
-        raise NotImplementedError("open_issue not implemented for %s" % type(self))
+        return
