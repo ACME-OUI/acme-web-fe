@@ -137,7 +137,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'web_fe',
     'django.contrib.admin',
-    'south',
     'captcha',
     'issues',
     'django_nose'
