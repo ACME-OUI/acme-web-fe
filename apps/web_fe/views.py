@@ -254,13 +254,23 @@ def grid(request):
 
     try:
         r = requests.get(
-            'http://pcmdi9.llnl.gov/esgf-node-manager/registration.xml')
+            'http://pcmdi9.llnl.gov/esgf-node-manager/registration.xml', timeout=0.1)
         f = StringIO(r.content)
         out = open('scripts/registration.xml', 'w')
         out.write(f.read())
         out.close()
     except Exception as e:
-        print repr(e)
+        import traceback
+        if 'requests.exceptions.ConnectTimeout' in str(sys.exc_info()):
+            node_list = []
+            return HttpResponse(render_template(request, "web_fe/grid.html", {'nodes': node_list}))
+        print '1', e.__doc__
+        print '2', sys.exc_info()
+        print '3', sys.exc_info()[0]
+        print '4', sys.exc_info()[1]
+        print '5', traceback.tb_lineno(sys.exc_info()[2])
+        ex_type, ex, tb = sys.exc_info()
+        print '6', traceback.print_tb(tb)
         return HttpResponse(status=404)
     tree = parse('scripts/registration.xml')
 
