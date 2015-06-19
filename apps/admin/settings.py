@@ -147,7 +147,7 @@ INSTALLED_APPS = (
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_ARGS = [
     '--with-coverage',
-    '--cover-package=apps.web_fe',
+    '--cover-package=web_fe',
     '--cover-html'
 ]
 
