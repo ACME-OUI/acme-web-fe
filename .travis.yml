@@ -15,5 +15,5 @@ sudo:
 before_script:
     - "pep8 --exclude=migrations --config=.pep8 apps"
 script:
-    - "./manage.py test apps.web_fe.tests -v 2"
+    - "./manage.py test -v 2 --liveserver=localhost:8000"
 
