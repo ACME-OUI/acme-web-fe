@@ -1,0 +1,30 @@
+*** Settings ***
+
+Documentation  Resources needed by the dashboard test suite.
+Library        Selenium2Library  timeout=10  implicit_wait=0.5
+
+
+
+*** Variables ***
+
+${SERVER}			localhost:8000
+${ISSUES}			http://${SERVER}/acme/issues/
+${LOGIN URL}		http://${SERVER}/acme/login?next=/issues/
+${BROWSER}			ff
+${VALID_USER}		testuser
+${VALID_PASS}		testpass
+${DELAY}            1000
+
+
+*** Keywords ***
+
+Open Browser And Log In
+	[Documentation]  Logs in and goes to the issues
+	Open Browser  ${LOGIN URL}  ${BROWSER}
+	Set Browser Implicit Wait  0.5
+	Maximize Browser Window
+	Title Should Be	 login
+	Input Text  username  testuser
+	Input Text  password  testpass
+	Click Button  Sign In
+	Page Should Contain  successfully loged in

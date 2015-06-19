@@ -30,19 +30,14 @@ update.py
 *.sublime-workspace
 db
 
-log.html
-output.xml
-report.html
-selenium-screenshot-1.png
-selenium_server_log.txt
 /migrations
 
 .coverage
+cover
 
 log.html
-output.xmlit
+output.xml
 report.html
-selesnium-screenshot-*.png
+selenium-screenshot-*.png
 selenium_server_log.txt
-
 userdata

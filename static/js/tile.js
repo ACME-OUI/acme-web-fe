@@ -311,7 +311,7 @@ $(document).ready(function() {
 	});
 
 	//setup the hander to fix the windows after a resize
-	$(window).resize(function() {
+	$(window).resize(function(event) {
 		if (event.target == this) {
 			if (this.resizeTO) clearTimeout(this.resizeTO);
 			this.resizeTO = setTimeout(function() {
