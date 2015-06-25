@@ -574,7 +574,7 @@ def velo_save_file(request):
     if request.method == 'POST':
         try:
             incomming_file = json.loads(request.body)
-            remote_path = incomming_file['remote_path']
+            # remote_path = incomming_file['remote_path']
             filename = incomming_file['filename']
             text = incomming_file['text']
 
@@ -585,10 +585,10 @@ def velo_save_file(request):
                 ['python', './apps/velo/save_file.py', text, filename, cred.site_user_name, cred.service_user_name, cred.password], stdout=PIPE)
             (out, err) = process.communicate()
             exit_code = process.wait()
-            out = out.splitlines(True)[1:]
-            if exit_code == 0:
+            if exit_code >= 0 and 'File saved' in out:
                 return HttpResponse(status=200)
             else:
+                print out, err
                 return HttpResponse(status=500)
         except Exception as e:
             import traceback

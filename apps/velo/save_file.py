@@ -19,11 +19,11 @@ def save_file(text, filename, site_user, velo_username, password):
             print 'I/O failure when writing file to django server'
             raise
 
-        if velo_api.upload_file(local_path, filename):
+        if velo_api.upload_file(local_path, filename) >= 0:
             print 'File saved'
             return 0
         else:
-            print 'Error saving file'
+            print 'Error saving file', local_path, filename
             return -1
     except:
         raise
