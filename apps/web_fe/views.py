@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext, loader
 from django.forms.models import model_to_dict
-from django.forms.util import ErrorList
+from django.forms.utils import ErrorList
 from django.core.context_processors import csrf
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files import File
@@ -248,20 +248,23 @@ def jspanel(request):
 @login_required(login_url='login')
 def grid(request):
     ''' For demo purposes this is loading a local file '''
-    from xml.etree.ElementTree import parse
+    import xml.etree.ElementTree as ET
     import requests
     from StringIO import StringIO
 
     try:
         r = requests.get(
             'http://pcmdi9.llnl.gov/esgf-node-manager/registration.xml', timeout=0.1)
+        if r.status_code == 404:
+            node_list = []
+            return HttpResponse(render_template(request, "web_fe/grid.html", {'nodes': node_list}))
         f = StringIO(r.content)
         out = open('scripts/registration.xml', 'w')
         out.write(f.read())
         out.close()
     except Exception as e:
         import traceback
-        if 'requests.exceptions.ConnectTimeout' in str(sys.exc_info()):
+        if 'requests.exceptions.ConnectTimeout' in str(sys.exc_info()) or 'requests.exceptions.ConnectionError' in str(sys.exc_info()):
             node_list = []
             return HttpResponse(render_template(request, "web_fe/grid.html", {'nodes': node_list}))
         print '1', e.__doc__
@@ -271,8 +274,7 @@ def grid(request):
         print '5', traceback.tb_lineno(sys.exc_info()[2])
         ex_type, ex, tb = sys.exc_info()
         print '6', traceback.print_tb(tb)
-        return HttpResponse(status=404)
-    tree = parse('scripts/registration.xml')
+    tree = ET.parse('scripts/registration.xml')
 
     node_name_list = []
     node_peer_list = []
