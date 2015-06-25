@@ -20,4 +20,5 @@ def get_file(remote_file_path, local_path, filename, site_user, velo_username, p
         raise
 
 
-get_file(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6])
+get_file(sys.argv[1], sys.argv[2], sys.argv[3],
+         sys.argv[4], sys.argv[5], sys.argv[6])

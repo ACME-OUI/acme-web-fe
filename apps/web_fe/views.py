@@ -100,7 +100,14 @@ def add_credentials(request):
             else:
                 return HttpResponse(render_template(request, 'web_fe/add_credentials.html', {'added': 'false'}))
         except Exception as e:
-            print 'Error creating new credentials:', repr(e)
+            import traceback
+            print '1', e.__doc__
+            print '2', sys.exc_info()
+            print '3', sys.exc_info()[0]
+            print '4', sys.exc_info()[1]
+            print '5', traceback.tb_lineno(sys.exc_info()[2])
+            ex_type, ex, tb = sys.exc_info()
+            print '6', traceback.print_tb(tb)
             return HttpResponse(status=500)
     else:
         creds = Credential.objects.filter(site_user_name=str(request.user))
@@ -570,15 +577,49 @@ def velo_save_file(request):
             remote_path = incomming_file['remote_path']
             filename = incomming_file['filename']
             text = incomming_file['text']
-            site_user = 'acmetest'
-            velo_user = 'acmetest'
-            velo_pass = 'acmetest'
+
+            cred = Credential.objects.get(
+                site_user_name=request.user, service="velo")
+
             process = Popen(
-                ['python', './apps/velo/save_file.py', text, local_path, remote_path, site_user, velo_user, velo_pass, filename], stdout=PIPE)
+                ['python', './apps/velo/save_file.py', text, filename, cred.site_user_name, cred.service_user_name, cred.password], stdout=PIPE)
             (out, err) = process.communicate()
             exit_code = process.wait()
             out = out.splitlines(True)[1:]
             if exit_code == 0:
+                return HttpResponse(status=200)
+            else:
+                return HttpResponse(status=500)
+        except Exception as e:
+            import traceback
+            print '1', e.__doc__
+            print '2', sys.exc_info()
+            print '3', sys.exc_info()[0]
+            print '4', sys.exc_info()[1]
+            print '5', traceback.tb_lineno(sys.exc_info()[2])
+            ex_type, ex, tb = sys.exc_info()
+            print '6', traceback.print_tb(tb)
+            return HttpResponse(status=500)
+    else:
+        return HttpResponse(status=404)
+
+
+@login_required(login_url='login')
+def velo_new_folder(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            foldername = data['foldername']
+
+            cred = Credential.objects.get(
+                site_user_name=request.user, service="velo")
+
+            process = Popen(
+                ['python', './apps/velo/new_folder.py', foldername, cred.service_user_name, cred.password], stdout=PIPE)
+            (out, err) = process.communicate()
+            exit_code = process.wait()
+
+            if exit_code == 0 and 'Creaded new folder' in out:
                 return HttpResponse(status=200)
             else:
                 return HttpResponse(status=500)

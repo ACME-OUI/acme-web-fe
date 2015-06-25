@@ -1,5 +1,6 @@
 from django.db import models
 import json
+from django.contrib.auth.models import User
 
 
 class TileLayout(models.Model):
@@ -11,6 +12,7 @@ class TileLayout(models.Model):
 
 
 class Credential(models.Model):
+    # site_user_name = models.ForeignKey(User)
     site_user_name = models.CharField(max_length=100, default='default_user')
     service_user_name = models.CharField(
         max_length=100, default='default_user')

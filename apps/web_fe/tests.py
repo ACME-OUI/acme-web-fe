@@ -1,4 +1,4 @@
-from django.utils import unittest
+from django.test import TestCase
 from django.test.client import Client
 import json
 from django.contrib.auth.models import User
@@ -276,7 +276,7 @@ class UserLoginTest(unittest.TestCase):
     def tearDown(self):
         User.objects.filter(username='testuser').delete()
 
-    def test_user_login_success(self):
+    def test_valid_user_login_success(self):
         user = {
             'username': 'testuser',
             'password': 'testpass'
@@ -286,6 +286,17 @@ class UserLoginTest(unittest.TestCase):
 
         self.assertEquals(response.status_code, 302)
         self.assertTrue(response.url.split('/').pop() != 'login')
+
+    def test_valud_user_invalid_password_login_success(self):
+        user = {
+            'username': 'testuser',
+            'password': 'NOT_A_GOOD_PASSWORD'
+        }
+        response = self.client.post(
+            '/acme/login/', {'username': user['username'], 'password': user['password']})
+
+        self.assertEquals(response.status_code, 302)
+        self.assertEquals(response.url.split('/').pop(), 'login')
 
     def test_user_login_failure(self):
         user = {

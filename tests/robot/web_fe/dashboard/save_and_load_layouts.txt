@@ -12,8 +12,9 @@ Load Layout
   Click Button   id=load-layout
   Page Should Contain  Select Layout:
   Click Element  select-layout
-  Click Element  id=layout-d
+  Click Element  id=layout-c
   Click Element  id=load-button
+  Wait Until Page Contains Element  id=provenance_window
   Page Should Contain Element  id=provenance_window
   Page Should Contain Element  id=status_window 
   Page Should Contain Element  id=science_window

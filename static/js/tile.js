@@ -208,15 +208,81 @@ $(document).ready(function() {
 								content = [ '<div id="velo-file-tree">',
 											'   <div id="velo-options-bar">',
 											'       <button class="fa fa-floppy-o" id="velo-options-bar-save" title="Save"></button>',
-											'       <button class="fa fa-file-text-o" id="velo-options-bar-save" title="New File"></button>',
-											'       <button class="fa fa-folder-o" id="velo-options-bar-save" title="New Folder"></button>',
-											'       <button class="fa fa-play-circle" id="velo-options-bar-save" title="Start Run"></button>',
+											'       <button class="fa fa-file-text-o" id="velo-options-bar-new-file" title="New File"></button>',
+											'       <button class="fa fa-folder-o" id="velo-options-bar-new-folder" title="New Folder"></button>',
+											'       <button class="fa fa-play-circle" id="velo-options-bar-start-run" title="Start Run"></button>',
 											'   </div>',
 											'	<ul class="mtree">',
 											'	</ul>',
 											'</div>',
 											'<div id="velo-text-edit"',
 											'</div>'].join('');
+								initFileTree();
+								var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + content + header3 + '</li>';
+								add_tile(new_tile, name + '_window', {
+									ignore: 'true'
+								}, function() {
+									$('#search-btn').click(function() {
+										nodeSearch(document.getElementById("node-search-name").value);
+									});
+								});
+								$('#velo-options-bar-save').click(function(){
+									velo_save_file();
+								});
+								$('#velo-options-bar-new-file').click(function(){
+									velo_new_file();
+								});
+								$('#velo-options-bar-new-folder').click(function(){
+									velo_new_folder();
+								});
+								$('#velo-options-bar-start-run').click(function(){
+									velo_start_run();
+								});
+									
+							} else {
+								content = [ '<form id="velo_login">',
+											'<h2 class="form-signin-heading">Please Sign In</h2>',
+											'<label for="velo_username" class="sr-only">User name:</label>',
+											'<input type="text" id="velo_username" name="velo_username" class="form-control" placeholder="User Name">',
+											'<label for="velo_password" class="sr-only">Password:</label>',
+											'<input type="password" id="velo_password" name="velo_password" class="form-control" placeholder="Password">',
+											'<a id="submit_velo_user" class="btn btn-success" href="javascript:void(0);">Submit</a>'
+										].join('');
+								var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + content + header3 + '</li>';
+								add_tile(new_tile, name + '_window', {
+									ignore: 'true'
+								}, function() {
+									$('#search-btn').click(function() {
+										nodeSearch(document.getElementById("node-search-name").value);
+									});
+								});
+								$('#submit_velo_user').click(function(){
+									var data = {};
+									var cred = {
+										'username': document.getElementById('velo_username').value,
+										'password': document.getElementById('velo_password').value
+									};
+									data['velo'] = cred;
+									get_data(
+										'add_credentials/',
+										'POST',
+										data,
+										function(){
+											alert('saved velo credentials');
+											$('#velo_window').remove();
+											removeHelper('velo_window');
+											content = [ '<div id="velo-file-tree">',
+														'   <div id="velo-options-bar">',
+														'       <button class="fa fa-floppy-o" id="velo-options-bar-save" title="Save"></button>',
+														'       <button class="fa fa-file-text-o" id="velo-options-bar-new-file" title="New File"></button>',
+														'       <button class="fa fa-folder-o" id="velo-options-bar-new-folder" title="New Folder"></button>',
+														'       <button class="fa fa-play-circle" id="velo-options-bar-start-run" title="Start Run"></button>',
+														'   </div>',
+														'	<ul class="mtree">',
+														'	</ul>',
+														'</div>',
+														'<div id="velo-text-edit"',
+														'</div>'].join('');
 											initFileTree();
 											var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + content + header3 + '</li>';
 											add_tile(new_tile, name + '_window', {
@@ -226,67 +292,26 @@ $(document).ready(function() {
 													nodeSearch(document.getElementById("node-search-name").value);
 												});
 											});
-									
-							} else {
-								content = [ '<form id="velo_login">',
-											'<h2 class="form-signin-heading">Please Sign In</h2>',
-											'<label for="velo_username" class="sr-only">User name:</label>',
-											'<input type="text" id="velo_username" name="velo_username" class="form-control" placeholder="User Name">',
-											'<label for="velo_password" class="sr-only">Password:</label>',
-											'<input type="text" id="velo_password" name="velo_password" class="form-control" placeholder="Password">',
-											'<a id="submit_velo_user" class="btn btn-success" href="javascript:void(0);">Submit</a>'
-										].join('');
-										var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + content + header3 + '</li>';
-										add_tile(new_tile, name + '_window', {
-											ignore: 'true'
-										}, function() {
-											$('#search-btn').click(function() {
-												nodeSearch(document.getElementById("node-search-name").value);
+											$('#velo-options-bar-save').click(function(){
+												velo_save_file();
 											});
+											$('#velo-options-bar-new-file').click(function(){
+												velo_new_file();
+											});
+											$('#velo-options-bar-new-folder').click(function(){
+												velo_new_folder();
+											});
+											$('#velo-options-bar-start-run').click(function(){
+												velo_start_run();
+											});
+										},
+										function(){
+											alert('failed to save credentials');
 										});
-										$('#submit_velo_user').click(function(){
-											var data = {};
-											var cred = {
-												'username': document.getElementById('velo_username').value,
-												'password': document.getElementById('velo_password').value
-											};
-											data['velo'] = cred;
-											get_data(
-												'add_credentials/',
-												'POST',
-												data,
-												function(){
-													alert('saved velo credentials');
-													$('#velo_window').remove();
-													removeHelper('velo_window');
-													content = [ '<div id="velo-file-tree">',
-																'   <div id="velo-options-bar">',
-																'       <button class="fa fa-floppy-o" id="velo-options-bar-save" title="Save"></button>',
-																'       <button class="fa fa-file-text-o" id="velo-options-bar-save" title="New File"></button>',
-																'       <button class="fa fa-folder-o" id="velo-options-bar-save" title="New Folder"></button>',
-																'       <button class="fa fa-play-circle" id="velo-options-bar-save" title="Start Run"></button>',
-																'   </div>',
-																'	<ul class="mtree">',
-																'	</ul>',
-																'</div>',
-																'<div id="velo-text-edit"',
-																'</div>'].join('');
-													initFileTree();
-													var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + content + header3 + '</li>';
-													add_tile(new_tile, name + '_window', {
-														ignore: 'true'
-													}, function() {
-														$('#search-btn').click(function() {
-															nodeSearch(document.getElementById("node-search-name").value);
-														});
-													});
-												},
-												function(){
-													alert('failed to save credentials');
-												});
-										})
+								});
 							}
 						});
+
 						return;
 					}
 					break;
@@ -337,6 +362,92 @@ $(document).ready(function() {
 
 	});
 
+	function velo_save_file(){
+		if($('.mtree-active').length > 0 ){
+			$.getScript("static/js/spin.js", function() {
+				if (mode == 'night') {
+					var color = '#fff';
+				} else {
+					color = '#000';
+				}
+				opts.color = color; 
+				var spinner = new Spinner(opts).spin();
+				document.getElementById('velo-text-edit').appendChild(spinner.el);
+
+				var filename = $('.mtree-active').find(':first-child').text();
+				var remote_path = $('.mtree-active').find(':first-child').attr('id');
+				remote_path = remote_path.replace('_', '/');
+				var text = codeMirror.getValue();
+				var outgoing_request = {
+					text: text,
+					remote_path: remote_path,
+					filename: filename
+				}
+				
+				get_data('velo_save_file/', 'POST', outgoing_request, function(){
+					spinner.stop();
+					alert('file saved!');
+				}, function(){
+					spinner.stop();
+					alert('failed to save file');
+				});
+			});
+		}
+	}
+
+	function velo_new_file(){
+
+	}
+
+	function velo_new_folder(){
+		var newFolderHtml = [	'<li id="velo-new-folder-text-input-list">',
+								'    <form id="velo-new-folder-text-input-form">',
+								'    	<input type="text" placeholder="New Folder Name" id="velo-new-folder-text-input"></input>',
+								'    </form>',
+								'</li>'].join('');
+		$('.mtree-level-1').append(newFolderHtml);
+		$("#velo-new-folder-text-input").keypress(function(event) {
+		    if (event.which == 13) {
+		        newFolderHtml = '<a href="#" id="new-velo-folder"></a><ul class="mtree-level-2" style="overflow: hidden; height: 0px; display: none;"></ul>';
+				var newFolderName = document.getElementById('velo-new-folder-text-input').value;
+				$('#velo-new-folder-text-input-form').remove();
+				$('#velo-new-folder-text-input-list').addClass('mtree-node mtree-closed');
+				$('#velo-new-folder-text-input-list').append(newFolderHtml);
+				$('#new-velo-folder').text(newFolderName);
+				// Set mtree-active class on list items for last opened element
+				$('.mtree li > *:first-child').on('click.mtree-active', function(e) {
+					if ($(this).parent().hasClass('mtree-closed')) {
+						$('.mtree-active').not($(this).parent()).removeClass('mtree-active');
+						$(this).parent().addClass('mtree-active');
+					} else if ($(this).parent().hasClass('mtree-open')) {
+						$(this).parent().removeClass('mtree-active');
+					} else {
+						$('.mtree-active').not($(this).parent()).removeClass('mtree-active');
+						$(this).parent().toggleClass('mtree-active');
+					}
+				});
+
+				$('.mtree').bind('contextmenu',function(e){
+					e.preventDefault();
+					if(e.button == 2){
+						alert('looks like we got a right click there');
+					}
+				});
+
+				get_data('velo_new_folder/', 'POST', {'foldername':newFolderName}, function(response){
+					alert('Success creating new folder');
+				}, function(response){
+					alert('Error when creating new folder');
+				})
+		    }
+		});
+
+	}
+
+	function velo_start_run(){
+
+	}
+
 	function initCodeMirror(text) {
 		$.getScript("static/js/codemirror.js", function() {
 			if (mode == 'night') {
@@ -356,6 +467,7 @@ $(document).ready(function() {
 				codeMirrorTextChanged(event);
 			});
 		});
+
 	}
 
 	function codeMirrorTextChanged(event){
@@ -370,23 +482,6 @@ $(document).ready(function() {
 		
 	}
 
-	function velo_save_file(){
-		var filename = $('.mtree-active:first-child').text();
-		var remote_path = $('.mtree-active:first-child').attr('id');
-		remote_path = remote_path.replace('_', '/');
-		var text = codeMirror.getValue();
-		var outgoing_request = {
-			text: text,
-			remote_path: remote_path,
-			filename: filename
-		}
-		
-		get_data('velo_save_file/', 'POST', outgoing_request, function(){
-			alert('file saved!');
-		}, function(){
-			alert('failed to save file :(');
-		});
-	}
 
 
 	function getFile(id){
@@ -461,10 +556,16 @@ $(document).ready(function() {
 				});
 			}
 			$('.mtree').addClass(mtree_style);
+
 			get_data('get_folder/', 'POST', request, function(response) {
 				spinner.stop();
-
+				response.sort();
 				for (var i = 0; i < response.length; i++) {
+					if(response[i] == '/User Documents/' || response[i] == 'Velo Initialized...'){
+						response.splice(i, 1);
+						i--;
+						continue;
+					}
 					response[i] = response[i].replace(/-/g, 'Z');
 					response[i] = response[i].replace(/_/g, 'X');
 					response[i] = response[i].replace(/\ /g, '-');
@@ -484,7 +585,7 @@ $(document).ready(function() {
 							}
 							parentFolder = $('#' + parentFolder);
 							if (parentFolder.length == 0) {
-								//console.log('creating new root folder with id='+parentFolder.selector.substr(1) + '_' + path[path.length - 2] + ' and text=' + path[path.length - 2]);
+
 								$('.mtree').append('<li><a href="#">' + path[path.length - 2] + '</a><ul id="' + parentFolder.selector.substr(1) + '_' + path[path.length - 2] + '"></ul></li>');
 							}
 							var folderName = '';
@@ -496,10 +597,9 @@ $(document).ready(function() {
 							newFolderName = newFolderName.replace(/-/g, ' ');
 							newFolderName = newFolderName.replace(/X/g, '_');
 							newFolderName = newFolderName.replace(/Z/g, '-');
-							//console.log('creating folder with id=' + folderName + ' and text=' + newFolderName + ' appending to ' + parentFolder.selector);
+
 							parentFolder.append('<li><a href="#">' + newFolderName + '</a><ul id="' + folderName + '"></ul></li>');
 						} else {
-							//console.log('creating new root folder ' + path[path.length - 2] + ' with id=_'+path[path.length - 2]+'_');
 							$('.mtree').append('<li><a href="#">' + path[path.length - 2] + '</a><ul id="_' + path[path.length - 2] + '_"></ul></li>');
 						}
 
@@ -509,16 +609,23 @@ $(document).ready(function() {
 						for (j = 1; j < path.length - 2; j++) {
 							parentFolder += path[j] + '_';
 						}
-						//console.log('creating new non-folder with id=' + response[i] + ' and text=' + path[path.length - 2]+ ' appending it to ' + parentFolder);
 
 						$('#' + parentFolder).append('<li><a href="#" id=' + response[i] + '>' + path[path.length - 2] + '</a></li>');
 						response[i] = response[i].replace('.', '\\\.');
-						//console.log('#' + response[i]);
+
 						$('#' + response[i]).click(function(event){
 							getFile(event.target.id);
 						});
 					}
 				}
+
+				$('.mtree').bind('contextmenu',function(e){
+					e.preventDefault();
+					if(e.button == 2){
+						alert('looks like we got a right click there');
+					}
+				});
+
 
 				/*
 					The following is copied from mtree.js
@@ -530,7 +637,7 @@ $(document).ready(function() {
 
 					// Settings
 					var collapsed = true; // Start with collapsed menu (only level 1 items visible)
-					var close_same_level = false; // Close elements on same level when opening new node.
+					var close_same_level = true; // Close elements on same level when opening new node.
 					var duration = 400; // Animation duration should be tweaked according to easing.
 					var listAnim = true; // Animate separate list items on open/close element (velocity.js only).
 					var easing = 'easeOutQuart'; // Velocity.js only, defaults to 'swing' with jquery animation.
@@ -1849,19 +1956,7 @@ $(document).ready(function() {
 
 	$('#save-layout').click(function() {
 		leftMenuToggle();
-		var mask = document.createElement('div');
-		$(mask).addClass('mask');
-		$(mask).attr({
-			'id': 'mask'
-		});
-		$(mask).click(function() {
-			$(this).fadeOut().queue(function() {
-				$(this).remove();
-				$('.save-layout').remove();
-			});
-
-		});
-		$('body').append(mask);
+		createMask('#save-menu');
 
 		var saveMenu = document.createElement('div');
 		$(saveMenu).addClass('bvc');
@@ -1877,7 +1972,6 @@ $(document).ready(function() {
 		saveMenuHtml += '</form></div><div class="bevel bl br"></div>';
 		$(saveMenu).html(saveMenuHtml);
 		$('body').append(saveMenu);
-		$(mask).fadeIn();
 		$('#save-btn').click(function(event) {
 			event.preventDefault();
 			var layout_name = document.getElementById('layout-name').value;
@@ -1906,12 +2000,11 @@ $(document).ready(function() {
 
 			//data = JSON.stringify(data);
 			get_data('save_layout/', 'POST', data, function() {
-				alert('layout saved');
+				alert('Layout saved');
 			}, function() {
-				alert('Server Error');
+				alert('Please use unique layout name');
 			});
-			$('.mask').remove();
-			$('.save-layout').remove();
+			fadeOutMask('#save-menu');
 		});
 	});
 
@@ -1921,16 +2014,8 @@ $(document).ready(function() {
 		get_data('load_layout/', 'GET', new Object(), function(request) {
 			//parse response
 			options = request;
-			//create background mask
-			var mask = document.createElement('div');
-			$(mask).addClass('mask');
-			$(mask).attr({
-				'id': 'mask'
-			});
-			$(mask).click(function() {
-				fadeOutMask();
-			});
-			$('body').append(mask);
+			createMask('.save-layout');
+
 			//create load menu and populate with values
 			var loadMenu = document.createElement('div');
 			$(loadMenu).addClass('bvc');
@@ -1945,7 +2030,7 @@ $(document).ready(function() {
 			loadMenuHtml += '</form></div><div class="bevel bl br"></div>';
 			$(loadMenu).html(loadMenuHtml);
 			$('body').append(loadMenu);
-			$(mask).fadeIn();
+			
 
 			$('#load-button').click(function() {
 				var name = document.forms['load-layout-form'].elements[0].options[document.forms['load-layout-form'].elements[0].selectedIndex].text;
@@ -1953,6 +2038,7 @@ $(document).ready(function() {
 					'layout_name': name
 				};
 				get_data('load_layout/', 'POST', data, function(request) {
+					fadeOutMask('.save-layout');
 					$('.tile').each(function() {
 						$(this).remove();
 					});
@@ -1964,6 +2050,7 @@ $(document).ready(function() {
 					loadLayout(layout, request.mode);
 				}, function() {
 					alert('failed to load layout');
+					fadeOutMask('.save-layout');
 				});
 			});
 		}, function() {
@@ -2022,10 +2109,23 @@ $(document).ready(function() {
 		}
 	}
 
-	function fadeOutMask() {
+	function createMask(id){
+		var mask = document.createElement('div');
+		$(mask).addClass('mask');
+		$(mask).attr({
+			'id': 'mask'
+		});
+		$(mask).click(function() {
+			fadeOutMask(id);
+		});
+		$('body').append(mask);
+		$(mask).fadeIn();
+	}
+
+	function fadeOutMask(id) {
 		$('#mask').fadeOut().queue(function() {
 			$('#mask').remove();
-			$('.save-layout').remove();
+			$(id).remove();
 		});
 	}
 
@@ -2058,6 +2158,7 @@ $(document).ready(function() {
 			});
 			codeMirror.setOption('theme', 'twilight');
 		}
+		$('#velo-options-bar').find(':button').css({'background-color': 'rgb(1, 1, 1)'});
 	}
 
 	function setDay() {
@@ -2089,6 +2190,7 @@ $(document).ready(function() {
 			});
 			codeMirror.setOption('theme', '3024-day');
 		}
+		$('#velo-options-bar').find(':button').css({'background-color': 'rgb(192, 192, 192)'});
 		
 	}
 
