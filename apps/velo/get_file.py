@@ -16,9 +16,12 @@ def get_file(remote_file_path, local_path, filename, site_user, velo_username, p
             return 0
         else:
             print 'NO SUCH FILE'
+            return -1
     except:
         raise
 
 
-get_file(sys.argv[1], sys.argv[2], sys.argv[3],
-         sys.argv[4], sys.argv[5], sys.argv[6])
+exit_code = get_file(remote_file_path=sys.argv[1], local_path=sys.argv[2], filename=sys.argv[3],
+                     site_user=sys.argv[4], velo_username=sys.argv[5], password=sys.argv[6])
+
+sys.exit(exit_code)

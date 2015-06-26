@@ -100,14 +100,7 @@ def add_credentials(request):
             else:
                 return HttpResponse(render_template(request, 'web_fe/add_credentials.html', {'added': 'false'}))
         except Exception as e:
-            import traceback
-            print '1', e.__doc__
-            print '2', sys.exc_info()
-            print '3', sys.exc_info()[0]
-            print '4', sys.exc_info()[1]
-            print '5', traceback.tb_lineno(sys.exc_info()[2])
-            ex_type, ex, tb = sys.exc_info()
-            print '6', traceback.print_tb(tb)
+            print_debug(e)
             return HttpResponse(status=500)
     else:
         creds = Credential.objects.filter(site_user_name=str(request.user))
@@ -115,6 +108,8 @@ def add_credentials(request):
         for s in creds:
             stored_credentials.append(s.service)
         return HttpResponse(render_template(request, 'web_fe/add_credentials.html', {'added': 'false', 'stored_credentials': stored_credentials}))
+
+# This whole thing needs to be refactored
 
 
 @login_required(login_url='login')
@@ -170,29 +165,13 @@ def check_credentials(request):
                         if c.service == 'jira':
                             print 'Working on jira....'
                     except:
-                        if velo_started:
-                            velo_api.shutdown_jvm()
-                        import traceback
-                        print '1', e.__doc__
-                        print '2', sys.exc_info()
-                        print '3', sys.exc_info()[0]
-                        print '4', sys.exc_info()[1]
-                        print '5', traceback.tb_lineno(sys.exc_info()[2])
-                        ex_type, ex, tb = sys.exc_info()
-                        print '6', traceback.print_tb(tb)
+                        print_debug(e)
                         return HttpResponse(status=500)
 
             return HttpResponse(json.dumps(response))
 
         except Exception as e:
-            import traceback
-            print '1', e.__doc__
-            print '2', sys.exc_info()
-            print '3', sys.exc_info()[0]
-            print '4', sys.exc_info()[1]
-            print '5', traceback.tb_lineno(sys.exc_info()[2])
-            ex_type, ex, tb = sys.exc_info()
-            print '6', traceback.print_tb(tb)
+            print_debug(e)
             return HttpResponse(status=500)
     else:
         return HttpResponse(status=404)
@@ -270,17 +249,13 @@ def grid(request):
         out.write(f.read())
         out.close()
     except Exception as e:
-        import traceback
-        if 'requests.exceptions.ConnectTimeout' in str(sys.exc_info()) or 'requests.exceptions.ConnectionError' in str(sys.exc_info()):
+
+        from requests.exceptions import ConnectTimeout, ConnectionError
+        if type(e) in (ConnectionError, ConnectTimeout):
             node_list = []
             return HttpResponse(render_template(request, "web_fe/grid.html", {'nodes': node_list}))
-        print '1', e.__doc__
-        print '2', sys.exc_info()
-        print '3', sys.exc_info()[0]
-        print '4', sys.exc_info()[1]
-        print '5', traceback.tb_lineno(sys.exc_info()[2])
-        ex_type, ex, tb = sys.exc_info()
-        print '6', traceback.print_tb(tb)
+        print_debug(e)
+
     tree = ET.parse('scripts/registration.xml')
 
     node_name_list = []
@@ -323,14 +298,7 @@ def save_layout(request):
             else:
                 return HttpResponse(status=422)
         except Exception as e:
-            import traceback
-            print '1', e.__doc__
-            print '2', sys.exc_info()
-            print '3', sys.exc_info()[0]
-            print '4', sys.exc_info()[1]
-            print '5', traceback.tb_lineno(sys.exc_info()[2])
-            ex_type, ex, tb = sys.exc_info()
-            print '6', traceback.print_tb(tb)
+            print_debug(e)
             return HttpResponse(status=500)
 
 
@@ -349,7 +317,7 @@ def load_layout(request):
                 j['mode'] = i.mode
                 return HttpResponse(json.dumps(j), status=200, content_type="application/json")
         except Exception as e:
-            print "Unexpected error:", repr(e)
+            print_debug(e)
             return HttpResponse(status=500)
     elif request.method == 'GET':
         try:
@@ -364,7 +332,7 @@ def load_layout(request):
                 layouts.append(curlayout)
             return HttpResponse(json.dumps(layouts))
         except Exception as e:
-            print "Unexpected error:", repr(e)
+            print_debug(e)
             return HttpResponse(status=500)
 
 
@@ -373,8 +341,6 @@ def node_info(request):
     if request.method == 'POST':
         try:
             from xml.etree.ElementTree import parse
-            import os.path
-            print os.path.exists('scripts/registration.xml')
             tree = parse('scripts/registration.xml')
             root = tree.getroot()
 
@@ -439,14 +405,7 @@ def node_info(request):
             if not found_node:
                 return HttpResponse(status=501)
         except Exception as e:
-            import traceback
-            print '1', e.__doc__
-            print '2', sys.exc_info()
-            print '3', sys.exc_info()[0]
-            print '4', sys.exc_info()[1]
-            print '5', traceback.tb_lineno(sys.exc_info()[2])
-            ex_type, ex, tb = sys.exc_info()
-            print '6', traceback.print_tb(tb)
+            print_debug(e)
             return HttpResponse(status=500)
     elif request.method == 'POST':
         print "Unexpected POST request"
@@ -469,7 +428,7 @@ def node_search(request):
                     response['status'] = 'success'
                     return HttpResponse(json.dumps(context.get_facet_options()))
                 except Exception as e:
-                    print "Unexpected error:", repr(e)
+                    print_debug(e)
                     return HttpResponse(status=500)
             else:
                 try:
@@ -484,7 +443,7 @@ def node_search(request):
 
                     return HttpResponse(json.dumps(searchResponse))
                 except Exception as e:
-                    print "Unexpected error:", repr(e)
+                    print_debug(e)
                     return HttpResponse(status=500)
         else:
             return HttpResponse(status=500)
@@ -509,14 +468,7 @@ def get_folder(request):
             return HttpResponse(json.dumps(out))
 
         except Exception as e:
-            import traceback
-            print '1', e.__doc__
-            print '2', sys.exc_info()
-            print '3', sys.exc_info()[0]
-            print '4', sys.exc_info()[1]
-            print '5', traceback.tb_lineno(sys.exc_info()[2])
-            ex_type, ex, tb = sys.exc_info()
-            print '6', traceback.print_tb(tb)
+            print_debug(e)
             return HttpResponse(status=500)
     else:
         return HttpResponse(status=404)
@@ -558,14 +510,7 @@ def get_file(request):
                 return HttpResponse(out, content_type='text/plain')
 
         except Exception as e:
-            import traceback
-            print '1', e.__doc__
-            print '2', sys.exc_info()
-            print '3', sys.exc_info()[0]
-            print '4', sys.exc_info()[1]
-            print '5', traceback.tb_lineno(sys.exc_info()[2])
-            ex_type, ex, tb = sys.exc_info()
-            print '6', traceback.print_tb(tb)
+            print_debug(e)
             return HttpResponse(status=500)
     else:
         return HttpResponse(status=404)
@@ -575,10 +520,9 @@ def get_file(request):
 def velo_save_file(request):
     if request.method == 'POST':
         try:
-            incomming_file = json.loads(request.body)
-            # remote_path = incomming_file['remote_path']
-            filename = incomming_file['filename']
-            text = incomming_file['text']
+            incoming_file = json.loads(request.body)
+            filename = incoming_file['filename']
+            text = incoming_file['text']
 
             cred = Credential.objects.get(
                 site_user_name=request.user, service="velo")
@@ -593,14 +537,7 @@ def velo_save_file(request):
                 print out, err
                 return HttpResponse(status=500)
         except Exception as e:
-            import traceback
-            print '1', e.__doc__
-            print '2', sys.exc_info()
-            print '3', sys.exc_info()[0]
-            print '4', sys.exc_info()[1]
-            print '5', traceback.tb_lineno(sys.exc_info()[2])
-            ex_type, ex, tb = sys.exc_info()
-            print '6', traceback.print_tb(tb)
+            print_debug(e)
             return HttpResponse(status=500)
     else:
         return HttpResponse(status=404)
@@ -621,19 +558,12 @@ def velo_new_folder(request):
             (out, err) = process.communicate()
             exit_code = process.wait()
 
-            if exit_code == 0 and 'Creaded new folder' in out:
+            if exit_code >= 0 and 'Created new folder' in out:
                 return HttpResponse(status=200)
             else:
                 return HttpResponse(status=500)
         except Exception as e:
-            import traceback
-            print '1', e.__doc__
-            print '2', sys.exc_info()
-            print '3', sys.exc_info()[0]
-            print '4', sys.exc_info()[1]
-            print '5', traceback.tb_lineno(sys.exc_info()[2])
-            ex_type, ex, tb = sys.exc_info()
-            print '6', traceback.print_tb(tb)
+            print_debug(e)
             return HttpResponse(status=500)
     else:
         return HttpResponse(status=404)
@@ -651,14 +581,7 @@ def credential_check_existance(request):
             else:
                 return HttpResponse(status=500)
         except Exception as e:
-            import traceback
-            print '1', e.__doc__
-            print '2', sys.exc_info()
-            print '3', sys.exc_info()[0]
-            print '4', sys.exc_info()[1]
-            print '5', traceback.tb_lineno(sys.exc_info()[2])
-            ex_type, ex, tb = sys.exc_info()
-            print '6', traceback.print_tb(tb)
+            print_debug(e)
             return HttpResponse(status=500)
     else:
         return HttpResponse(status=404)
@@ -893,3 +816,14 @@ def filetree(request):
         r.append('Could not load directory: %s' % str(e))
     r.append('</ul>')
     return HttpResponse(''.join(r))
+
+
+def print_debug(e):
+    import traceback
+    print '1', e.__doc__
+    print '2', sys.exc_info()
+    print '3', sys.exc_info()[0]
+    print '4', sys.exc_info()[1]
+    print '5', traceback.tb_lineno(sys.exc_info()[2])
+    ex_type, ex, tb = sys.exc_info()
+    print '6', traceback.print_tb(tb)
