@@ -387,6 +387,7 @@ $(document).ready(function() {
 				get_data('velo_save_file/', 'POST', outgoing_request, function(){
 					spinner.stop();
 					alert('file saved!');
+					$('.mtree-active > a').removeClass('mtree-unsaved');
 				}, function(){
 					spinner.stop();
 					alert('failed to save file');
@@ -471,15 +472,7 @@ $(document).ready(function() {
 	}
 
 	function codeMirrorTextChanged(event){
-		if( $('#velo-save-button').length == 0 ){
-			var save_button = '<button class="fa fa-floppy-o" id="velo-save-button" style="float: right;"></button>'
-			$('.mtree-active').children().append(save_button);
-			$('#velo-save-button').click(function(event){
-				event.stopPropagation();
-				velo_save_file();
-			})
-		}
-		
+		$('.mtree-active > a').addClass('mtree-unsaved');
 	}
 
 
