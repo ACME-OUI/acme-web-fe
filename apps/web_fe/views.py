@@ -373,6 +373,8 @@ def node_info(request):
     if request.method == 'POST':
         try:
             from xml.etree.ElementTree import parse
+            import os.path
+            print os.path.exists('scripts/registration.xml')
             tree = parse('scripts/registration.xml')
             root = tree.getroot()
 
