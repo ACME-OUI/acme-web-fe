@@ -38,6 +38,7 @@ selenium_server_log.txt
 /migrations
 
 .coverage
+cover
 
 log.html
 output.xmlit

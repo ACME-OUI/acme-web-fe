@@ -59,9 +59,13 @@ class Velo:
         # print "Job Status:", status
 
     def create_folder(self, foldername):  # create a folder
-        homeFolder = Velo.get_homefolder(self)
-        cmspath = cms(homeFolder).append(foldername)
-        resMgr.createFolder(cmspath)
+        try:
+            homeFolder = Velo.get_homefolder(self)
+            cmspath = cms(homeFolder).append(foldername)
+            resMgr.createFolder(cmspath)
+            return 0
+        except:
+            return -1
 
     def upload_file(self, location, filename):  # upload file in velo
         try:
