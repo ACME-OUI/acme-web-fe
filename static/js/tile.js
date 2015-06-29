@@ -212,8 +212,10 @@ $(document).ready(function() {
 											'       <button class="fa fa-folder-o" id="velo-options-bar-new-folder" title="New Folder"></button>',
 											'       <button class="fa fa-play-circle" id="velo-options-bar-start-run" title="Start Run"></button>',
 											'   </div>',
-											'	<ul class="mtree">',
-											'	</ul>',
+											'   <div id="mtree-container">',
+											'	    <ul class="mtree">',
+											'	    </ul>',
+											'   </div>',
 											'</div>',
 											'<div id="velo-text-edit"',
 											'</div>'].join('');
@@ -397,7 +399,27 @@ $(document).ready(function() {
 	}
 
 	function velo_new_file(){
+		var newFileHtml = [	'<li id="velo-new-file-text-input-list">',
+								'    <form id="velo-new-file-text-input-form">',
+								'    	<input type="text" placeholder="New File Name" id="velo-new-file-text-input"></input>',
+								'    </form>',
+								'</li>'].join('');
+		$('.mtree-level-1').prepend(newFileHtml);
+		$("#velo-new-file-text-input").keypress(function(event) {
+		    if (event.which == 13) {
+		    	newFolderHtml = '<a href="#" id="new-velo-file"></a>';
+		    	var newFileName = document.getElementById('velo-new-file-text-input').value;
+		    	$('#velo-new-file-text-input-form').remove();
+				$('#velo-new-file-text-input-list').addClass('mtree-active');
+				$('#velo-new-file-text-input-list').append(newFileHtml);
 
+				if(typeof codeMirror === 'undefined'){
+					initCodeMirror('');
+				} else {
+					codeMirror.setValue('');
+				}
+		    }
+		});
 	}
 
 	function velo_new_folder(){
@@ -406,7 +428,7 @@ $(document).ready(function() {
 								'    	<input type="text" placeholder="New Folder Name" id="velo-new-folder-text-input"></input>',
 								'    </form>',
 								'</li>'].join('');
-		$('.mtree-level-1').append(newFolderHtml);
+		$('.mtree-level-1').prepend(newFolderHtml);
 		$("#velo-new-folder-text-input").keypress(function(event) {
 		    if (event.which == 13) {
 		        newFolderHtml = '<a href="#" id="new-velo-folder"></a><ul class="mtree-level-2" style="overflow: hidden; height: 0px; display: none;"></ul>';
