@@ -8,7 +8,7 @@ from django.http import (
 )
 from django.template import RequestContext, loader
 from django.core.urlresolvers import reverse
-from templatetags.issues import render_question_tree
+from templatetags.issues_extras import render_question_tree
 from django.contrib import messages
 from models import (
     IssueSource,

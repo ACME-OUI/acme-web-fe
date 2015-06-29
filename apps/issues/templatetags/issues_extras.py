@@ -1,7 +1,7 @@
 from django import template
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
-from apps.issues.models import IssueCategory
+from issues.models import IssueCategory
 
 register = template.Library()
 

@@ -1,6 +1,9 @@
 language: python
 python:
     - "2.7"
+before_install:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
 install:
     - pip install -r requirements.txt
     - pip install pep8 --use-mirrors
@@ -12,5 +15,5 @@ sudo:
 before_script:
     - "pep8 --exclude=migrations --config=.pep8 apps"
 script:
-    - "./manage.py test apps.web_fe.tests -v 2"
+    - "./manage.py test apps/* -v 2 --liveserver=localhost:8000"
 

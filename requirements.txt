@@ -1,7 +1,6 @@
-Django==1.6
+Django==1.8
 Jinja2==2.7.3
 MarkupSafe==0.23
-South==1.0.1
 django-recaptcha==1.0.3
 esgf-pyclient==0.1.2
 github3.py==0.9.4
