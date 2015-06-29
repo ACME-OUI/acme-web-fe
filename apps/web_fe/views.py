@@ -464,7 +464,6 @@ def get_folder(request):
             exit_code = process.wait()
             out = out.splitlines(False)
             out.insert(0, folder['file'])
-            print out
             return HttpResponse(json.dumps(out))
 
         except Exception as e:
@@ -524,8 +523,6 @@ def velo_save_file(request):
             filename = incoming_file['filename']
             text = incoming_file['text']
 
-            print incoming_file
-
             cred = Credential.objects.get(
                 site_user_name=request.user, service="velo")
 
@@ -534,7 +531,6 @@ def velo_save_file(request):
             (out, err) = process.communicate()
             exit_code = process.wait()
             if exit_code >= 0 and 'File saved' in out:
-                print out
                 return HttpResponse(status=200)
             else:
                 print out, err
