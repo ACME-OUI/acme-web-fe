@@ -385,7 +385,7 @@ $(document).ready(function() {
 					remote_path: remote_path,
 					filename: filename
 				}
-				
+				console.log(outgoing_request);
 				get_data('velo_save_file/', 'POST', outgoing_request, function(){
 					spinner.stop();
 					alert('file saved!');
@@ -407,17 +407,16 @@ $(document).ready(function() {
 		$('.mtree-level-1').prepend(newFileHtml);
 		$("#velo-new-file-text-input").keypress(function(event) {
 		    if (event.which == 13) {
-		    	newFolderHtml = '<a href="#" id="new-velo-file"></a>';
+		    	newFileHtml = '<a href="#" id="velo-new-file"></a>';
 		    	var newFileName = document.getElementById('velo-new-file-text-input').value;
 		    	$('#velo-new-file-text-input-form').remove();
-				$('#velo-new-file-text-input-list').addClass('mtree-active');
 				$('#velo-new-file-text-input-list').append(newFileHtml);
+				$('#velo-new-file').text(newFileName);
+				$('.mtree-active').removeClass('mtree-active');
+				$('#velo-new-file-text-input-list').addClass('mtree-active');
 
-				if(typeof codeMirror === 'undefined'){
-					initCodeMirror('');
-				} else {
-					codeMirror.setValue('');
-				}
+				initCodeMirror('');
+
 		    }
 		});
 	}
