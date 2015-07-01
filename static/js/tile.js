@@ -2217,8 +2217,7 @@ $(document).ready(function() {
 			$('#velo-text-edit').css({
 				'background-color': '#141414'
 			});
-			if(typeof codeMirror === 'undefined'){
-			} else {
+			if(typeof codeMirror !== 'undefined'){
 				codeMirror.setOption('theme', 'twilight');
 			}
 		}
@@ -2252,10 +2251,9 @@ $(document).ready(function() {
 			$('#velo-text-edit').css({
 				'background-color': '#f7f7f7'
 			});
-			if(typeof codeMirror === 'undefined'){
-			} else {
+			if(typeof codeMirror !== 'undefined'){
 				codeMirror.setOption('theme', '3024-day');
-			}
+			} 
 		}
 		$('#velo-options-bar').find(':button').css({'background-color': 'rgb(192, 192, 192)'});
 		
