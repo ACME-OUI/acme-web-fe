@@ -477,23 +477,23 @@ def get_folder(request):
 def get_file(request):
     if request.method == 'POST':
         try:
-            filename = json.loads(request.body)['file']
+            data = json.loads(request.body)
+            filename = data['filename']
+            remote_file_path = data['path'] + '/' + filename
             cred = Credential.objects.get(
                 site_user_name=request.user, service='velo')
 
-            remote_file_path = '/User Documents/' + \
-                cred.service_user_name + '/' + filename
-            local_path = os.getcwd() + '/userdata/' + cred.site_user_name
-            path = local_path.split('/')
-            remote_path = remote_file_path.split('/')
-            remote_folder_index = remote_path.index(cred.service_user_name)
-            prefix = ''
-            for i in range(path.index(cred.site_user_name)):
-                prefix += path[i] + '/'
-                if not os.path.isdir(prefix):
-                    os.makedirs(prefix)
+            local_path = os.getcwd() + '/userdata/' + \
+                cred.service_user_name + '/'
 
-            for i in range(remote_folder_index, len(remote_path) - 1):
+            # Create the local directories if they dont exist
+            remote_path = remote_file_path.split('/')
+            prefix = local_path[
+                :local_path.index(cred.service_user_name) + len(cred.service_user_name)] + '/'
+            if not os.path.isdir(prefix):
+                os.makedirs(prefix)
+
+            for i in range(remote_path.index(cred.service_user_name) + 1, len(remote_path) - 1):
                 if not os.path.isdir(prefix + remote_path[i]):
                     prefix += remote_path[i] + '/'
                     os.makedirs(prefix)
@@ -502,7 +502,8 @@ def get_file(request):
                 ['python', './apps/velo/get_file.py', remote_file_path, prefix, filename, cred.site_user_name, cred.service_user_name, cred.password], stdout=PIPE)
             (out, err) = process.communicate()
             exit_code = process.wait()
-            if exit_code == -1:
+            if exit_code == -1 or 'NO SUCH FILE' in out:
+                print out
                 return HttpResponse(status=500)
             else:
                 out = out.splitlines(True)[1:]
@@ -534,6 +535,32 @@ def velo_save_file(request):
                 return HttpResponse(status=200)
             else:
                 print out, err
+                return HttpResponse(status=500)
+        except Exception as e:
+            print_debug(e)
+            return HttpResponse(status=500)
+    else:
+        return HttpResponse(status=404)
+
+
+@login_required(login_url='login')
+def velo_delete(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            print data
+            name = data['name']
+
+            cred = Credential.objects.get(
+                site_user_name=request.user, service="velo")
+
+            process = Popen(
+                ['python', './apps/velo/delete.py', name, cred.service_user_name, cred.password], stdout=PIPE)
+            (out, err) = process.communicate()
+            exit_code = process.wait()
+            if exit_code >= 0:
+                return HttpResponse(status=200)
+            else:
                 return HttpResponse(status=500)
         except Exception as e:
             print_debug(e)

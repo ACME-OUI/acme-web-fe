@@ -3,16 +3,13 @@ $(document).ready(function() {
 
 	/****************************************
 	 	Setup variables
-	 	***************************************/
-	// var docWidth = $(".tile-board").width();
-	// var docHeight = $(".tile-board").height();
+
+	 	These could probably all be put in a resource file somewhere
+	 ***************************************/
+
 	var docHeight, docWidth, maxCols, maxHeight, tileHeight, tileWidth;
 	calcMaxSize();
 
-	// var tileWidth = 50;
-	// var tileHeight = 50;
-	// var maxCols = Math.floor(docWidth/tileWidth)-1;
-	// var maxHeight = Math.floor(docHeight/tileHeight)-1;
 	$('.wrapper').width(maxCols * tileWidth);
 	$('.wrapper').height(maxHeight * tileHeight);
 	$('.tile-board').css({
@@ -24,28 +21,32 @@ $(document).ready(function() {
 	var header3 = '';
 	var contents = '';
 	var optionContents = '';
-	var header1 = ['<div class="tile-panel panel-default">',
-		' <div class="tile-panel-heading">',
-		'  <div class="panel-header-title text-center">',
-		'    <button type="button" class="btn btn-default btn-xs options" style="float:left;">',
-		'     <span class="fa fa-cog" aria-label="Options"></span>',
-		'    </button>',
-		'    <button type="button" class="btn btn-default btn-xs remove"  style="float:right;">',
-		'     <span class="fa fa-times" aria-label="Close"></span>',
-		'    </button>',
-		'     <p style="text-align: center">'
-	].join('');
+	var header1 = [	'<div class="tile-panel panel-default">',
+					' <div class="tile-panel-heading">',
+					'  <div class="panel-header-title text-center">',
+					'    <button type="button" class="btn btn-default btn-xs options" style="float:left;">',
+					'     <span class="fa fa-cog" aria-label="Options"></span>',
+					'    </button>',
+					'    <button type="button" class="btn btn-default btn-xs remove"  style="float:right;">',
+					'     <span class="fa fa-times" aria-label="Close"></span>',
+					'    </button>',
+					'     <p style="text-align: center">' ].join('');
 	// Widget Name
-	header2 = ['     <p>',
-		'   </div>',
-		'  </div>',
-		' </div>',
-		' <div class="tile-panel-body" data-direction="horizontal" data-mode="slid">',
-		'  <div class="tile-contents">'
-	].join('');
+	header2 = [		'     <p>',
+					'   </div>',
+					'  </div>',
+					' </div>',
+					' <div class="tile-panel-body" data-direction="horizontal" data-mode="slid">',
+					'  <div class="tile-contents">' ].join('');
 	// Widget Contents
 	contents += '  <p>The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men.</p>';
 	header3 += ' </div></div></div>';
+
+	var velo_context_menu_html = [	'<div id="velo_context_menu">',
+									'  <a href="#" id="velo_context_menu_delete">Delete</a>',
+									'  <a href="#" id="velo_context_menu_rename">Rename</a>',
+									'</div>' ].join('');
+
 	var dragStartX = 0;
 	var dragStartY = 0;
 	var dragStartSizeX = 0;
@@ -207,10 +208,10 @@ $(document).ready(function() {
 							if(code == 200){
 								content = [ '<div id="velo-file-tree">',
 											'   <div id="velo-options-bar">',
-											'       <button class="fa fa-floppy-o" id="velo-options-bar-save" title="Save"></button>',
-											'       <button class="fa fa-file-text-o" id="velo-options-bar-new-file" title="New File"></button>',
-											'       <button class="fa fa-folder-o" id="velo-options-bar-new-folder" title="New Folder"></button>',
-											'       <button class="fa fa-play-circle" id="velo-options-bar-start-run" title="Start Run"></button>',
+											'       <button class="fa fa-floppy-o velo-button" id="velo-options-bar-save" title="Save"></button>',
+											'       <button class="fa fa-file-text-o velo-button" id="velo-options-bar-new-file" title="New File"></button>',
+											'       <button class="fa fa-folder-o velo-button" id="velo-options-bar-new-folder" title="New Folder"></button>',
+											'       <button class="fa fa-play-circle velo-button" id="velo-options-bar-start-run" title="Start Run"></button>',
 											'   </div>',
 											'   <div id="mtree-container">',
 											'	    <ul class="mtree">',
@@ -219,6 +220,7 @@ $(document).ready(function() {
 											'</div>',
 											'<div id="velo-text-edit"',
 											'</div>'].join('');
+								
 								initFileTree();
 								var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + content + header3 + '</li>';
 								add_tile(new_tile, name + '_window', {
@@ -228,6 +230,13 @@ $(document).ready(function() {
 										nodeSearch(document.getElementById("node-search-name").value);
 									});
 								});
+								var background = '';
+								if(mode == 'day'){
+									background = 'rgb(192, 192, 192)';
+								} else{
+									background = 'rgb(1, 1, 1)';
+								}
+								$('#velo-options-bar').find(':button').css({'background-color': background});
 								$('#velo-options-bar-save').click(function(){
 									velo_save_file();
 								});
@@ -409,12 +418,22 @@ $(document).ready(function() {
 		    if (event.which == 13) {
 		    	newFileHtml = '<a href="#" id="velo-new-file"></a>';
 		    	var newFileName = document.getElementById('velo-new-file-text-input').value;
+		    	if(isFolder(newFileName)){
+		    		newFileName += '.txt';
+		    	}
 		    	$('#velo-new-file-text-input-form').remove();
 				$('#velo-new-file-text-input-list').append(newFileHtml);
 				$('#velo-new-file').text(newFileName);
 				$('.mtree-active').removeClass('mtree-active');
 				$('#velo-new-file-text-input-list').addClass('mtree-active');
-
+				var path = $('#velo-new-file').parent().parent().attr('data-path') + '/' + newFileName;
+				$('#velo-new-file').attr({
+					'data-path': path,
+					'id': ''
+				});
+				$('a[data-path="' + path + '"]').click(function(e){
+					getFile($(e.target).attr('data-path'));
+				})
 				initCodeMirror('');
 
 		    }
@@ -452,7 +471,7 @@ $(document).ready(function() {
 				$('.mtree').bind('contextmenu',function(e){
 					e.preventDefault();
 					if(e.button == 2){
-						alert('looks like we got a right click there');
+						velo_context_menu(e);
 					}
 				});
 
@@ -469,6 +488,64 @@ $(document).ready(function() {
 	function velo_start_run(){
 
 	}
+
+	function velo_context_menu(e){
+		$.getScript("static/js/spin.js", function() {
+			if (mode == 'night') {
+				var color = '#fff';
+			} else {
+				color = '#000';
+			}
+			opts.color = color; 
+			
+			var name = $(e.target).siblings().attr('data-path');
+			if(typeof name === 'undefined'){
+				name = $(e.target).attr('data-path');
+			}
+			$('body').append(velo_context_menu_html);
+			$('#velo_context_menu').offset({
+				'top': e.clientY,
+				'left': e.clientX
+			});
+			$('#velo_context_menu_delete').attr({
+				'data-name':name
+			});
+			$('#velo_context_menu_rename').attr({
+				'data-name':name
+			});
+			createMask('velo_context_menu', 0);
+			$('#velo_context_menu_delete').click(function(e){
+				var spinner = new Spinner(opts).spin();
+				document.getElementById('velo-file-tree').appendChild(spinner.el);
+				data = {
+					'name': $('#velo_context_menu_delete').attr('data-name')
+				};
+				get_data('velo_delete/', 'POST', data, function(response){
+					spinner.stop();
+					var target = $('ul[data-path="' + JSON.parse(data)['name'] + '"]');
+					if(target.length == 0){
+						target = $('a[data-path="' + JSON.parse(data)['name'] + '"]');
+					}
+					target.parent().fadeOut().queue(function(){
+						target.parent().remove();
+					});
+				}, function(response){
+					spinner.stop();
+					alert('delete failure');
+				});
+				fadeOutMask('velo_context_menu');
+			});
+			$('#velo_context_menu_rename').click(function(e){
+				var spinner = new Spinner(opts).spin();
+				document.getElementById('velo-file-tree').appendChild(spinner.el);
+
+				fadeOutMask('velo_context_menu');
+			});
+
+		});
+
+
+	}	
 
 	function initCodeMirror(text) {
 		$.getScript("static/js/codemirror.js", function() {
@@ -508,20 +585,12 @@ $(document).ready(function() {
 			opts.color = color; 
 			var spinner = new Spinner(opts).spin();
 			document.getElementById('velo-text-edit').appendChild(spinner.el);
-			id = id.replace(/_/g, '/');
-			id = id.replace(/-/g, ' ');
-			id = id.replace(/X/g, '_');
-			id = id.replace(/Z/g, '-');
-			id = id.substring(0, id.length -1);
 			var path = id.split('/');
-			id = '';
-			for(var i = 2; i < path.length; i++){
-				id += path[i] + '/';
-			}
-			id = id.substring(0, id.length -1);
-			console.log('attempting to get file:'+id);
+			filename = path.pop();
+			var path = path.join('/');
 			data = {
-				'file':id
+				'filename': filename,
+				'path': path
 			}
 			get_data('get_file/', 'POST', data, function(response){
 				spinner.stop();
@@ -580,55 +649,33 @@ $(document).ready(function() {
 						i--;
 						continue;
 					}
-					response[i] = response[i].replace(/-/g, 'Z');
-					response[i] = response[i].replace(/_/g, 'X');
-					response[i] = response[i].replace(/\ /g, '-');
-					response[i] = response[i].replace(/\//g, '_');
-					response[i] = response[i].replace('_User-Documents_', '_');
-					var path = response[i].split('_');
-					response[i] = '_';
-					for (var j = 1; j < path.length; j++) {
-						response[i] += path[j] + '_';
-					}
+					var path = response[i].split('/');
+					var name = path[path.length - 1];
 					if (isFolder(response[i])) {
-						path = response[i].split('_');
-						if (path.length > 3) {
-							var parentFolder = '_';
-							for (j = 1; j < path.length - 2; j++) {
-								parentFolder += path[j] + '_';
-							}
-							parentFolder = $('#' + parentFolder);
-							if (parentFolder.length == 0) {
-
-								$('.mtree').append('<li><a href="#">' + path[path.length - 2] + '</a><ul id="' + parentFolder.selector.substr(1) + '_' + path[path.length - 2] + '"></ul></li>');
-							}
-							var folderName = '';
-							for (j = 0; j < path.length - 1; j++) {
-								folderName += path[j] + '_';
-							}
-							var newFolderName = path[path.length - 2];
-							newFolderName = newFolderName.replace(/_/g, '/');
-							newFolderName = newFolderName.replace(/-/g, ' ');
-							newFolderName = newFolderName.replace(/X/g, '_');
-							newFolderName = newFolderName.replace(/Z/g, '-');
-
-							parentFolder.append('<li><a href="#">' + newFolderName + '</a><ul id="' + folderName + '"></ul></li>');
-						} else {
-							$('.mtree').append('<li><a href="#">' + path[path.length - 2] + '</a><ul id="_' + path[path.length - 2] + '_"></ul></li>');
+						var parentFolder = '/';
+						for (j = 1; j < path.length - 1; j++) {
+							parentFolder += path[j] + '/';
 						}
+						parentFolder = parentFolder.substring(0, parentFolder.length - 1);
+						var parentFolderEl = $('ul[data-path="' + parentFolder + '"]');
+						if(parentFolderEl.length == 0){
+							$('.mtree').append('<li><a href="#">' + path[path.length - 1] + '</a><ul data-path="' + response[i] + '"></ul></li>');
+							continue;
+						}
+						var folderPath = parentFolder + '/' + path[path.length - 1];
+						var folderName = path[path.length - 1];
+						parentFolderEl.append('<li><a href="#">' + folderName + '</a><ul data-path="' + folderPath + '"></ul></li>');
 
 					} else {
-						var path = response[i].split('_');
-						parentFolder = '_';
-						for (j = 1; j < path.length - 2; j++) {
-							parentFolder += path[j] + '_';
+						parentFolder = '/';
+						for (j = 1; j < path.length - 1; j++) {
+							parentFolder += path[j] + '/';
 						}
+						parentFolder = parentFolder.substring(0, parentFolder.length - 1);
+						$('ul[data-path="'+ parentFolder + '"]').append('<li><a href="#" data-path="' + response[i] + '">' + path[path.length - 1] + '</a></li>');
 
-						$('#' + parentFolder).append('<li><a href="#" id=' + response[i] + '>' + path[path.length - 2] + '</a></li>');
-						response[i] = response[i].replace('.', '\\\.');
-
-						$('#' + response[i]).click(function(event){
-							getFile(event.target.id);
+						$('a[data-path="' + response[i] + '"]').click(function(event){
+							getFile( $(event.target).attr('data-path') );
 						});
 					}
 				}
@@ -636,7 +683,7 @@ $(document).ready(function() {
 				$('.mtree').bind('contextmenu',function(e){
 					e.preventDefault();
 					if(e.button == 2){
-						alert('looks like we got a right click there');
+						velo_context_menu(e);
 					}
 				});
 
@@ -799,11 +846,6 @@ $(document).ready(function() {
 		});
 	}
 
-
-
-	function folderName(file) {
-		return file.split('/').pop();
-	}
 
 	function isFolder(file) {
 		if (file.split('.').pop() != file) {
@@ -2123,12 +2165,17 @@ $(document).ready(function() {
 		}
 	}
 
-	function createMask(id){
+	function createMask(id, opacity){
 		var mask = document.createElement('div');
 		$(mask).addClass('mask');
 		$(mask).attr({
 			'id': 'mask'
 		});
+		if(typeof opacity !== 'undefined'){
+			$(mask).css({
+				'opacity': opacity
+			});
+		}
 		$(mask).click(function() {
 			fadeOutMask(id);
 		});
@@ -2137,9 +2184,9 @@ $(document).ready(function() {
 	}
 
 	function fadeOutMask(id) {
-		$('#mask').fadeOut().queue(function() {
+		$('#' + id).remove();
+		$('#mask').fadeOut('fast').queue(function() {
 			$('#mask').remove();
-			$(id).remove();
 		});
 	}
 
@@ -2170,7 +2217,10 @@ $(document).ready(function() {
 			$('#velo-text-edit').css({
 				'background-color': '#141414'
 			});
-			codeMirror.setOption('theme', 'twilight');
+			if(typeof codeMirror === 'undefined'){
+			} else {
+				codeMirror.setOption('theme', 'twilight');
+			}
 		}
 		$('#velo-options-bar').find(':button').css({'background-color': 'rgb(1, 1, 1)'});
 	}
@@ -2202,7 +2252,10 @@ $(document).ready(function() {
 			$('#velo-text-edit').css({
 				'background-color': '#f7f7f7'
 			});
-			codeMirror.setOption('theme', '3024-day');
+			if(typeof codeMirror === 'undefined'){
+			} else {
+				codeMirror.setOption('theme', '3024-day');
+			}
 		}
 		$('#velo-options-bar').find(':button').css({'background-color': 'rgb(192, 192, 192)'});
 		

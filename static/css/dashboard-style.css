@@ -75,6 +75,18 @@ body {
     border-radius: 5px;
   }
 
+  #velo_context_menu{
+    width: 100px;
+    height: 70px;
+    border-color: black;
+    border-style: double;
+    border-width: 2px;
+    border-radius: 10px;
+    padding: 10px 10px 10px 10px;
+    z-index: 10000;
+    background: black;
+  }
+
 
 /*============================================================================
    Drop down menu 

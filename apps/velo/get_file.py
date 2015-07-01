@@ -15,7 +15,7 @@ def get_file(remote_file_path, local_path, filename, site_user, velo_username, p
             print content
             return 0
         else:
-            print 'NO SUCH FILE'
+            print 'NO SUCH FILE', remote_file_path, local_path
             return -1
     except:
         raise

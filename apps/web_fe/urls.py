@@ -19,6 +19,7 @@ urlpatterns = patterns('',
                        url(r'^get_file/', views.get_file),
                        url(r'^velo_save_file/', views.velo_save_file),
                        url(r'^velo_new_folder/', views.velo_new_folder),
+                       url(r'^velo_delete/', views.velo_delete),
 
                        url(r'^save_layout/', views.save_layout,
                            name='save_layout'),
