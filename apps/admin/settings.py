@@ -27,6 +27,10 @@ if os.getenv('build_on_travis', None):
     )
 
     VELO_PATH = 'static/java/Velo.jar'
+    
+    GITHUB_KEY = ''
+    JIRA_USER = ''
+    JIRA_PASSWORD = ''
 else:
     from local_settings import *  # noqa
 
