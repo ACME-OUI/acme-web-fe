@@ -25,6 +25,10 @@ ul.mtree a {
   transition: all 300ms ease-out;
 }
 
+.mtree-unsaved {
+  background: red !important;
+}
+
 ul.mtree.bubba ul {
   margin-left: 0;
 }
