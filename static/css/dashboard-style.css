@@ -53,9 +53,15 @@ body {
     float: left;
     width: 25%;
     height: 100%;
-    overflow-y: auto;
+    overflow-y: none;
     border: 1px solid black;
     border-radius: 5px;
+  }
+
+  #mtree-container {
+    overflow-y: auto;
+    height: calc(100% - 35px);
+    width: 100%;
   }
 
   #velo-text-edit {
@@ -67,6 +73,18 @@ body {
     overflow-y: auto;
     border: 1px solid black;
     border-radius: 5px;
+  }
+
+  #velo_context_menu{
+    width: 100px;
+    height: 70px;
+    border-color: black;
+    border-style: double;
+    border-width: 2px;
+    border-radius: 10px;
+    padding: 10px 10px 10px 10px;
+    z-index: 10000;
+    background: black;
   }
 
 
