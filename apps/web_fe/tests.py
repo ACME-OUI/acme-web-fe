@@ -58,7 +58,15 @@ class VeloServiceTest(TestCase):
     def test_get_valid_file(self):
 
         data = json.dumps({
-            'file': 'testAPI.py'
+            'text': 'This is text for the save_file test',
+            'filename': 'testSaveFile.txt'
+        })
+        response = self.client.post(
+            '/acme/velo_save_file/', content_type='application/json', data=data)
+
+        data = json.dumps({
+            'filename': 'testSaveFile.txt',
+            'path': '/User Documents/acmetest'
         })
         response = self.client.post(
             '/acme/get_file/', content_type='application/json', data=data)
@@ -67,11 +75,12 @@ class VeloServiceTest(TestCase):
     def test_get_bogus_file(self):
 
         data = json.dumps({
-            'file': 'THIS_FILE_DOES_NOT_EXIST'
+            'filename': 'THIS_FILE_DOES_NOT_EXIST',
+            'path': '/User Documents/acmetest'
         })
         response = self.client.post(
             '/acme/get_file/', content_type='application/json', data=data)
-        self.assertTrue('NO SUCH FILE' in response.content)
+        self.assertEquals(response.status_code, 500)
 
     def test_save_file(self):
 
@@ -92,6 +101,24 @@ class VeloServiceTest(TestCase):
         response = self.client.post(
             '/acme/velo_new_folder/', content_type='application/json', data=data)
         self.assertEquals(response.status_code, 200)
+
+    def test_delete_file(self):
+
+        data = json.dumps({
+            'text': 'This is text for the save_file test',
+            'filename': 'testSaveFile.txt'
+        })
+        response = self.client.post(
+            '/acme/velo_save_file/', content_type='application/json', data=data)
+        response = self.client.post(
+            '/acme/velo_delete/', content_type='application/json', data=json.dumps({'name': '/User Documents/acmetest/testSaveFile.txt'}))
+        data = json.dumps({
+            'filename': 'testSaveFile.txt',
+            'path': '/User Documents/acmetest'
+        })
+        response = self.client.post(
+            '/acme/get_file/', content_type='application/json', data=data)
+        self.assertEquals(response.status_code, 500)
 
 
 class ServiceCredentialTest(TestCase):
