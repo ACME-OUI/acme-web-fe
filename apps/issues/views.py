@@ -376,7 +376,6 @@ def github_jira_sync(request, json_data=None):
         else:
             return HttpResponse("Not tracking this issue")
 
-
     if json_data["action"] == "closed":
         # Grab the comments, check for a comment by the closer with time breakdown
         r = requests.get(issue["url"] + "/comments", headers={"Authorization": "token %s" % settings.GITHUB_KEY})
