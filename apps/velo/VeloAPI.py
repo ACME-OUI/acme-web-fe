@@ -105,6 +105,15 @@ class Velo:
         except:
             return -1
 
+    # download multiple files from velo
+    def download_files(self, filepaths, location):
+        destFolder = jpype.java.io.File(location)
+        for filepath in filepaths:
+            cmsfilepath = cms(filepath)
+            filesToDownload.add(cmsfilepath)
+        resMgr.bulkDownload(filesToDownload, destFolder)
+        print "Files downloaded"
+
     # download the job outputs
     def download_job_outputs(self, contextPathName, location):
         destFolder = jpype.java.io.File(location)
@@ -187,7 +196,17 @@ class Velo:
         for i in range(len(ress)):
             ret.append(ress[i].toString())
         return ret
-        # Velo.get_resources(self,folder.toString())
+
+    def delete_resource(self, resourcePath):  # delete single resource
+        cmsfilepath = cms(resourcePath)
+        resMgr.deleteResource(cmsfilepath)
+
+    def delete_resources(self, resources):  # delete multiple resources
+        resourceToDelete = jpype.java.util.ArrayList()
+        for res in resources:
+            cmsfilepath = cms(res)
+            resourceToDelete.add(cmsfilepath)
+        resMgr.deleteResources(resourceToDelete)
 
     def get_homefolder(self):  # get user's home folder
         folder = resMgr.getHomeFolder()
