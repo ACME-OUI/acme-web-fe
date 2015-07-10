@@ -13,7 +13,9 @@
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-    <link rel="shortcut icon" href="{% static "media/favicon.ico"   }%">
+    {% load staticfiles %}
+    <link rel="shortcut icon" href="{% static "media/favicon.ico"   %}">
+
     {% block extra_headers %} {% endblock %}
 
     <style type="text/css">
@@ -49,7 +51,7 @@
     </style>
 
 
-    <script src="{% static "js/bootstrap.min.js" }%"></script>
+    <script src="{% static "js/bootstrap.min.js" %}"></script>
   </head>
   <body role="document" class="day">
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">

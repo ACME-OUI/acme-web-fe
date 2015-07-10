@@ -23,7 +23,7 @@ Open Browser And Log In
     [Documentation]  Logs in and goes to the dashboard
     Open Browser  ${LOGIN URL}  ${BROWSER}
     Set Browser Implicit Wait  0.5
-    Maximize Browser Window
+    Set Window Size    1500    1500
     Title Should Be  login
     Input Text  username  testuser
     Input Text  password  testpass
