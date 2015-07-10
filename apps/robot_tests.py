@@ -1,6 +1,5 @@
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase as LiveServerTestCase
-from django.core.management import call_command
-from issues.models import *
+from issues.models import IssueSource
 from web_fe.models import Credential
 import robot
 import os
@@ -14,6 +13,10 @@ def init_db():
     User.objects.create_user('testuser', 'test@test.test', 'testpass')
     Credential(service="velo", site_user_name="testuser", service_user_name="acmetest", password="acmetest").save()
     issues_db()
+
+
+def dashboard_db():
+    pass
 
 
 def issues_db():
@@ -43,4 +46,4 @@ class RobotTest(LiveServerTestCase):
         Invoke robot tests
         """
         r_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "tests", "robot")
-        self.assertEqual(robot.run(r_path), 1, "Robot Tests failed")
+        self.assertEqual(robot.run(r_path), 0, "Robot Tests failed")

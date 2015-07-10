@@ -7,6 +7,17 @@ Test Teardown    Close Browser
 
 
 *** Testcases ***
+Save Non-Default Layout
+  Click Element             id=toggle-left-a
+  Click Button              id=provenance
+  Click Button              id=status
+  Click Button              id=science
+  Wait Until Page Contains Element  id=provenance_window
+  Click Button              id=save-layout
+  Input Text                id=layout-name  c
+  Click Button              id=save-btn
+  Alert Should Be Present   Layout saved
+
 Load Layout
   Click Element  id=toggle-left-a
   Click Button   id=load-layout
@@ -19,18 +30,10 @@ Load Layout
   Page Should Contain Element  id=status_window 
   Page Should Contain Element  id=science_window
 
-
-Save Non-Default Layout
-  Click Element             id=toggle-left-a
-  Click Button              id=save-layout
-  Input Text                id=layout-name  new_layout
-  Click Button              id=save-btn
-  Alert Should Be Present   layout saved
-
 Save Default Layout
   Click Element             id=toggle-left-a
   Click Button              id=save-layout
   Input Text                id=layout-name  new_default_layout
   Click Element             id=default
   Click Button              id=save-btn
-  Alert Should Be Present   layout saved
+  Alert Should Be Present   Layout saved

@@ -2070,12 +2070,12 @@ $(document).ready(function() {
 		get_data('load_layout/', 'GET', new Object(), function(request) {
 			//parse response
 			options = request;
-			createMask('.save-layout');
+			createMask('save-layout-menu');
 
 			//create load menu and populate with values
 			var loadMenu = document.createElement('div');
 			$(loadMenu).addClass('bvc');
-			$(loadMenu).addClass('save-layout');
+			$(loadMenu).attr({"id": 'save-layout-menu'}).addClass("save-layout");
 			var loadMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
 			loadMenuHtml += '<form name="load-layout-form" id="save-form">';
 			loadMenuHtml += 'Select Layout:<br><select id="select-layout">';
@@ -2094,7 +2094,7 @@ $(document).ready(function() {
 					'layout_name': name
 				};
 				get_data('load_layout/', 'POST', data, function(request) {
-					fadeOutMask('.save-layout');
+					fadeOutMask('save-layout-menu');
 					$('.tile').each(function() {
 						$(this).remove();
 					});
@@ -2106,7 +2106,7 @@ $(document).ready(function() {
 					loadLayout(layout, request.mode);
 				}, function() {
 					alert('failed to load layout');
-					fadeOutMask('.save-layout');
+					fadeOutMask('save-layout-menu');
 				});
 			});
 		}, function() {
