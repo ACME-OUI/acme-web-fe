@@ -32,8 +32,6 @@ def issues_db():
     s.required_info = "None"
     s.save()
 
-    call_command("getlabels")
-
 
 class RobotTest(LiveServerTestCase):
 
