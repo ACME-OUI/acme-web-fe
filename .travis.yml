@@ -14,4 +14,3 @@ before_script:
     - "pep8 --exclude=migrations --config=.pep8 apps"
 script:
     - "./manage.py test -v 2 --liveserver=localhost:8000"
-
