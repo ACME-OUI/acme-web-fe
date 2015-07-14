@@ -45,5 +45,6 @@ class RobotTest(LiveServerTestCase):
         """
         Invoke robot tests
         """
+
         r_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "tests", "robot")
         self.assertEqual(robot.run(r_path), 0, "Robot Tests failed")
