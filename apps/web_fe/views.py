@@ -13,7 +13,7 @@ from django.contrib.auth.models import Group
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
-from web_fe.models import TileLayout, Credential
+from web_fe.models import TileLayout, Credential, ESGFNode
 import sys
 import json
 import simplejson
@@ -238,40 +238,30 @@ def grid(request):
     import requests
     from StringIO import StringIO
 
-    try:
-        r = requests.get(
-            'http://pcmdi9.llnl.gov/esgf-node-manager/registration.xml', timeout=0.1)
-        if r.status_code == 404:
-            node_list = []
-            return HttpResponse(render_template(request, "web_fe/grid.html", {'nodes': node_list}))
-        f = StringIO(r.content)
-        out = open('scripts/registration.xml', 'w')
-        out.write(f.read())
-        out.close()
-    except Exception as e:
-
-        from requests.exceptions import ConnectTimeout, ConnectionError
-        if type(e) in (ConnectionError, ConnectTimeout):
-            node_list = []
-            return HttpResponse(render_template(request, "web_fe/grid.html", {'nodes': node_list}))
-        print_debug(e)
-
-    tree = ET.parse('scripts/registration.xml')
+    nodes = ESGFNode.objects.all()
+    if len(nodes) == 0:
+        # bootstrapping off of the australian node since its up
+        bootstrap_node = ESGFNode(host='esg2.nci.org.au')
+        bootstrap_node.save()
+        bootstrap_node.refresh()
+        print bootstrap_node.node_data
+    else:
+        for node in nodes:
+            node.refresh()
 
     node_name_list = []
-    node_peer_list = []
+    node_org_list = []
     node_url_list = []
     node_location_list = []
-    for node in tree.getroot():
-        attrs = node.attrib
-        node_name_list.append(attrs["shortName"])
-        node_peer_list.append(attrs["adminPeer"])
-        node_url_list.append(attrs["hostname"])
-        for child in node:
-            if child.tag[-11:] == "GeoLocation":
-                node_location_list.append(child.attrib["city"])
+    for node in ESGFNode.objects.all():
+        node_name_list.append(node.short_name)
+        node_org_list.append(node.node_data['children'][
+                             '{http://www.esgf.org/registry}Node']['attributes']['organization'])
+        node_url_list.append(node.host)
+        node_location_list.append(node.node_data['children'][
+                                  '{http://www.esgf.org/registry}Node']['children']['{http://www.esgf.org/registry}GeoLocation']['attributes']['city'])
     node_list = zip(
-        node_peer_list, node_url_list, node_name_list, node_location_list)
+        node_org_list, node_url_list, node_name_list, node_location_list)
 
     return HttpResponse(render_template(request, "web_fe/grid.html", {'nodes': node_list}))
 

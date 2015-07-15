@@ -198,8 +198,12 @@ class Velo:
         return ret
 
     def delete_resource(self, resourcePath):  # delete single resource
-        cmsfilepath = cms(resourcePath)
-        resMgr.deleteResource(cmsfilepath)
+        try:
+            cmsfilepath = cms(resourcePath)
+            resMgr.deleteResource(cmsfilepath)
+            return 0
+        except:
+            return -1
 
     def delete_resources(self, resources):  # delete multiple resources
         resourceToDelete = jpype.java.util.ArrayList()

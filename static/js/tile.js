@@ -435,7 +435,6 @@ $(document).ready(function() {
 					getFile($(e.target).attr('data-path'));
 				})
 				initCodeMirror('');
-
 		    }
 		});
 	}
