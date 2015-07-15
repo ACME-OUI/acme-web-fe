@@ -35,7 +35,3 @@ Open Browser And Log In
 Close Tile  [Arguments]  ${tilename}
     Click On Thing  ${tilename}_close
     Page Should Not Contain  ${tilename}
-
-Click On Thing    [Arguments]    ${identifier}
-    Focus    ${identifier}
-    Click Element    ${identifier}
