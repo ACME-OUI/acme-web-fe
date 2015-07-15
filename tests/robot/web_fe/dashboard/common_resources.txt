@@ -27,12 +27,15 @@ Open Browser And Log In
     Title Should Be  login
     Input Text  username  testuser
     Input Text  password  testpass
-    Click Button  Sign In
+    Click On Thing  id=sign-in
     Page Should Contain  successfully loged in
-    Click Element  xpath=/html/body/div[1]/div/div[2]/ul/li[3]/a
+    Click On Thing  xpath=/html/body/div[1]/div/div[2]/ul/li[3]/a
 
 
 Close Tile  [Arguments]  ${tilename}
-    Click Button  ${tilename}_close
+    Click On Thing  ${tilename}_close
     Page Should Not Contain  ${tilename}
 
+Click On Thing    [Arguments]    ${identifier}
+    Focus    ${identifier}
+    Click Element    ${identifier}
