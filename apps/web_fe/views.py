@@ -249,21 +249,7 @@ def dashboard(request):
         for node in nodes:
             node.refresh()
 
-    node_name_list = []
-    node_org_list = []
-    node_url_list = []
-    node_location_list = []
-    for node in ESGFNode.objects.all():
-        node_name_list.append(node.short_name)
-        node_org_list.append(node.node_data['children'][
-                             'Node']['attributes']['organization'])
-        node_url_list.append(node.host)
-        node_location_list.append(node.node_data['children'][
-                                  'Node']['children']['GeoLocation']['attributes']['city'])
-    node_list = zip(
-        node_org_list, node_url_list, node_name_list, node_location_list)
-
-    return HttpResponse(render_template(request, "web_fe/dashboard.html", {'nodes': node_list}))
+    return HttpResponse(render_template(request, "web_fe/dashboard.html", {}))
 
 
 @login_required(login_url='login')
@@ -334,9 +320,9 @@ def node_info(request):
             nodes = ESGFNode.objects.all()
             for node in nodes:
                 response[node.short_name] = node.node_data
-
+                response[node.short_name]['children']['Node']['attributes']['status'] = str(node.available)
+                response[node.short_name]['children']['Node']['attributes']['last_seen'] = str(node.last_seen)
             return HttpResponse(json.dumps(response))
-
         except Exception as e:
             print_debug(e)
             return HttpResponse(status=500)
@@ -350,10 +336,9 @@ def node_search(request):
     if request.method == 'POST':
         from pyesgf.search import SearchConnection
         searchString = json.loads(request.body)
+        print searchString
         if 'node' in searchString:
             if 'test_connection' in searchString:
-                if searchString['test_connection'] != 'true':
-                    return HttpResponse(status=500)
                 try:
                     conn = SearchConnection(searchString['node'], distrib=True)
                     context = conn.new_context()

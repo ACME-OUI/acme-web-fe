@@ -46,6 +46,9 @@ $(document).ready(function() {
 									'  <a href="#" id="velo_context_menu_delete">Delete</a>',
 									'  <a href="#" id="velo_context_menu_rename">Rename</a>',
 									'</div>' ].join('');
+	var esgf_context_menu_html = [	'<div id="esgf_context_menu">',
+									'  <a href="#" id="esgf_context_menu_search">Search</a>',
+									'</div>' ].join('');
 
 	var dragStartX = 0;
 	var dragStartY = 0;
@@ -492,6 +495,21 @@ $(document).ready(function() {
 
 	}
 
+	function esgf_context_menu(e){
+		$('body').append(esgf_context_menu_html);
+		$('#esgf_context_menu').offset({
+			'top': e.clientY,
+			'left': e.clientX
+		});
+		createMask('esgf_context_menu', 0);
+		$('#esgf_context_menu_search').click(function(e){
+			//$('#esgf_window .tile-contents').empty();
+			fadeOutMask('esgf_context_menu');
+			var target = $('#esgf-mtree .mtree-active ul').attr('data-node');
+			nodeSearch(target);
+		});
+	}
+
 	function velo_context_menu(e){
 		$.getScript("static/js/spin.js", function() {
 			if (mode == 'night') {
@@ -544,10 +562,7 @@ $(document).ready(function() {
 
 				fadeOutMask('velo_context_menu');
 			});
-
 		});
-
-
 	}	
 
 	function initCodeMirror(text) {
@@ -711,30 +726,42 @@ $(document).ready(function() {
 					$('#esgf-node-tree').append('<ul class="mtree" id="esgf-mtree"></ul>');
 					var node_array = Object.keys(response);
 					for(var i = 0; i < node_array.length; i++){
-						$('#esgf-mtree').append('<li><a href="#">' + node_array[i] + '</a><ul data-node="' + node_array[i] + '"></li>');
 						var node_attrib = Object.keys(response[node_array[i]]['attributes']);
 						//var node_child = Object.keys(response[node_array[i]]['children']);
 						var node_child = 'Node';
+						$('#esgf-mtree').append('<li><a href="#">' + node_array[i] + '</a><ul data-node="' + response[node_array[i]]['children'][node_child]['attributes']['hostname'] + '"></li>');
+
 						for(var j = 0; j < node_attrib.length; j++){
 							var attribute;
 							var children;
 							if(node_attrib[j] == 'timeStamp'){
 								var d = new Date(0); 
 								d.setUTCSeconds(response[node_array[i]]['attributes'][node_attrib[j]] / 1000);
-								attribute = d;
+								attribute = 'date node came online ' + d;
 							} else {
 								attribute = response[node_array[i]]['attributes'][node_attrib[j]];
 							}
 							children = Object.keys(response[node_array[i]]['children'][node_child]['attributes']);
 							
-							$('ul[data-node="' + node_array[i] + '"]').append('<li><a href="#">' + node_attrib[j] + ': ' + attribute + '</a></li>');
-							for(var k = 0; k < children.length; k++){
-								$('ul[data-node="' + node_array[i] + '"]').append('<li><a href="#">' + children[k] + ': ' + response[node_array[i]]['children'][node_child]['attributes'][children[k]] + '</a></li>');
+							$('ul[data-node="' + response[node_array[i]]['children'][node_child]['attributes']['hostname'] + '"]').append('<li>' + node_attrib[j] + ': ' + attribute + '</li>');					
+						}
+						for(var k = 0; k < children.length; k++){
+							if(children[k] == 'timeStamp'){
+								var d = new Date(0); 
+								d.setUTCSeconds(response[node_array[i]]['children'][node_child]['attributes'][children[k]] / 1000);
+								attribute = 'node online at ' + d;
+							} else {
+								attribute = response[node_array[i]]['children'][node_child]['attributes'][children[k]];
 							}
-							
+							$('ul[data-node="' + response[node_array[i]]['children'][node_child]['attributes']['hostname'] + '"]').append('<li>' + children[k] + ': ' + attribute + '</li>');
 						}
 					}
-
+					$('#esgf-mtree.mtree').bind('contextmenu',function(e){
+						e.preventDefault();
+						if(e.button == 2){
+							esgf_context_menu(e);
+						}
+					});
 					mtree();
 				}, function(response){
 					alert('Error getting node list');
