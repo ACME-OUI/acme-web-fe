@@ -186,10 +186,15 @@ $(document).ready(function() {
 			var name = $(this).attr('id');
 			var content = '';
 			switch (name) {
+				case 'esgf':
+					content = '<div id="esgf-node-tree"><div class="mtree"></div></div>';
+					initFileTree('esgf_window');
+					break;
+
 				case 'nodeSearch':
 
 					if ($('#nodeSelect_window').length == 0) {
-						var content = ['<form id="node-search-form>"',
+						content = ['<form id="node-search-form>"',
 							'<p>Node to search:</p><input type="text" style="color: #000;" id="node-search-name">',
 							'<input type="submit" value="Search" id="search-btn" style="color: #000;"><br>',
 							'</form>'
@@ -221,7 +226,7 @@ $(document).ready(function() {
 											'<div id="velo-text-edit"',
 											'</div>'].join('');
 								
-								initFileTree();
+								initFileTree('velo_window');
 								var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + content + header3 + '</li>';
 								add_tile(new_tile, name + '_window', {
 									ignore: 'true'
@@ -294,7 +299,7 @@ $(document).ready(function() {
 														'</div>',
 														'<div id="velo-text-edit"',
 														'</div>'].join('');
-											initFileTree();
+											initFileTree('velo_window');
 											var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + content + header3 + '</li>';
 											add_tile(new_tile, name + '_window', {
 												ignore: 'true'
@@ -602,7 +607,7 @@ $(document).ready(function() {
 		});
 	}
 
-	function initFileTree() {
+	function initFileTree(window_id) {
 
 		$.getScript("static/js/spin.js", function() {
 			if (mode == 'night') {
@@ -612,96 +617,112 @@ $(document).ready(function() {
 			}
 			opts.color = color; 
 			var spinner = new Spinner(opts).spin();
-			document.getElementById('velo_window').appendChild(spinner.el);
+			if(window_id == 'velo_window'){
+				document.getElementById('velo_window').appendChild(spinner.el);
+				/*
+					The server adds the CURRENT_USER/velo_credentials to the end of the folder request
+				*/
+				request = {
+					'file': '/User Documents/'
+				}
+				if (mode == 'day') {
+					var mtree_style = 'jet';
+					$('#velo-file-tree').css({
+						'background-color': '#FAFFFF'
+					});
+					$('#velo-text-edit').css({
+						'background-color': '#f7f7f7'
+					});
+				} else {
+					mtree_style = 'transit';
+					$('#velo-file-tree').css({
+						'background-color': '#111'
+					});
+					$('#velo-text-edit').css({
+						'background-color': '#141414'
+					});
+				}
+				$('.mtree').addClass(mtree_style);
 
-			/*
-				The server adds the CURRENT_USER/velo_credentials to the end of the folder request
-			*/
-			request = {
-				'file': '/User Documents/'
-			}
-			if (mode == 'day') {
-				var mtree_style = 'jet';
-				$('#velo-file-tree').css({
-					'background-color': '#FAFFFF'
-				});
-				$('#velo-text-edit').css({
-					'background-color': '#f7f7f7'
-				});
-			} else {
-				mtree_style = 'transit';
-				$('#velo-file-tree').css({
-					'background-color': '#111'
-				});
-				$('#velo-text-edit').css({
-					'background-color': '#141414'
-				});
-			}
-			$('.mtree').addClass(mtree_style);
-
-			get_data('get_folder/', 'POST', request, function(response) {
-				spinner.stop();
-				response.sort();
-				for (var i = 0; i < response.length; i++) {
-					if(response[i] == '/User Documents/' || response[i] == 'Velo Initialized...'){
-						response.splice(i, 1);
-						i--;
-						continue;
-					}
-					var path = response[i].split('/');
-					var name = path[path.length - 1];
-					if (isFolder(response[i])) {
-						var parentFolder = '/';
-						for (j = 1; j < path.length - 1; j++) {
-							parentFolder += path[j] + '/';
-						}
-						parentFolder = parentFolder.substring(0, parentFolder.length - 1);
-						var parentFolderEl = $('ul[data-path="' + parentFolder + '"]');
-						if(parentFolderEl.length == 0){
-							$('.mtree').append('<li><a href="#">' + path[path.length - 1] + '</a><ul data-path="' + response[i] + '"></ul></li>');
+				get_data('get_folder/', 'POST', request, function(response) {
+					spinner.stop();
+					response.sort();
+					for (var i = 0; i < response.length; i++) {
+						if(response[i] == '/User Documents/' || response[i] == 'Velo Initialized...'){
+							response.splice(i, 1);
+							i--;
 							continue;
 						}
-						var folderPath = parentFolder + '/' + path[path.length - 1];
-						var folderName = path[path.length - 1];
-						parentFolderEl.append('<li><a href="#">' + folderName + '</a><ul data-path="' + folderPath + '"></ul></li>');
+						var path = response[i].split('/');
+						var name = path[path.length - 1];
+						if (isFolder(response[i])) {
+							var parentFolder = '/';
+							for (j = 1; j < path.length - 1; j++) {
+								parentFolder += path[j] + '/';
+							}
+							parentFolder = parentFolder.substring(0, parentFolder.length - 1);
+							var parentFolderEl = $('ul[data-path="' + parentFolder + '"]');
+							if(parentFolderEl.length == 0){
+								$('.mtree').append('<li><a href="#">' + path[path.length - 1] + '</a><ul data-path="' + response[i] + '"></ul></li>');
+								continue;
+							}
+							var folderPath = parentFolder + '/' + path[path.length - 1];
+							var folderName = path[path.length - 1];
+							parentFolderEl.append('<li><a href="#">' + folderName + '</a><ul data-path="' + folderPath + '"></ul></li>');
 
-					} else {
-						parentFolder = '/';
-						for (j = 1; j < path.length - 1; j++) {
-							parentFolder += path[j] + '/';
+						} else {
+							parentFolder = '/';
+							for (j = 1; j < path.length - 1; j++) {
+								parentFolder += path[j] + '/';
+							}
+							parentFolder = parentFolder.substring(0, parentFolder.length - 1);
+							$('ul[data-path="'+ parentFolder + '"]').append('<li><a href="#" data-path="' + response[i] + '">' + path[path.length - 1] + '</a></li>');
+
+							$('a[data-path="' + response[i] + '"]').click(function(event){
+								getFile( $(event.target).attr('data-path') );
+							});
 						}
-						parentFolder = parentFolder.substring(0, parentFolder.length - 1);
-						$('ul[data-path="'+ parentFolder + '"]').append('<li><a href="#" data-path="' + response[i] + '">' + path[path.length - 1] + '</a></li>');
-
-						$('a[data-path="' + response[i] + '"]').click(function(event){
-							getFile( $(event.target).attr('data-path') );
-						});
 					}
-				}
 
-				$('.mtree').bind('contextmenu',function(e){
-					e.preventDefault();
-					if(e.button == 2){
-						velo_context_menu(e);
-					}
+					mtree();
+
+					$('.mtree').bind('contextmenu',function(e){
+						e.preventDefault();
+						if(e.button == 2){
+							velo_context_menu(e);
+						}
+					});
+				}, function() {
+					spinner.stop();
+					alert('error getting home folder');
 				});
+			}
+			else if(window_id == 'esgf_window'){
+				document.getElementById('esgf_window').appendChild(spinner.el);
+				get_data('node_info/', 'GET', {}, function(response){
+					spinner.stop();
+					console.log(response.keys());
 
+				}, function(response){
+					alert('Error getting node list');
+					spinner.stop();
+				});
+			}
+			
 
+			function mtree(){
 				/*
-					The following is copied from mtree.js
+				The following is copied from mtree.js
 				*/
 				// mtree.js
 				// Only apply if mtree list exists
 				if ($('ul.mtree').length) {
-
-
 					// Settings
 					var collapsed = true; // Start with collapsed menu (only level 1 items visible)
 					var close_same_level = true; // Close elements on same level when opening new node.
 					var duration = 400; // Animation duration should be tweaked according to easing.
 					var listAnim = true; // Animate separate list items on open/close element (velocity.js only).
 					var easing = 'easeOutQuart'; // Velocity.js only, defaults to 'swing' with jquery animation.
-
 
 					// Set initial styles 
 					$('.mtree ul').css({
@@ -837,10 +858,7 @@ $(document).ready(function() {
 				/*
 					End mtree.js
 				*/
-			}, function() {
-				spinner.stop();
-				alert('error getting home folder');
-			});
+			}
 
 		});
 	}

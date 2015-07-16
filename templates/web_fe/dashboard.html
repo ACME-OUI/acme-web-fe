@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %} Gridster Demo {% endblock %}
+{% block extra_headers %}
+
+{% load staticfiles %} 
+
+  <!-- Metro -->
+    <link rel="stylesheet" type="text/css" href="{% static "css/MetroJs.css" %}">
+    <script type="text/javascript" src="{% static "js/MetroJs.js" %}"></script>
+
+  <!-- Custom Grid -->
+    <link rel="stylesheet" type="text/css" href="{% static "css/dashboard-style.css" %}">
+    <script type="text/javascript" src="{% static "js/grid_layouts.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/dashboard.js" %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static "css/tile.css" %}">
+
+  <!-- Bootstrap -->
+    <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.js"></script>
+  
+  <!-- Font Awesome -->
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+  <!-- Slick Carousel -->
+    <script type="text/javascript" src="{% static "js/slick.js" %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static "css/slick.css" %}"/>
+    <link rel="stylesheet" href="{% static "css/slick-theme.css" %}">
+
+  <!-- Code Mirror -->
+  <link rel="stylesheet" href="{% static "css/twilight.css" %}">
+  <link rel="stylesheet" href="{% static "css/3024-day.css" %}">
+  <link rel="stylesheet" href="{% static "css/codemirror.css" %}">
+
+  <!-- mTree -->
+  <link rel="stylesheet" href="{% static "css/mtree.css" %}">
+  <script src='http://cdnjs.cloudflare.com/ajax/libs/velocity/0.2.1/jquery.velocity.min.js'></script> 
+{% endblock %}
+
+
+{% block new_button_left_link%}
+    <li class="navbar-left" id="toggle-slide-left" style="position: fixed; left: 10px;"><a id="toggle-left-a" href="#">Open Menu</a></li>
+{% endblock %}
+
+{% block dropmenu %}
+
+  <nav class="menu" id="slide-menu-left" style="top: 50px; z-index:22;">
+    <ul>
+      <li><button type="button" class="btn menu-btn slide-btn" id="esgf">ESGF</button></li>
+      <li><button type="button" class="btn menu-btn slide-btn" id="velo">Velo</button></li>
+      <li><button type="button" class="btn menu-btn slide-btn" id="cdat">CDAT</button></li>
+    </ul>
+    <br>
+    <button type="button" class="btn menu-btn" id="dark-mode-toggle">Dark mode is off</button>    
+    <button type="button" class="btn menu-btn" id="save-layout">Store Current Layout</button>   
+    <button type="button" class="btn menu-btn" id="load-layout">Load Previous Layout</button>   
+  </nav> <!-- Nav left menu -->
+
+  <div class="wrapper" id="wrapper">
+    <div class="tile-board">
+      <ul class="tile-holder">
+      </ul>
+    </div>
+  </div> 
+  
+{% endblock %}
+
+{% block content %}  
+{% endblock %}
