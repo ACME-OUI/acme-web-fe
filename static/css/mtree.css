@@ -1,7 +1,7 @@
 ul.mtree {
   opacity: 0;
   margin-left: 0;
-  padding: 1.2em;
+  padding: 0.2em;
   height: 100%;
 }
 ul.mtree ul {
@@ -37,7 +37,7 @@ ul.mtree.bubba ul li {
 }
 ul.mtree.bubba li.mtree-node > a:after {
   content: '›';
-  margin-left: .5em;
+  margin-left: .2em;
   font-weight: normal;
 }
 ul.mtree.bubba li.mtree-node > a {
@@ -91,7 +91,7 @@ ul.mtree.skinny a:hover {
 }
 ul.mtree.skinny li.mtree-node:before {
   float: left;
-  margin-left: .5em;
+  margin-left: .2em;
   zoom: .8;
   margin-top: .1em;
   color: #777;
@@ -201,19 +201,19 @@ ul.mtree.jet li > a:hover {
   color: #FFF;
 }
 ul.mtree.jet a {
-  padding: 5px 0px 5px 1em;
+  padding: 5px 0px 5px 0.8em;
 }
 ul.mtree.jet li li > a {
-  padding-left: 2em;
+  padding-left: 1.5em;
 }
 ul.mtree.jet li li li > a {
-  padding-left: 3em;
+  padding-left: 2em;
 }
 ul.mtree.jet li li li li > a {
-  padding-left: 4em;
+  padding-left: 2.5em;
 }
 ul.mtree.jet li li li li li > a {
-  padding-left: 5em;
+  padding-left: 3em;
 }
 
 ul.mtree.nix {

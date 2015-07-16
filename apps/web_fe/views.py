@@ -13,7 +13,7 @@ from django.contrib.auth.models import Group
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
-from web_fe.models import TileLayout, Credential
+from web_fe.models import TileLayout, Credential, ESGFNode
 import sys
 import json
 import simplejson
@@ -232,48 +232,38 @@ def jspanel(request):
 
 
 @login_required(login_url='login')
-def grid(request):
+def dashboard(request):
     ''' For demo purposes this is loading a local file '''
     import xml.etree.ElementTree as ET
     import requests
     from StringIO import StringIO
 
-    try:
-        r = requests.get(
-            'http://pcmdi9.llnl.gov/esgf-node-manager/registration.xml', timeout=0.1)
-        if r.status_code == 404:
-            node_list = []
-            return HttpResponse(render_template(request, "web_fe/grid.html", {'nodes': node_list}))
-        f = StringIO(r.content)
-        out = open('scripts/registration.xml', 'w')
-        out.write(f.read())
-        out.close()
-    except Exception as e:
-
-        from requests.exceptions import ConnectTimeout, ConnectionError
-        if type(e) in (ConnectionError, ConnectTimeout):
-            node_list = []
-            return HttpResponse(render_template(request, "web_fe/grid.html", {'nodes': node_list}))
-        print_debug(e)
-
-    tree = ET.parse('scripts/registration.xml')
+    nodes = ESGFNode.objects.all()
+    if len(nodes) == 0:
+        # bootstrapping off of the australian node since its up
+        bootstrap_node = ESGFNode(host='esg2.nci.org.au')
+        bootstrap_node.save()
+        bootstrap_node.refresh()
+        print bootstrap_node.node_data
+    else:
+        for node in nodes:
+            node.refresh()
 
     node_name_list = []
-    node_peer_list = []
+    node_org_list = []
     node_url_list = []
     node_location_list = []
-    for node in tree.getroot():
-        attrs = node.attrib
-        node_name_list.append(attrs["shortName"])
-        node_peer_list.append(attrs["adminPeer"])
-        node_url_list.append(attrs["hostname"])
-        for child in node:
-            if child.tag[-11:] == "GeoLocation":
-                node_location_list.append(child.attrib["city"])
+    for node in ESGFNode.objects.all():
+        node_name_list.append(node.short_name)
+        node_org_list.append(node.node_data['children'][
+                             'Node']['attributes']['organization'])
+        node_url_list.append(node.host)
+        node_location_list.append(node.node_data['children'][
+                                  'Node']['children']['GeoLocation']['attributes']['city'])
     node_list = zip(
-        node_peer_list, node_url_list, node_name_list, node_location_list)
+        node_org_list, node_url_list, node_name_list, node_location_list)
 
-    return HttpResponse(render_template(request, "web_fe/grid.html", {'nodes': node_list}))
+    return HttpResponse(render_template(request, "web_fe/dashboard.html", {'nodes': node_list}))
 
 
 @login_required(login_url='login')
@@ -338,72 +328,15 @@ def load_layout(request):
 
 @login_required(login_url='login')
 def node_info(request):
-    if request.method == 'POST':
+    if request.method == 'GET':
         try:
-            from xml.etree.ElementTree import parse
-            tree = parse('scripts/registration.xml')
-            root = tree.getroot()
-
-            request_data = json.loads(request.body)
-            if 'node' not in request_data:
-                return HttpResponse(status=500)
-            name = request_data['node']
-
             response = {}
-            found_node = False
-            for node in root:
-                if node.attrib['shortName'] == name:
-                    found_node = True
-                    if 'organization' in node.attrib:
-                        response['org'] = node.attrib['organization']
-                    if 'namespace' in node.attrib:
-                        response['namespace'] = node.attrib['namespace']
-                    if 'supportEmail' in node.attrib:
-                        response['email'] = node.attrib['supportEmail']
-                    if 'ip' in node.attrib:
-                        response['ip'] = node.attrib['ip']
-                    if 'longName' in node.attrib:
-                        response['longName'] = node.attrib['longName']
-                    if 'version' in node.attrib:
-                        response['version'] = node.attrib['version']
-                    if 'shortNamep' in node.attrib:
-                        response['shortName'] = name
-                    if 'adminPeer' in node.attrib:
-                        response['adminPeer'] = node.attrib['adminPeer']
-                    if 'hostname' in node.attrib:
-                        response['hostname'] = node.attrib['hostname']
+            nodes = ESGFNode.objects.all()
+            for node in nodes:
+                response[node.short_name] = node.node_data
 
-                    for child in list(node):
-                        if child.tag[-len('AuthorizationService'):] == "AuthorizationService":
-                            response['authService'] = child.attrib["endpoint"]
-                        if child.tag[-len('GeoLocation'):] == "GeoLocation":
-                            response['location'] = child.attrib["city"]
-                        if child.tag[-len('Metrics'):] == "Metrics":
-                            for gchild in list(child):
-                                if gchild.tag[-len('DownloadedData'):] == "DownloadedData":
-                                    response['dataDownCount'] = gchild.attrib[
-                                        'count']
-                                    response['dataDownSize'] = gchild.attrib[
-                                        'size']
-                                    response['dataDownUsers'] = gchild.attrib[
-                                        'users']
-                                if gchild.tag[-len('RegisteredUsers'):] == "RegisteredUsers":
-                                    response['registeredUsers'] = gchild.attrib[
-                                        'count']
+            return HttpResponse(json.dumps(response))
 
-                    from pyesgf.search import SearchConnection
-                    conn = SearchConnection(
-                        'http://' + response['hostname'] + '/esg-search/', distrib=True)
-                    try:
-                        conn.get_shard_list()
-                        response['status'] = 'up'
-                    except Exception as e:
-                        print repr(e)
-                        response['status'] = 'down'
-
-                    return HttpResponse(json.dumps(response))
-            if not found_node:
-                return HttpResponse(status=501)
         except Exception as e:
             print_debug(e)
             return HttpResponse(status=500)

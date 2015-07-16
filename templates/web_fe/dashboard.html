@@ -11,7 +11,7 @@
   <!-- Custom Grid -->
     <link rel="stylesheet" type="text/css" href="{% static "css/dashboard-style.css" %}">
     <script type="text/javascript" src="{% static "js/grid_layouts.js" %}"></script>
-    <script type="text/javascript" src="{% static "js/tile.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/dashboard.js" %}"></script>
     <link rel="stylesheet" type="text/css" href="{% static "css/tile.css" %}">
 
   <!-- Bootstrap -->
@@ -38,46 +38,17 @@
 
 {% block new_button_left_link%}
     <li class="navbar-left" id="toggle-slide-left" style="position: fixed; left: 10px;"><a id="toggle-left-a" href="#">Open Menu</a></li>
-    <li class="navbar-left" id="drop-down-tab" style="position: fixed; left: 80px;"><a style="color: #000;" href="#">Node List</a></li>
 {% endblock %}
 
 {% block dropmenu %}
 
-<!-- Hidden node menu-->
-<div id="drop-down-menu" style="width: 90%; height:130px; ">
-  <div class="node-carousel" style="width:90%; margin: 0 auto 0 auto;">
-      {% for peer, url, name, location in nodes %}
-        <div class="item-holder" style="padding-left: 10px; background-color: #1E70E3;">
-          <p class="node-item">Node: <a href="#">{{name}}</a></p>
-          <p>AdminPeer: {{peer}}</p>
-          <p>Location: {{location}}</p>
-          <p>Url: <a href=http://{{url}} target="_blank">{{url}}</a></p>
-        </div>
-      {% endfor %}
-  </div> <!-- end carousel -->
-</div><!-- end node menu -->
-
   <nav class="menu" id="slide-menu-left" style="top: 50px; z-index:22;">
     <ul>
-      <li><button type="button" class="btn menu-btn slide-btn" id="provenance">Provenance Capture</button></li>
-      <li><button type="button" class="btn menu-btn slide-btn" id="status">Status Messages</button></li>
-      <li><button type="button" class="btn menu-btn slide-btn" id="science">Science Input</button></li>
-      <li><button type="button" class="btn menu-btn slide-btn" id="nodeSearch">Node Search</button></li>
-      <li><button type="button" class="btn menu-btn slide-btn" id="heatMap">Heat Map</button></li>
+      <li><button type="button" class="btn menu-btn slide-btn" id="esgf">ESGF</button></li>
       <li><button type="button" class="btn menu-btn slide-btn" id="velo">Velo</button></li>
-      <li><button type="button" class="btn menu-btn slide-btn" id="nodeSelect">Node Selector</button></li>
-      <li><button type="button" class="btn menu-btn slide-btn" id="cdat">CDATWeb Analysis</button></li>
-      <li><button type="button" class="btn menu-btn slide-btn" id="charting">Charting System Status</button></li>
+      <li><button type="button" class="btn menu-btn slide-btn" id="cdat">CDAT</button></li>
     </ul>
     <br>
-    <form>
-      <label for="LayoutStyle" style="color: #000;">Layout Style</label>
-      <select name="LayoutStyle" id="LayoutStyle" class="input">
-        <option value="balanced">Balanced</option>
-        <option value="left-weighted">Left Weighted</option>
-        <option value="right-weighted">Right Weighted</option>
-      </select>
-    </form>
     <button type="button" class="btn menu-btn" id="dark-mode-toggle">Dark mode is off</button>    
     <button type="button" class="btn menu-btn" id="save-layout">Store Current Layout</button>   
     <button type="button" class="btn menu-btn" id="load-layout">Load Previous Layout</button>   
