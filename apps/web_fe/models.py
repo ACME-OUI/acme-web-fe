@@ -1,5 +1,6 @@
 from django.db import models
 from jsonfield import JSONField
+import json
 from django.contrib.auth.models import User
 import xml.etree.ElementTree as ET
 import requests
@@ -33,15 +34,20 @@ class ESGFNode(models.Model):
     def refresh(self):
         r = requests.get(
             'http://' + self.host + '/esgf-node-manager/registration.xml', timeout=1)
-        if r.status_code == 404:
+        if r.status_code != 200:
             self.available = False
             self.save()
             return
         self.available = True
         self.last_seen = datetime.datetime.now()
-        tree = ET.parse(StringIO(r.content))
+        node_xml = r.content
+        tree = ET.parse(StringIO(node_xml))
         self.node_data = self.xml_to_json(tree.getroot())
-        self.short_name = self.node_data['children']['{http://www.esgf.org/registry}Node']['attributes']['shortName']
+        self.node_data = json.dumps(self.node_data).replace(
+            '{http://www.esgf.org/registry}', '')
+        self.node_data = json.loads(self.node_data)
+        self.short_name = self.node_data['children'][
+            'Node']['attributes']['shortName']
         self.save()
 
     def xml_to_json(self, node):

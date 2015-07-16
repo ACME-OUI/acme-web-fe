@@ -187,7 +187,7 @@ $(document).ready(function() {
 			var content = '';
 			switch (name) {
 				case 'esgf':
-					content = '<div id="esgf-node-tree"><div class="mtree"></div></div>';
+					content = '<div id="esgf-node-tree"></div>';
 					initFileTree('esgf_window');
 					break;
 
@@ -218,8 +218,8 @@ $(document).ready(function() {
 											'       <button class="fa fa-folder-o velo-button" id="velo-options-bar-new-folder" title="New Folder"></button>',
 											'       <button class="fa fa-play-circle velo-button" id="velo-options-bar-start-run" title="Start Run"></button>',
 											'   </div>',
-											'   <div id="mtree-container">',
-											'	    <ul class="mtree">',
+											'   <div id="velo-mtree-container">',
+											'	    <ul class="mtree" id="velo-mtree">',
 											'	    </ul>',
 											'   </div>',
 											'</div>',
@@ -294,7 +294,7 @@ $(document).ready(function() {
 														'       <button class="fa fa-folder-o" id="velo-options-bar-new-folder" title="New Folder"></button>',
 														'       <button class="fa fa-play-circle" id="velo-options-bar-start-run" title="Start Run"></button>',
 														'   </div>',
-														'	<ul class="mtree">',
+														'	<ul class="mtree" id="velo-mtree">',
 														'	</ul>',
 														'</div>',
 														'<div id="velo-text-edit"',
@@ -390,9 +390,8 @@ $(document).ready(function() {
 				var spinner = new Spinner(opts).spin();
 				document.getElementById('velo-text-edit').appendChild(spinner.el);
 
-				var filename = $('.mtree-active').find(':first-child').text();
-				var remote_path = $('.mtree-active').find(':first-child').attr('id');
-				remote_path = remote_path.replace('_', '/');
+				var filename = $('#velo-mtree.mtree-active').find(':first-child').text();
+				var remote_path = $('#velo-mtree.mtree-active').find(':first-child').attr('data-path');
 				var text = codeMirror.getValue();
 				var outgoing_request = {
 					text: text,
@@ -403,7 +402,7 @@ $(document).ready(function() {
 				get_data('velo_save_file/', 'POST', outgoing_request, function(){
 					spinner.stop();
 					alert('file saved!');
-					$('.mtree-active > a').removeClass('mtree-unsaved');
+					$('#velo-mtree.mtree-active > a').removeClass('mtree-unsaved');
 				}, function(){
 					spinner.stop();
 					alert('failed to save file');
@@ -418,7 +417,7 @@ $(document).ready(function() {
 								'    	<input type="text" placeholder="New File Name" id="velo-new-file-text-input"></input>',
 								'    </form>',
 								'</li>'].join('');
-		$('.mtree-level-1').prepend(newFileHtml);
+		$('#velo-mtree.mtree-level-1').prepend(newFileHtml);
 		$("#velo-new-file-text-input").keypress(function(event) {
 		    if (event.which == 13) {
 		    	newFileHtml = '<a href="#" id="velo-new-file"></a>';
@@ -429,7 +428,7 @@ $(document).ready(function() {
 		    	$('#velo-new-file-text-input-form').remove();
 				$('#velo-new-file-text-input-list').append(newFileHtml);
 				$('#velo-new-file').text(newFileName);
-				$('.mtree-active').removeClass('mtree-active');
+				$('#velo-mtree.mtree-active').removeClass('mtree-active');
 				$('#velo-new-file-text-input-list').addClass('mtree-active');
 				var path = $('#velo-new-file').parent().parent().attr('data-path') + '/' + newFileName;
 				$('#velo-new-file').attr({
@@ -450,7 +449,7 @@ $(document).ready(function() {
 								'    	<input type="text" placeholder="New Folder Name" id="velo-new-folder-text-input"></input>',
 								'    </form>',
 								'</li>'].join('');
-		$('.mtree-level-1').prepend(newFolderHtml);
+		$('#velo-mtree.mtree-level-1').prepend(newFolderHtml);
 		$("#velo-new-folder-text-input").keypress(function(event) {
 		    if (event.which == 13) {
 		        newFolderHtml = '<a href="#" id="new-velo-folder"></a><ul class="mtree-level-2" style="overflow: hidden; height: 0px; display: none;"></ul>';
@@ -472,7 +471,7 @@ $(document).ready(function() {
 					}
 				});
 
-				$('.mtree').bind('contextmenu',function(e){
+				$('#velo-mtree.mtree').bind('contextmenu',function(e){
 					e.preventDefault();
 					if(e.button == 2){
 						velo_context_menu(e);
@@ -574,7 +573,7 @@ $(document).ready(function() {
 	}
 
 	function codeMirrorTextChanged(event){
-		$('.mtree-active > a').addClass('mtree-unsaved');
+		$('#velo-mtree.mtree-active > a').addClass('mtree-unsaved');
 	}
 
 
@@ -617,6 +616,29 @@ $(document).ready(function() {
 			}
 			opts.color = color; 
 			var spinner = new Spinner(opts).spin();
+			if (mode == 'day') {
+				var mtree_style = 'jet';
+				$('#velo-file-tree').css({
+					'background-color': '#FAFFFF'
+				});
+				$('#esgf-node-tree').css({
+					'background-color': '#FAFFFF'
+				});
+				$('#velo-text-edit').css({
+					'background-color': '#f7f7f7'
+				});
+			} else {
+				mtree_style = 'transit';
+				$('#velo-file-tree').css({
+					'background-color': '#111'
+				});
+				$('#esgf-node-tree').css({
+					'background-color': '#111'
+				});
+				$('#velo-text-edit').css({
+					'background-color': '#141414'
+				});
+			}
 			if(window_id == 'velo_window'){
 				document.getElementById('velo_window').appendChild(spinner.el);
 				/*
@@ -625,24 +647,8 @@ $(document).ready(function() {
 				request = {
 					'file': '/User Documents/'
 				}
-				if (mode == 'day') {
-					var mtree_style = 'jet';
-					$('#velo-file-tree').css({
-						'background-color': '#FAFFFF'
-					});
-					$('#velo-text-edit').css({
-						'background-color': '#f7f7f7'
-					});
-				} else {
-					mtree_style = 'transit';
-					$('#velo-file-tree').css({
-						'background-color': '#111'
-					});
-					$('#velo-text-edit').css({
-						'background-color': '#141414'
-					});
-				}
-				$('.mtree').addClass(mtree_style);
+				
+				$('#velo-mtree.mtree').addClass(mtree_style);
 
 				get_data('get_folder/', 'POST', request, function(response) {
 					spinner.stop();
@@ -663,7 +669,7 @@ $(document).ready(function() {
 							parentFolder = parentFolder.substring(0, parentFolder.length - 1);
 							var parentFolderEl = $('ul[data-path="' + parentFolder + '"]');
 							if(parentFolderEl.length == 0){
-								$('.mtree').append('<li><a href="#">' + path[path.length - 1] + '</a><ul data-path="' + response[i] + '"></ul></li>');
+								$('#velo-mtree.mtree').append('<li><a href="#">' + path[path.length - 1] + '</a><ul data-path="' + response[i] + '"></ul></li>');
 								continue;
 							}
 							var folderPath = parentFolder + '/' + path[path.length - 1];
@@ -686,7 +692,7 @@ $(document).ready(function() {
 
 					mtree();
 
-					$('.mtree').bind('contextmenu',function(e){
+					$('#velo-mtree.mtree').bind('contextmenu',function(e){
 						e.preventDefault();
 						if(e.button == 2){
 							velo_context_menu(e);
@@ -701,14 +707,42 @@ $(document).ready(function() {
 				document.getElementById('esgf_window').appendChild(spinner.el);
 				get_data('node_info/', 'GET', {}, function(response){
 					spinner.stop();
-					console.log(response.keys());
+					$('#esgf-node-tree.mtree').addClass(mtree_style);
+					$('#esgf-node-tree').append('<ul class="mtree" id="esgf-mtree"></ul>');
+					var node_array = Object.keys(response);
+					for(var i = 0; i < node_array.length; i++){
+						$('#esgf-mtree').append('<li><a href="#">' + node_array[i] + '</a><ul data-node="' + node_array[i] + '"></li>');
+						var node_attrib = Object.keys(response[node_array[i]]['attributes']);
+						//var node_child = Object.keys(response[node_array[i]]['children']);
+						var node_child = 'Node';
+						for(var j = 0; j < node_attrib.length; j++){
+							var attribute;
+							var children;
+							if(node_attrib[j] == 'timeStamp'){
+								var d = new Date(0); 
+								d.setUTCSeconds(response[node_array[i]]['attributes'][node_attrib[j]] / 1000);
+								attribute = d;
+							} else {
+								attribute = response[node_array[i]]['attributes'][node_attrib[j]];
+							}
+							children = Object.keys(response[node_array[i]]['children'][node_child]['attributes']);
+							
+							$('ul[data-node="' + node_array[i] + '"]').append('<li><a href="#">' + node_attrib[j] + ': ' + attribute + '</a></li>');
+							for(var k = 0; k < children.length; k++){
+								$('ul[data-node="' + node_array[i] + '"]').append('<li><a href="#">' + children[k] + ': ' + response[node_array[i]]['children'][node_child]['attributes'][children[k]] + '</a></li>');
+							}
+							
+						}
+					}
 
+					mtree();
 				}, function(response){
 					alert('Error getting node list');
 					spinner.stop();
 				});
 			}
 			
+
 
 			function mtree(){
 				/*
