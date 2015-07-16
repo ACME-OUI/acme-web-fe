@@ -67,24 +67,15 @@ class Velo:
         except:
             return -1
 
-    def upload_file(self, location, filename):  # upload file in velo
+    # upload file in velo
+    def upload_file(self, remote_path, local_path, filename):
         try:
-            fileObj = jpype.java.io.File(location + "/" + filename)
-            homeFolder = Velo.get_homefolder(self)
-            cmspath = homeFolder.append(filename)
-            fileServerMap.put(fileObj, cmspath)
-            # velo.uploadFile(location, filename , fileServerMap, None)
+            fileObj = jpype.java.io.File(local_path + "/" + filename)
+            cmsfilepath = cms(remote_path).append(filename)
+            fileServerMap.put(fileObj, cmsfilepath)
             resMgr.bulkUpload(fileServerMap, None)
             return 0
-        except Exception as e:
-            import traceback
-            print '1', e.__doc__
-            print '2', sys.exc_info()
-            print '3', sys.exc_info()[0]
-            print '4', sys.exc_info()[1]
-            print '5', traceback.tb_lineno(sys.exc_info()[2])
-            ex_type, ex, tb = sys.exc_info()
-            print '6', traceback.print_tb(tb)
+        except:
             return -1
 
     # download file from velo
