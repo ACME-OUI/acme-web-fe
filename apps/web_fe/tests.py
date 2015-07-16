@@ -95,12 +95,15 @@ class VeloServiceTest(TestCase):
     def test_create_folder(self):
 
         import random
+        foldername = 'create_new_folder_test_' + str(random.getrandbits(32))
         data = json.dumps({
-            'foldername': 'create_new_folder_test_' + str(random.getrandbits(32))
+            'foldername': foldername
         })
         response = self.client.post(
             '/acme/velo_new_folder/', content_type='application/json', data=data)
         self.assertEquals(response.status_code, 200)
+        response = self.client.post(
+            '/acme/delete/', content_type='application/json', data=data)
 
     def test_delete_file(self):
 

@@ -3,7 +3,7 @@ import os
 import sys
 
 
-def save_file(text, filename, site_user, velo_username, password):
+def save_file(text, filename, remote_path, site_user, velo_username, password):
 
     velo_api = VeloAPI.Velo()
     if not velo_api.isJVMStarted():
@@ -18,7 +18,7 @@ def save_file(text, filename, site_user, velo_username, password):
     except:
         print 'I/O failure when writing file to django server'
 
-    if velo_api.upload_file(local_path, filename) >= 0:
+    if velo_api.upload_file(remote_path, local_path, filename) >= 0:
         print 'File saved'
         return 0
     else:
