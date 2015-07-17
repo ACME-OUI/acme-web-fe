@@ -92,6 +92,8 @@ $(document).ready(function() {
 		top: '50%', // Top position relative to parent
 		left: '50%' // Left position relative to parent
 	};
+	var esgf_search_terms = {};
+	var esgf_search_nodes = [];
 
 	/****************************************
 	 	End setup variables
@@ -845,6 +847,7 @@ $(document).ready(function() {
 			$.each($('.node-check-box:checked'), function(box, value){
 				nodes_to_search.push($(value).val());
 			});
+			esgf_search_nodes = nodes_to_search;
 			$('#esgf_window #esgf-node-tree').remove();
 			document.getElementById('esgf_window').appendChild(spinner.el);
 			get_data('load_facets/', 'POST', nodes_to_search, function(response){
@@ -852,87 +855,43 @@ $(document).ready(function() {
 				console.log(response);
 				var newHtml = '<div id="esgf-node-search"><ul class="mtree" id="esgf-node-search-mtree"></ul></div>';
 				$('#esgf_window .tile-contents').append(newHtml);
-				var keys = Object.keys(response);
+				newHtml = '<div><input type="text" id="esgf-search-terms" placeholder="Type search terms here or select options below" style="width: 50%;"></input></div>';
+				$('#esgf_window .tile-contents').prepend(newHtml);
+				newHtml = '<button class="btn btn-primary" id="esgf-search-submit">Search</button>';
+				$('#esgf_window .tile-contents').prepend(newHtml);
+				var keys = Object.keys(response).sort();
 				for(var i = 0; i < keys.length; i++){
 					var facet = response[keys[i]];
-					var facet_html = '<li><a href="#">' + keys[i] + '</a><ul data-facet="' + keys[i] + '"></ul></li>';
+					var facet_html = '<li><a href="#">' + keys[i] + '</a><ul data-facet="' + keys[i] + '" class="facet"></ul></li>';
 					$('#esgf-node-search-mtree').append(facet_html);
-					var facet_options = Object.keys(response[keys[i]]);
+					var facet_options = Object.keys(response[keys[i]]).sort();
 					for(var j=0; j < facet_options.length; j++){
-						var facet_options_html = '<li><table><tr><td>' + facet_options[j] + '</td><td style="text-align: right;">' + response[keys[i]][facet_options[j]] + '</td></tr></table></li>';
+						var facet_options_html = '<li><table><tr><td><a href="#">' + facet_options[j] + '</a></td><td style="text-align: right;">' + response[keys[i]][facet_options[j]] + '</td></tr></table></li>';
 						$('ul[data-facet="' + keys[i] + '"').append(facet_options_html);
 					}
+					$('ul[data-facet="' + keys[i] + '"]').click(function(e){
+						esgf_search_terms[$(e.target).parents('.facet').attr('data-facet')] = $(e.target).text();
+						var terms = Object.keys(esgf_search_terms);
+						var terms_string = '';
+						for(var i = 0; i < terms.length; i++){
+							terms_string += terms[i] + '=' + esgf_search_terms[terms[i]] + ',';
+						}
+						terms_string = terms_string.substring(0, terms_string.length - 1);
+						document.getElementById('esgf-search-terms').value = terms_string;
+					});
 				}
 				mtree();
+				$('#esgf-search-submit').click(function(){
+					esgfSearch(document.getElementById('esgf-search-terms').value);
+				});
 			}, function(){
 				spinner.stop();
 				alert('Failed to load node facets');
 			});
-
-			// if ($('#nodeSearch_window').length != 0) {
-			// 	$('#nodeSearch_window').find('.tile-contents').empty();
-			// } else {
-			// 	var new_tile = '<li id="' + "nodeSearch" + '_window" class="tile">' + header1 + "nodeSearch" + header2 + header3 + '</li>';
-			// 	add_tile(new_tile, "nodeSearch_window");
-			// }
-			// var searchWindow = $('#nodeSearch_window').find('.tile-contents');
-			// opts.color = color; 
-			// var spinner = new Spinner(opts).spin();
-			// document.getElementById('nodeSearch_window').appendChild(spinner.el);
-			// var data = {
-			// 	node: 'http://' + hostname + '/esg-search/',
-			// 	test_connection: true
-			// };
-			// get_data('node_search/', 'POST', data, function(response) {
-			// 	spinner.stop();
-			// 	var facet_options = response;
-			// 	searchWindow.empty();
-			// 	var form = ['<form>',
-			// 		'Facet options<br>',
-			// 		'<select id="select-filter"></select>',
-			// 		'<br><p>Filter value</p><select id="filter-value"></select>',
-			// 		'<br><p id="search-string">Search string: </p>',
-			// 		'<input type="submit" id="search-submit" value="Search" style="color: #000;">',
-			// 		'</form>'
-			// 	].join('');
-			// 	searchWindow.append(form);
-			// 	$('#select-filter').on('change', function() {
-			// 		$('#filter-value').empty();
-			// 		var facet_option_values = facet_options[document.getElementById('select-filter').value]
-			// 		for (key in facet_option_values) {
-			// 			$('#filter-value').append('<option value="' + key + '">' + key + ' : ' + facet_option_values[key] + '</option>');
-			// 		}
-			// 	})
-			// 	for (key in facet_options) {
-			// 		var facet = '<option value=' + key + '>' + key + '</option>';
-			// 		searchWindow.find('#select-filter').append(facet);
-			// 	}
-
-			// 	searchTerms = {};
-			// 	$('#filter-value').on('change', function() {
-			// 		searchTerms[document.getElementById("select-filter").value] = document.getElementById('filter-value').value;
-			// 		$('#search-string').html('Search string: ');
-			// 		for (key in searchTerms) {
-			// 			if (key == 'node')
-			// 				continue;
-			// 			$('#search-string').append('<a href="#" class="search-term" id="' + key + '">' + key + '=' + searchTerms[key] + ',</a>');
-			// 		}
-			// 		$('.search-term').click(function() {
-			// 			delete searchTerms[$(this).attr('id')];
-			// 			$(this).remove();
-			// 		});
-			// 	});
-			// 	$('#search-submit').click(function() {
-			// 		esgfSearch(searchTerms, hostname);
-			// 	});
-			// }, function() {
-			// 	spinner.stop();
-			// 	alert('Unable to connect');
-			// });
 		});
 	}
 
-	function esgfSearch(searchTerms, hostname) {
+	function esgfSearch(searchTerms) {
 		$.getScript("static/js/spin.js", function() {
 			if (mode == 'night') {
 				var color = '#fff';

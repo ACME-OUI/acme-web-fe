@@ -99,6 +99,16 @@ body {
     background: black;
   }
 
+  #esgf-node-search {
+    width: 48%;
+    height: 100%;
+  }
+
+  #esgf-node-tree {
+    width: 50%;
+    height: 100%;
+  }
+
 
 /*============================================================================
    Drop down menu 

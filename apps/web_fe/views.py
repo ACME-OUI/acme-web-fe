@@ -347,7 +347,6 @@ def load_facets(request):
         facets = {}
         for node in nodes:
             try:
-                print 'node', node
                 conn = SearchConnection('http://' + node + '/esg-search/', distrib=True)
                 context = conn.new_context()
                 for facet in context.get_facet_options():
@@ -367,33 +366,20 @@ def node_search(request):
         searchString = json.loads(request.body)
         print searchString
         if 'node' in searchString:
-            if 'test_connection' in searchString:
-                try:
-                    conn = SearchConnection(searchString['node'], distrib=True)
-                    context = conn.new_context()
-                    response = {}
-                    response['status'] = 'success'
-                    return HttpResponse(json.dumps(context.get_facet_options()))
-                except Exception as e:
-                    print_debug(e)
-                    return HttpResponse(status=500)
-            else:
-                try:
-                    conn = SearchConnection(searchString['node'], distrib=True)
-                    del searchString["node"]
-                    context = conn.new_context(**searchString)
-                    rs = context.search()
-                    searchResponse = {}
-                    searchResponse['hits'] = context.hit_count
-                    for i in range(8):
-                        searchResponse[str(i)] = rs[i].json
+            try:
+                conn = SearchConnection(searchString['node'], distrib=True)
+                del searchString["node"]
+                context = conn.new_context(**searchString)
+                rs = context.search()
+                searchResponse = {}
+                searchResponse['hits'] = context.hit_count
+                for i in range(8):
+                    searchResponse[str(i)] = rs[i].json
 
-                    return HttpResponse(json.dumps(searchResponse))
-                except Exception as e:
-                    print_debug(e)
-                    return HttpResponse(status=500)
-        else:
-            return HttpResponse(status=500)
+                return HttpResponse(json.dumps(searchResponse))
+            except Exception as e:
+                print_debug(e)
+                return HttpResponse(status=500)
     else:
         return HttpResponse(status=500)
 
