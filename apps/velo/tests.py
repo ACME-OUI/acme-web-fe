@@ -34,6 +34,6 @@ class TestVelo(TestCase):
 
         os.remove(path + '/' + upload_file)
 
-        ret = v.download_file('/User Documents/acmetest/'+upload_file, path)
+        ret = v.download_file('/User Documents/acmetest/' + upload_file, path)
         self.assertEqual(ret, 0)
         self.assertTrue(upload_file in next(os.walk(path))[2])
