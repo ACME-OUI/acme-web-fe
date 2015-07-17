@@ -46,8 +46,8 @@ class ESGFNode(models.Model):
         self.node_data = json.dumps(self.node_data).replace(
             '{http://www.esgf.org/registry}', '')
         self.node_data = json.loads(self.node_data)
-        self.short_name = self.node_data['children'][
-            'Node']['attributes']['shortName']
+        if 'Node' in self.node_data['children']:
+            self.short_name = self.node_data['children']['Node']['attributes']['shortName']
         self.save()
 
     def xml_to_json(self, node):

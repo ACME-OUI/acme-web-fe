@@ -24,6 +24,7 @@ import base64
 import time
 import datetime
 from subprocess import Popen, PIPE
+from sets import Set
 
 
 # General
@@ -320,8 +321,16 @@ def node_info(request):
             nodes = ESGFNode.objects.all()
             for node in nodes:
                 response[node.short_name] = node.node_data
-                response[node.short_name]['children']['Node']['attributes']['status'] = str(node.available)
-                response[node.short_name]['children']['Node']['attributes']['last_seen'] = str(node.last_seen)
+                if 'Node' in response[node.short_name]['children']:
+                    response[node.short_name]['children']['Node']['attributes']['status'] = str(node.available)
+                    response[node.short_name]['children']['Node']['attributes']['last_seen'] = str(node.last_seen)
+                else:
+                    response[node.short_name]['children']['Node'] = {}
+                    response[node.short_name]['children']['Node']['attributes'] = {}
+                    response[node.short_name]['children']['Node']['attributes']['status'] = str(node.available)
+                    response[node.short_name]['children']['Node']['attributes']['last_seen'] = str(node.last_seen)
+                    response[node.short_name]['children']['Node']['attributes']['hostname'] = node.short_name
+            print response
             return HttpResponse(json.dumps(response))
         except Exception as e:
             print_debug(e)
@@ -330,6 +339,26 @@ def node_info(request):
         print "Unexpected POST request"
         return HttpResponse(status=500)
 
+@login_required(login_url='login')
+def load_facets(request):
+    if request.method == 'POST':
+        from pyesgf.search import SearchConnection    
+        nodes = json.loads(request.body)
+        facets = {}
+        for node in nodes:
+            try:
+                print 'node', node
+                conn = SearchConnection('http://' + node + '/esg-search/', distrib=True)
+                context = conn.new_context()
+                for facet in context.get_facet_options():
+                    facets[facet] = context.facet_counts[facet]
+            except Exception as e:
+                print_debug(e)
+                return HttpResponse(status=500)
+        print 'facets', facets
+        return HttpResponse(json.dumps(facets))
+    else:
+        return HttpResponse(status=500)
 
 @login_required(login_url='login')
 def node_search(request):
