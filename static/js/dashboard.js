@@ -707,7 +707,7 @@ $(document).ready(function() {
 						}
 					}
 
-					mtree();
+					mtree('velo-mtree');
 
 					$('#velo-mtree.mtree').bind('contextmenu',function(e){
 						e.preventDefault();
@@ -768,7 +768,7 @@ $(document).ready(function() {
 							esgf_context_menu(e);
 						}
 					});
-					mtree();
+					mtree('esgf-node-tree');
 				}, function(response){
 					alert('Error getting node list');
 					spinner.stop();
@@ -855,7 +855,7 @@ $(document).ready(function() {
 				console.log(response);
 				var newHtml = '<div id="esgf-node-search"><ul class="mtree" id="esgf-node-search-mtree"></ul></div>';
 				$('#esgf_window .tile-contents').append(newHtml);
-				newHtml = '<div><input type="text" id="esgf-search-terms" placeholder="Type search terms here or select options below" style="width: 50%;"></input></div>';
+				newHtml = '<div><input type="text" id="esgf-search-terms" placeholder="Type search terms here or select options below"></input></div>';
 				$('#esgf_window .tile-contents').prepend(newHtml);
 				newHtml = '<button class="btn btn-primary" id="esgf-search-submit">Search</button>';
 				$('#esgf_window .tile-contents').prepend(newHtml);
@@ -880,9 +880,14 @@ $(document).ready(function() {
 						document.getElementById('esgf-search-terms').value = terms_string;
 					});
 				}
-				mtree();
+				mtree('esgf-node-search');
 				$('#esgf-search-submit').click(function(){
-					esgfSearch(document.getElementById('esgf-search-terms').value);
+					var terms = document.getElementById('esgf-search-terms').value.split(/[=,]+/);
+					esgf_search_terms = {};
+					for(var i = 0; i < terms.length - 1; i++){
+						esgf_search_terms[terms[i]] = terms[i + 1];
+					}
+					esgfSearch();
 				});
 			}, function(){
 				spinner.stop();
@@ -891,7 +896,7 @@ $(document).ready(function() {
 		});
 	}
 
-	function esgfSearch(searchTerms) {
+	function esgfSearch() {
 		$.getScript("static/js/spin.js", function() {
 			if (mode == 'night') {
 				var color = '#fff';
@@ -900,45 +905,47 @@ $(document).ready(function() {
 			}
 			opts.color = color; 
 			var spinner = new Spinner(opts).spin();
-			document.getElementById('nodeSearch_window').appendChild(spinner.el);
-			searchTerms['node'] = 'http://' + hostname + '/esg-search/';
-			get_data('node_search/', 'POST', searchTerms, function(response) {
-				spinner.stop();
-				console.log(JSON.parse(response));
-				response = JSON.parse(response);
-				var searchDisplay = ['<div id="searchDisplay">',
-					'</div>'
-				].join('');
-				if ($('#searchDisplay').length == 0) {
-					$('#nodeSearch_window').find('.tile-contents').append(searchDisplay);
-				} else {
-					$('#searchDisplay').empty();
-				}
-				$('#searchDisplay').css({
-					// 	width: $('#nodeSearch_window').width()/2,
-					height: $('#nodeSearch_window').height() - $('#searchDisplay').offset().top
-						// 	left: $('#nodeSearch_window').width()/2,
-				});
-				for (i in response) {
-					$('#searchDisplay').append('<h2>Hit number ' + (parseInt(i) + 1) + '</h2><p id="' + i + '"></p>');
-					for (key in response[i]) {
-						var value = '<p>' + key + ' : ';
-						if (typeof(response[i][key]) != 'object') {
-							value += response[i][key] + '</p>';
-							$('#searchDisplay').find('#' + i).append(value);
-							continue;
-						}
-						for (var j = 0; j < response[i][key].length; j++) {
-							if (j == 0) {
-								value += response[i][key][j];
-							} else {
-								value += ', ' + response[i][key][j];
-							}
-						}
-						$('#searchDisplay').find('#' + i).append(value + '</p>');
+			document.getElementById('esgf_window').appendChild(spinner.el);
+			data = {
+				'nodes': esgf_search_nodes,
+				'terms': esgf_search_terms
+			}
+
+			function display_response(r, parent){
+				keys = Object.keys(r);
+				var branch = '';
+				for(var i = 0; i < keys.length; i++){
+					if(typeof r[keys[i]] != 'object'){
+						branch = '<li><a href="#"><table><tr><td>' + keys[i] + '</td><td style="float:right;"> ' + r[keys[i]] + '</td></tr></table></a></li>';
+						parent.append(branch);
+					} else {
+						branch = '<li><a href="#">' + keys[i] + '</a><ul data-branch="' + keys[i] + '"></ul></li>';
+						parent.append(branch);
+						display_response(r[keys[i]], $('ul[data-branch="' + keys[i] + '"]'));
 					}
-					$('#searchDisplay').find('#' + i).append('<br>');
 				}
+			}
+
+
+			get_data('node_search/', 'POST', data, function(response) {
+				spinner.stop();
+				console.log(response);
+				
+				var searchDisplay = '<div id="esgf-search-display"><ul class="mtree" id="esgf-search-display-mtree"></ul></div>';
+				if ($('#esgf-search-display').length == 0) {
+					$('#esgf_window').find('.tile-contents').append(searchDisplay);
+				} else {
+					$('#esgf-search-display').empty();
+				}
+				for (i in response) {
+					$('#esgf-search-display-mtree').append('<li><a href="#">' + i + '</a><ul data-branch="' + i + '"></ul></li>');
+					display_response(response[i], $('ul[data-branch="' + i + '"]'));
+				}
+				$('#esgf-search-display-mtree').offset({
+					'top': $('#esgf-node-search').offset.top,
+					'left': $('#esgf-node-search').offset.left + $('#esgf-node-search').width()
+				});
+				mtree('esgf-search-display');
 			}, function() {
 				spinner.stop();
 				alert('No data found, ease search restrictions and try again');
@@ -2338,13 +2345,16 @@ $(document).ready(function() {
 	}
 
 
-	function mtree(){
+	function mtree(id){
+		if(typeof id === 'undefined'){
+			id = 'tile-contents';
+		}
 		/*
 		The following is copied from mtree.js
 		*/
 		// mtree.js
 		// Only apply if mtree list exists
-		if ($('ul.mtree').length) {
+		if ($('#' + id + ' ul.mtree').length) {
 			// Settings
 			var collapsed = true; // Start with collapsed menu (only level 1 items visible)
 			var close_same_level = true; // Close elements on same level when opening new node.
@@ -2353,22 +2363,22 @@ $(document).ready(function() {
 			var easing = 'easeOutQuart'; // Velocity.js only, defaults to 'swing' with jquery animation.
 
 			// Set initial styles 
-			$('.mtree ul').css({
+			$('#' + id + ' .mtree ul').css({
 				'overflow': 'hidden',
 				'height': (collapsed) ? 0 : 'auto',
 				'display': (collapsed) ? 'none' : 'block'
 			});
 
 			// Get node elements, and add classes for styling
-			var node = $('.mtree li:has(ul)');
+			var node = $('#' + id + ' .mtree li:has(ul)');
 			node.each(function(index, val) {
 				$(this).children(':first-child').css('cursor', 'pointer')
-				$(this).addClass('mtree-node mtree-' + ((collapsed) ? 'closed' : 'open'));
-				$(this).children('ul').addClass('mtree-level-' + ($(this).parentsUntil($('ul.mtree'), 'ul').length + 1));
+				$(this).addClass('#' + id + 'mtree-node mtree-' + ((collapsed) ? 'closed' : 'open'));
+				$(this).children('ul').addClass('mtree-level-' + ($(this).parentsUntil($('#' + id + ' ul.mtree'), 'ul').length + 1));
 			});
 
 			// Set mtree-active class on list items for last opened element
-			$('.mtree li > *:first-child').on('click.mtree-active', function(e) {
+			$('#' + id + ' .mtree li > *:first-child').on('click.mtree-active', function(e) {
 				if ($(this).parent().hasClass('mtree-closed')) {
 					$('.mtree-active').not($(this).parent()).removeClass('mtree-active');
 					$(this).parent().addClass('mtree-active');
@@ -2474,7 +2484,7 @@ $(document).ready(function() {
 
 			// Fade in mtree after classes are added.
 			// Useful if you have set collapsed = true or applied styles that change the structure so the menu doesn't jump between states after the function executes.
-			if ($('.mtree').css('opacity') == 0) {
+			if ($('#' + id + ' .mtree').css('opacity') == 0) {
 				if ($.Velocity) {
 					$('.mtree').css('opacity', 1).children().css('opacity', 0).velocity('list');
 				} else {

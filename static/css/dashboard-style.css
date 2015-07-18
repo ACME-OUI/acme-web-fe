@@ -87,6 +87,11 @@ body {
     background: black;
   }
 
+/*============================================================================
+   ESGF window 
+  ============================================================================*/
+
+
   #esgf_context_menu{
     width: 100px;
     height: 70px;
@@ -102,11 +107,24 @@ body {
   #esgf-node-search {
     width: 48%;
     height: 100%;
+    margin-right: 0px;
+    float: left;
   }
 
   #esgf-node-tree {
     width: 50%;
     height: 100%;
+  }
+
+  #esgf-search-terms {
+    width: 48%;
+  }
+
+  #esgf-search-display{
+    width:48%;
+    height:100%;
+    overflow-y: auto;
+    float: right;
   }
 
 

@@ -330,7 +330,6 @@ def node_info(request):
                     response[node.short_name]['children']['Node']['attributes']['status'] = str(node.available)
                     response[node.short_name]['children']['Node']['attributes']['last_seen'] = str(node.last_seen)
                     response[node.short_name]['children']['Node']['attributes']['hostname'] = node.short_name
-            print response
             return HttpResponse(json.dumps(response))
         except Exception as e:
             print_debug(e)
@@ -354,7 +353,6 @@ def load_facets(request):
             except Exception as e:
                 print_debug(e)
                 return HttpResponse(status=500)
-        print 'facets', facets
         return HttpResponse(json.dumps(facets))
     else:
         return HttpResponse(status=500)
@@ -365,21 +363,22 @@ def node_search(request):
         from pyesgf.search import SearchConnection
         searchString = json.loads(request.body)
         print searchString
-        if 'node' in searchString:
-            try:
-                conn = SearchConnection(searchString['node'], distrib=True)
-                del searchString["node"]
-                context = conn.new_context(**searchString)
-                rs = context.search()
-                searchResponse = {}
-                searchResponse['hits'] = context.hit_count
-                for i in range(8):
-                    searchResponse[str(i)] = rs[i].json
+        if 'nodes' in searchString:
+            response = {}
+            for node in searchString['nodes']:
+                try:
+                    conn = SearchConnection('http://' + node + '/esg-search/', distrib=True)
+                    print searchString['terms']
+                    context = conn.new_context(**searchString['terms'])
+                    rs = context.search()
+                    response['hits'] = context.hit_count
+                    for i in range(len(rs)):
+                        response[str(i)] = rs[i].json
 
-                return HttpResponse(json.dumps(searchResponse))
-            except Exception as e:
-                print_debug(e)
-                return HttpResponse(status=500)
+                except Exception as e:
+                    print_debug(e)
+
+            return HttpResponse(json.dumps(response))
     else:
         return HttpResponse(status=500)
 
@@ -481,7 +480,6 @@ def velo_delete(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            print data
             name = data['name']
 
             cred = Credential.objects.get(
