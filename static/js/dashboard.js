@@ -852,7 +852,6 @@ $(document).ready(function() {
 			document.getElementById('esgf_window').appendChild(spinner.el);
 			get_data('load_facets/', 'POST', nodes_to_search, function(response){
 				spinner.stop();
-				console.log(response);
 				var newHtml = '<div id="esgf-node-search"><ul class="mtree" id="esgf-node-search-mtree"></ul></div>';
 				$('#esgf_window .tile-contents').append(newHtml);
 				newHtml = '<div><input type="text" id="esgf-search-terms" placeholder="Type search terms here or select options below"></input></div>';
@@ -884,7 +883,7 @@ $(document).ready(function() {
 				$('#esgf-search-submit').click(function(){
 					var terms = document.getElementById('esgf-search-terms').value.split(/[=,]+/);
 					esgf_search_terms = {};
-					for(var i = 0; i < terms.length - 1; i++){
+					for(var i = 0; i < terms.length - 1; i+=2){
 						esgf_search_terms[terms[i]] = terms[i + 1];
 					}
 					esgfSearch();
@@ -911,17 +910,21 @@ $(document).ready(function() {
 				'terms': esgf_search_terms
 			}
 
-			function display_response(r, parent){
-				keys = Object.keys(r);
+			function display_response(r, parent, hitnum){
+				keys = Object.keys(r).sort();
 				var branch = '';
 				for(var i = 0; i < keys.length; i++){
 					if(typeof r[keys[i]] != 'object'){
-						branch = '<li><a href="#"><table><tr><td>' + keys[i] + '</td><td style="float:right;"> ' + r[keys[i]] + '</td></tr></table></a></li>';
+						branch = '<li><table><tr><td>' + keys[i] + '</td><td style="float:right;"> ' + r[keys[i]] + '</td></tr></table></li>';
 						parent.append(branch);
 					} else {
-						branch = '<li><a href="#">' + keys[i] + '</a><ul data-branch="' + keys[i] + '"></ul></li>';
+						branch = '<li><a href="#">' + keys[i] + '</a><ul data-branch="' + hitnum + keys[i] + '"></ul></li>';
 						parent.append(branch);
-						display_response(r[keys[i]], $('ul[data-branch="' + keys[i] + '"]'));
+						var subkeys = Object.keys(r[keys[i]]);
+						for(var j = 0; j < subkeys.length; j++){
+							branch = '<li><table><tr><td>' + subkeys[j] + '</td><td style="float:right;"> ' + r[keys[i]][subkeys[j]] + '</td></tr></table></li>';
+							$('ul[data-branch="' + hitnum + keys[i] + '"]').append(branch);
+						}
 					}
 				}
 			}
@@ -937,9 +940,11 @@ $(document).ready(function() {
 				} else {
 					$('#esgf-search-display').empty();
 				}
-				for (i in response) {
-					$('#esgf-search-display-mtree').append('<li><a href="#">' + i + '</a><ul data-branch="' + i + '"></ul></li>');
-					display_response(response[i], $('ul[data-branch="' + i + '"]'));
+				for (var i in response) {
+					if(i != 'hits'){
+						$('#esgf-search-display-mtree').append('<li><a href="#">Dataset: ' + i + '</a><ul data-branch="' + i + '"></ul></li>');
+						display_response(response[i], $('ul[data-branch="' + i + '"]'), i);
+					}
 				}
 				$('#esgf-search-display-mtree').offset({
 					'top': $('#esgf-node-search').offset.top,
