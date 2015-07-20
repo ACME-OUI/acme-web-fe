@@ -26,7 +26,7 @@ def save_file(text, filename, remote_path, site_user, velo_username, password):
         return -1
 
 
-exit_code = save_file(text=sys.argv[1], filename=sys.argv[2], site_user=sys.argv[3],
-                      velo_username=sys.argv[4], password=sys.argv[5])
+exit_code = save_file(text=sys.argv[1], filename=sys.argv[2], remote_path=sys.argv[3],
+                      site_user=sys.argv[4], velo_username=sys.argv[5], password=sys.argv[6])
 
 sys.exit(exit_code)

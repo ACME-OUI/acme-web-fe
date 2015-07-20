@@ -28,7 +28,8 @@ urlpatterns = patterns('',
                        url(r'^node_info/', views.node_info),
                        url(r'^node_search/', views.node_search),
                        url(r'^load_facets/', views.load_facets),
-                       url(r'^velo/', views.velo),
+                       url(r'^userdata/image/(?P<path>.*\.png)$', views.send_image),
+                       # url(r'^esgf_download/', views.esgf_download),
 
                        # ajax needs to be moved to service app
                        url(r'^gettemplates/?$', views.gettemplates),

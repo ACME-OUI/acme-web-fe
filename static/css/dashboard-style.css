@@ -109,7 +109,8 @@ body {
     height: 90%;
     margin-right: 0px;
     float: left;
-    border: solid black 1px
+    border: solid black 1px;
+    overflow-y: auto;
 ;  }
 
   #esgf-node-tree {
@@ -119,6 +120,7 @@ body {
 
   #esgf-search-terms {
     width: 48%;
+    color: #111;
   }
 
   #esgf-search-display{

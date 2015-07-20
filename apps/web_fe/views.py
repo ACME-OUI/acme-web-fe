@@ -14,6 +14,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
 from web_fe.models import TileLayout, Credential, ESGFNode
+from pyesgf.search import SearchConnection
 import sys
 import json
 import simplejson
@@ -322,14 +323,20 @@ def node_info(request):
             for node in nodes:
                 response[node.short_name] = node.node_data
                 if 'Node' in response[node.short_name]['children']:
-                    response[node.short_name]['children']['Node']['attributes']['status'] = str(node.available)
-                    response[node.short_name]['children']['Node']['attributes']['last_seen'] = str(node.last_seen)
+                    response[node.short_name]['children']['Node'][
+                        'attributes']['status'] = str(node.available)
+                    response[node.short_name]['children']['Node'][
+                        'attributes']['last_seen'] = str(node.last_seen)
                 else:
                     response[node.short_name]['children']['Node'] = {}
-                    response[node.short_name]['children']['Node']['attributes'] = {}
-                    response[node.short_name]['children']['Node']['attributes']['status'] = str(node.available)
-                    response[node.short_name]['children']['Node']['attributes']['last_seen'] = str(node.last_seen)
-                    response[node.short_name]['children']['Node']['attributes']['hostname'] = node.short_name
+                    response[node.short_name]['children'][
+                        'Node']['attributes'] = {}
+                    response[node.short_name]['children']['Node'][
+                        'attributes']['status'] = str(node.available)
+                    response[node.short_name]['children']['Node'][
+                        'attributes']['last_seen'] = str(node.last_seen)
+                    response[node.short_name]['children']['Node'][
+                        'attributes']['hostname'] = node.short_name
             return HttpResponse(json.dumps(response))
         except Exception as e:
             print_debug(e)
@@ -338,15 +345,16 @@ def node_info(request):
         print "Unexpected POST request"
         return HttpResponse(status=500)
 
+
 @login_required(login_url='login')
 def load_facets(request):
     if request.method == 'POST':
-        from pyesgf.search import SearchConnection    
         nodes = json.loads(request.body)
         facets = {}
         for node in nodes:
             try:
-                conn = SearchConnection('http://' + node + '/esg-search/', distrib=True)
+                conn = SearchConnection(
+                    'http://' + node + '/esg-search/', distrib=True)
                 context = conn.new_context()
                 for facet in context.get_facet_options():
                     facets[facet] = context.facet_counts[facet]
@@ -357,17 +365,18 @@ def load_facets(request):
     else:
         return HttpResponse(status=500)
 
+
 @login_required(login_url='login')
 def node_search(request):
     if request.method == 'POST':
-        from pyesgf.search import SearchConnection
         searchString = json.loads(request.body)
         print searchString
         if 'nodes' in searchString:
             response = {}
             for node in searchString['nodes']:
                 try:
-                    conn = SearchConnection('http://' + node + '/esg-search/', distrib=True)
+                    conn = SearchConnection(
+                        'http://' + node + '/esg-search/', distrib=True)
                     print searchString['terms']
                     context = conn.new_context(**searchString['terms'])
                     rs = context.search()
@@ -437,6 +446,17 @@ def get_file(request):
             if exit_code == -1 or 'NO SUCH FILE' in out:
                 print out
                 return HttpResponse(status=500)
+
+            path = prefix + filename
+            path_components = path.split("/")
+            path = os.path.join(
+                path_components[path_components.index(cred.service_user_name) + 1:])
+            if filename.split('.').pop() == 'png':
+                response = {
+                    'type': 'image',
+                    'location': path
+                }
+                return HttpResponse(json.dumps(response))
             else:
                 out = out.splitlines(True)[1:]
                 return HttpResponse(out, content_type='text/plain')
@@ -449,18 +469,33 @@ def get_file(request):
 
 
 @login_required(login_url='login')
+def send_image(request, path):
+    from sendfile import sendfile
+    import os
+    cred = Credential.objects.get(service='velo', site_user_name=request.user)
+    fullpath = os.path.join('userdata', cred.service_user_name, path)
+
+    print fullpath
+    if os.path.isfile(fullpath):
+        return sendfile(request, fullpath)
+    else:
+        return HttpResponse(status=404)
+
+
+@login_required(login_url='login')
 def velo_save_file(request):
     if request.method == 'POST':
         try:
             incoming_file = json.loads(request.body)
             filename = incoming_file['filename']
+            remote_path = incoming_file['remote_path']
             text = incoming_file['text']
 
             cred = Credential.objects.get(
                 site_user_name=request.user, service="velo")
 
             process = Popen(
-                ['python', './apps/velo/save_file.py', text, filename, cred.site_user_name, cred.service_user_name, cred.password], stdout=PIPE)
+                ['python', './apps/velo/save_file.py', text, filename, remote_path, cred.site_user_name, cred.service_user_name, cred.password], stdout=PIPE)
             (out, err) = process.communicate()
             exit_code = process.wait()
             if exit_code >= 0 and 'File saved' in out:
