@@ -25,9 +25,9 @@ class Velo:
         index = path.find(acme)
         path = path[:index]
 
+        global velo, cms, jobConfig, fileObj, tifConstants, fileServerMap, filesToDownload
         jpype.startJVM(
             jvmPath, "-Djava.class.path=" + path + "acme-web-fe/static/java/VeloAPI.jar")
-        global velo, cms, jobConfig, fileObj, tifConstants, fileServerMap, filesToDownload
         velo = JPackage("velo").mgr.VeloManager
         cms = JPackage("gov").pnnl.velo.model.CmsPath
         jobConfig = JPackage("gov").pnnl.velo.tif.model.JobConfig

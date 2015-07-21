@@ -59,7 +59,8 @@ class VeloServiceTest(TestCase):
 
         data = json.dumps({
             'text': 'This is text for the save_file test',
-            'filename': 'testSaveFile.txt'
+            'filename': 'testSaveFile.txt',
+            'remote_path': '/User Documents/acmetest/testSaveFile.txt'
         })
         response = self.client.post(
             '/acme/velo_save_file/', content_type='application/json', data=data)
@@ -84,13 +85,24 @@ class VeloServiceTest(TestCase):
 
     def test_save_file(self):
 
+        filename = 'testSaveFile.txt'
+        remote_path = '/User Documents/acmetest/testSaveFile.txt'
         data = json.dumps({
             'text': 'This is text for the save_file test',
-            'filename': 'testSaveFile.txt'
+            'filename': filename,
+            'remote_path': remote_path
         })
         response = self.client.post(
             '/acme/velo_save_file/', content_type='application/json', data=data)
         self.assertEquals(response.status_code, 200)
+        data = json.dumps({
+            'file': '/User Documents/acmetest/'
+        })
+        response = self.client.post(
+            '/acme/get_folder/', content_type='application/json', data=data)
+        self.assertTrue(remote_path in json.loads(response.content))
+        response = self.client.post(
+            '/acme/velo_delete/', content_type='application/json', data=json.dumps({'name': '/User Documents/acmetest/testSaveFile.txt'}))
 
     def test_create_folder(self):
 
@@ -109,7 +121,8 @@ class VeloServiceTest(TestCase):
 
         data = json.dumps({
             'text': 'This is text for the save_file test',
-            'filename': 'testSaveFile.txt'
+            'filename': 'testSaveFile.txt',
+            'remote_path': '/User Documents/acmetest/testSaveFile.txt'
         })
         response = self.client.post(
             '/acme/velo_save_file/', content_type='application/json', data=data)
@@ -117,7 +130,7 @@ class VeloServiceTest(TestCase):
             '/acme/velo_delete/', content_type='application/json', data=json.dumps({'name': '/User Documents/acmetest/testSaveFile.txt'}))
         data = json.dumps({
             'filename': 'testSaveFile.txt',
-            'path': '/User Documents/acmetest'
+            'path': '/User Documents/acmetest',
         })
         response = self.client.post(
             '/acme/get_file/', content_type='application/json', data=data)

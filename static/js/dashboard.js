@@ -691,12 +691,12 @@ $(document).ready(function() {
 							parentFolder = parentFolder.substring(0, parentFolder.length - 1);
 							var parentFolderEl = $('ul[data-path="' + parentFolder + '"]');
 							if(parentFolderEl.length == 0){
-								$('#velo-mtree.mtree').append('<li><a href="#">' + path[path.length - 1] + '</a><ul data-path="' + response[i] + '"></ul></li>');
+								$('#velo-mtree.mtree').append('<li class="mtree-root"><a href="#">' + path[path.length - 1] + '</a><ul data-path="' + response[i] + '"></ul></li>');
 								continue;
 							}
 							var folderPath = parentFolder + '/' + path[path.length - 1];
 							var folderName = path[path.length - 1];
-							parentFolderEl.append('<li><a href="#">' + folderName + '</a><ul data-path="' + folderPath + '"></ul></li>');
+							parentFolderEl.append('<li class="mtree-drag mtree-drop"><a href="#">' + folderName + '</a><ul data-path="' + folderPath + '"></ul></li>');
 
 						} else {
 							parentFolder = '/';
@@ -704,7 +704,7 @@ $(document).ready(function() {
 								parentFolder += path[j] + '/';
 							}
 							parentFolder = parentFolder.substring(0, parentFolder.length - 1);
-							$('ul[data-path="'+ parentFolder + '"]').append('<li><a href="#" data-path="' + response[i] + '">' + path[path.length - 1] + '</a></li>');
+							$('ul[data-path="'+ parentFolder + '"]').append('<li class="mtree-drag mtree-file"><a href="#" data-path="' + response[i] + '">' + path[path.length - 1] + '</a></li>');
 
 							$('a[data-path="' + response[i] + '"]').click(function(event){
 								getFile( $(event.target).attr('data-path') );
@@ -718,6 +718,25 @@ $(document).ready(function() {
 						e.preventDefault();
 						if(e.button == 2){
 							velo_context_menu(e);
+						}
+					});
+					$('.mtree-drag').draggable({
+						revert: 'invalid',
+						stack: '#velo-mtree-container',
+					});
+					// $('.mtree-drag-and-sort').sortable({
+					// 	revert: 'true',
+					// 	placeholder: "ui-state-highlight",
+					// 	stop: function(){
+					// 		mtree('velo-mtree-container')
+					// 	}
+					// });
+					//$('.mtree-drag-and-sort').disableSelection();
+					$('.mtree-drop').droppable({
+						drop: function(event, ui){
+							console.log(event);
+							console.log(ui);
+
 						}
 					});
 				}, function() {
