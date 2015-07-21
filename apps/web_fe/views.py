@@ -78,7 +78,7 @@ def user_login(request):
 
 
 # Allows the user to add ESGF and Velo credentials to their account
-@login_required(login_url='login')
+@login_required
 def add_credentials(request):
     if request.method == 'POST':
         print request.body
@@ -114,7 +114,7 @@ def add_credentials(request):
 # This whole thing needs to be refactored
 
 
-@login_required(login_url='login')
+@login_required
 def check_credentials(request):
     if request.method == 'POST':
         try:
@@ -218,22 +218,22 @@ def register(request):
 
 
 # Work Flows
-@login_required(login_url='login')
+@login_required
 def workflow(request):
     return HttpResponse(render_template(request, "demo/work_flow_home.html", {}))
 
 
-@login_required(login_url='login')
+@login_required
 def code(request):
     return HttpResponse(render_template(request, "demo/work_flow_edit.html", {}))
 
 
-@login_required(login_url='login')
+@login_required
 def jspanel(request):
     return HttpResponse(render_template(request, "web_fe/jspanel.html", {}))
 
 
-@login_required(login_url='login')
+@login_required
 def dashboard(request):
     ''' For demo purposes this is loading a local file '''
     import xml.etree.ElementTree as ET
@@ -254,7 +254,7 @@ def dashboard(request):
     return HttpResponse(render_template(request, "web_fe/dashboard.html", {}))
 
 
-@login_required(login_url='login')
+@login_required
 def save_layout(request):
     if request.method == 'POST':
         try:
@@ -280,7 +280,7 @@ def save_layout(request):
             return HttpResponse(status=500)
 
 
-@login_required(login_url='login')
+@login_required
 def load_layout(request):
     if request.method == 'POST':
         try:
@@ -314,7 +314,7 @@ def load_layout(request):
             return HttpResponse(status=500)
 
 
-@login_required(login_url='login')
+@login_required
 def node_info(request):
     if request.method == 'GET':
         try:
@@ -346,7 +346,7 @@ def node_info(request):
         return HttpResponse(status=500)
 
 
-@login_required(login_url='login')
+@login_required
 def load_facets(request):
     if request.method == 'POST':
         nodes = json.loads(request.body)
@@ -366,7 +366,7 @@ def load_facets(request):
         return HttpResponse(status=500)
 
 
-@login_required(login_url='login')
+@login_required
 def node_search(request):
     if request.method == 'POST':
         searchString = json.loads(request.body)
@@ -392,7 +392,7 @@ def node_search(request):
         return HttpResponse(status=500)
 
 
-@login_required(login_url='login')
+@login_required
 def get_folder(request):
     if request.method == 'POST':
         folder = json.loads(request.body)
@@ -414,7 +414,7 @@ def get_folder(request):
         return HttpResponse(status=404)
 
 
-@login_required(login_url='login')
+@login_required
 def get_file(request):
     if request.method == 'POST':
         try:
@@ -468,7 +468,7 @@ def get_file(request):
         return HttpResponse(status=404)
 
 
-@login_required(login_url='login')
+@login_required
 def send_image(request, path):
     from sendfile import sendfile
     import os
@@ -482,7 +482,7 @@ def send_image(request, path):
         return HttpResponse(status=404)
 
 
-@login_required(login_url='login')
+@login_required
 def velo_save_file(request):
     if request.method == 'POST':
         try:
@@ -493,6 +493,9 @@ def velo_save_file(request):
 
             cred = Credential.objects.get(
                 site_user_name=request.user, service="velo")
+
+            remote_path = remote_path[:remote_path.index(filename)]
+            print 'filename:', filename, 'remote_path:', remote_path
 
             process = Popen(
                 ['python', './apps/velo/save_file.py', text, filename, remote_path, cred.site_user_name, cred.service_user_name, cred.password], stdout=PIPE)
@@ -510,7 +513,7 @@ def velo_save_file(request):
         return HttpResponse(status=404)
 
 
-@login_required(login_url='login')
+@login_required
 def velo_delete(request):
     if request.method == 'POST':
         try:
@@ -535,7 +538,7 @@ def velo_delete(request):
         return HttpResponse(status=404)
 
 
-@login_required(login_url='login')
+@login_required
 def velo_new_folder(request):
     if request.method == 'POST':
         try:
@@ -561,7 +564,7 @@ def velo_new_folder(request):
         return HttpResponse(status=404)
 
 
-@login_required(login_url='login')
+@login_required
 def credential_check_existance(request):
     if request.method == 'POST':
         try:

@@ -618,8 +618,10 @@ $(document).ready(function() {
 				if(response.type == 'image'){
 					var name = 'image-viewer';
 					var contents = '<div id="velo-image"><img src="/acme/userdata/image/' + response.location + '"></div>'
-					var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + contents + header3 + '</li>';
-					add_tile(new_tile, name + '_window', {ignore: 'true'});
+					$('#velo-text-edit').empty();
+					$('#velo-text-edit').append(contents);
+					// var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + contents + header3 + '</li>';
+					// (new_tile, name + '_window', {ignore: 'true'});
 				} else {
 					initCodeMirror(response.responseText);
 				}
@@ -1900,7 +1902,7 @@ $(document).ready(function() {
 			}, function() {
 				alert('Please use unique layout name');
 			});
-			fadeOutMask('#save-menu');
+			fadeOutMask('save-menu');
 		});
 	});
 
