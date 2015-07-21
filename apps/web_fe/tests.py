@@ -250,7 +250,7 @@ class TestNodeSearch(TestCase):
 '''
 
 
-class GridTest(TestCase):
+class DashboardTest(TestCase):
 
     def setUp(self):
         userSetup(self)
@@ -259,7 +259,7 @@ class GridTest(TestCase):
         User.objects.filter(username='testuser').delete()
 
     def test_load_grid(self):
-        response = self.client.get('/acme/grid/')
+        response = self.client.get('/acme/dashboard/')
 
         # Check that the page is returning normally
         self.assertEquals(response.status_code, 200)
