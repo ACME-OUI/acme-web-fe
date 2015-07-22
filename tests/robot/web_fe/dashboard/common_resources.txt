@@ -23,16 +23,15 @@ Open Browser And Log In
     [Documentation]  Logs in and goes to the dashboard
     Open Browser  ${LOGIN URL}  ${BROWSER}
     Set Browser Implicit Wait  0.5
-    Maximize Browser Window
+    Set Window Size    1280    2000
     Title Should Be  login
     Input Text  username  testuser
     Input Text  password  testpass
-    Click Button  Sign In
+    Click Element  id=sign-in
     Page Should Contain  successfully loged in
     Click Element  xpath=/html/body/div[1]/div/div[2]/ul/li[3]/a
 
 
 Close Tile  [Arguments]  ${tilename}
-    Click Button  ${tilename}_close
+    Click Element  ${tilename}_close
     Page Should Not Contain  ${tilename}
-

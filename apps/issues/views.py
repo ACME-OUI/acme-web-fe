@@ -371,7 +371,10 @@ def github_jira_sync(request, json_data=None):
         i_model = Issue.objects.get(url=issue["url"])
         i_model.update_linked(issue)
     except Issue.DoesNotExist:
-        i_model = source.create_issue(issue)
+        if json_data["action"] == "opened":
+            i_model = source.create_issue(issue)
+        else:
+            return HttpResponse("Not tracking this issue")
 
     if json_data["action"] == "closed":
         # Grab the comments, check for a comment by the closer with time breakdown

@@ -27,6 +27,10 @@ if os.getenv('build_on_travis', None):
     )
 
     VELO_PATH = 'static/java/Velo.jar'
+
+    GITHUB_KEY = ''
+    JIRA_USER = ''
+    JIRA_PASSWORD = ''
 else:
     from local_settings import *  # noqa
 
@@ -136,22 +140,19 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'web_fe',
     'django.contrib.admin',
+    'django_nose',
     'captcha',
+    'web_fe',
     'issues',
-    'django_nose'
-    # 'django.contrib.admindocs',
 )
 
 # Use nose to run all tests
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-NOSE_ARGS = [
-    '--with-coverage',
-    '--cover-package=web_fe',
-    '--cover-html'
-]
 
+NOSE_ARGS = [
+    "apps",
+]
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
