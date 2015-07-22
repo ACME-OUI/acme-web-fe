@@ -14,6 +14,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
 from web_fe.models import TileLayout, Credential, ESGFNode
+from pyesgf.search import SearchConnection
 import sys
 import json
 import simplejson
@@ -24,6 +25,7 @@ import base64
 import time
 import datetime
 from subprocess import Popen, PIPE
+from sets import Set
 
 
 # General
@@ -33,10 +35,6 @@ def render_template(request, template, context):
     template = loader.get_template(template)
     context = RequestContext(request, context)
     return template.render(context)
-
-
-def not_done(request, *args, **kwargs):
-    return HttpResponse("Stub")
 
 
 # Index
@@ -76,7 +74,7 @@ def user_login(request):
 
 
 # Allows the user to add ESGF and Velo credentials to their account
-@login_required(login_url='login')
+@login_required
 def add_credentials(request):
     if request.method == 'POST':
         print request.body
@@ -112,7 +110,7 @@ def add_credentials(request):
 # This whole thing needs to be refactored
 
 
-@login_required(login_url='login')
+@login_required
 def check_credentials(request):
     if request.method == 'POST':
         try:
@@ -215,25 +213,8 @@ def register(request):
     return render_to_response("web_fe/register.html", {"user_form": user_form, "registered": registered}, context)
 
 
-# Work Flows
-@login_required(login_url='login')
-def workflow(request):
-    return HttpResponse(render_template(request, "demo/work_flow_home.html", {}))
-
-
-@login_required(login_url='login')
-def code(request):
-    return HttpResponse(render_template(request, "demo/work_flow_edit.html", {}))
-
-
-@login_required(login_url='login')
-def jspanel(request):
-    return HttpResponse(render_template(request, "web_fe/jspanel.html", {}))
-
-
-@login_required(login_url='login')
+@login_required
 def dashboard(request):
-    ''' For demo purposes this is loading a local file '''
     import xml.etree.ElementTree as ET
     import requests
     from StringIO import StringIO
@@ -249,24 +230,10 @@ def dashboard(request):
         for node in nodes:
             node.refresh()
 
-    node_name_list = []
-    node_org_list = []
-    node_url_list = []
-    node_location_list = []
-    for node in ESGFNode.objects.all():
-        node_name_list.append(node.short_name)
-        node_org_list.append(node.node_data['children'][
-                             'Node']['attributes']['organization'])
-        node_url_list.append(node.host)
-        node_location_list.append(node.node_data['children'][
-                                  'Node']['children']['GeoLocation']['attributes']['city'])
-    node_list = zip(
-        node_org_list, node_url_list, node_name_list, node_location_list)
-
-    return HttpResponse(render_template(request, "web_fe/dashboard.html", {'nodes': node_list}))
+    return HttpResponse(render_template(request, "web_fe/dashboard.html", {}))
 
 
-@login_required(login_url='login')
+@login_required
 def save_layout(request):
     if request.method == 'POST':
         try:
@@ -292,7 +259,7 @@ def save_layout(request):
             return HttpResponse(status=500)
 
 
-@login_required(login_url='login')
+@login_required
 def load_layout(request):
     if request.method == 'POST':
         try:
@@ -326,7 +293,7 @@ def load_layout(request):
             return HttpResponse(status=500)
 
 
-@login_required(login_url='login')
+@login_required
 def node_info(request):
     if request.method == 'GET':
         try:
@@ -334,9 +301,22 @@ def node_info(request):
             nodes = ESGFNode.objects.all()
             for node in nodes:
                 response[node.short_name] = node.node_data
-
+                if 'Node' in response[node.short_name]['children']:
+                    response[node.short_name]['children']['Node'][
+                        'attributes']['status'] = str(node.available)
+                    response[node.short_name]['children']['Node'][
+                        'attributes']['last_seen'] = str(node.last_seen)
+                else:
+                    response[node.short_name]['children']['Node'] = {}
+                    response[node.short_name]['children'][
+                        'Node']['attributes'] = {}
+                    response[node.short_name]['children']['Node'][
+                        'attributes']['status'] = str(node.available)
+                    response[node.short_name]['children']['Node'][
+                        'attributes']['last_seen'] = str(node.last_seen)
+                    response[node.short_name]['children']['Node'][
+                        'attributes']['hostname'] = node.short_name
             return HttpResponse(json.dumps(response))
-
         except Exception as e:
             print_debug(e)
             return HttpResponse(status=500)
@@ -345,46 +325,53 @@ def node_info(request):
         return HttpResponse(status=500)
 
 
-@login_required(login_url='login')
-def node_search(request):
+@login_required
+def load_facets(request):
     if request.method == 'POST':
-        from pyesgf.search import SearchConnection
-        searchString = json.loads(request.body)
-        if 'node' in searchString:
-            if 'test_connection' in searchString:
-                if searchString['test_connection'] != 'true':
-                    return HttpResponse(status=500)
-                try:
-                    conn = SearchConnection(searchString['node'], distrib=True)
-                    context = conn.new_context()
-                    response = {}
-                    response['status'] = 'success'
-                    return HttpResponse(json.dumps(context.get_facet_options()))
-                except Exception as e:
-                    print_debug(e)
-                    return HttpResponse(status=500)
-            else:
-                try:
-                    conn = SearchConnection(searchString['node'], distrib=True)
-                    del searchString["node"]
-                    context = conn.new_context(**searchString)
-                    rs = context.search()
-                    searchResponse = {}
-                    searchResponse['hits'] = context.hit_count
-                    for i in range(8):
-                        searchResponse[str(i)] = rs[i].json
-
-                    return HttpResponse(json.dumps(searchResponse))
-                except Exception as e:
-                    print_debug(e)
-                    return HttpResponse(status=500)
-        else:
-            return HttpResponse(status=500)
+        nodes = json.loads(request.body)
+        facets = {}
+        for node in nodes:
+            try:
+                conn = SearchConnection(
+                    'http://' + node + '/esg-search/', distrib=True)
+                context = conn.new_context()
+                for facet in context.get_facet_options():
+                    facets[facet] = context.facet_counts[facet]
+            except Exception as e:
+                print_debug(e)
+                return HttpResponse(status=500)
+        return HttpResponse(json.dumps(facets))
     else:
         return HttpResponse(status=500)
 
 
-@login_required(login_url='login')
+@login_required
+def node_search(request):
+    if request.method == 'POST':
+        searchString = json.loads(request.body)
+        print searchString
+        if 'nodes' in searchString:
+            response = {}
+            for node in searchString['nodes']:
+                try:
+                    conn = SearchConnection(
+                        'http://' + node + '/esg-search/', distrib=True)
+                    print searchString['terms']
+                    context = conn.new_context(**searchString['terms'])
+                    rs = context.search()
+                    response['hits'] = context.hit_count
+                    for i in range(len(rs)):
+                        response[str(i)] = rs[i].json
+
+                except Exception as e:
+                    print_debug(e)
+
+            return HttpResponse(json.dumps(response))
+    else:
+        return HttpResponse(status=500)
+
+
+@login_required
 def get_folder(request):
     if request.method == 'POST':
         folder = json.loads(request.body)
@@ -406,7 +393,7 @@ def get_folder(request):
         return HttpResponse(status=404)
 
 
-@login_required(login_url='login')
+@login_required
 def get_file(request):
     if request.method == 'POST':
         try:
@@ -438,6 +425,17 @@ def get_file(request):
             if exit_code == -1 or 'NO SUCH FILE' in out:
                 print out
                 return HttpResponse(status=500)
+
+            path = prefix + filename
+            path_components = path.split("/")
+            path = os.path.join(
+                path_components[path_components.index(cred.service_user_name) + 1:])
+            if filename.split('.').pop() == 'png':
+                response = {
+                    'type': 'image',
+                    'location': path
+                }
+                return HttpResponse(json.dumps(response))
             else:
                 out = out.splitlines(True)[1:]
                 return HttpResponse(out, content_type='text/plain')
@@ -449,19 +447,37 @@ def get_file(request):
         return HttpResponse(status=404)
 
 
-@login_required(login_url='login')
+@login_required
+def send_image(request, path):
+    from sendfile import sendfile
+    import os
+    cred = Credential.objects.get(service='velo', site_user_name=request.user)
+    fullpath = os.path.join('userdata', cred.service_user_name, path)
+
+    print fullpath
+    if os.path.isfile(fullpath):
+        return sendfile(request, fullpath)
+    else:
+        return HttpResponse(status=404)
+
+
+@login_required
 def velo_save_file(request):
     if request.method == 'POST':
         try:
             incoming_file = json.loads(request.body)
             filename = incoming_file['filename']
+            remote_path = incoming_file['remote_path']
             text = incoming_file['text']
 
             cred = Credential.objects.get(
                 site_user_name=request.user, service="velo")
 
+            remote_path = remote_path[:remote_path.index(filename)]
+            print 'filename:', filename, 'remote_path:', remote_path
+
             process = Popen(
-                ['python', './apps/velo/save_file.py', text, filename, cred.site_user_name, cred.service_user_name, cred.password], stdout=PIPE)
+                ['python', './apps/velo/save_file.py', text, filename, remote_path, cred.site_user_name, cred.service_user_name, cred.password], stdout=PIPE)
             (out, err) = process.communicate()
             exit_code = process.wait()
             if exit_code >= 0 and 'File saved' in out:
@@ -476,12 +492,11 @@ def velo_save_file(request):
         return HttpResponse(status=404)
 
 
-@login_required(login_url='login')
+@login_required
 def velo_delete(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            print data
             name = data['name']
 
             cred = Credential.objects.get(
@@ -502,7 +517,7 @@ def velo_delete(request):
         return HttpResponse(status=404)
 
 
-@login_required(login_url='login')
+@login_required
 def velo_new_folder(request):
     if request.method == 'POST':
         try:
@@ -528,7 +543,7 @@ def velo_new_folder(request):
         return HttpResponse(status=404)
 
 
-@login_required(login_url='login')
+@login_required
 def credential_check_existance(request):
     if request.method == 'POST':
         try:
@@ -544,237 +559,6 @@ def credential_check_existance(request):
             return HttpResponse(status=500)
     else:
         return HttpResponse(status=404)
-
-
-@login_required
-def velo(request):
-    if request.method == 'POST':
-        try:
-            rm = velo_api.init_velo("acmetest", "acmetest")
-            if rm.getRepositoryUrlBase() == 'http://acmetest.ornl.gov:80/alfresco':
-                foo = {'0': 'success I guess'}
-
-                velo_api.shutdown_jvm()
-                return HttpResponse(json.dumps(foo))
-            else:
-                velo_api.shutdown_jvm()
-                print 'failed connecting to velo', barr.getRepositoryUrlBase()
-                return HttpResponse(status=500)
-
-        except Exception as e:
-            velo_api.shutdown_jvm()
-            print "Error connecting to velo:", repr(e)
-            return HttpResponse(status=500)
-
-    else:
-        return HttpResponse(status=500)
-
-
-# AJAX
-@csrf_exempt
-def gettemplates(request):
-    # GET call
-    status = ""
-    try:
-        inputstring = request.POST.get('user')
-        inputjson = simplejson.loads(inputstring)
-
-        username = inputjson['username']
-        password = inputjson['password']
-        base64string = base64.encodestring(
-            '%s:%s' % (username, password)).replace('\n', '')
-
-        url = "https://acmetest.ornl.gov/alfresco/service/cssef/listWorkflowPackageTemplates"
-        request = urllib2.Request(url)
-        request.add_header("Authorization", "Basic %s" % base64string)
-        response = urllib2.urlopen(request)
-        page = response.read()
-        status = page
-    except Exception, e:
-        status = "fail: " + str(e)
-    json_data = {}
-    json_data['key'] = status
-    return HttpResponse(json.dumps(json_data))
-
-
-@csrf_exempt
-def clonetemplates(request):
-    # POST call
-    status = ""
-    try:
-        inputstring = request.POST.get('user')
-        inputjson = simplejson.loads(inputstring)
-
-        username = inputjson['username']
-        password = inputjson['password']
-        template = inputjson['template']
-        case = template + "_" + username + "_" + \
-            datetime.datetime.now().isoformat()
-        data_args = {'caseName': case, 'templateName': template}
-        data = urllib.urlencode(data_args)
-        base64string = base64.encodestring(
-            '%s:%s' % (username, password)).replace('\n', '')
-
-        url = "https://acmetest.ornl.gov/alfresco/service/cssef/cloneWorkflowPackageTemplate"
-        request = urllib2.Request(url, data)
-        request.add_header("Authorization", "Basic %s" % base64string)
-        response = urllib2.urlopen(request)
-        page = response.read()
-        status = "success"
-    except Exception, e:
-        status = "fail: " + str(e)
-
-    json_data = {}
-    json_data['key'] = status
-    return HttpResponse(json.dumps(json_data))
-
-
-@csrf_exempt
-def getchildren(request):
-    # GET call
-    status = ""
-    try:
-        inputstring = request.POST.get('user')
-        inputjson = simplejson.loads(inputstring)
-
-        username = inputjson['username']
-        password = inputjson['password']
-        path = inputjson['path']
-        base64string = base64.encodestring(
-            '%s:%s' % (username, password)).replace('\n', '')
-
-        url = "https://acmetest.ornl.gov/alfresco/service/cat/getChildren?path=" + \
-            path
-        request = urllib2.Request(url)
-        request.add_header("Authorization", "Basic %s" % base64string)
-        response = urllib2.urlopen(request)
-        page = response.read()
-        status = page
-    except Exception, e:
-        status = "fail: " + str(e)
-
-    json_data = {}
-    json_data['key'] = status
-    return HttpResponse(json.dumps(json_data))
-
-
-@csrf_exempt
-def getfile(request):
-    # GET call
-    status = ""
-    try:
-        inputstring = request.POST.get('user')
-        inputjson = simplejson.loads(inputstring)
-
-        username = inputjson['username']
-        password = inputjson['password']
-        path = inputjson['path']
-        base64string = base64.encodestring(
-            '%s:%s' % (username, password)).replace('\n', '')
-
-        url = "https://acmetest.ornl.gov/alfresco/service/cat/getFileContents?path=" + \
-            path
-        request = urllib2.Request(url)
-        request.add_header("Authorization", "Basic %s" % base64string)
-        response = urllib2.urlopen(request)
-        page = response.read()
-        status = page
-    except Exception, e:
-        status = "fail: " + str(e)
-
-    json_data = {}
-    json_data['key'] = status
-    return HttpResponse(json.dumps(json_data))
-
-
-@csrf_exempt
-def savefile(request):
-    # POST call
-    status = ""
-    try:
-        inputstring = request.POST.get('user')
-        inputjson = simplejson.loads(inputstring)
-
-        username = inputjson['username']
-        password = inputjson['password']
-        path = inputjson['path']
-        content = inputjson['content']
-
-        data_args = {'path': path, 'content': content}
-        data = urllib.urlencode(data_args)
-        base64string = base64.encodestring(
-            '%s:%s' % (username, password)).replace('\n', '')
-
-        url = "https://acmetest.ornl.gov/alfresco/service/cat/upload"
-
-        # request = urllib2.Request(url, data)
-        # request.add_header("Authorization", "Basic %s" % base64string)
-        # response = urllib2.urlopen(request)
-        # page = response.read()
-        # status = page
-        status = "success"
-    except Exception, e:
-        status = "fail: " + str(e)
-    json_data = {}
-    json_data['key'] = status
-    return HttpResponse(json.dumps(json_data))
-
-
-@csrf_exempt
-def getresource(request):
-    # GET call
-    status = ""
-    try:
-        inputstring = request.POST.get('user')
-        inputjson = simplejson.loads(inputstring)
-
-        username = inputjson['username']
-        password = inputjson['password']
-        path = inputjson['path']
-        base64string = base64.encodestring(
-            '%s:%s' % (username, password)).replace('\n', '')
-
-        url = "https://acmetest.ornl.gov/alfresco/service/cssef/getResource?path=" + \
-            path
-        print url
-        request = urllib2.Request(url)
-        request.add_header("Authorization", "Basic %s" % base64string)
-        print request
-        response = urllib2.urlopen(request)
-        print response
-        page = response.read()
-        print page
-        status = page
-    except Exception, e:
-        status = "fail: " + str(e)
-        print status
-    json_data = {}
-    json_data['key'] = status
-    return HttpResponse(json.dumps(json_data))
-
-
-# FILE TREE PLUG IN
-@csrf_exempt
-def filetree(request):
-    r = ['<ul class="jqueryFileTree" style="display: none;">']
-    try:
-        r = ['<ul class="jqueryFileTree" style="display: none;">']
-        d = urllib.unquote(
-            request.POST.get('dir', '/Users/harris112/Projects/aims/acme-site'))
-        for f in os.listdir(d):
-            ff = os.path.join(d, f)
-            if os.path.isdir(ff):
-                r.append(
-                    '<li class="directory collapsed"><a href="#" rel="%s/">%s</a></li>' % (ff, f))
-            else:
-                e = os.path.splitext(f)[1][1:]  # get .ext and remove dot
-                r.append(
-                    '<li class="file ext_%s"><a href="#" rel="%s">%s</a></li>' % (e, ff, f))
-        r.append('</ul>')
-    except Exception, e:
-        r.append('Could not load directory: %s' % str(e))
-    r.append('</ul>')
-    return HttpResponse(''.join(r))
 
 
 def print_debug(e):

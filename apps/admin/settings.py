@@ -30,6 +30,7 @@ if os.getenv('build_on_travis', None):
 else:
     from local_settings import *  # noqa
 
+USERDATA_ROOT = os.path.join(os.getcwd(), 'userdata')
 
 # Django settings for admin project.
 

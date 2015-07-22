@@ -46,6 +46,9 @@ $(document).ready(function() {
 									'  <a href="#" id="velo_context_menu_delete">Delete</a>',
 									'  <a href="#" id="velo_context_menu_rename">Rename</a>',
 									'</div>' ].join('');
+	var esgf_context_menu_html = [	'<div id="esgf_context_menu">',
+									'  <a href="#" id="esgf_context_menu_search">Search</a>',
+									'</div>' ].join('');
 
 	var dragStartX = 0;
 	var dragStartY = 0;
@@ -89,6 +92,8 @@ $(document).ready(function() {
 		top: '50%', // Top position relative to parent
 		left: '50%' // Left position relative to parent
 	};
+	var esgf_search_terms = {};
+	var esgf_search_nodes = [];
 
 	/****************************************
 	 	End setup variables
@@ -226,7 +231,6 @@ $(document).ready(function() {
 											'<div id="velo-text-edit"',
 											'</div>'].join('');
 								
-								initFileTree('velo_window');
 								var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + content + header3 + '</li>';
 								add_tile(new_tile, name + '_window', {
 									ignore: 'true'
@@ -235,6 +239,7 @@ $(document).ready(function() {
 										nodeSearch(document.getElementById("node-search-name").value);
 									});
 								});
+								initFileTree('velo_window');
 								var background = '';
 								if(mode == 'day'){
 									background = 'rgb(192, 192, 192)';
@@ -390,8 +395,8 @@ $(document).ready(function() {
 				var spinner = new Spinner(opts).spin();
 				document.getElementById('velo-text-edit').appendChild(spinner.el);
 
-				var filename = $('#velo-mtree.mtree-active').find(':first-child').text();
-				var remote_path = $('#velo-mtree.mtree-active').find(':first-child').attr('data-path');
+				var filename = $('#velo-mtree .mtree-active').find(':first-child').text();
+				var remote_path = $('#velo-mtree .mtree-active').find(':first-child').attr('data-path');
 				var text = codeMirror.getValue();
 				var outgoing_request = {
 					text: text,
@@ -417,7 +422,7 @@ $(document).ready(function() {
 								'    	<input type="text" placeholder="New File Name" id="velo-new-file-text-input"></input>',
 								'    </form>',
 								'</li>'].join('');
-		$('#velo-mtree.mtree-level-1').prepend(newFileHtml);
+		$('#velo-mtree .mtree-level-1').prepend(newFileHtml);
 		$("#velo-new-file-text-input").keypress(function(event) {
 		    if (event.which == 13) {
 		    	newFileHtml = '<a href="#" id="velo-new-file"></a>';
@@ -449,7 +454,7 @@ $(document).ready(function() {
 								'    	<input type="text" placeholder="New Folder Name" id="velo-new-folder-text-input"></input>',
 								'    </form>',
 								'</li>'].join('');
-		$('#velo-mtree.mtree-level-1').prepend(newFolderHtml);
+		$('#velo-mtree .mtree-level-1').prepend(newFolderHtml);
 		$("#velo-new-folder-text-input").keypress(function(event) {
 		    if (event.which == 13) {
 		        newFolderHtml = '<a href="#" id="new-velo-folder"></a><ul class="mtree-level-2" style="overflow: hidden; height: 0px; display: none;"></ul>';
@@ -490,6 +495,21 @@ $(document).ready(function() {
 
 	function velo_start_run(){
 
+	}
+
+	function esgf_context_menu(e){
+		$('body').append(esgf_context_menu_html);
+		$('#esgf_context_menu').offset({
+			'top': e.clientY,
+			'left': e.clientX
+		});
+		createMask('esgf_context_menu', 0);
+		$('#esgf_context_menu_search').click(function(e){
+			//$('#esgf_window .tile-contents').empty();
+			fadeOutMask('esgf_context_menu');
+			var target = $('#esgf-mtree .mtree-active ul').attr('data-node');
+			nodeSearch(target);
+		});
 	}
 
 	function velo_context_menu(e){
@@ -544,10 +564,7 @@ $(document).ready(function() {
 
 				fadeOutMask('velo_context_menu');
 			});
-
 		});
-
-
 	}	
 
 	function initCodeMirror(text) {
@@ -598,7 +615,16 @@ $(document).ready(function() {
 			get_data('get_file/', 'POST', data, function(response){
 				spinner.stop();
 				$('#velo-text-edit').empty();
-				initCodeMirror(response.responseText);
+				if(response.type == 'image'){
+					var name = 'image-viewer';
+					var contents = '<div id="velo-image"><img src="/acme/userdata/image/' + response.location + '"></div>'
+					$('#velo-text-edit').empty();
+					$('#velo-text-edit').append(contents);
+					// var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + contents + header3 + '</li>';
+					// (new_tile, name + '_window', {ignore: 'true'});
+				} else {
+					initCodeMirror(response.responseText);
+				}
 			}, function(response){
 				spinner.stop();
 				alert('Faild to retrieve file from server');
@@ -617,7 +643,6 @@ $(document).ready(function() {
 			opts.color = color; 
 			var spinner = new Spinner(opts).spin();
 			if (mode == 'day') {
-				var mtree_style = 'jet';
 				$('#velo-file-tree').css({
 					'background-color': '#FAFFFF'
 				});
@@ -628,7 +653,6 @@ $(document).ready(function() {
 					'background-color': '#f7f7f7'
 				});
 			} else {
-				mtree_style = 'transit';
 				$('#velo-file-tree').css({
 					'background-color': '#111'
 				});
@@ -648,8 +672,6 @@ $(document).ready(function() {
 					'file': '/User Documents/'
 				}
 				
-				$('#velo-mtree.mtree').addClass(mtree_style);
-
 				get_data('get_folder/', 'POST', request, function(response) {
 					spinner.stop();
 					response.sort();
@@ -669,12 +691,12 @@ $(document).ready(function() {
 							parentFolder = parentFolder.substring(0, parentFolder.length - 1);
 							var parentFolderEl = $('ul[data-path="' + parentFolder + '"]');
 							if(parentFolderEl.length == 0){
-								$('#velo-mtree.mtree').append('<li><a href="#">' + path[path.length - 1] + '</a><ul data-path="' + response[i] + '"></ul></li>');
+								$('#velo-mtree.mtree').append('<li class="mtree-root"><a href="#">' + path[path.length - 1] + '</a><ul data-path="' + response[i] + '"></ul></li>');
 								continue;
 							}
 							var folderPath = parentFolder + '/' + path[path.length - 1];
 							var folderName = path[path.length - 1];
-							parentFolderEl.append('<li><a href="#">' + folderName + '</a><ul data-path="' + folderPath + '"></ul></li>');
+							parentFolderEl.append('<li class="mtree-drag mtree-drop"><a href="#">' + folderName + '</a><ul data-path="' + folderPath + '"></ul></li>');
 
 						} else {
 							parentFolder = '/';
@@ -682,7 +704,7 @@ $(document).ready(function() {
 								parentFolder += path[j] + '/';
 							}
 							parentFolder = parentFolder.substring(0, parentFolder.length - 1);
-							$('ul[data-path="'+ parentFolder + '"]').append('<li><a href="#" data-path="' + response[i] + '">' + path[path.length - 1] + '</a></li>');
+							$('ul[data-path="'+ parentFolder + '"]').append('<li class="mtree-drag mtree-file"><a href="#" data-path="' + response[i] + '">' + path[path.length - 1] + '</a></li>');
 
 							$('a[data-path="' + response[i] + '"]').click(function(event){
 								getFile( $(event.target).attr('data-path') );
@@ -690,12 +712,31 @@ $(document).ready(function() {
 						}
 					}
 
-					mtree();
+					mtree('velo-mtree-container');
 
 					$('#velo-mtree.mtree').bind('contextmenu',function(e){
 						e.preventDefault();
 						if(e.button == 2){
 							velo_context_menu(e);
+						}
+					});
+					$('.mtree-drag').draggable({
+						revert: 'invalid',
+						stack: '#velo-mtree-container',
+					});
+					// $('.mtree-drag-and-sort').sortable({
+					// 	revert: 'true',
+					// 	placeholder: "ui-state-highlight",
+					// 	stop: function(){
+					// 		mtree('velo-mtree-container')
+					// 	}
+					// });
+					//$('.mtree-drag-and-sort').disableSelection();
+					$('.mtree-drop').droppable({
+						drop: function(event, ui){
+							console.log(event);
+							console.log(ui);
+
 						}
 					});
 				}, function() {
@@ -707,195 +748,58 @@ $(document).ready(function() {
 				document.getElementById('esgf_window').appendChild(spinner.el);
 				get_data('node_info/', 'GET', {}, function(response){
 					spinner.stop();
-					$('#esgf-node-tree.mtree').addClass(mtree_style);
 					$('#esgf-node-tree').append('<ul class="mtree" id="esgf-mtree"></ul>');
 					var node_array = Object.keys(response);
 					for(var i = 0; i < node_array.length; i++){
-						$('#esgf-mtree').append('<li><a href="#">' + node_array[i] + '</a><ul data-node="' + node_array[i] + '"></li>');
+
 						var node_attrib = Object.keys(response[node_array[i]]['attributes']);
 						//var node_child = Object.keys(response[node_array[i]]['children']);
 						var node_child = 'Node';
-						for(var j = 0; j < node_attrib.length; j++){
-							var attribute;
-							var children;
-							if(node_attrib[j] == 'timeStamp'){
-								var d = new Date(0); 
-								d.setUTCSeconds(response[node_array[i]]['attributes'][node_attrib[j]] / 1000);
-								attribute = d;
-							} else {
-								attribute = response[node_array[i]]['attributes'][node_attrib[j]];
+						if(response[node_array[i]]['children'][node_child]){
+							var host = response[node_array[i]]['children'][node_child]['attributes']['hostname'];
+							$('#esgf-mtree').append('<li><a href="#">' + node_array[i] + '</a><ul data-node="' + host + '"></li>');
+							$('ul[data-node="' + host + '"]').append('<input type="checkbox" class="node-check-box" value="' + host + '">Search Node</input>');
+							for(var j = 0; j < node_attrib.length; j++){
+								var attribute;
+								var children;
+								if(node_attrib[j] == 'timeStamp'){
+									var d = new Date(0); 
+									d.setUTCSeconds(response[node_array[i]]['attributes'][node_attrib[j]] / 1000);
+									attribute = 'date node came online ' + d;
+								} else {
+									attribute = response[node_array[i]]['attributes'][node_attrib[j]];
+								}
+								children = Object.keys(response[node_array[i]]['children'][node_child]['attributes']);
+								
+								$('ul[data-node="' + host + '"]').append('<li><table><tr><td>' + node_attrib[j] + '</td><td style="text-align: right;"> ' + attribute + '</td></tr></table></li>');					
 							}
-							children = Object.keys(response[node_array[i]]['children'][node_child]['attributes']);
-							
-							$('ul[data-node="' + node_array[i] + '"]').append('<li><a href="#">' + node_attrib[j] + ': ' + attribute + '</a></li>');
 							for(var k = 0; k < children.length; k++){
-								$('ul[data-node="' + node_array[i] + '"]').append('<li><a href="#">' + children[k] + ': ' + response[node_array[i]]['children'][node_child]['attributes'][children[k]] + '</a></li>');
+								if(children[k] == 'timeStamp'){
+									var d = new Date(0); 
+									d.setUTCSeconds(response[node_array[i]]['children'][node_child]['attributes'][children[k]] / 1000);
+									attribute = 'node online at ' + d;
+								} else {
+									attribute = response[node_array[i]]['children'][node_child]['attributes'][children[k]];
+								}
+								$('ul[data-node="' + host + '"]').append('<li><table><tr><td>' + children[k] + '</td><td style="text-align: right;">' + attribute + '</td></tr></table></li>');
 							}
-							
 						}
 					}
-
-					mtree();
+					$('#esgf-mtree.mtree').bind('contextmenu',function(e){
+						e.preventDefault();
+						if(e.button == 2){
+							esgf_context_menu(e);
+						}
+					});
+					mtree('esgf-node-tree');
 				}, function(response){
 					alert('Error getting node list');
 					spinner.stop();
 				});
 			}
-			
-
-
-			function mtree(){
-				/*
-				The following is copied from mtree.js
-				*/
-				// mtree.js
-				// Only apply if mtree list exists
-				if ($('ul.mtree').length) {
-					// Settings
-					var collapsed = true; // Start with collapsed menu (only level 1 items visible)
-					var close_same_level = true; // Close elements on same level when opening new node.
-					var duration = 400; // Animation duration should be tweaked according to easing.
-					var listAnim = true; // Animate separate list items on open/close element (velocity.js only).
-					var easing = 'easeOutQuart'; // Velocity.js only, defaults to 'swing' with jquery animation.
-
-					// Set initial styles 
-					$('.mtree ul').css({
-						'overflow': 'hidden',
-						'height': (collapsed) ? 0 : 'auto',
-						'display': (collapsed) ? 'none' : 'block'
-					});
-
-					// Get node elements, and add classes for styling
-					var node = $('.mtree li:has(ul)');
-					node.each(function(index, val) {
-						$(this).children(':first-child').css('cursor', 'pointer')
-						$(this).addClass('mtree-node mtree-' + ((collapsed) ? 'closed' : 'open'));
-						$(this).children('ul').addClass('mtree-level-' + ($(this).parentsUntil($('ul.mtree'), 'ul').length + 1));
-					});
-
-					// Set mtree-active class on list items for last opened element
-					$('.mtree li > *:first-child').on('click.mtree-active', function(e) {
-						if ($(this).parent().hasClass('mtree-closed')) {
-							$('.mtree-active').not($(this).parent()).removeClass('mtree-active');
-							$(this).parent().addClass('mtree-active');
-						} else if ($(this).parent().hasClass('mtree-open')) {
-							$(this).parent().removeClass('mtree-active');
-						} else {
-							$('.mtree-active').not($(this).parent()).removeClass('mtree-active');
-							$(this).parent().toggleClass('mtree-active');
-						}
-					});
-
-					// Set node click elements, preferably <a> but node links can be <span> also
-					node.children(':first-child').on('click.mtree', function(e) {
-
-						// element vars
-						var el = $(this).parent().children('ul').first();
-						var isOpen = $(this).parent().hasClass('mtree-open');
-
-						// close other elements on same level if opening 
-						if ((close_same_level || $('.csl').hasClass('active')) && !isOpen) {
-							var close_items = $(this).closest('ul').children('.mtree-open').not($(this).parent()).children('ul');
-
-							// Velocity.js
-							if ($.Velocity) {
-								close_items.velocity({
-									height: 0
-								}, {
-									duration: duration,
-									easing: easing,
-									display: 'none',
-									delay: 100,
-									complete: function() {
-										setNodeClass($(this).parent(), true)
-									}
-								});
-
-								// jQuery fallback
-							} else {
-								close_items.delay(100).slideToggle(duration, function() {
-									setNodeClass($(this).parent(), true);
-								});
-							}
-						}
-
-						// force auto height of element so actual height can be extracted
-						el.css({
-							'height': 'auto'
-						});
-
-						// listAnim: animate child elements when opening
-						if (!isOpen && $.Velocity && listAnim) el.find(' > li, li.mtree-open > ul > li').css({
-							'opacity': 0
-						}).velocity('stop').velocity('list');
-
-						// Velocity.js animate element
-						if ($.Velocity) {
-							el.velocity('stop').velocity({
-								//translateZ: 0, // optional hardware-acceleration is automatic on mobile
-								height: isOpen ? [0, el.outerHeight()] : [el.outerHeight(), 0]
-							}, {
-								queue: false,
-								duration: duration,
-								easing: easing,
-								display: isOpen ? 'none' : 'block',
-								begin: setNodeClass($(this).parent(), isOpen),
-								complete: function() {
-									if (!isOpen) $(this).css('height', 'auto');
-								}
-							});
-
-							// jQuery fallback animate element
-						} else {
-							setNodeClass($(this).parent(), isOpen);
-							el.slideToggle(duration);
-						}
-
-						// We can't have nodes as links unfortunately
-						e.preventDefault();
-					});
-
-					// Function for updating node class
-					function setNodeClass(el, isOpen) {
-						if (isOpen) {
-							el.removeClass('mtree-open').addClass('mtree-closed');
-						} else {
-							el.removeClass('mtree-closed').addClass('mtree-open');
-						}
-					}
-
-					// List animation sequence
-					if ($.Velocity && listAnim) {
-						$.Velocity.Sequences.list = function(element, options, index, size) {
-							$.Velocity.animate(element, {
-								opacity: [1, 0],
-								translateY: [0, -(index + 1)]
-							}, {
-								delay: index * (duration / size / 2),
-								duration: duration,
-								easing: easing
-							});
-						};
-					}
-
-					// Fade in mtree after classes are added.
-					// Useful if you have set collapsed = true or applied styles that change the structure so the menu doesn't jump between states after the function executes.
-					if ($('.mtree').css('opacity') == 0) {
-						if ($.Velocity) {
-							$('.mtree').css('opacity', 1).children().css('opacity', 0).velocity('list');
-						} else {
-							$('.mtree').show(200);
-						}
-					}
-				}
-
-				/*
-					End mtree.js
-				*/
-			}
-
 		});
 	}
+
 
 
 	function isFolder(file) {
@@ -944,87 +848,6 @@ $(document).ready(function() {
 		return exists;
 	}
 
-	
-	/* Initializes the connection to the velo api
-	 *
-	 *
-	 *
-	 */
-	function initVeloConnection() {
-		$.getScript("static/js/spin.js", function() {
-			if (mode == 'night') {
-				var color = '#fff';
-			} else {
-				color = '#000';
-			}
-			opts.color = color; 
-			var spinner = new Spinner(opts).spin();
-			document.getElementById('velo_window').appendChild(spinner.el);
-			var data = {
-				connection: 'init'
-			}
-			get_data('velo/', 'POST', data, function(response) {
-				spinner.stop();
-				alert(jQuery.parseJSON(response));
-			}, function() {
-				spinner.stop();
-				alert('server error');
-			});
-		});
-	}
-
-
-	/* populates additional node info by querying the server 
-	 *
-	 * id -> the name of the node to fetch information for
-	 *
-	 */
-	function populateNodeSelect(id) {
-		$.getScript("static/js/spin.js", function() {
-			if (mode == 'night') {
-				var color = '#fff';
-			} else {
-				color = '#000';
-			}
-			opts.color = color; 
-			var spinner = new Spinner(opts).spin();
-			document.getElementById('nodeSelect_window').appendChild(spinner.el);
-			var data = {
-				node: id
-			}
-			get_data('node_info/', 'POST', data, function(response) {
-				spinner.stop();
-				var node_data = response;
-				var data = '';
-				var text_style = '';
-				$('#nodeSelect_window').find('.tile-contents').append('<table id=node-info></table>');
-				for (var key in node_data) {
-					if (key == 'status') {
-						if (node_data[key] == 'up') {
-							text_style = 'color: green;';
-						} else {
-							text_style = 'color: red;';
-						}
-					} else {
-						text_style = '';
-					}
-					var data = '<tr><td class="key" id="' + key + '">' + key + '</td><td class="value" id="' + key + '_value" style="' + text_style + '">' + node_data[key] + '</td><tr>';
-					$('#nodeSelect_window').find('#node-info').append(data);
-				}
-				var button = ['<br><button type="button" class="btn btn-default btn-xs" id="node-search" style="float:left; margin-left: 20px;">',
-					'     <span class="fa fa-search" aria-label="Options"></span>',
-					'</button>'
-				].join('');
-				$('#nodeSelect_window').find('.tile-contents').append(button);
-				$('#node-search').click(function() {
-					nodeSearch($('#hostname_value').text());
-				});
-			}, function() {
-				spinner.stop();
-				alert('Server error');
-			});
-		});
-	}
 
 	/* Creates the window for searching a node for its data
 	 *
@@ -1038,70 +861,64 @@ $(document).ready(function() {
 			} else {
 				color = '#000';
 			}
-			if ($('#nodeSearch_window').length != 0) {
-				$('#nodeSearch_window').find('.tile-contents').empty();
-			} else {
-				var new_tile = '<li id="' + "nodeSearch" + '_window" class="tile">' + header1 + "nodeSearch" + header2 + header3 + '</li>';
-				add_tile(new_tile, "nodeSearch_window");
-			}
-			var searchWindow = $('#nodeSearch_window').find('.tile-contents');
 			opts.color = color; 
 			var spinner = new Spinner(opts).spin();
-			document.getElementById('nodeSearch_window').appendChild(spinner.el);
-			var data = {
-				node: 'http://' + hostname + '/esg-search/',
-				test_connection: true
-			};
-			get_data('node_search/', 'POST', data, function(response) {
-				spinner.stop();
-				var facet_options = response;
-				searchWindow.empty();
-				var form = ['<form>',
-					'Facet options<br>',
-					'<select id="select-filter"></select>',
-					'<br><p>Filter value</p><select id="filter-value"></select>',
-					'<br><p id="search-string">Search string: </p>',
-					'<input type="submit" id="search-submit" value="Search" style="color: #000;">',
-					'</form>'
-				].join('');
-				searchWindow.append(form);
-				$('#select-filter').on('change', function() {
-					$('#filter-value').empty();
-					var facet_option_values = facet_options[document.getElementById('select-filter').value]
-					for (key in facet_option_values) {
-						$('#filter-value').append('<option value="' + key + '">' + key + ' : ' + facet_option_values[key] + '</option>');
-					}
-				})
-				for (key in facet_options) {
-					var facet = '<option value=' + key + '>' + key + '</option>';
-					searchWindow.find('#select-filter').append(facet);
-				}
 
-				searchTerms = {};
-				$('#filter-value').on('change', function() {
-					searchTerms[document.getElementById("select-filter").value] = document.getElementById('filter-value').value;
-					$('#search-string').html('Search string: ');
-					for (key in searchTerms) {
-						if (key == 'node')
-							continue;
-						$('#search-string').append('<a href="#" class="search-term" id="' + key + '">' + key + '=' + searchTerms[key] + ',</a>');
-					}
-					$('.search-term').click(function() {
-						delete searchTerms[$(this).attr('id')];
-						$(this).remove();
-					});
-				});
-				$('#search-submit').click(function() {
-					esgfSearch(searchTerms, hostname);
-				});
-			}, function() {
+			
+			//get  facets
+			var nodes_to_search = [];
+			$.each($('.node-check-box:checked'), function(box, value){
+				nodes_to_search.push($(value).val());
+			});
+			esgf_search_nodes = nodes_to_search;
+			$('#esgf_window #esgf-node-tree').remove();
+			document.getElementById('esgf_window').appendChild(spinner.el);
+			get_data('load_facets/', 'POST', nodes_to_search, function(response){
 				spinner.stop();
-				alert('Unable to connect');
+				var newHtml = '<div id="esgf-node-search"><ul class="mtree" id="esgf-node-search-mtree"></ul></div>';
+				$('#esgf_window .tile-contents').append(newHtml);
+				newHtml = '<div><input type="text" id="esgf-search-terms" placeholder="Type search terms here or select options below"></input></div>';
+				$('#esgf_window .tile-contents').prepend(newHtml);
+				newHtml = '<button class="btn btn-primary" id="esgf-search-submit">Search</button>';
+				$('#esgf_window .tile-contents').prepend(newHtml);
+				var keys = Object.keys(response).sort();
+				for(var i = 0; i < keys.length; i++){
+					var facet = response[keys[i]];
+					var facet_html = '<li><a href="#">' + keys[i] + '</a><ul data-facet="' + keys[i] + '" class="facet"></ul></li>';
+					$('#esgf-node-search-mtree').append(facet_html);
+					var facet_options = Object.keys(response[keys[i]]).sort();
+					for(var j=0; j < facet_options.length; j++){
+						var facet_options_html = '<li><table><tr><td><a href="#">' + facet_options[j] + '</a></td><td style="text-align: right;">' + response[keys[i]][facet_options[j]] + '</td></tr></table></li>';
+						$('ul[data-facet="' + keys[i] + '"').append(facet_options_html);
+					}
+					$('ul[data-facet="' + keys[i] + '"]').click(function(e){
+						esgf_search_terms[$(e.target).parents('.facet').attr('data-facet')] = $(e.target).text();
+						var terms = Object.keys(esgf_search_terms);
+						var terms_string = '';
+						for(var i = 0; i < terms.length; i++){
+							terms_string += terms[i] + '=' + esgf_search_terms[terms[i]] + ',';
+						}
+						terms_string = terms_string.substring(0, terms_string.length - 1);
+						document.getElementById('esgf-search-terms').value = terms_string;
+					});
+				}
+				mtree('esgf-node-search');
+				$('#esgf-search-submit').click(function(){
+					var terms = document.getElementById('esgf-search-terms').value.split(/[=,]+/);
+					esgf_search_terms = {};
+					for(var i = 0; i < terms.length - 1; i+=2){
+						esgf_search_terms[terms[i]] = terms[i + 1];
+					}
+					esgfSearch();
+				});
+			}, function(){
+				spinner.stop();
+				alert('Failed to load node facets');
 			});
 		});
 	}
 
-	function esgfSearch(searchTerms, hostname) {
+	function esgfSearch() {
 		$.getScript("static/js/spin.js", function() {
 			if (mode == 'night') {
 				var color = '#fff';
@@ -1110,45 +927,53 @@ $(document).ready(function() {
 			}
 			opts.color = color; 
 			var spinner = new Spinner(opts).spin();
-			document.getElementById('nodeSearch_window').appendChild(spinner.el);
-			searchTerms['node'] = 'http://' + hostname + '/esg-search/';
-			get_data('node_search/', 'POST', searchTerms, function(response) {
-				spinner.stop();
-				console.log(JSON.parse(response));
-				response = JSON.parse(response);
-				var searchDisplay = ['<div id="searchDisplay">',
-					'</div>'
-				].join('');
-				if ($('#searchDisplay').length == 0) {
-					$('#nodeSearch_window').find('.tile-contents').append(searchDisplay);
-				} else {
-					$('#searchDisplay').empty();
-				}
-				$('#searchDisplay').css({
-					// 	width: $('#nodeSearch_window').width()/2,
-					height: $('#nodeSearch_window').height() - $('#searchDisplay').offset().top
-						// 	left: $('#nodeSearch_window').width()/2,
-				});
-				for (i in response) {
-					$('#searchDisplay').append('<h2>Hit number ' + (parseInt(i) + 1) + '</h2><p id="' + i + '"></p>');
-					for (key in response[i]) {
-						var value = '<p>' + key + ' : ';
-						if (typeof(response[i][key]) != 'object') {
-							value += response[i][key] + '</p>';
-							$('#searchDisplay').find('#' + i).append(value);
-							continue;
+			document.getElementById('esgf_window').appendChild(spinner.el);
+			data = {
+				'nodes': esgf_search_nodes,
+				'terms': esgf_search_terms
+			}
+
+			function display_response(r, parent, hitnum){
+				keys = Object.keys(r).sort();
+				var branch = '';
+				for(var i = 0; i < keys.length; i++){
+					if(typeof r[keys[i]] != 'object'){
+						branch = '<li><table><tr><td>' + keys[i] + '</td><td style="float:right;"> ' + r[keys[i]] + '</td></tr></table></li>';
+						parent.append(branch);
+					} else {
+						branch = '<li><a href="#">' + keys[i] + '</a><ul data-branch="' + hitnum + keys[i] + '"></ul></li>';
+						parent.append(branch);
+						var subkeys = Object.keys(r[keys[i]]);
+						for(var j = 0; j < subkeys.length; j++){
+							branch = '<li><table><tr><td>' + subkeys[j] + '</td><td style="float:right;"> ' + r[keys[i]][subkeys[j]] + '</td></tr></table></li>';
+							$('ul[data-branch="' + hitnum + keys[i] + '"]').append(branch);
 						}
-						for (var j = 0; j < response[i][key].length; j++) {
-							if (j == 0) {
-								value += response[i][key][j];
-							} else {
-								value += ', ' + response[i][key][j];
-							}
-						}
-						$('#searchDisplay').find('#' + i).append(value + '</p>');
 					}
-					$('#searchDisplay').find('#' + i).append('<br>');
 				}
+			}
+
+
+			get_data('node_search/', 'POST', data, function(response) {
+				spinner.stop();
+				
+				var searchDisplay = '<div id="esgf-search-display"><ul class="mtree" id="esgf-search-display-mtree"></ul></div>';
+				if ($('#esgf-search-display').length == 0) {
+					$('#esgf_window .tile-contents').append(searchDisplay);
+				} else {
+					$('#esgf-search-display').empty();
+					$('#esgf_window .tile-contents').append(searchDisplay);
+				}
+				for (var i in response) {
+					if(i != 'hits'){
+						$('#esgf-search-display-mtree').append('<li><a href="#">Dataset: ' + (i+1) + '</a><ul data-branch="' + i + '"></ul></li>');
+						display_response(response[i], $('ul[data-branch="' + i + '"]'), i);
+					}
+				}
+				$('#esgf-search-display-mtree').offset({
+					'top': $('#esgf-node-search').offset.top,
+					'left': $('#esgf-node-search').offset.left + $('#esgf-node-search').width()
+				});
+				mtree('esgf-search-display');
 			}, function() {
 				spinner.stop();
 				alert('No data found, ease search restrictions and try again');
@@ -1285,21 +1110,6 @@ $(document).ready(function() {
 				'sizex': options.sizex,
 				'sizey': options.sizey
 			});
-			// for(var i = 0; i < tiles.length -1; i ++){
-			// 	if(id != tiles[i]){
-			// 		// if the tile is overlapping in the y direction t.y + t.sizey >= y > t.y
-			// 		if(parseInt($('#'+tiles[i]).attr('row'))+parseInt($('#'+tiles[i]).attr('sizey')) - 1 > parseInt($(w).attr('row')) && parseInt($(w).attr('row')) > parseInt($('#'+tiles[i]).attr('row'))){
-			// 			$(w).attr({
-			// 				'row' : parseInt($('#'+tiles[i]).attr('row'))+parseInt($('#'+tiles[i]).attr('sizey'))
-			// 			});
-			// 		}
-			// 		if(parseInt($('#'+tiles[i]).attr('col'))+parseInt($('#'+tiles[i]).attr('sizex')) - 1 > parseInt($(w).attr('col')) && parseInt($(w).attr('col')) > parseInt($('#'+tiles[i]).attr('col'))){
-			// 			$(w).attr({
-			// 				'col' : parseInt($('#'+tiles[i]).attr('col'))+parseInt($('#'+tiles[i]).attr('sizex'))
-			// 			});
-			// 		}
-			// 	}
-			// }
 			update_board(id);
 			var tile_offset = offset_from_location(parseInt($(w).attr('row')), parseInt($(w).attr('col')));
 			$(w).css({
@@ -2111,7 +1921,7 @@ $(document).ready(function() {
 			}, function() {
 				alert('Please use unique layout name');
 			});
-			fadeOutMask('#save-menu');
+			fadeOutMask('save-menu');
 		});
 	});
 
@@ -2292,10 +2102,10 @@ $(document).ready(function() {
 			'color': '#000'
 		});
 		$('#dark-mode-toggle').text('Dark mode is off');
+		$('.mtree').removeClass('transit');
+		$('.mtree').addClass('jet');
 		//handle velo window
 		if($('#velo_window').length != 0){
-			$('.mtree').removeClass('transit');
-			$('.mtree').addClass('jet');
 			$('#velo-file-tree').css({
 				'background-color': '#FAFFFF'
 			});
@@ -2560,5 +2370,166 @@ $(document).ready(function() {
 			}
 		});
 		return ajax_obj;
+	}
+
+
+	function mtree(id){
+		if(typeof id === 'undefined'){
+			id = 'tile-contents';
+		}
+		/*
+		The following is copied from mtree.js
+		*/
+		// mtree.js
+		// Only apply if mtree list exists
+		if ($('#' + id + ' ul.mtree').length) {
+			// Settings
+			var collapsed = true; // Start with collapsed menu (only level 1 items visible)
+			var close_same_level = true; // Close elements on same level when opening new node.
+			var duration = 400; // Animation duration should be tweaked according to easing.
+			var listAnim = true; // Animate separate list items on open/close element (velocity.js only).
+			var easing = 'easeOutQuart'; // Velocity.js only, defaults to 'swing' with jquery animation.
+
+			if (mode == 'day') {
+				var mtree_style = 'jet';
+			} else {
+				mtree_style = 'transit';
+			}
+			$('.mtree').addClass(mtree_style);
+
+			// Set initial styles 
+			$('#' + id + ' .mtree ul').css({
+				'overflow': 'hidden',
+				'height': (collapsed) ? 0 : 'auto',
+				'display': (collapsed) ? 'none' : 'block'
+			});
+
+			// Get node elements, and add classes for styling
+			var node = $('#' + id + ' .mtree li:has(ul)');
+			node.each(function(index, val) {
+				$(this).children(':first-child').css('cursor', 'pointer')
+				$(this).addClass('mtree-node mtree-' + ((collapsed) ? 'closed' : 'open'));
+				$(this).children('ul').addClass('mtree-level-' + ($(this).parentsUntil($('#' + id + ' ul.mtree'), 'ul').length + 1));
+			});
+
+			// Set mtree-active class on list items for last opened element
+			$('#' + id + ' .mtree li > *:first-child').on('click.mtree-active', function(e) {
+				if ($(this).parent().hasClass('mtree-closed')) {
+					$('.mtree-active').not($(this).parent()).removeClass('mtree-active');
+					$(this).parent().addClass('mtree-active');
+				} else if ($(this).parent().hasClass('mtree-open')) {
+					$(this).parent().removeClass('mtree-active');
+				} else {
+					$('.mtree-active').not($(this).parent()).removeClass('mtree-active');
+					$(this).parent().toggleClass('mtree-active');
+				}
+			});
+
+			// Set node click elements, preferably <a> but node links can be <span> also
+			node.children(':first-child').on('click.mtree', function(e) {
+
+				// element vars
+				var el = $(this).parent().children('ul').first();
+				var isOpen = $(this).parent().hasClass('mtree-open');
+
+				// close other elements on same level if opening 
+				if ((close_same_level || $('.csl').hasClass('active')) && !isOpen) {
+					var close_items = $(this).closest('ul').children('.mtree-open').not($(this).parent()).children('ul');
+
+					// Velocity.js
+					if ($.Velocity) {
+						close_items.velocity({
+							height: 0
+						}, {
+							duration: duration,
+							easing: easing,
+							display: 'none',
+							delay: 100,
+							complete: function() {
+								setNodeClass($(this).parent(), true)
+							}
+						});
+
+						// jQuery fallback
+					} else {
+						close_items.delay(100).slideToggle(duration, function() {
+							setNodeClass($(this).parent(), true);
+						});
+					}
+				}
+
+				// force auto height of element so actual height can be extracted
+				el.css({
+					'height': 'auto'
+				});
+
+				// listAnim: animate child elements when opening
+				if (!isOpen && $.Velocity && listAnim) el.find(' > li, li.mtree-open > ul > li').css({
+					'opacity': 0
+				}).velocity('stop').velocity('list');
+
+				// Velocity.js animate element
+				if ($.Velocity) {
+					el.velocity('stop').velocity({
+						//translateZ: 0, // optional hardware-acceleration is automatic on mobile
+						height: isOpen ? [0, el.outerHeight()] : [el.outerHeight(), 0]
+					}, {
+						queue: false,
+						duration: duration,
+						easing: easing,
+						display: isOpen ? 'none' : 'block',
+						begin: setNodeClass($(this).parent(), isOpen),
+						complete: function() {
+							if (!isOpen) $(this).css('height', 'auto');
+						}
+					});
+
+					// jQuery fallback animate element
+				} else {
+					setNodeClass($(this).parent(), isOpen);
+					el.slideToggle(duration);
+				}
+
+				// We can't have nodes as links unfortunately
+				e.preventDefault();
+			});
+
+			// Function for updating node class
+			function setNodeClass(el, isOpen) {
+				if (isOpen) {
+					el.removeClass('mtree-open').addClass('mtree-closed');
+				} else {
+					el.removeClass('mtree-closed').addClass('mtree-open');
+				}
+			}
+
+			// List animation sequence
+			if ($.Velocity && listAnim) {
+				$.Velocity.Sequences.list = function(element, options, index, size) {
+					$.Velocity.animate(element, {
+						opacity: [1, 0],
+						translateY: [0, -(index + 1)]
+					}, {
+						delay: index * (duration / size / 2),
+						duration: duration,
+						easing: easing
+					});
+				};
+			}
+
+			// Fade in mtree after classes are added.
+			// Useful if you have set collapsed = true or applied styles that change the structure so the menu doesn't jump between states after the function executes.
+			if ($('#' + id + ' .mtree').css('opacity') == 0) {
+				if ($.Velocity) {
+					$('.mtree').css('opacity', 1).children().css('opacity', 0).velocity('list');
+				} else {
+					$('.mtree').show(200);
+				}
+			}
+		}
+
+		/*
+			End mtree.js
+		*/
 	}
 });

@@ -27,12 +27,12 @@ class TestVelo(TestCase):
         path = os.getcwd()
         acme = 'acme-web-fe'
         index = path.find(acme)
-        path = path[:index] + acme + '/userdata/acmetest'
-        upload_file = next(os.walk(path))[2][3]
+        path = os.path.join(path[:index], acme, 'userdata/acmetest')
+        upload_file = next(os.walk(path))[2][0]
         ret = v.upload_file('/User Documents/acmetest/', path, upload_file)
         self.assertEqual(ret, 0)
 
-        os.remove(path + '/' + upload_file)
+        os.remove(os.path.join(path, upload_file))
 
         ret = v.download_file('/User Documents/acmetest/' + upload_file, path)
         self.assertEqual(ret, 0)

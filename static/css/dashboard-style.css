@@ -87,6 +87,50 @@ body {
     background: black;
   }
 
+/*============================================================================
+   ESGF window 
+  ============================================================================*/
+
+
+  #esgf_context_menu{
+    width: 100px;
+    height: 70px;
+    border-color: black;
+    border-style: double;
+    border-width: 2px;
+    border-radius: 10px;
+    padding: 10px 10px 10px 10px;
+    z-index: 10000;
+    background: black;
+  }
+
+  #esgf-node-search {
+    width: 48%;
+    height: 90%;
+    margin-right: 0px;
+    float: left;
+    border: solid black 1px;
+    overflow-y: auto;
+;  }
+
+  #esgf-node-tree {
+    width: 50%;
+    height: 90%;
+  }
+
+  #esgf-search-terms {
+    width: 48%;
+    color: #111;
+  }
+
+  #esgf-search-display{
+    width:48%;
+    height:90%;
+    overflow-y: auto;
+    float: right;
+    border: solid black 1px;
+  }
+
 
 /*============================================================================
    Drop down menu 
