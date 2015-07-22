@@ -220,15 +220,25 @@ def dashboard(request):
     from StringIO import StringIO
 
     nodes = ESGFNode.objects.all()
-    if len(nodes) == 0:
-        # bootstrapping off of the australian node since its up
-        bootstrap_node = ESGFNode(host='esg2.nci.org.au')
-        bootstrap_node.save()
-        bootstrap_node.refresh()
-        print bootstrap_node.node_data
-    else:
-        for node in nodes:
+    r = requests.get('http://pcmdi9.llnl.gov/esgf-node-manager/registration.xml')
+    if r.status_code == 200:
+        print "######### Node Manager is back online!  ############"
+        tree = ET.parse(StringIO(r.content))
+        for node in tree.getroot():
+            new_node = ESGFNode(host=node.attrib['hostname'])
+            new_node.save()
+        for node in ESGFNode.objects.all():
             node.refresh()
+    else:
+        if len(nodes) == 0:
+            # bootstrapping off of the australian node since its up
+            bootstrap_node = ESGFNode(host='esg2.nci.org.au')
+            bootstrap_node.save()
+            bootstrap_node.refresh()
+            print bootstrap_node.node_data
+        else:
+            for node in nodes:
+                node.refresh()
 
     return HttpResponse(render_template(request, "web_fe/dashboard.html", {}))
 
