@@ -48,6 +48,9 @@ class VeloService(object):
         else:
             return 'Failed to download file'
 
+    def delete(self, data, velo):
+        return velo.delete_resource(data['resource'])
+
     def wsgi_app(self, environ, start_response):
         request = Request(environ)
         response = self.dispatch_request(request)
@@ -63,7 +66,8 @@ class VeloService(object):
             'get_folder': self.get_folder,
             'create_folder': self.create_folder,
             'save_file': self.save_file,
-            'get_file': self.get_file
+            'get_file': self.get_file,
+            'delete': self.delete
         }
 
 
