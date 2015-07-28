@@ -191,23 +191,13 @@ $(document).ready(function() {
 			var name = $(this).attr('id');
 			var content = '';
 			switch (name) {
+
+				case 'cdat':
+					break;
+
 				case 'esgf':
 					content = '<div id="esgf-node-tree"></div>';
 					initFileTree('esgf_window');
-					break;
-
-				case 'nodeSearch':
-
-					if ($('#nodeSelect_window').length == 0) {
-						content = ['<form id="node-search-form>"',
-							'<p>Node to search:</p><input type="text" style="color: #000;" id="node-search-name">',
-							'<input type="submit" value="Search" id="search-btn" style="color: #000;"><br>',
-							'</form>'
-						].join('');
-					} else {
-						nodeSearch($('#hostname_value').text());
-						return;
-					}
 					break;
 
 				case 'velo':
