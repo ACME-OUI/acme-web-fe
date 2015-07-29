@@ -20,56 +20,20 @@ acme-site
 
     pip install -r requirements.txt
 
+    _Note_
+    If the Jpype install fails because of missing Python.h, you're missing the python dev tools.
+    Simply: sudo apt-get install python-dev
+
 **local settings**
-    
+
+    cp local_settings.py.example local_settings.py
     vim local_settings.py
 
-**add this**
-
-    import os.path
-
-    STATICFILES_DIRS = (
-        '/path/to/acme-web-fe/acme_site/static/',
-    )
-
-    DATABASES = {
-      'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': os.path.join(os.path.abspath("."), 'db.sqlite3'),
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
-      }
-    }
-
-    #Get a key from the google registration page
-    RECAPTCHA_PUBLIC_KEY = ''
-    RECAPTCHA_PRIVATE_KEY = ''
-
-    # Make this unique, and don't share it with anybody.
-    # CAN NOT BE EMPTY http://www.miniwebtool.com/django-secret-key-generator
-    SECRET_KEY = ''
-    JAR_PATH = '-Djava.class.path=/path/to/acme-web-fe/static/java/VeloAPI.jar'
-
+    Modify the settings for your local environment.
 
 **static files**
 
    python manage.py collectstatic
-
-**Velo API**
-
-    Open VeloAPI.py and change /Users/baldwin32/projects/acme-web-fe/acme_site/static/java/VeloAPI.jar to the location of your .jar file
-    source env/bin/activate
-    git clone https://github.com/originell/jpype.git
-    cd jpype
-    python setup.py install 
-    cd ..
-    rm -rf jpype
-    
-    _Note_
-    If the Jpype install fails because of missing Python.h, you're missing the python dev tools. 
-    Simply: sudo apt-get install python-dev
 
 **Selenium**
     Follow the directions [here](https://code.google.com/p/robotframework-seleniumlibrary/wiki/InstallationInstructions) to install the Selenium library to work with the robotframework.
@@ -77,7 +41,7 @@ acme-site
 **setup db**
 
     python manage.py syncdb
-    
+
 **setup admin**
 
     yes
@@ -92,13 +56,13 @@ acme-site
 
 **running**
 
-    python manage.py runserver 
+    python manage.py runserver
 
-If you have turned on websharing on your mac you can display it using your machines url, eg 
+If you have turned on websharing on your mac you can display it using your machines url, eg
 
     python manage.py runserver boxname.domain:8000
 
-then from your browser you can view the site at 
+then from your browser you can view the site at
 
 * users front end
   * *boxname.domain*:8000/acme
