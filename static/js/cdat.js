@@ -174,6 +174,7 @@
                                 }, connection, config.viewportopts) // override defaults
                             );
                             viewport.bind($(config.node).get(0));
+                            defer.resolve(viewport);
 
                             // @todo store open viewport somehow to clean up
                         },
@@ -187,7 +188,7 @@
                     defer.reject.apply(this, arguments);
                 }
             );
-            return defer.promise();
+            return promise;
         }
     };
 
