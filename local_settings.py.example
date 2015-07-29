@@ -1,0 +1,31 @@
+import os.path
+
+_root = os.path.abspath(
+    os.path.dirname(__file__)
+)
+
+STATICFILES_DIRS = (
+    os.path.join(_root, 'static'),
+)
+
+STATIC_ROOT = os.path.join(_root, 'webroot')
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(_root, 'db.sqlite3'),
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+    }
+}
+
+#Get a key from the google registration page
+RECAPTCHA_PUBLIC_KEY = ''
+RECAPTCHA_PRIVATE_KEY = ''
+
+# Make this unique, and don't share it with anybody.
+# CAN NOT BE EMPTY http://www.miniwebtool.com/django-secret-key-generator
+SECRET_KEY = ''
+JAR_PATH = '-Djava.class.path=%s/static/java/VeloAPI.jar' % _root
