@@ -107,6 +107,8 @@ class TestVelo(TestCase):
         print 'data:', data
         print 'response:', response
         # self.assertTrue('Fail' not in response)
+        print 'target file:', upload_file
+        print 'folder contests:', next(os.walk(path))[2]
         self.assertTrue(upload_file in next(os.walk(path))[2])
 
         data = {
