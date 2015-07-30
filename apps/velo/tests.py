@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.test.client import Client
 import VeloAPI
 import os
+import os.path
 import requests
 import json
 
@@ -31,7 +32,20 @@ def velo_request(data):
         response = requests.post('http://localhost:8080', request).content
         if 'Success' not in response:
             return 'Failed to initialize velo'
-    return requests.post('http://localhost:8080', json.dumps(data)).content
+
+    retry_count = 5
+    for i in range(retry_count):
+        response = requests.post(
+            'http://localhost:8080', json.dumps(data)).content
+        if response == '':
+            request = json.dumps({
+                'command': 'init',
+                'velo_user': data['velo_user'],
+                'velo_pass': data['velo_pass'],
+            })
+            requests.post('http://localhost:8080', request)
+        else:
+            return response
 
 
 class TestVelo(TestCase):
@@ -42,26 +56,31 @@ class TestVelo(TestCase):
         data = {
             'velo_user': 'acmetest',
             'velo_pass': 'acmetest',
-            'foldername': folderpath + foldername,
+            'foldername': foldername,
             'command': 'create_folder'
         }
         response = velo_request(data)
-        self.assertEqual(response, '0')
+        self.assertEqual(response, 'Success')
 
         data['command'] = 'get_folder'
         data['folder'] = '/User Documents/acmetest'
         response = velo_request(data)
-        self.assertTrue(
-            folderpath + foldername in response)
+        print 'foldername:', foldername
+        print 'data:', data
+        print 'response', response
+        self.assertTrue(foldername in response)
 
         data['command'] = 'delete'
         data['resource'] = folderpath + foldername
         response = velo_request(data)
-        self.assertEqual(response, '0')
+        self.assertEqual(response, 'Success')
 
         data['command'] = 'get_folder'
         data['folder'] = '/User Documents/acmetest'
         response = velo_request(data)
+        if len(response) < 50:
+            print 'response:', response
+        print 'data:', data
         self.assertFalse(
             folderpath + foldername in response)
 
@@ -70,8 +89,8 @@ class TestVelo(TestCase):
         acme = 'acme-web-fe'
         index = path.find(acme)
         path = os.path.join(path[:index], acme, 'userdata/acmetest')
-        upload_file = next(os.walk(path))[2][0]
-
+        # upload_file = next(os.walk(path))[2][0]
+        upload_file = 'testSaveFile.txt'
         data = {
             'command': 'save_file',
             'velo_user': 'acmetest',
@@ -80,13 +99,17 @@ class TestVelo(TestCase):
             'local_path': path,
             'filename': upload_file
         }
+        print 'sending request with data', data
         response = velo_request(data)
-        self.assertEqual(response, '0')
+        self.assertTrue('Failed' not in response)
 
-        os.remove(os.path.join(path, upload_file))
+        if os.path.exists(os.path.join(path, upload_file)):
+            os.remove(os.path.join(path, upload_file))
         data['command'] = 'get_file'
         data['remote_path'] = '/User Documents/acmetest/' + upload_file
         data['local_path'] = path
         response = velo_request(data)
-        self.assertEqual(response, '0')
+        print 'data:', data
+        print 'response:', response
+        self.assertTrue('Fail' not in response)
         self.assertTrue(upload_file in next(os.walk(path))[2])

@@ -1863,7 +1863,7 @@ $(document).ready(function() {
 
 	$('#save-layout').click(function() {
 		leftMenuToggle();
-		createMask('#save-menu');
+		createMask('save-menu');
 
 		var saveMenu = document.createElement('div');
 		$(saveMenu).addClass('bvc');
@@ -1905,7 +1905,6 @@ $(document).ready(function() {
 				default_layout: document.getElementById('default').checked
 			};
 
-			//data = JSON.stringify(data);
 			get_data('save_layout/', 'POST', data, function() {
 				alert('Layout saved');
 			}, function() {
@@ -1921,12 +1920,15 @@ $(document).ready(function() {
 		get_data('load_layout/', 'GET', new Object(), function(request) {
 			//parse response
 			options = request;
-			createMask('.save-layout');
+			createMask('load-layout-menu');
 
 			//create load menu and populate with values
 			var loadMenu = document.createElement('div');
 			$(loadMenu).addClass('bvc');
 			$(loadMenu).addClass('save-layout');
+			$(loadMenu).attr({
+				'id': 'load-layout-menu'
+			});
 			var loadMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
 			loadMenuHtml += '<form name="load-layout-form" id="save-form">';
 			loadMenuHtml += 'Select Layout:<br><select id="select-layout">';
@@ -1945,7 +1947,7 @@ $(document).ready(function() {
 					'layout_name': name
 				};
 				get_data('load_layout/', 'POST', data, function(request) {
-					fadeOutMask('.save-layout');
+					fadeOutMask('load-layout-menu');
 					$('.tile').each(function() {
 						$(this).remove();
 					});
@@ -1957,7 +1959,7 @@ $(document).ready(function() {
 					loadLayout(layout, request.mode);
 				}, function() {
 					alert('failed to load layout');
-					fadeOutMask('.save-layout');
+					fadeOutMask('load-layout-menu');
 				});
 			});
 		}, function() {
