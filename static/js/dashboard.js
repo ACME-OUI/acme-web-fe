@@ -8,11 +8,10 @@ $(function() {
 	 ***************************************/
 
 	// call the vis server setup
-	if (cdat.visualization_launcher) {
-		cdat.setup(cdat.visualization_launcher);
-	} else {
-		console.log('No visualization server given in the config');
-	}
+	cdat.setup()
+		.then(function () { console.log('Vis instance launched'); },
+		      function () { console.log(arguments); });
+
 
 	var docHeight, docWidth, maxCols, maxHeight, tileHeight, tileWidth;
 	calcMaxSize();
@@ -208,7 +207,7 @@ $(function() {
 						node: '#cdat-vis'
 					}).then(
 						function () {console.log('cdat vis success');}, // indicate success or error in the console
-						function () {console.log('\n'.join(arguments));}
+						function () {console.log(arguments);}
 					);
 
 					break;

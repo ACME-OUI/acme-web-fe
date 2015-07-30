@@ -39,10 +39,10 @@
          *       function (code, reason) { console.log('load failed because ' + reason); }
          *   );
          */
-        setup: function (launcher, config) {
+        setup: function (config) {
             config = config || {};
             config.application  = config.application || 'default';
-            config.sessionManagerURL = launcher;
+            config.sessionManagerURL = 'vtk/';
             open = new $.Deferred();
 
             /*
@@ -59,7 +59,11 @@
                 config,
                 function (_connection) {
                     connection = _connection;
-                    open.resolve(connection);
+                    if (connection.error) {
+                        open.reject(null, connection.error);
+                    } else {
+                        open.resolve(connection);
+                    }
                 },
                 function (code, reason) {
                     open.reject(code, reason);
@@ -151,7 +155,7 @@
 
             open.then(
                 function (connection) {
-                    connections.session.call(
+                    connection.session.call(
                         'cdat.view.create',
                         [
                             config.file,
