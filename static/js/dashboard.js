@@ -1,4 +1,4 @@
-$(document).ready(function() {
+$(function() {
 
 
 	/****************************************
@@ -6,6 +6,13 @@ $(document).ready(function() {
 
 	 	These could probably all be put in a resource file somewhere
 	 ***************************************/
+
+	// call the vis server setup
+	if (cdat.visualization_launcher) {
+		cdat.setup(cdat.visualization_launcher);
+	} else {
+		console.log('No visualization server given in the config');
+	}
 
 	var docHeight, docWidth, maxCols, maxHeight, tileHeight, tileWidth;
 	calcMaxSize();
@@ -191,6 +198,20 @@ $(document).ready(function() {
 			var name = $(this).attr('id');
 			var content = '';
 			switch (name) {
+				case 'cdat':
+					content = '<div id="cdat-vis"></div>';
+
+					// for example
+					cdat.show({
+						file: 'http://test.opendap.org/dap/netcdf/examples/cami_0000-09-01_64x128_L26_c030918.nc',
+						variable: 'TS',
+						node: '#cdat-vis'
+					}).then(
+						function () {console.log('cdat vis success');}, // indicate success or error in the console
+						function () {console.log('\n'.join(arguments));}
+					);
+
+					break;
 				case 'esgf':
 					content = '<div id="esgf-node-tree"></div>';
 					initFileTree('esgf_window');

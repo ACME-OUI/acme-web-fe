@@ -218,6 +218,10 @@ def dashboard(request):
     import xml.etree.ElementTree as ET
     import requests
     from StringIO import StringIO
+    try:
+        from local_settings import VISUALIZATION_LAUNCHER
+    except ImportError:
+        VISUALIZATION_LAUNCHER = None
 
     nodes = ESGFNode.objects.all()
     if len(nodes) == 0:
@@ -230,7 +234,8 @@ def dashboard(request):
         for node in nodes:
             node.refresh()
 
-    return HttpResponse(render_template(request, "web_fe/dashboard.html", {}))
+    data = {'vis_launcher': VISUALIZATION_LAUNCHER}
+    return HttpResponse(render_template(request, "web_fe/dashboard.html", data))
 
 
 @login_required
