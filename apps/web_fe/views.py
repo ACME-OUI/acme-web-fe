@@ -251,7 +251,9 @@ def save_layout(request):
         try:
             data = json.loads(request.body)
 
-            if len(TileLayout.objects.filter(layout_name=data['name'])) == 0:
+            layout = TileLayout.objects.filter(
+                layout_name=data['name'], user_name=str(request.user))
+            if len(layout) == 0:
                 if data['default_layout'] == 1:
                     isDefault = TileLayout.objects.filter(
                         user_name=request.user, default=1)
@@ -260,12 +262,17 @@ def save_layout(request):
                             i.default = 0
                             i.save()
 
-                layout = TileLayout(user_name=request.user, layout_name=data['name'], board_layout=json.dumps(
+                layout = TileLayout(user_name=str(request.user), layout_name=data['name'], board_layout=json.dumps(
                     data['layout']), mode=data['mode'], default=data['default_layout'])
                 layout.save()
                 return HttpResponse(status=200)
             else:
-                return HttpResponse(status=422)
+                for x in layout:
+                    x.board_layout = json.dumps(data['layout'])
+                    x.mode = data['mode']
+                    x.default = data['default_layout']
+                    x.save()
+                return HttpResponse(status=200)
         except Exception as e:
             print_debug(e)
             return HttpResponse(status=500)
@@ -444,8 +451,8 @@ def get_file(request):
                 'filename': filename
             }
             response = velo_request(request)
-            if response == -1 or 'NO SUCH FILE' in response:
-                print out
+            if 'Failed to download file' in response:
+                print response
                 return HttpResponse(status=500)
 
             path = prefix + filename
@@ -495,7 +502,8 @@ def velo_save_file(request):
             cred = Credential.objects.get(
                 site_user_name=request.user, service="velo")
 
-            local_path = os.path.join(os.getcwd(), 'userdata', cred.service_user_name)
+            local_path = os.path.join(
+                os.getcwd(), 'userdata', cred.service_user_name)
             remote_path = remote_path[:remote_path.index(filename)]
             print 'filename:', filename, 'remote_path:', remote_path
 
@@ -512,7 +520,8 @@ def velo_save_file(request):
                 'velo_pass': cred.password,
                 'remote_path': remote_path,
                 'local_path': local_path,
-                'filename': filename
+                'filename': filename,
+                'command': 'save_file'
             }
             if velo_request(data) >= 0:
                 return HttpResponse(status=200)
@@ -574,11 +583,13 @@ def velo_request(data):
             'velo_user': data['velo_user'],
             'velo_pass': data['velo_pass'],
         })
-        print request
         response = requests.post('http://localhost:8080', request).content
         if 'Success' not in response:
             return 'Failed to initialize velo'
-    print json.dumps(data)
+    if not 'velo_user' in data:
+        return 'No user in velo request'
+    if not 'velo_pass' in data:
+        return 'No password in velo request'
     return requests.post('http://localhost:8080', json.dumps(data)).content
 
 
@@ -595,11 +606,11 @@ def velo_new_folder(request):
             request = {
                 'velo_user': cred.service_user_name,
                 'velo_pass': cred.password,
-                'command': 'creat_folder',
+                'command': 'create_folder',
                 'foldername': foldername
             }
-            exit_code = velo_request(request)
-            if exit_code >= 0 and 'Created new folder' in exit_code:
+
+            if velo_request(request) == 'Success':
                 return HttpResponse(status=200)
             else:
                 return HttpResponse(status=500)

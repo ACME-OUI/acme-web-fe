@@ -26,6 +26,17 @@ def start_jvm():
     tifConstants = JPackage("gov").pnnl.velo.util.VeloTifConstants
 
 
+def print_debug(e):
+    import traceback
+    print '1', e.__doc__
+    print '2', sys.exc_info()
+    print '3', sys.exc_info()[0]
+    print '4', sys.exc_info()[1]
+    print '5', traceback.tb_lineno(sys.exc_info()[2])
+    ex_type, ex, tb = sys.exc_info()
+    print '6', traceback.print_tb(tb)
+
+
 class Velo(object):
 
     def __init__(self):
@@ -64,9 +75,10 @@ class Velo(object):
             homeFolder = Velo.get_homefolder(self)
             cmspath = cms(homeFolder).append(foldername)
             self.resMgr.createFolder(cmspath)
-            return 0
-        except:
-            return -1
+            return 'Success'
+        except Exception as e:
+            print_debug(e)
+            return 'Fail'
 
     # upload file in velo
     def upload_file(self, remote_path, local_path, filename):
@@ -75,9 +87,9 @@ class Velo(object):
             cmsfilepath = cms(remote_path).append(filename)
             self.fileServerMap.put(fileObj, cmsfilepath)
             self.resMgr.bulkUpload(self.fileServerMap, None)
-            return 0
+            return 'Success'
         except:
-            return -1
+            return 'Fail'
 
     # download file from velo
     def download_userhome_file(self, filename, location):
@@ -91,11 +103,16 @@ class Velo(object):
         try:
             destFolder = jpype.java.io.File(location)
             cmsfilepath = cms(filepath)
+            if self.filesToDownload is None:
+                return 'reinit'
             self.filesToDownload.add(cmsfilepath)
             self.resMgr.bulkDownload(self.filesToDownload, destFolder)
-            return 0
-        except:
-            return -1
+            return 'Success'
+        except Exception as e:
+            print self.filesToDownload.toString()
+            self.filesToDownload = jpype.java.util.ArrayList()
+            print_debug(e)
+            return 'reinit'
 
     # download multiple files from velo
     def download_files(self, filepaths, location):
@@ -169,14 +186,13 @@ class Velo(object):
         try:
             ress = self.resMgr.getChildren(cmsparentPath)
             for i in range(len(ress)):
-                print ress[i]
                 ret.append(ress[i].toString() + ',')
                 if isinstance(ress[i], Folder):
                     sub = Velo.get_resources(self, ress[i].toString())
                     for r in sub:
                         ret.append(r + ',')
         except:
-            print 'resource ', parentPath, 'does not exist'
+            return 'resource does not exist'
 
         return ret
 
@@ -193,16 +209,20 @@ class Velo(object):
         try:
             cmsfilepath = cms(resourcePath)
             self.resMgr.deleteResource(cmsfilepath)
-            return 0
+            return 'Success'
         except:
-            return -1
+            return 'Fail'
 
     def delete_resources(self, resources):  # delete multiple resources
-        resourceToDelete = jpype.java.util.ArrayList()
-        for res in resources:
-            cmsfilepath = cms(res)
-            resourceToDelete.add(cmsfilepath)
-        self.resMgr.deleteResources(resourceToDelete)
+        try:
+            resourceToDelete = jpype.java.util.ArrayList()
+            for res in resources:
+                cmsfilepath = cms(res)
+                resourceToDelete.add(cmsfilepath)
+            self.resMgr.deleteResources(resourceToDelete)
+            return 'Success'
+        except:
+            return 'Fail'
 
     def get_homefolder(self):  # get user's home folder
         folder = self.resMgr.getHomeFolder()

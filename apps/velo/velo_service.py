@@ -18,38 +18,61 @@ class VeloService(object):
 
     def dispatch_request(self, request):
         data = json.loads(request.get_data())
+        if 'velo_user' not in data:
+            debug_out = "DEBUG OUTPUT, DUMPING velo_instances \n"
+            debug_out += ' '.join(self.velo_instances)
+            return Response(debug_out)
+        if 'command' not in data:
+            debug_out = "DEBUG OUTPUT, DUMPING request data \n"
+            debug_out += ' '.join(data)
+            return Response(debug_out)
         if data['command'] != 'init':
-            if 'velo_user' not in data:
-                return Response('Failed')
-            if data['velo_user'] not in self.velo_instances:
-                return Response('Failed')
+            self.init_velo(data)
             return Response(self.commands[data['command']](data, self.velo_instances[data['velo_user']]))
         else:
-            return Response(self.commands[data['command']](data))
- 
+            return Response(self.commands['init'](data))
+
     def init_velo(self, data):
         if data['velo_user'] in self.velo_instances:
             return 'Success'
+        if 'velo_pass' not in data:
+            return 'No password given to velo init'
+        print '\n [+] Running init '
         v = VeloAPI.Velo()
-        self.velo_instances[data['velo_user']] = v
         VeloAPI.start_jvm()
         v.init_velo(data['velo_user'], data['velo_pass'])
+        self.velo_instances[data['velo_user']] = v
         return 'Success'
 
     def get_folder(self, data, velo):
-        return velo.get_resources(data['folder'])
+        val = velo.get_resources(data['folder'])
+        return val
 
     def create_folder(self, data, velo):
-        return velo.create_folder(data['foldername'])
+        try:
+            velo.create_folder(data['foldername'])
+            return 'Success'
+        except:
+            return 'Fail'
 
     def save_file(self, data, velo):
         return velo.upload_file(data['remote_path'], data['local_path'], data['filename'])
 
     def get_file(self, data, velo):
-        if velo.download_file(data['remote_path'], data['local_path'] == 0):
+        retry_counter = 1
+        val = velo.download_file(data['remote_path'], data['local_path'])
+        while retry_counter > 0 and val == 'reinit':
+            print '\[-]     Forced reinit\n'
+            self.init_velo(data)
+            velo = self.velo_instances[data['velo_user']]
+            val = velo.download_file(data['remote_path'], data['local_path'])
+            retry_counter -= 1
+
+        if val == 'Success':
             return open(os.path.join(data['local_path'], data['filename'])).read()
         else:
-            return 'Failed to download file'
+            print 'Failed to download file:', data
+            return 'Failed to download file:' + val
 
     def delete(self, data, velo):
         return velo.delete_resource(data['resource'])
