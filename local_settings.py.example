@@ -29,3 +29,7 @@ RECAPTCHA_PRIVATE_KEY = ''
 # CAN NOT BE EMPTY http://www.miniwebtool.com/django-secret-key-generator
 SECRET_KEY = ''
 JAR_PATH = '-Djava.class.path=%s/static/java/VeloAPI.jar' % _root
+
+# Add the visualization launcher address here
+# this is the default when `./start` is run locally
+VISUALIZATION_LAUNCHER = 'http://localhost:7000/vtk'
