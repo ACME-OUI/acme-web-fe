@@ -13,5 +13,6 @@ env:
 sudo: false
 before_script:
     - "pep8 --exclude=migrations --config=.pep8 apps"
+    - "python ./apps/velo/velo_service.py &"
 script:
     - "./manage.py test -v 2 --liveserver=localhost:8000"
