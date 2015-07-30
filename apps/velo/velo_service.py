@@ -1,5 +1,4 @@
 import os
-import redis
 import urlparse
 from werkzeug.wrappers import Request, Response
 from werkzeug.routing import Map, Rule
