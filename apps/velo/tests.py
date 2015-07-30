@@ -84,13 +84,31 @@ class TestVelo(TestCase):
         self.assertFalse(
             folderpath + foldername in response)
 
-    def test_upload_and_download_file(self):
+    def test_download_and_upload_file(self):
         path = os.getcwd()
         acme = 'acme-web-fe'
         index = path.find(acme)
         path = os.path.join(path[:index], acme, 'userdata/acmetest')
         # upload_file = next(os.walk(path))[2][0]
         upload_file = 'testSaveFile.txt'
+
+        if os.path.exists(os.path.join(path, upload_file)):
+            os.remove(os.path.join(path, upload_file))
+
+        data = {
+            'command': 'get_file',
+            'velo_user': 'acmetest',
+            'velo_pass': 'acmetest',
+            'remote_path': '/User Documents/acmetest/' + upload_file,
+            'local_path': path,
+            'filename': upload_file
+        }
+        response = velo_request(data)
+        print 'data:', data
+        print 'response:', response
+        self.assertTrue('Fail' not in response)
+        self.assertTrue(upload_file in next(os.walk(path))[2])
+
         data = {
             'command': 'save_file',
             'velo_user': 'acmetest',
@@ -102,14 +120,3 @@ class TestVelo(TestCase):
         print 'sending request with data', data
         response = velo_request(data)
         self.assertTrue('Failed' not in response)
-
-        if os.path.exists(os.path.join(path, upload_file)):
-            os.remove(os.path.join(path, upload_file))
-        data['command'] = 'get_file'
-        data['remote_path'] = '/User Documents/acmetest/' + upload_file
-        data['local_path'] = path
-        response = velo_request(data)
-        print 'data:', data
-        print 'response:', response
-        self.assertTrue('Fail' not in response)
-        self.assertTrue(upload_file in next(os.walk(path))[2])

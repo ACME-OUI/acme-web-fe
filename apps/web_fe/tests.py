@@ -105,10 +105,8 @@ class VeloServiceTest(TestCase):
         response = self.client.post(
             '/acme/get_folder/', content_type='application/json', data=data)
         self.assertTrue(remote_path in json.loads(response.content))
-        response = self.client.post(
-            '/acme/velo_delete/', content_type='application/json', data=json.dumps({'name': '/User Documents/acmetest/testSaveFile.txt'}))
 
-    def test_create_folder(self):
+    def test_create_and_delete_folder(self):
 
         import random
         foldername = 'create_new_folder_test_' + str(random.getrandbits(32))
@@ -118,28 +116,21 @@ class VeloServiceTest(TestCase):
         response = self.client.post(
             '/acme/velo_new_folder/', content_type='application/json', data=data)
         self.assertEquals(response.status_code, 200)
+
         # cleanup
+        data = json.dumps({
+            'name': '/User Documents/acmetest/' + foldername,
+        })
         response = self.client.post(
-            '/acme/delete/', content_type='application/json', data=data)
+            '/acme/velo_delete/', content_type='application/json', data=data)
 
-    # def test_delete_file(self):
-
-    #     data = json.dumps({
-    #         'text': 'This is text for the save_file test',
-    #         'filename': 'testSaveFile.txt',
-    #         'remote_path': '/User Documents/acmetest/testSaveFile.txt'
-    #     })
-    #     response = self.client.post(
-    #         '/acme/velo_save_file/', content_type='application/json', data=data)
-    #     response = self.client.post(
-    #         '/acme/velo_delete/', content_type='application/json', data=json.dumps({'name': '/User Documents/acmetest/testSaveFile.txt'}))
-    #     data = json.dumps({
-    #         'filename': 'testSaveFile.txt',
-    #         'path': '/User Documents/acmetest',
-    #     })
-    #     response = self.client.post(
-    #         '/acme/get_file/', content_type='application/json', data=data)
-    #     self.assertEquals(response.status_code, 500)
+        # test its actually gone
+        data = json.dumps({
+            'file': '/User Documents/acmetest',
+        })
+        response = self.client.post(
+            '/acme/get_folder/', content_type='application/json', data=data)
+        self.assertTrue(foldername not in response.content)
 
 
 class ServiceCredentialTest(TestCase):
@@ -299,7 +290,7 @@ class LayoutTest(TestCase):
 
         tiles = [{"y": 0.016666666666666666, "x": 0.1, "sizex": 1, "tileName": "provenance", "sizey": 0.5},
                  {"y": 0.5166666666666667, "x": 0.1, "sizex": 0.5,
-                     "tileName": "status", "sizey": 0.5},
+                  "tileName": "status", "sizey": 0.5},
                  {"y": 0.5166666666666667, "x": 0.6, "sizex": 0.5, "tileName": "science", "sizey": 0.5}]
         try:
             tiles = json.dumps(tiles)
