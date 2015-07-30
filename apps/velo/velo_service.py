@@ -108,7 +108,7 @@ def create_app(with_static=True):
     app = VeloService()
     if with_static:
         app.wsgi_app = SharedDataMiddleware(app.wsgi_app, {
-            '/static':  os.path.join(os.path.dirname(__file__), 'static')
+            '/static': os.path.join(os.path.dirname(__file__), 'static')
         })
     return app
 

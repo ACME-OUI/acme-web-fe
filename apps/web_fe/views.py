@@ -586,9 +586,9 @@ def velo_request(data):
         response = requests.post('http://localhost:8080', request).content
         if 'Success' not in response:
             return 'Failed to initialize velo'
-    if not 'velo_user' in data:
+    if 'velo_user' not in data:
         return 'No user in velo request'
-    if not 'velo_pass' in data:
+    if 'velo_pass' not in data:
         return 'No password in velo request'
     return requests.post('http://localhost:8080', json.dumps(data)).content
 
