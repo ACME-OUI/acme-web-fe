@@ -23,7 +23,7 @@
     * global module for CDAT specific methods
     * @namespace
     */
-    cdat = {
+    var cdat = {
         /**
          * This is an initialization function that should be called once to initiate
          * the vtkweb connection.
