@@ -41,3 +41,9 @@ report.html
 selenium-screenshot-*.png
 selenium_server_log.txt
 userdata
+
+/webroot
+/static/java
+!/static/java/.api_description
+!/static/java/.options
+!/static/java/VeloAPI.jar
