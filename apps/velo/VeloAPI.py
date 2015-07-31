@@ -1,45 +1,57 @@
-'''
-Created on Mar 16, 2015
-
-@author: raju332
-'''
 import jpype
 import time
 from jpype import *
 import os
+
 jvmPath = jpype.getDefaultJVMPath()
 
 
-class Velo:
+def start_jvm():
+    # include the velo python API jar file here
+    path = os.getcwd()
+    acme = 'acme-web-fe'
+    index = path.find(acme)
+    path = path[:index]
+
+    if jpype.isJVMStarted():
+        return
+    jpype.startJVM(
+        jvmPath, "-Djava.class.path=" + path + "acme-web-fe/static/java/VeloAPI.jar")
+
+    global velo, cms, jobConfig, fileObj, tifConstants
+
+    velo = JPackage("velo").mgr.VeloManager
+    cms = JPackage("gov").pnnl.velo.model.CmsPath
+    jobConfig = JPackage("gov").pnnl.velo.tif.model.JobConfig
+    tifConstants = JPackage("gov").pnnl.velo.util.VeloTifConstants
+
+
+def print_debug(e):
+    import traceback
+    print '1', e.__doc__
+    print '2', sys.exc_info()
+    print '3', sys.exc_info()[0]
+    print '4', sys.exc_info()[1]
+    print '5', traceback.tb_lineno(sys.exc_info()[2])
+    ex_type, ex, tb = sys.exc_info()
+    print '6', traceback.print_tb(tb)
+
+
+class Velo(object):
 
     def __init__(self):
-        pass
+        self.fileServerMap = None
+        self.filesToDownload = None
+        self.resMgr = None
 
     def isJVMStarted(self):
         return jpype.isJVMStarted()
 
-    def start_jvm(self):
-        # include the velo python API jar file here
-        path = os.getcwd()
-        acme = 'acme-web-fe'
-        index = path.find(acme)
-        path = path[:index]
-
-        global velo, cms, jobConfig, fileObj, tifConstants, fileServerMap, filesToDownload
-        jpype.startJVM(
-            jvmPath, "-Djava.class.path=" + path + "acme-web-fe/static/java/VeloAPI.jar")
-        velo = JPackage("velo").mgr.VeloManager
-        cms = JPackage("gov").pnnl.velo.model.CmsPath
-        jobConfig = JPackage("gov").pnnl.velo.tif.model.JobConfig
-        tifConstants = JPackage("gov").pnnl.velo.util.VeloTifConstants
-
-        fileServerMap = jpype.java.util.HashMap()
-        filesToDownload = jpype.java.util.ArrayList()
-
     def init_velo(self, username, password):
-        global resMgr
-        resMgr = velo.init(username, password)
-        return resMgr
+        self.fileServerMap = jpype.java.util.HashMap()
+        self.filesToDownload = jpype.java.util.ArrayList()
+        self.resMgr = velo.init(username, password)
+        return self.resMgr
 
     def get_cms_service(self):
         cms = velo.getCmsService()
@@ -62,47 +74,53 @@ class Velo:
         try:
             homeFolder = Velo.get_homefolder(self)
             cmspath = cms(homeFolder).append(foldername)
-            resMgr.createFolder(cmspath)
-            return 0
-        except:
-            return -1
+            self.resMgr.createFolder(cmspath)
+            return 'Success'
+        except Exception as e:
+            print_debug(e)
+            return 'Fail'
 
     # upload file in velo
     def upload_file(self, remote_path, local_path, filename):
         try:
             fileObj = jpype.java.io.File(local_path + "/" + filename)
             cmsfilepath = cms(remote_path).append(filename)
-            fileServerMap.put(fileObj, cmsfilepath)
-            resMgr.bulkUpload(fileServerMap, None)
-            return 0
+            self.fileServerMap.put(fileObj, cmsfilepath)
+            self.resMgr.bulkUpload(self.fileServerMap, None)
+            return 'Success'
         except:
-            return -1
+            return 'Fail'
 
     # download file from velo
     def download_userhome_file(self, filename, location):
         destFolder = jpype.java.io.File(location)
         homeFolder = Velo.get_homefolder(self)
         cmspath = homeFolder.append(filename)
-        filesToDownload.add(cmspath)
-        resMgr.bulkDownload(filesToDownload, destFolder)
+        self.filesToDownload.add(cmspath)
+        self.resMgr.bulkDownload(self.filesToDownload, destFolder)
 
     def download_file(self, filepath, location):  # download file from velo
         try:
             destFolder = jpype.java.io.File(location)
             cmsfilepath = cms(filepath)
-            filesToDownload.add(cmsfilepath)
-            resMgr.bulkDownload(filesToDownload, destFolder)
-            return 0
-        except:
-            return -1
+            if self.filesToDownload is None:
+                return 'reinit'
+            self.filesToDownload.add(cmsfilepath)
+            self.resMgr.bulkDownload(self.filesToDownload, destFolder)
+            return 'Success'
+        except Exception as e:
+            print self.filesToDownload.toString()
+            self.filesToDownload = jpype.java.util.ArrayList()
+            print_debug(e)
+            return 'reinit'
 
     # download multiple files from velo
     def download_files(self, filepaths, location):
         destFolder = jpype.java.io.File(location)
         for filepath in filepaths:
             cmsfilepath = cms(filepath)
-            filesToDownload.add(cmsfilepath)
-        resMgr.bulkDownload(filesToDownload, destFolder)
+            self.filesToDownload.add(cmsfilepath)
+        self.resMgr.bulkDownload(self.filesToDownload, destFolder)
         print "Files downloaded"
 
     # download the job outputs
@@ -115,10 +133,10 @@ class Velo:
             "Outputs").append("job.out")
         joboutput = homeFolder.append(contextPathName).append(
             "Outputs").append("output.txt")
-        filesToDownload.add(joberrfile)
-        filesToDownload.add(joboutfile)
-        filesToDownload.add(joboutput)
-        resMgr.bulkDownload(filesToDownload, destFolder)
+        self.filesToDownload.add(joberrfile)
+        self.filesToDownload.add(joboutfile)
+        self.filesToDownload.add(joboutput)
+        self.resMgr.bulkDownload(self.filesToDownload, destFolder)
 
     def launch_job(self, acmeusername, location):  # launch the fake job
         secMgr = Velo.get_security_manager(self)
@@ -136,7 +154,7 @@ class Velo:
         now = time.strftime("%Y-%m-%d_%H-%M-%S")
         contextPathName = remotedirfile + "_" + now
         contextPath = Velo.get_homefolder(self).append(contextPathName)
-        resMgr.createFolder(contextPath)
+        self.resMgr.createFolder(contextPath)
         time.sleep(5)
         print "folder created: ", contextPathName
         config.setContextPath(contextPath.toAssociationNamePath())
@@ -166,23 +184,22 @@ class Velo:
         cmsparentPath = cms(parentPath)
         ret = []
         try:
-            ress = resMgr.getChildren(cmsparentPath)
+            ress = self.resMgr.getChildren(cmsparentPath)
             for i in range(len(ress)):
-                print ress[i]
-                ret.append(ress[i].toString())
+                ret.append(ress[i].toString() + ',')
                 if isinstance(ress[i], Folder):
                     sub = Velo.get_resources(self, ress[i].toString())
                     for r in sub:
-                        ret.append(r)
+                        ret.append(r + ',')
         except:
-            print 'resource ', parentPath, 'does not exist'
+            return 'resource does not exist'
 
         return ret
 
     # returns all the subfolders in users' home folder
     def get_homefolder_resources(self):
-        folder = resMgr.getHomeFolder()
-        ress = resMgr.getChildren(folder.getPath())
+        folder = self.resMgr.getHomeFolder()
+        ress = self.resMgr.getChildren(folder.getPath())
         ret = []
         for i in range(len(ress)):
             ret.append(ress[i].toString())
@@ -191,20 +208,24 @@ class Velo:
     def delete_resource(self, resourcePath):  # delete single resource
         try:
             cmsfilepath = cms(resourcePath)
-            resMgr.deleteResource(cmsfilepath)
-            return 0
+            self.resMgr.deleteResource(cmsfilepath)
+            return 'Success'
         except:
-            return -1
+            return 'Fail'
 
     def delete_resources(self, resources):  # delete multiple resources
-        resourceToDelete = jpype.java.util.ArrayList()
-        for res in resources:
-            cmsfilepath = cms(res)
-            resourceToDelete.add(cmsfilepath)
-        resMgr.deleteResources(resourceToDelete)
+        try:
+            resourceToDelete = jpype.java.util.ArrayList()
+            for res in resources:
+                cmsfilepath = cms(res)
+                resourceToDelete.add(cmsfilepath)
+            self.resMgr.deleteResources(resourceToDelete)
+            return 'Success'
+        except:
+            return 'Fail'
 
     def get_homefolder(self):  # get user's home folder
-        folder = resMgr.getHomeFolder()
+        folder = self.resMgr.getHomeFolder()
         home_folder = folder.getPath()
         return home_folder
 
