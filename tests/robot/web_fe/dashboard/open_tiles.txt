@@ -7,42 +7,26 @@ Resource          common_resources.txt
 
 *** Testcases ***
 Open Each Tile
-    Check Tile    provenance    1
-    Check Tile    status    2
-    Check Tile    science    3
-    Check Tile    nodeSearch    4
-    Check Tile    heatMap    5
-    Check TIle    velo    6
-    Check TIle    nodeSelect    7
-    Check Tile    cdat    8
-    Check Tile    charting    9
+    Check Tile    esgf
+    Check Tile    velo
+    Check Tile    cdat
+
 
 Open All Tiles At Once
     Click Element   id=toggle-left-a
-    Click Element    xpath=/html/body/nav/ul/li[1]/button
-    Click Element    xpath=/html/body/nav/ul/li[2]/button
-    Click Element    xpath=/html/body/nav/ul/li[3]/button
-    Click Element    xpath=/html/body/nav/ul/li[4]/button
-    Click Element    xpath=/html/body/nav/ul/li[5]/button
-    Click Element    xpath=/html/body/nav/ul/li[6]/button
-    Click Element    xpath=/html/body/nav/ul/li[7]/button
-    Click Element    xpath=/html/body/nav/ul/li[8]/button
-    Click Element    xpath=/html/body/nav/ul/li[9]/button
-    Page Should Contain Element    provenance_window
-    Page Should Contain Element    status_window
-    Page Should Contain Element    science_window
-    Page Should Contain Element    nodeSearch_window
-    Page Should Contain Element    heatMap_window
+    Click Element    id=esgf
+    Click Element    id=velo
+    Click Element    id=cdat
+    Page Should Contain Element    esgf_window
     Page Should Contain Element    velo_window
-    Page Should Contain Element    nodeSelect_window
     Page Should Contain Element    cdat_window
-    Page Should Contain Element    charting_window
+
 
 
 *** Keywords ***
-Check Tile  [Arguments]    ${tilename}    ${tilenumber}
+Check Tile  [Arguments]    ${tilename} 
     Click Element   id=toggle-left-a
-    Click Element    xpath=/html/body/nav/ul/li[${tilenumber}]/button
+    Click Element    id=${tilename}
     Click Element   id=toggle-left-a
     Wait Until Element Is Visible  ${tilename}_window
     Page Should Contain Element    ${tilename}_window

@@ -24,6 +24,7 @@ import urllib2
 import base64
 import time
 import datetime
+import requests
 from subprocess import Popen, PIPE
 from sets import Set
 
@@ -105,7 +106,8 @@ def add_credentials(request):
         stored_credentials = []
         for s in creds:
             stored_credentials.append(s.service)
-        return HttpResponse(render_template(request, 'web_fe/add_credentials.html', {'added': 'false', 'stored_credentials': stored_credentials}))
+        response = {'added': 'false', 'stored_credentials': stored_credentials}
+        return HttpResponse(render_template(request, 'web_fe/add_credentials.html', response))
 
 # This whole thing needs to be refactored
 
@@ -216,7 +218,6 @@ def register(request):
 @login_required
 def dashboard(request):
     import xml.etree.ElementTree as ET
-    import requests
     from StringIO import StringIO
     try:
         from local_settings import VISUALIZATION_LAUNCHER
@@ -224,15 +225,26 @@ def dashboard(request):
         VISUALIZATION_LAUNCHER = None
 
     nodes = ESGFNode.objects.all()
-    if len(nodes) == 0:
-        # bootstrapping off of the australian node since its up
-        bootstrap_node = ESGFNode(host='esg2.nci.org.au')
-        bootstrap_node.save()
-        bootstrap_node.refresh()
-        print bootstrap_node.node_data
-    else:
-        for node in nodes:
+    r = requests.get(
+        'http://pcmdi9.llnl.gov/esgf-node-manager/registration.xml')
+    if r.status_code == 200:
+        print "######### Node Manager is back online!  ############"
+        tree = ET.parse(StringIO(r.content))
+        for node in tree.getroot():
+            new_node = ESGFNode(host=node.attrib['hostname'])
+            new_node.save()
+        for node in ESGFNode.objects.all():
             node.refresh()
+    else:
+        if len(nodes) == 0:
+            # bootstrapping off of the australian node since its up
+            bootstrap_node = ESGFNode(host='esg2.nci.org.au')
+            bootstrap_node.save()
+            bootstrap_node.refresh()
+            print bootstrap_node.node_data
+        else:
+            for node in nodes:
+                node.refresh()
 
     data = {'vis_launcher': VISUALIZATION_LAUNCHER}
     return HttpResponse(render_template(request, "web_fe/dashboard.html", data))
@@ -244,7 +256,9 @@ def save_layout(request):
         try:
             data = json.loads(request.body)
 
-            if len(TileLayout.objects.filter(layout_name=data['name'])) == 0:
+            layout = TileLayout.objects.filter(
+                layout_name=data['name'], user_name=str(request.user))
+            if len(layout) == 0:
                 if data['default_layout'] == 1:
                     isDefault = TileLayout.objects.filter(
                         user_name=request.user, default=1)
@@ -253,12 +267,17 @@ def save_layout(request):
                             i.default = 0
                             i.save()
 
-                layout = TileLayout(user_name=request.user, layout_name=data['name'], board_layout=json.dumps(
+                layout = TileLayout(user_name=str(request.user), layout_name=data['name'], board_layout=json.dumps(
                     data['layout']), mode=data['mode'], default=data['default_layout'])
                 layout.save()
                 return HttpResponse(status=200)
             else:
-                return HttpResponse(status=422)
+                for x in layout:
+                    x.board_layout = json.dumps(data['layout'])
+                    x.mode = data['mode']
+                    x.default = data['default_layout']
+                    x.save()
+                return HttpResponse(status=200)
         except Exception as e:
             print_debug(e)
             return HttpResponse(status=500)
@@ -379,16 +398,21 @@ def node_search(request):
 @login_required
 def get_folder(request):
     if request.method == 'POST':
-        folder = json.loads(request.body)
+        folder = json.loads(request.body)['file']
         try:
             cred = Credential.objects.get(
                 site_user_name=request.user, service='velo')
-            process = Popen(
-                ['python', './apps/velo/get_folder.py', folder['file'], cred.service_user_name, cred.password], stdout=PIPE)
-            (out, err) = process.communicate()
-            exit_code = process.wait()
-            out = out.splitlines(False)
-            out.insert(0, folder['file'])
+            if folder == '/User Documents/':
+                folder += cred.service_user_name
+            request = {
+                'velo_user': cred.service_user_name,
+                'velo_pass': cred.password,
+                'command': 'get_folder',
+                'folder': folder
+            }
+            out = velo_request(request)
+            out = out.split(',')
+            out.insert(0, folder)
             return HttpResponse(json.dumps(out))
 
         except Exception as e:
@@ -423,12 +447,17 @@ def get_file(request):
                     prefix += remote_path[i] + '/'
                     os.makedirs(prefix)
 
-            process = Popen(
-                ['python', './apps/velo/get_file.py', remote_file_path, prefix, filename, cred.site_user_name, cred.service_user_name, cred.password], stdout=PIPE)
-            (out, err) = process.communicate()
-            exit_code = process.wait()
-            if exit_code == -1 or 'NO SUCH FILE' in out:
-                print out
+            request = {
+                'velo_user': cred.service_user_name,
+                'velo_pass': cred.password,
+                'command': 'get_file',
+                'remote_path': remote_file_path,
+                'local_path': prefix,
+                'filename': filename
+            }
+            response = velo_request(request)
+            if 'Failed to download file' in response:
+                print response
                 return HttpResponse(status=500)
 
             path = prefix + filename
@@ -442,7 +471,7 @@ def get_file(request):
                 }
                 return HttpResponse(json.dumps(response))
             else:
-                out = out.splitlines(True)[1:]
+                out = response.splitlines(True)
                 return HttpResponse(out, content_type='text/plain')
 
         except Exception as e:
@@ -478,14 +507,28 @@ def velo_save_file(request):
             cred = Credential.objects.get(
                 site_user_name=request.user, service="velo")
 
+            local_path = os.path.join(
+                os.getcwd(), 'userdata', cred.service_user_name)
             remote_path = remote_path[:remote_path.index(filename)]
             print 'filename:', filename, 'remote_path:', remote_path
 
-            process = Popen(
-                ['python', './apps/velo/save_file.py', text, filename, remote_path, cred.site_user_name, cred.service_user_name, cred.password], stdout=PIPE)
-            (out, err) = process.communicate()
-            exit_code = process.wait()
-            if exit_code >= 0 and 'File saved' in out:
+            try:
+                f = open(os.path.join(local_path, filename), 'w')
+                f.write(text)
+                f.close()
+            except:
+                print 'I/O failure when saving file for velo'
+                return HttpResponse(status=500)
+
+            data = {
+                'velo_user': cred.service_user_name,
+                'velo_pass': cred.password,
+                'remote_path': remote_path,
+                'local_path': local_path,
+                'filename': filename,
+                'command': 'save_file'
+            }
+            if velo_request(data) >= 0:
                 return HttpResponse(status=200)
             else:
                 print out, err
@@ -507,11 +550,13 @@ def velo_delete(request):
             cred = Credential.objects.get(
                 site_user_name=request.user, service="velo")
 
-            process = Popen(
-                ['python', './apps/velo/delete.py', name, cred.service_user_name, cred.password], stdout=PIPE)
-            (out, err) = process.communicate()
-            exit_code = process.wait()
-            if exit_code >= 0:
+            data = {
+                'command': 'delete',
+                'velo_user': cred.service_user_name,
+                'velo_pass': cred.password,
+                'resource': name
+            }
+            if velo_request(data) >= 0:
                 return HttpResponse(status=200)
             else:
                 return HttpResponse(status=500)
@@ -520,6 +565,37 @@ def velo_delete(request):
             return HttpResponse(status=500)
     else:
         return HttpResponse(status=404)
+
+
+def check_velo_initialized(user):
+    request = json.dumps({
+        'velo_user': user,
+        'command': 'is_initialized'
+    })
+    response = requests.post('http://localhost:8080', request).content
+    if 'true' in response:
+        return True
+    elif 'false' in response:
+        return False
+    else:
+        return 'error'
+
+
+def velo_request(data):
+    if not check_velo_initialized(data['velo_user']):
+        request = json.dumps({
+            'command': 'init',
+            'velo_user': data['velo_user'],
+            'velo_pass': data['velo_pass'],
+        })
+        response = requests.post('http://localhost:8080', request).content
+        if 'Success' not in response:
+            return 'Failed to initialize velo'
+    if 'velo_user' not in data:
+        return 'No user in velo request'
+    if 'velo_pass' not in data:
+        return 'No password in velo request'
+    return requests.post('http://localhost:8080', json.dumps(data)).content
 
 
 @login_required
@@ -532,12 +608,14 @@ def velo_new_folder(request):
             cred = Credential.objects.get(
                 site_user_name=request.user, service="velo")
 
-            process = Popen(
-                ['python', './apps/velo/new_folder.py', foldername, cred.service_user_name, cred.password], stdout=PIPE)
-            (out, err) = process.communicate()
-            exit_code = process.wait()
+            request = {
+                'velo_user': cred.service_user_name,
+                'velo_pass': cred.password,
+                'command': 'create_folder',
+                'foldername': foldername
+            }
 
-            if exit_code >= 0 and 'Created new folder' in out:
+            if velo_request(request) == 'Success':
                 return HttpResponse(status=200)
             else:
                 return HttpResponse(status=500)

@@ -34,6 +34,7 @@ class ESGFNode(models.Model):
     def refresh(self):
         r = requests.get(
             'http://' + self.host + '/esgf-node-manager/registration.xml', timeout=1)
+
         if r.status_code != 200:
             self.available = False
             self.save()
@@ -47,7 +48,8 @@ class ESGFNode(models.Model):
             '{http://www.esgf.org/registry}', '')
         self.node_data = json.loads(self.node_data)
         if 'Node' in self.node_data['children']:
-            self.short_name = self.node_data['children']['Node']['attributes']['shortName']
+            self.short_name = self.node_data['children'][
+                'Node']['attributes']['shortName']
         self.save()
 
     def xml_to_json(self, node):
