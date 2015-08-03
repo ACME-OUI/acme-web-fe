@@ -24,6 +24,13 @@ acme-site
     If the Jpype install fails because of missing Python.h, you're missing the python dev tools.
     Simply: sudo apt-get install python-dev
 
+    You will also need to install the django-sendfile module
+    After creating your virtualenv and sourcing it,
+    
+    git clone https://github.com/johnsensible/django-sendfile
+    cd django-sendfile
+    python setup.py install
+
 **local settings**
 
     cp local_settings.py.example local_settings.py
