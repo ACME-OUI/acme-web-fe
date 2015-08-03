@@ -516,7 +516,8 @@ def velo_save_file(request):
                 f = open(os.path.join(local_path, filename), 'w')
                 f.write(text)
                 f.close()
-            except:
+            except Exception as e:
+                print_debug(e)
                 print 'I/O failure when saving file for velo'
                 return HttpResponse(status=500)
 
