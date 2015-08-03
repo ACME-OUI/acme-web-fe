@@ -211,23 +211,10 @@ $(function() {
 					);
 
 					break;
+
 				case 'esgf':
 					content = '<div id="esgf-node-tree"></div>';
 					initFileTree('esgf_window');
-					break;
-
-				case 'nodeSearch':
-
-					if ($('#nodeSelect_window').length == 0) {
-						content = ['<form id="node-search-form>"',
-							'<p>Node to search:</p><input type="text" style="color: #000;" id="node-search-name">',
-							'<input type="submit" value="Search" id="search-btn" style="color: #000;"><br>',
-							'</form>'
-						].join('');
-					} else {
-						nodeSearch($('#hostname_value').text());
-						return;
-					}
 					break;
 
 				case 'velo':
@@ -1893,7 +1880,7 @@ $(function() {
 
 	$('#save-layout').click(function() {
 		leftMenuToggle();
-		createMask('#save-menu');
+		createMask('save-menu');
 
 		var saveMenu = document.createElement('div');
 		$(saveMenu).addClass('bvc');
@@ -1935,7 +1922,6 @@ $(function() {
 				default_layout: document.getElementById('default').checked
 			};
 
-			//data = JSON.stringify(data);
 			get_data('save_layout/', 'POST', data, function() {
 				alert('Layout saved');
 			}, function() {
@@ -1951,12 +1937,15 @@ $(function() {
 		get_data('load_layout/', 'GET', new Object(), function(request) {
 			//parse response
 			options = request;
-			createMask('.save-layout');
+			createMask('load-layout-menu');
 
 			//create load menu and populate with values
 			var loadMenu = document.createElement('div');
 			$(loadMenu).addClass('bvc');
 			$(loadMenu).addClass('save-layout');
+			$(loadMenu).attr({
+				'id': 'load-layout-menu'
+			});
 			var loadMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
 			loadMenuHtml += '<form name="load-layout-form" id="save-form">';
 			loadMenuHtml += 'Select Layout:<br><select id="select-layout">';
@@ -1975,7 +1964,7 @@ $(function() {
 					'layout_name': name
 				};
 				get_data('load_layout/', 'POST', data, function(request) {
-					fadeOutMask('.save-layout');
+					fadeOutMask('load-layout-menu');
 					$('.tile').each(function() {
 						$(this).remove();
 					});
@@ -1987,7 +1976,7 @@ $(function() {
 					loadLayout(layout, request.mode);
 				}, function() {
 					alert('failed to load layout');
-					fadeOutMask('.save-layout');
+					fadeOutMask('load-layout-menu');
 				});
 			});
 		}, function() {
