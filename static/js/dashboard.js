@@ -201,12 +201,19 @@ $(function() {
 					content = '<div id="cdat-vis"></div>';
 
 					// for example
-					cdat.show({
+					var view = cdat.show({
 						file: 'http://test.opendap.org/dap/netcdf/examples/cami_0000-09-01_64x128_L26_c030918.nc',
 						variable: 'TS',
 						node: '#cdat-vis'
 					}).then(
-						function () {console.log('cdat vis success');}, // indicate success or error in the console
+						function () {
+							console.log('cdat vis success');
+
+							// bind resize handler
+							$('#cdat-vis').on('resizestop', view.render);
+
+							// also need to bind `view.close` to some event triggered when the window closes
+						},
 						function () {console.log(arguments);}
 					);
 
