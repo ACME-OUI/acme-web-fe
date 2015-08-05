@@ -59,10 +59,22 @@
                 config,
                 function (_connection) {
                     connection = _connection;
+
+                    // this should really be fixed at some point
+                    connection.secret = 'vtkweb-secret';
+
                     if (connection.error) {
                         open.reject(null, connection.error);
                     } else {
-                        open.resolve(connection);
+                        vtkWeb.connect(
+                            connection,
+                            function () {
+                                open.resolve(connection);
+                            },
+                            function () {
+                                open.reject.apply(this, arguments);
+                            }
+                        );
                     }
                 },
                 function (code, reason) {
@@ -170,6 +182,7 @@
                             // Generate the viewport in the dom element
                             viewport = new vtkWeb.createViewport(
                                 $.extend({
+                                    view: view,
                                     enableInteractions: true,
                                     renderer: 'image',
                                     interactiveQuality: 100,        // possibly reduce for remote connections
