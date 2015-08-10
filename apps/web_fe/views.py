@@ -243,6 +243,14 @@ def dashboard(request):
             bootstrap_node.refresh()
             print bootstrap_node.node_data
         else:
+            node_list = [
+                'dev.esg.anl.gov', 'esg.bnu.edu.cn', 'esg.ccs.ornl.gov']
+            for node_name in node_list:
+                new_node = ESGFNode.objects.filter(host=node_name)
+                if len(new_node) == 0:
+                    new_node = ESGFNode(host=node_name)
+                    new_node.save()
+
             for node in nodes:
                 node.refresh()
 
@@ -325,6 +333,9 @@ def node_info(request):
             nodes = ESGFNode.objects.all()
             for node in nodes:
                 response[node.short_name] = node.node_data
+                if 'children' not in response[node.short_name]:
+                    continue
+
                 if 'Node' in response[node.short_name]['children']:
                     response[node.short_name]['children']['Node'][
                         'attributes']['status'] = str(node.available)
@@ -413,6 +424,7 @@ def get_folder(request):
             out = velo_request(request)
             out = out.split(',')
             out.insert(0, folder)
+            out = [o for o in out if o != '']
             return HttpResponse(json.dumps(out))
 
         except Exception as e:
@@ -666,7 +678,7 @@ def vtkweb_launcher(request):
             return HttpResponse(req.content)
         else:
             return HttpResponse(status=500)
-            
+
     return HttpResponse(status=404)
 
 
