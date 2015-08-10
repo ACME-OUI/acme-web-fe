@@ -206,8 +206,12 @@ $(function() {
 						variable: 'TS',
 						node: '#cdat-vis'
 					}).then(
-						function () {console.log('cdat vis success');}, // indicate success or error in the console
-						function () {console.log(arguments);}
+						function () {
+							console.log('cdat vis success');
+							}, // indicate success or error in the console
+						function () {
+							console.log(arguments);
+						}
 					);
 
 					break;

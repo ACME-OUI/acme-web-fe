@@ -666,6 +666,8 @@ def vtkweb_launcher(request):
             return HttpResponse(req.content)
         else:
             return HttpResponse(status=500)
+            
+    return HttpResponse(status=404)
 
 
 def print_debug(e):
