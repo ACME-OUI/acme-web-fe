@@ -409,7 +409,7 @@ $(function() {
 								'    	<input type="text" placeholder="New File Name" id="velo-new-file-text-input"></input>',
 								'    </form>',
 								'</li>'].join('');
-		$('#velo-mtree .mtree-level-1').prepend(newFileHtml);
+		$('#velo-mtree .mtree-active ul').prepend(newFileHtml);
 		$("#velo-new-file-text-input").keypress(function(event) {
 		    if (event.which == 13) {
 		    	newFileHtml = '<a href="#" id="velo-new-file"></a>';
@@ -442,7 +442,7 @@ $(function() {
 								'    	<input type="text" placeholder="New Folder Name" id="velo-new-folder-text-input"></input>',
 								'    </form>',
 								'</li>'].join('');
-		$('#velo-mtree .mtree-level-1').prepend(newFolderHtml);
+		$('#velo-mtree .mtree-active ul').prepend(newFolderHtml);
 		$("#velo-new-folder-text-input").keypress(function(event) {
 		    if (event.which == 13) {
 		        newFolderHtml = '<a href="#" id="new-velo-folder"></a><ul class="mtree-level-2" style="overflow: hidden; height: 0px; display: none;"></ul>';
@@ -450,6 +450,7 @@ $(function() {
 				$('#velo-new-folder-text-input-form').remove();
 				$('#velo-new-folder-text-input-list').addClass('mtree-node mtree-closed');
 				$('#velo-new-folder-text-input-list').append(newFolderHtml);
+
 				$('#new-velo-folder').text(newFolderName);
 				// Set mtree-active class on list items for last opened element
 				$('.mtree li > *:first-child').on('click.mtree-active', function(e) {
@@ -464,7 +465,7 @@ $(function() {
 					}
 				});
 
-				$('#velo-mtree.mtree').bind('contextmenu',function(e){
+				$('#velo-mtree .mtree').bind('contextmenu',function(e){
 					e.preventDefault();
 					if(e.button == 2){
 						velo_context_menu(e);
