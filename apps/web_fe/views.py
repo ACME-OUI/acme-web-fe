@@ -223,10 +223,10 @@ def dashboard(request):
         from local_settings import VISUALIZATION_LAUNCHER
     except ImportError:
         VISUALIZATION_LAUNCHER = None
-
+    '''
     nodes = ESGFNode.objects.all()
     r = requests.get(
-        'http://pcmdi9.llnl.gov/esgf-node-manager/registration.xml')
+        'https://pcmdi9.llnl.gov/esgf-node-manager/registration.xml')
     if r.status_code == 200:
         print "######### Node Manager is back online!  ############"
         tree = ET.parse(StringIO(r.content))
@@ -238,13 +238,13 @@ def dashboard(request):
     else:
         if len(nodes) == 0:
             # bootstrapping off of the australian node since its up
-            bootstrap_node = ESGFNode(host='esg2.nci.org.au')
+            # bootstrap_node = ESGFNode(host='esg2.nci.org.au')
+            bootstrap_node = ESGFNode(host='https://pcmdi9.llnl.gov')
             bootstrap_node.save()
             bootstrap_node.refresh()
             print bootstrap_node.node_data
         else:
-            node_list = [
-                'dev.esg.anl.gov', 'esg.bnu.edu.cn', 'esg.ccs.ornl.gov']
+            node_list = ['dev.esg.anl.gov', 'esg.bnu.edu.cn', 'esg.ccs.ornl.gov']
             for node_name in node_list:
                 new_node = ESGFNode.objects.filter(host=node_name)
                 if len(new_node) == 0:
@@ -253,7 +253,7 @@ def dashboard(request):
 
             for node in nodes:
                 node.refresh()
-
+    '''
     data = {'vis_launcher': VISUALIZATION_LAUNCHER}
     return HttpResponse(render_template(request, "web_fe/dashboard.html", data))
 
