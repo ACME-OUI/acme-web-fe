@@ -16,7 +16,7 @@ acme-site
     virtualenv env
     source env/bin/activate
 
-    You need to have installed openssl or myproxy-devel
+    You need to have installed openssl, myproxy-devel, libffi
 
     pip install -r requirements.txt
 

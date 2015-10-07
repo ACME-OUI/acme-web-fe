@@ -32,10 +32,15 @@ class ESGFNode(models.Model):
     node_data = JSONField()
 
     def refresh(self):
-        r = requests.get(
-            'http://' + self.host + '/esgf-node-manager/registration.xml', timeout=1)
+        status = False
+        try:
+            r = requests.get('http://' + self.host + '/esgf-node-manager/registration.xml', timeout=1)
+            if r.status == 200:
+                status = True
+        except Exception:
+            print 'http://' + self.host + '/esgf-node-manager/registration.xml'
 
-        if r.status_code != 200:
+        if not status:
             self.available = False
             self.save()
             return
