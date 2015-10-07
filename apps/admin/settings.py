@@ -31,12 +31,12 @@ if os.getenv('build_on_travis', None):
     GITHUB_KEY = ''
     JIRA_USER = ''
     JIRA_PASSWORD = ''
+    VISUALIZATION_LAUNCHER = None
 else:
     from local_settings import *  # noqa
 
 USERDATA_ROOT = os.path.join(os.getcwd(), 'userdata')
 
-VISUALIZATION_LAUNCHER = None
 
 # Django settings for admin project.
 
