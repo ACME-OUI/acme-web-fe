@@ -18,8 +18,7 @@ class TileLayout(models.Model):
 
 class Credential(models.Model):
     site_user_name = models.CharField(max_length=100, default='default_user')
-    service_user_name = models.CharField(
-        max_length=100, default='default_user')
+    service_user_name = models.CharField(max_length=100, default='default_user')
     password = models.CharField(max_length=100)
     service = models.CharField(max_length=100)
 
@@ -49,12 +48,10 @@ class ESGFNode(models.Model):
         node_xml = r.content
         tree = ET.parse(StringIO(node_xml))
         self.node_data = self.xml_to_json(tree.getroot())
-        self.node_data = json.dumps(self.node_data).replace(
-            '{http://www.esgf.org/registry}', '')
+        self.node_data = json.dumps(self.node_data).replace('{http://www.esgf.org/registry}', '')
         self.node_data = json.loads(self.node_data)
         if 'Node' in self.node_data['children']:
-            self.short_name = self.node_data['children'][
-                'Node']['attributes']['shortName']
+            self.short_name = self.node_data['children']['Node']['attributes']['shortName']
         self.save()
 
     def xml_to_json(self, node):

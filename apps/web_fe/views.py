@@ -220,10 +220,11 @@ def dashboard(request):
     import xml.etree.ElementTree as ET
     from StringIO import StringIO
     try:
-        from local_settings import VISUALIZATION_LAUNCHER
+        from django.conf import settings
+        VISUALIZATION_LAUNCHER = settings.VISUALIZATION_LAUNCHER
     except ImportError:
         VISUALIZATION_LAUNCHER = None
-        data = {'vis_launcher': VISUALIZATION_LAUNCHER}
+    data = {'vis_launcher': VISUALIZATION_LAUNCHER}
     return HttpResponse(render_template(request, "web_fe/dashboard.html", data))
 
 
@@ -632,7 +633,8 @@ def vtkweb_launcher(request):
     """Proxy requests to the configured launcher service."""
     import requests
     try:
-        from local_settings import VISUALIZATION_LAUNCHER
+        from django.conf import settings
+        VISUALIZATION_LAUNCHER = settings.VISUALIZATION_LAUNCHER
     except ImportError:
         VISUALIZATION_LAUNCHER = None
 
