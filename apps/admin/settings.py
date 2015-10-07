@@ -36,6 +36,8 @@ else:
 
 USERDATA_ROOT = os.path.join(os.getcwd(), 'userdata')
 
+VISUALIZATION_LAUNCHER =  None
+
 # Django settings for admin project.
 
 DEBUG = True
