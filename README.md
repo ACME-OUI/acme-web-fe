@@ -4,9 +4,8 @@ acme-site
 ## Please Read the [Development Guidelines](https://github.com/ACME-OUI/acme-web-fe/wiki/Development-Guidelines)
 
 ###ACME Dashboard
-#####Python
 
-**This application requires  2.7.9 < Python < 3.0**
+**Python: This application requires  2.7.9 < Python < 3.0**
 
 **init**
 
