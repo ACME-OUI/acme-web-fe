@@ -5,7 +5,8 @@ acme-site
 
 ###ACME Dashboard
 #####Python
-**This application requires  2.7.9 < Python < 3.0 **
+
+**This application requires  2.7.9 < Python < 3.0**
 
 **init**
 
