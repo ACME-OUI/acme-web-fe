@@ -203,7 +203,7 @@ $(function() {
 					// for example
 					var view = cdat.show({
 						file: 'http://test.opendap.org/opendap/data/nc/coads_climatology.nc',
-						variable: ['SST'],
+						variable: 'SST',
 						node: '#cdat-vis'
 					}).then(
 						function () {
