@@ -1,4 +1,4 @@
-from django.contrib.auth.forms import UserCreationForm
+import django.contrib.auth.forms
 from django.contrib.auth.models import User
 from django import forms
 from captcha.fields import ReCaptchaField
@@ -14,10 +14,20 @@ class UserForm(forms.ModelForm):
         fields = ('username', 'email', 'password')
 
 
-class UserCreationForm(UserCreationForm):
-    email = forms.EmailField(required=True)
+class UserCreationForm(django.contrib.auth.forms.UserCreationForm):
+    email = forms.EmailField(widget=forms.EmailInput(attrs = {'placeholder': 'E-Mail'}),required=True)
     captcha = ReCaptchaField(attrs={'theme': 'blackglass'})
+    password1 = forms.CharField(label="Password",
+                                widget=forms.PasswordInput(attrs={"placeholder": "Password"}))
+    password2 = forms.CharField(label="Confirm Password",
+                                widget=forms.PasswordInput(attrs={'placeholder': 'Verify Password'}))
 
     class Meta:
         model = User
         fields = ("username", "email", "first_name", "last_name")
+        widgets = {
+                'username' : forms.TextInput(attrs = {'placeholder': 'User Name'}),
+                'email' : forms.EmailInput(attrs = {'placeholder': 'E-Mail'}),
+                'first_name' : forms.TextInput(attrs = {'placeholder': 'First Name'}),
+                'last_name' : forms.TextInput(attrs = {'placeholder': 'Last Name'}),
+                }

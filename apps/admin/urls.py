@@ -5,7 +5,7 @@ admin.autodiscover()
 
 urlpatterns = patterns(
     '',
-    (r'^$', lambda r: HttpResponseRedirect('acme/')),
+    (r'^$', lambda r: HttpResponseRedirect('acme/dashboard')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^acme/', include('web_fe.urls')),
     url(r'^issues/', include('issues.urls'))
