@@ -9,8 +9,12 @@ $(function() {
 
 	// call the vis server setup
 	cdat.setup()
-		.then(function () { console.log('Vis instance launched'); },
-		      function () { console.log(arguments); });
+		.then(function() {
+				console.log('Vis instance launched');
+			},
+			function() {
+				console.log(arguments);
+			});
 
 
 	var docHeight, docWidth, maxCols, maxHeight, tileHeight, tileWidth;
@@ -27,34 +31,38 @@ $(function() {
 	var header3 = '';
 	var contents = '';
 	var optionContents = '';
-	var header1 = [	'<div class="tile-panel panel-default">',
-					' <div class="tile-panel-heading">',
-					'  <div class="panel-header-title text-center">',
-					'    <button type="button" class="btn btn-default btn-xs options" style="float:left;">',
-					'     <span class="fa fa-cog" aria-label="Options"></span>',
-					'    </button>',
-					'    <button type="button" class="btn btn-default btn-xs remove"  style="float:right;">',
-					'     <span class="fa fa-times" aria-label="Close"></span>',
-					'    </button>',
-					'     <p style="text-align: center">' ].join('');
+	var header1 = ['<div class="tile-panel panel-default">',
+		' <div class="tile-panel-heading">',
+		'  <div class="panel-header-title text-center">',
+		'    <button type="button" class="btn btn-default btn-xs options" style="float:left;">',
+		'     <span class="fa fa-cog" aria-label="Options"></span>',
+		'    </button>',
+		'    <button type="button" class="btn btn-default btn-xs remove"  style="float:right;">',
+		'     <span class="fa fa-times" aria-label="Close"></span>',
+		'    </button>',
+		'     <p style="text-align: center">'
+	].join('');
 	// Widget Name
-	header2 = [		'     <p>',
-					'   </div>',
-					'  </div>',
-					' </div>',
-					' <div class="tile-panel-body" data-direction="horizontal" data-mode="slid">',
-					'  <div class="tile-contents">' ].join('');
+	header2 = ['     <p>',
+		'   </div>',
+		'  </div>',
+		' </div>',
+		' <div class="tile-panel-body" data-direction="horizontal" data-mode="slid">',
+		'  <div class="tile-contents">'
+	].join('');
 	// Widget Contents
 	contents += '  <p>The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men.</p>';
 	header3 += ' </div></div></div>';
 
-	var velo_context_menu_html = [	'<div id="velo_context_menu">',
-									'  <a href="#" id="velo_context_menu_delete">Delete</a>',
-									'  <a href="#" id="velo_context_menu_rename">Rename</a>',
-									'</div>' ].join('');
-	var esgf_context_menu_html = [	'<div id="esgf_context_menu">',
-									'  <a href="#" id="esgf_context_menu_search">Search</a>',
-									'</div>' ].join('');
+	var velo_context_menu_html = ['<div id="velo_context_menu">',
+		'  <a href="#" id="velo_context_menu_delete">Delete</a>',
+		'  <a href="#" id="velo_context_menu_rename">Rename</a>',
+		'</div>'
+	].join('');
+	var esgf_context_menu_html = ['<div id="esgf_context_menu">',
+		'  <a href="#" id="esgf_context_menu_search">Search</a>',
+		'</div>'
+	].join('');
 
 	var dragStartX = 0;
 	var dragStartY = 0;
@@ -122,20 +130,20 @@ $(function() {
 					loadLayout(v.layout, v.mode);
 				}
 			});
-			if(!found_default){
+			if (!found_default) {
 				fixValY = 0;
 				fixValX = 0;
 				mode = 'day';
 			}
-		}, function(request){
+		}, function(request) {
 			fixValY = 0;
 			fixValX = 0;
 			mode = 'day';
 		});
 	}
 
-	function getFixVal(layouts){
-		if(layouts.length == 0){
+	function getFixVal(layouts) {
+		if (layouts.length == 0) {
 			fixValY = 0;
 			fixValX = 0;
 			mode = 'day';
@@ -206,14 +214,16 @@ $(function() {
 						variable: 'SST',
 						node: '#cdat-vis'
 					}).then(
-						function () {
+						function() {
 							console.log('cdat vis success');
 							// bind resize handler
 							$('#cdat-vis').on('resizestop', view.render);
 
 							// also need to bind `view.close` to some event triggered when the window closes
 						},
-						function () {console.log(arguments);}
+						function() {
+							console.log(arguments);
+						}
 					);
 
 					break;
@@ -225,55 +235,7 @@ $(function() {
 
 				case 'velo':
 
-					if ($('#velo_window').length == 0) {
-
-						check_credentials('velo', function(code){
-							if(code == 200){
-								
-								setup_velo();
-
-							} else {
-								content = [ '<form id="velo_login">',
-											'<h2 class="form-signin-heading">Please Sign In</h2>',
-											'<label for="velo_username" class="sr-only">User name:</label>',
-											'<input type="text" id="velo_username" name="velo_username" class="form-control" placeholder="User Name">',
-											'<label for="velo_password" class="sr-only">Password:</label>',
-											'<input type="password" id="velo_password" name="velo_password" class="form-control" placeholder="Password">',
-											'<a id="submit_velo_user" class="btn btn-success" href="javascript:void(0);">Submit</a>'
-										].join('');
-								var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + content + header3 + '</li>';
-								add_tile(new_tile, name + '_window', {
-									ignore: 'true'
-								}, function() {
-									$('#search-btn').click(function() {
-										nodeSearch(document.getElementById("node-search-name").value);
-									});
-								});
-								$('#submit_velo_user').click(function(){
-									var data = {};
-									var cred = {
-										'username': document.getElementById('velo_username').value,
-										'password': document.getElementById('velo_password').value
-									};
-									data['velo'] = cred;
-									get_data(
-										'add_credentials/',
-										'POST',
-										data,
-										function(){
-											$('#velo_window').remove();
-											removeHelper($('#'+'velo_window'));
-											setup_velo();
-										},
-										function(){
-											alert('failed to save credentials');
-										});
-								});
-							}
-						});
-
-						return;
-					}
+					//removed because velo window should be static
 					break;
 
 				default:
@@ -295,24 +257,76 @@ $(function() {
 		});
 	});
 
-	function setup_velo(){
-		content = [ '<div id="velo-file-tree">',
-					'   <div id="velo-options-bar">',
-					'       <button class="fa fa-floppy-o velo-button" id="velo-options-bar-save" title="Save"></button>',
-					'       <button class="fa fa-file-text-o velo-button" id="velo-options-bar-new-file" title="New File"></button>',
-					'       <button class="fa fa-folder-o velo-button" id="velo-options-bar-new-folder" title="New Folder"></button>',
-					'       <button class="fa fa-play-circle velo-button" id="velo-options-bar-start-run" title="Start Run"></button>',
-					'   </div>',
-					'   <div id="velo-mtree-container">',
-					'	    <ul class="mtree" id="velo-mtree">',
-					'	    </ul>',
-					'   </div>',
-					'</div>',
-					'<div id="velo-text-edit"',
-					'</div>'].join('');
-		
-		var new_tile = '<li id="velo_window" class="tile">' + header1 + name + header2 + content + header3 + '</li>';
-		add_tile(new_tile, 'velo_window', {
+	$(document).ready(function () {
+
+		check_credentials('velo', function(code) {
+			if (code == 200) {
+
+				setup_velo();
+
+			} else {
+				content = ['<form id="velo_login">',
+					'<h2 class="form-signin-heading">Please Sign In</h2>',
+					'<label for="velo_username" class="sr-only">User name:</label>',
+					'<input type="text" id="velo_username" name="velo_username" class="form-control" placeholder="User Name">',
+					'<label for="velo_password" class="sr-only">Password:</label>',
+					'<input type="password" id="velo_password" name="velo_password" class="form-control" placeholder="Password">',
+					'<a id="submit_velo_user" class="btn btn-success" href="javascript:void(0);">Submit</a>'
+				].join('');
+				var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + content + header3 + '</li>';
+				add_sidebar_window(new_tile, name + '_window', {
+					ignore: 'true'
+				}, function() {
+					$('#search-btn').click(function() {
+						nodeSearch(document.getElementById("node-search-name").value);
+					});
+				});
+				$('#submit_velo_user').click(function() {
+					var data = {};
+					var cred = {
+						'username': document.getElementById('velo_username').value,
+						'password': document.getElementById('velo_password').value
+					};
+					data['velo'] = cred;
+					get_data(
+						'add_credentials/',
+						'POST',
+						data,
+						function() {
+							$('#velo_window').remove();
+							removeHelper($('#' + 'velo_window'));
+							setup_velo();
+						},
+						function() {
+							alert('failed to save credentials');
+						});
+				});
+			}
+		});
+
+		return;
+	})
+
+
+	function setup_velo() {
+		content = ['<div id="velo-file-tree">',
+			'   <div id="velo-options-bar">',
+			'       <button class="fa fa-floppy-o velo-button" id="velo-options-bar-save" title="Save"></button>',
+			'       <button class="fa fa-file-text-o velo-button" id="velo-options-bar-new-file" title="New File"></button>',
+			'       <button class="fa fa-folder-o velo-button" id="velo-options-bar-new-folder" title="New Folder"></button>',
+			'       <button class="fa fa-play-circle velo-button" id="velo-options-bar-start-run" title="Start Run"></button>',
+			'   </div>',
+			'   <div id="velo-mtree-container">',
+			'	    <ul class="mtree" id="velo-mtree">',
+			'	    </ul>',
+			'   </div>',
+			'</div>',
+			'<div id="velo-text-edit"',
+			'</div>'
+		].join('');
+
+		var new_window = '<li id="velo_window" class="side-window">' + header1 + name + header2 + content + header3 + '</li>';
+		add_sidebar_window(new_window, 'velo_window', {
 			ignore: 'true'
 		}, function() {
 			$('#search-btn').click(function() {
@@ -321,22 +335,24 @@ $(function() {
 		});
 		initFileTree('velo_window');
 		var background = '';
-		if(mode == 'day'){
+		if (mode == 'day') {
 			background = 'rgb(192, 192, 192)';
 		} else {
 			background = 'rgb(1, 1, 1)';
 		}
-		$('#velo-options-bar').find(':button').css({'background-color': background});
-		$('#velo-options-bar-save').click(function(){
+		$('#velo-options-bar').find(':button').css({
+			'background-color': background
+		});
+		$('#velo-options-bar-save').click(function() {
 			velo_save_file();
 		});
-		$('#velo-options-bar-new-file').click(function(){
+		$('#velo-options-bar-new-file').click(function() {
 			velo_new_file();
 		});
-		$('#velo-options-bar-new-folder').click(function(){
+		$('#velo-options-bar-new-folder').click(function() {
 			velo_new_folder();
 		});
-		$('#velo-options-bar-start-run').click(function(){
+		$('#velo-options-bar-start-run').click(function() {
 			velo_start_run();
 		});
 	}
@@ -362,21 +378,41 @@ $(function() {
 		} else {
 			var new_tile = '<li id="' + "nodeSelect" + '_window" class="tile">' + header1 + "nodeSelect" + header2 + header3 + '</li>';
 			add_tile(new_tile, "nodeSelect_window");
+
+			$('#side-menu').append(html);
+			var w = $('#' + id);
+			$(w).css({
+				'z-index': 1,
+				'opacity': 0
+			});
+			console.log('setting options button id to ' + id + '_window_options');
+			$(w).find('.fa-cog').parent().attr({
+				id: id + '_options'
+			});
+			$(w).find('.fa-times').parent().attr({
+				id: id + '_close'
+			});
+
+			$(w).find('.options').click(function(e) {
+
+			});
+
+
 		}
 		var nodeName = $(this).find('a').text();
 		populateNodeSelect(nodeName);
 
 	});
 
-	function velo_save_file(){
-		if($('.mtree-active').length > 0 ){
+	function velo_save_file() {
+		if ($('.mtree-active').length > 0) {
 			$.getScript("static/js/spin.js", function() {
 				if (mode == 'night') {
 					var color = '#fff';
 				} else {
 					color = '#000';
 				}
-				opts.color = color; 
+				opts.color = color;
 				var spinner = new Spinner(opts).spin();
 				document.getElementById('velo-text-edit').appendChild(spinner.el);
 
@@ -391,11 +427,11 @@ $(function() {
 					filename: filename
 				}
 				console.log(outgoing_request);
-				get_data('velo_save_file/', 'POST', outgoing_request, function(){
+				get_data('velo_save_file/', 'POST', outgoing_request, function() {
 					spinner.stop();
 					alert('file saved!');
 					$('#velo-mtree .mtree-active .mtree-unsaved').removeClass('mtree-unsaved');
-				}, function(){
+				}, function() {
 					spinner.stop();
 					alert('failed to save file');
 				});
@@ -403,21 +439,22 @@ $(function() {
 		}
 	}
 
-	function velo_new_file(){
-		var newFileHtml = [	'<li id="velo-new-file-text-input-list">',
-								'    <form id="velo-new-file-text-input-form">',
-								'    	<input type="text" placeholder="New File Name" id="velo-new-file-text-input"></input>',
-								'    </form>',
-								'</li>'].join('');
+	function velo_new_file() {
+		var newFileHtml = ['<li id="velo-new-file-text-input-list">',
+			'    <form id="velo-new-file-text-input-form">',
+			'    	<input type="text" placeholder="New File Name" id="velo-new-file-text-input"></input>',
+			'    </form>',
+			'</li>'
+		].join('');
 		$('#velo-mtree .mtree-active ul').prepend(newFileHtml);
 		$("#velo-new-file-text-input").keypress(function(event) {
-		    if (event.which == 13) {
-		    	newFileHtml = '<a href="#" id="velo-new-file"></a>';
-		    	var newFileName = document.getElementById('velo-new-file-text-input').value;
-		    	if(isFolder(newFileName)){
-		    		newFileName += '.txt';
-		    	}
-		    	$('#velo-new-file-text-input-form').remove();
+			if (event.which == 13) {
+				newFileHtml = '<a href="#" id="velo-new-file"></a>';
+				var newFileName = document.getElementById('velo-new-file-text-input').value;
+				if (isFolder(newFileName)) {
+					newFileName += '.txt';
+				}
+				$('#velo-new-file-text-input-form').remove();
 				$('#velo-new-file-text-input-list').append(newFileHtml);
 				$('#velo-new-file').text(newFileName);
 				$('#velo-new-file').addClass('velo-file');
@@ -428,24 +465,25 @@ $(function() {
 					'data-path': path,
 					'id': ''
 				});
-				$('a[data-path="' + path + '"]').click(function(e){
+				$('a[data-path="' + path + '"]').click(function(e) {
 					getFile($(e.target).attr('data-path'));
 				})
 				initCodeMirror('');
-		    }
+			}
 		});
 	}
 
-	function velo_new_folder(){
-		var newFolderHtml = [	'<li id="velo-new-folder-text-input-list">',
-								'    <form id="velo-new-folder-text-input-form">',
-								'    	<input type="text" placeholder="New Folder Name" id="velo-new-folder-text-input"></input>',
-								'    </form>',
-								'</li>'].join('');
+	function velo_new_folder() {
+		var newFolderHtml = ['<li id="velo-new-folder-text-input-list">',
+			'    <form id="velo-new-folder-text-input-form">',
+			'    	<input type="text" placeholder="New Folder Name" id="velo-new-folder-text-input"></input>',
+			'    </form>',
+			'</li>'
+		].join('');
 		$('#velo-mtree .mtree-active ul').prepend(newFolderHtml);
 		$("#velo-new-folder-text-input").keypress(function(event) {
-		    if (event.which == 13) {
-		        newFolderHtml = '<a href="#" id="new-velo-folder"></a><ul class="mtree-level-2" style="overflow: hidden; height: 0px; display: none;"></ul>';
+			if (event.which == 13) {
+				newFolderHtml = '<a href="#" id="new-velo-folder"></a><ul class="mtree-level-2" style="overflow: hidden; height: 0px; display: none;"></ul>';
 				var newFolderName = document.getElementById('velo-new-folder-text-input').value;
 				$('#velo-new-folder-text-input-form').remove();
 				$('#velo-new-folder-text-input-list').addClass('mtree-node mtree-closed');
@@ -465,35 +503,37 @@ $(function() {
 					}
 				});
 
-				$('#velo-mtree .mtree').bind('contextmenu',function(e){
+				$('#velo-mtree .mtree').bind('contextmenu', function(e) {
 					e.preventDefault();
-					if(e.button == 2){
+					if (e.button == 2) {
 						velo_context_menu(e);
 					}
 				});
 
-				get_data('velo_new_folder/', 'POST', {'foldername':newFolderName}, function(response){
+				get_data('velo_new_folder/', 'POST', {
+					'foldername': newFolderName
+				}, function(response) {
 					alert('Success creating new folder');
-				}, function(response){
+				}, function(response) {
 					alert('Error when creating new folder');
 				})
-		    }
+			}
 		});
 
 	}
 
-	function velo_start_run(){
+	function velo_start_run() {
 
 	}
 
-	function esgf_context_menu(e){
+	function esgf_context_menu(e) {
 		$('body').append(esgf_context_menu_html);
 		$('#esgf_context_menu').offset({
 			'top': e.clientY,
 			'left': e.clientX
 		});
 		createMask('esgf_context_menu', 0);
-		$('#esgf_context_menu_search').click(function(e){
+		$('#esgf_context_menu_search').click(function(e) {
 			//$('#esgf_window .tile-contents').empty();
 			fadeOutMask('esgf_context_menu');
 			var target = $('#esgf-mtree .mtree-active ul').attr('data-node');
@@ -501,17 +541,17 @@ $(function() {
 		});
 	}
 
-	function velo_context_menu(e){
+	function velo_context_menu(e) {
 		$.getScript("static/js/spin.js", function() {
 			if (mode == 'night') {
 				var color = '#fff';
 			} else {
 				color = '#000';
 			}
-			opts.color = color; 
-			
+			opts.color = color;
+
 			var name = $(e.target).siblings().attr('data-path');
-			if(typeof name === 'undefined'){
+			if (typeof name === 'undefined') {
 				name = $(e.target).attr('data-path');
 			}
 			$('body').append(velo_context_menu_html);
@@ -520,41 +560,41 @@ $(function() {
 				'left': e.clientX
 			});
 			$('#velo_context_menu_delete').attr({
-				'data-name':name
+				'data-name': name
 			});
 			$('#velo_context_menu_rename').attr({
-				'data-name':name
+				'data-name': name
 			});
 			createMask('velo_context_menu', 0);
-			$('#velo_context_menu_delete').click(function(e){
+			$('#velo_context_menu_delete').click(function(e) {
 				var spinner = new Spinner(opts).spin();
 				document.getElementById('velo-file-tree').appendChild(spinner.el);
 				data = {
 					'name': $('#velo_context_menu_delete').attr('data-name')
 				};
-				get_data('velo_delete/', 'POST', data, function(response){
+				get_data('velo_delete/', 'POST', data, function(response) {
 					spinner.stop();
 					var target = $('ul[data-path="' + JSON.parse(data)['name'] + '"]');
-					if(target.length == 0){
+					if (target.length == 0) {
 						target = $('a[data-path="' + JSON.parse(data)['name'] + '"]');
 					}
-					target.parent().fadeOut().queue(function(){
+					target.parent().fadeOut().queue(function() {
 						target.parent().remove();
 					});
-				}, function(response){
+				}, function(response) {
 					spinner.stop();
 					alert('delete failure');
 				});
 				fadeOutMask('velo_context_menu');
 			});
-			$('#velo_context_menu_rename').click(function(e){
+			$('#velo_context_menu_rename').click(function(e) {
 				var spinner = new Spinner(opts).spin();
 				document.getElementById('velo-file-tree').appendChild(spinner.el);
 
 				fadeOutMask('velo_context_menu');
 			});
 		});
-	}	
+	}
 
 	function initCodeMirror(text) {
 		$.getScript("static/js/codemirror.js", function() {
@@ -571,27 +611,27 @@ $(function() {
 				'mode': 'text/python'
 			});
 			codeMirror.setValue(text);
-			codeMirror.on('change', function(event){
+			codeMirror.on('change', function(event) {
 				codeMirrorTextChanged(event);
 			});
 		});
 
 	}
 
-	function codeMirrorTextChanged(event){
+	function codeMirrorTextChanged(event) {
 		$($('#velo-mtree .mtree-active > a')[1]).addClass('mtree-unsaved');
 	}
 
 
 
-	function getFile(id){
+	function getFile(id) {
 		$.getScript("static/js/spin.js", function() {
 			if (mode == 'night') {
 				var color = '#fff';
 			} else {
 				color = '#000';
 			}
-			opts.color = color; 
+			opts.color = color;
 			var spinner = new Spinner(opts).spin();
 			document.getElementById('velo-text-edit').appendChild(spinner.el);
 			var path = id.split('/');
@@ -601,10 +641,10 @@ $(function() {
 				'filename': filename,
 				'path': path
 			}
-			get_data('get_file/', 'POST', data, function(response){
+			get_data('get_file/', 'POST', data, function(response) {
 				spinner.stop();
 				$('#velo-text-edit').empty();
-				if(response.type == 'image'){
+				if (response.type == 'image') {
 					var name = 'image-viewer';
 					var contents = '<div id="velo-image"><img src="/acme/userdata/image/' + response.location + '"></div>'
 					$('#velo-text-edit').empty();
@@ -614,10 +654,10 @@ $(function() {
 				} else {
 					initCodeMirror(response.responseText);
 				}
-			}, function(response){
+			}, function(response) {
 				spinner.stop();
-				alert('Faild to retrieve file from server');
-			} );
+				alert('Failed to retrieve file from server');
+			});
 		});
 	}
 
@@ -629,7 +669,7 @@ $(function() {
 			} else {
 				color = '#000';
 			}
-			opts.color = color; 
+			opts.color = color;
 			var spinner = new Spinner(opts).spin();
 			if (mode == 'day') {
 				$('#velo-file-tree').css({
@@ -652,7 +692,7 @@ $(function() {
 					'background-color': '#141414'
 				});
 			}
-			if(window_id == 'velo_window'){
+			if (window_id == 'velo_window') {
 				document.getElementById('velo_window').appendChild(spinner.el);
 				/*
 					The server adds the CURRENT_USER/velo_credentials to the end of the folder request
@@ -660,12 +700,12 @@ $(function() {
 				request = {
 					'file': '/User Documents/'
 				}
-				
+
 				get_data('get_folder/', 'POST', request, function(response) {
 					spinner.stop();
 					response.sort();
 					for (var i = 0; i < response.length; i++) {
-						if(response[i] == '/User Documents/' || response[i] == 'Velo Initialized...'){
+						if (response[i] == '/User Documents/' || response[i] == 'Velo Initialized...') {
 							response.splice(i, 1);
 							i--;
 							continue;
@@ -679,7 +719,7 @@ $(function() {
 							}
 							parentFolder = parentFolder.substring(0, parentFolder.length - 1);
 							var parentFolderEl = $('ul[data-path="' + parentFolder + '"]');
-							if(parentFolderEl.length == 0){
+							if (parentFolderEl.length == 0) {
 								$('#velo-mtree.mtree').append('<li class="mtree-root"><a href="#">' + path[path.length - 1] + '</a><ul data-path="' + response[i] + '"></ul></li>');
 								continue;
 							}
@@ -693,19 +733,19 @@ $(function() {
 								parentFolder += path[j] + '/';
 							}
 							parentFolder = parentFolder.substring(0, parentFolder.length - 1);
-							$('ul[data-path="'+ parentFolder + '"]').append('<li class="mtree-drag mtree-file"><a href="#" data-path="' + response[i] + '">' + path[path.length - 1] + '</a></li>');
+							$('ul[data-path="' + parentFolder + '"]').append('<li class="mtree-drag mtree-file"><a href="#" data-path="' + response[i] + '">' + path[path.length - 1] + '</a></li>');
 							$('a[data-path="' + response[i] + '"]').addClass('velo-file');
-							$('a[data-path="' + response[i] + '"]').click(function(event){
-								getFile( $(event.target).attr('data-path') );
+							$('a[data-path="' + response[i] + '"]').click(function(event) {
+								getFile($(event.target).attr('data-path'));
 							});
 						}
 					}
 
 					mtree('velo-mtree-container');
 
-					$('#velo-mtree.mtree').bind('contextmenu',function(e){
+					$('#velo-mtree.mtree').bind('contextmenu', function(e) {
 						e.preventDefault();
-						if(e.button == 2){
+						if (e.button == 2) {
 							velo_context_menu(e);
 						}
 					});
@@ -722,7 +762,7 @@ $(function() {
 					// });
 					//$('.mtree-drag-and-sort').disableSelection();
 					$('.mtree-drop').droppable({
-						drop: function(event, ui){
+						drop: function(event, ui) {
 							console.log(event);
 							console.log(ui);
 
@@ -732,43 +772,42 @@ $(function() {
 					spinner.stop();
 					alert('error getting home folder');
 				});
-			}
-			else if(window_id == 'esgf_window'){
+			} else if (window_id == 'esgf_window') {
 				document.getElementById('esgf_window').appendChild(spinner.el);
-				get_data('node_info/', 'GET', {}, function(response){
+				get_data('node_info/', 'GET', {}, function(response) {
 					spinner.stop();
 					$('#esgf-node-tree').append('<ul class="mtree" id="esgf-mtree"></ul>');
 					var node_array = Object.keys(response);
 					var length = node_array.length;
-					if(length > 10){
+					if (length > 10) {
 						length = 10
 					}
-					for(var i = 0; i < length; i++){
+					for (var i = 0; i < length; i++) {
 
 						var node_attrib = Object.keys(response[node_array[i]]['attributes']);
 						//var node_child = Object.keys(response[node_array[i]]['children']);
 						var node_child = 'Node';
-						if(response[node_array[i]]['children'][node_child]){
+						if (response[node_array[i]]['children'][node_child]) {
 							var host = response[node_array[i]]['children'][node_child]['attributes']['hostname'];
 							$('#esgf-mtree').append('<li><a href="#">' + node_array[i] + '</a><ul data-node="' + host + '"></li>');
 							$('ul[data-node="' + host + '"]').append('<input type="checkbox" class="node-check-box" value="' + host + '">Search Node</input>');
-							for(var j = 0; j < node_attrib.length; j++){
+							for (var j = 0; j < node_attrib.length; j++) {
 								var attribute;
 								var children;
-								if(node_attrib[j] == 'timeStamp'){
-									var d = new Date(0); 
+								if (node_attrib[j] == 'timeStamp') {
+									var d = new Date(0);
 									d.setUTCSeconds(response[node_array[i]]['attributes'][node_attrib[j]] / 1000);
 									attribute = 'date node came online ' + d;
 								} else {
 									attribute = response[node_array[i]]['attributes'][node_attrib[j]];
 								}
 								children = Object.keys(response[node_array[i]]['children'][node_child]['attributes']);
-								
-								$('ul[data-node="' + host + '"]').append('<li><table><tr><td>' + node_attrib[j] + '</td><td style="text-align: right;"> ' + attribute + '</td></tr></table></li>');					
+
+								$('ul[data-node="' + host + '"]').append('<li><table><tr><td>' + node_attrib[j] + '</td><td style="text-align: right;"> ' + attribute + '</td></tr></table></li>');
 							}
-							for(var k = 0; k < children.length; k++){
-								if(children[k] == 'timeStamp'){
-									var d = new Date(0); 
+							for (var k = 0; k < children.length; k++) {
+								if (children[k] == 'timeStamp') {
+									var d = new Date(0);
 									d.setUTCSeconds(response[node_array[i]]['children'][node_child]['attributes'][children[k]] / 1000);
 									attribute = 'node online at ' + d;
 								} else {
@@ -778,14 +817,14 @@ $(function() {
 							}
 						}
 					}
-					$('#esgf-mtree.mtree').bind('contextmenu',function(e){
+					$('#esgf-mtree.mtree').bind('contextmenu', function(e) {
 						e.preventDefault();
-						if(e.button == 2){
+						if (e.button == 2) {
 							esgf_context_menu(e);
 						}
 					});
 					mtree('esgf-node-tree');
-				}, function(response){
+				}, function(response) {
 					alert('Error getting node list');
 					spinner.stop();
 				});
@@ -826,10 +865,10 @@ $(function() {
 			type: 'POST',
 			dataType: 'json',
 			statusCode: {
-				200: function(response){
+				200: function(response) {
 					cb(response.status);
 				},
-				500: function(response){
+				500: function(response) {
 					cb(response.status);
 				}
 			},
@@ -854,19 +893,19 @@ $(function() {
 			} else {
 				color = '#000';
 			}
-			opts.color = color; 
+			opts.color = color;
 			var spinner = new Spinner(opts).spin();
 
-			
+
 			//get  facets
 			var nodes_to_search = [];
-			$.each($('.node-check-box:checked'), function(box, value){
+			$.each($('.node-check-box:checked'), function(box, value) {
 				nodes_to_search.push($(value).val());
 			});
 			esgf_search_nodes = nodes_to_search;
 			$('#esgf_window #esgf-node-tree').remove();
 			document.getElementById('esgf_window').appendChild(spinner.el);
-			get_data('load_facets/', 'POST', nodes_to_search, function(response){
+			get_data('load_facets/', 'POST', nodes_to_search, function(response) {
 				spinner.stop();
 				var newHtml = '<div id="esgf-node-search"><ul class="mtree" id="esgf-node-search-mtree"></ul></div>';
 				$('#esgf_window .tile-contents').append(newHtml);
@@ -876,20 +915,20 @@ $(function() {
 				$('#esgf_window .tile-contents').prepend(newHtml);
 				var keys = Object.keys(response).sort();
 
-				for(var i = 0; i < keys.length; i++){
+				for (var i = 0; i < keys.length; i++) {
 					var facet = response[keys[i]];
 					var facet_html = '<li><a href="#">' + keys[i] + '</a><ul data-facet="' + keys[i] + '" class="facet"></ul></li>';
 					$('#esgf-node-search-mtree').append(facet_html);
 					var facet_options = Object.keys(response[keys[i]]).sort();
-					for(var j=0; j < facet_options.length; j++){
+					for (var j = 0; j < facet_options.length; j++) {
 						var facet_options_html = '<li><table><tr><td><a href="#">' + facet_options[j] + '</a></td><td style="text-align: right;">' + response[keys[i]][facet_options[j]] + '</td></tr></table></li>';
 						$('ul[data-facet="' + keys[i] + '"').append(facet_options_html);
 					}
-					$('ul[data-facet="' + keys[i] + '"]').click(function(e){
+					$('ul[data-facet="' + keys[i] + '"]').click(function(e) {
 						esgf_search_terms[$(e.target).parents('.facet').attr('data-facet')] = $(e.target).text();
 						var terms = Object.keys(esgf_search_terms);
 						var terms_string = '';
-						for(var i = 0; i < terms.length; i++){
+						for (var i = 0; i < terms.length; i++) {
 							terms_string += terms[i] + '=' + esgf_search_terms[terms[i]] + ',';
 						}
 						terms_string = terms_string.substring(0, terms_string.length - 1);
@@ -897,15 +936,15 @@ $(function() {
 					});
 				}
 				mtree('esgf-node-search');
-				$('#esgf-search-submit').click(function(){
+				$('#esgf-search-submit').click(function() {
 					var terms = document.getElementById('esgf-search-terms').value.split(/[=,]+/);
 					esgf_search_terms = {};
-					for(var i = 0; i < terms.length - 1; i+=2){
+					for (var i = 0; i < terms.length - 1; i += 2) {
 						esgf_search_terms[terms[i]] = terms[i + 1];
 					}
 					esgfSearch();
 				});
-			}, function(){
+			}, function() {
 				spinner.stop();
 				alert('Failed to load node facets');
 			});
@@ -919,7 +958,7 @@ $(function() {
 			} else {
 				color = '#000';
 			}
-			opts.color = color; 
+			opts.color = color;
 			var spinner = new Spinner(opts).spin();
 			document.getElementById('esgf_window').appendChild(spinner.el);
 			data = {
@@ -927,19 +966,19 @@ $(function() {
 				'terms': esgf_search_terms
 			}
 
-			function display_response(r, parent, hitnum){
+			function display_response(r, parent, hitnum) {
 				keys = Object.keys(r).sort();
 				var branch = '';
 
-				for(var i = 0; i < keys.length; i++){
-					if(typeof r[keys[i]] != 'object'){
+				for (var i = 0; i < keys.length; i++) {
+					if (typeof r[keys[i]] != 'object') {
 						branch = '<li><table><tr><td>' + keys[i] + '</td><td style="float:right;"> ' + r[keys[i]] + '</td></tr></table></li>';
 						parent.append(branch);
 					} else {
 						branch = '<li><a href="#">' + keys[i] + '</a><ul data-branch="' + hitnum + keys[i] + '"></ul></li>';
 						parent.append(branch);
 						var subkeys = Object.keys(r[keys[i]]);
-						for(var j = 0; j < subkeys.length; j++){
+						for (var j = 0; j < subkeys.length; j++) {
 							branch = '<li><table><tr><td>' + subkeys[j] + '</td><td style="float:right;"> ' + r[keys[i]][subkeys[j]] + '</td></tr></table></li>';
 							$('ul[data-branch="' + hitnum + keys[i] + '"]').append(branch);
 						}
@@ -950,7 +989,7 @@ $(function() {
 
 			get_data('node_search/', 'POST', data, function(response) {
 				spinner.stop();
-				
+
 				var searchDisplay = '<div id="esgf-search-display"><ul class="mtree" id="esgf-search-display-mtree"></ul></div>';
 				if ($('#esgf-search-display').length == 0) {
 					$('#esgf_window .tile-contents').append(searchDisplay);
@@ -959,8 +998,8 @@ $(function() {
 					$('#esgf_window .tile-contents').append(searchDisplay);
 				}
 				for (var i in response) {
-					if(i != 'hits'){
-						$('#esgf-search-display-mtree').append('<li><a href="#">Dataset: ' + (parseInt(i)+1) + '</a><ul data-branch="' + i + '"></ul></li>');
+					if (i != 'hits') {
+						$('#esgf-search-display-mtree').append('<li><a href="#">Dataset: ' + (parseInt(i) + 1) + '</a><ul data-branch="' + i + '"></ul></li>');
 						display_response(response[i], $('ul[data-branch="' + i + '"]'), i);
 					}
 				}
@@ -975,6 +1014,38 @@ $(function() {
 			});
 		});
 	}
+
+
+	/**
+	 * Adds a given window to the sidebar.
+	 * Based off the add tile function, but with the tile system removed. 
+	 **/
+
+	function add_sidebar_window(html, id, options, callback) {
+		$('#side-menu').append(html);
+		var w = $('#' + id);
+		$(w).css({
+			'z-index': 1,
+			'opacity': 1
+		});
+		console.log('setting options button id to ' + id + '_window_options');
+		$(w).find('.fa-cog').parent().attr({
+			id: id + '_options'
+		});
+		$(w).find('.fa-times').parent().attr({
+			id: id + '_close'
+		});
+
+		$(w).find('.options').click(function(e) {
+
+		});
+
+		if (callback != null)
+			callback();
+		return $(w);
+	};
+
+
 
 
 
@@ -993,12 +1064,12 @@ $(function() {
 			'opacity': 0
 		});
 		console.log('setting options button id to ' + id + '_window_options');
-	 	$(w).find('.fa-cog').parent().attr({ 
-	 		id: id + '_options'
-	 	});
-	 	$(w).find('.fa-times').parent().attr({ 
-	 		id: id + '_close'
-	 	});
+		$(w).find('.fa-cog').parent().attr({
+			id: id + '_options'
+		});
+		$(w).find('.fa-times').parent().attr({
+			id: id + '_close'
+		});
 
 		$(w).draggable({
 			//containment: '.tile-board',
@@ -1850,21 +1921,21 @@ $(function() {
 	***********************************/
 	var body = document.body;
 
-	function leftMenuToggle() {
-		$('#slide-menu-left').toggle('slide', {
-			direction: 'left',
-			easing: 'easeOutCubic'
-		}, 500);
-		if ($('#toggle-left-a').text() == 'Open Menu') {
-			$('#toggle-left-a').text('Close Menu');
-		} else {
-			$('#toggle-left-a').text('Open Menu');
-		}
-	}
+	// function leftMenuToggle() {
+	// 	$('#slide-menu-left').toggle('slide', {
+	// 		direction: 'left',
+	// 		easing: 'easeOutCubic'
+	// 	}, 500);
+	// 	if ($('#toggle-left-a').text() == 'Open Menu') {
+	// 		$('#toggle-left-a').text('Close Menu');
+	// 	} else {
+	// 		$('#toggle-left-a').text('Open Menu');
+	// 	}
+	// }
 
-	$('#toggle-slide-left').click(function(e) {
-		leftMenuToggle();
-	});
+	// $('#toggle-slide-left').click(function(e) {
+	// 	leftMenuToggle();
+	// });
 
 	$('#save-layout').click(function() {
 		leftMenuToggle();
@@ -1944,7 +2015,7 @@ $(function() {
 			loadMenuHtml += '</form></div><div class="bevel bl br"></div>';
 			$(loadMenu).html(loadMenuHtml);
 			$('body').append(loadMenu);
-			
+
 
 			$('#load-button').click(function() {
 				var name = document.forms['load-layout-form'].elements[0].options[document.forms['load-layout-form'].elements[0].selectedIndex].text;
@@ -2023,13 +2094,13 @@ $(function() {
 		}
 	}
 
-	function createMask(id, opacity){
+	function createMask(id, opacity) {
 		var mask = document.createElement('div');
 		$(mask).addClass('mask');
 		$(mask).attr({
 			'id': 'mask'
 		});
-		if(typeof opacity !== 'undefined'){
+		if (typeof opacity !== 'undefined') {
 			$(mask).css({
 				'opacity': opacity
 			});
@@ -2066,7 +2137,7 @@ $(function() {
 		});
 		$('#dark-mode-toggle').text('Dark mode is on');
 		//handle velo window
-		if($('#velo_window').length != 0){
+		if ($('#velo_window').length != 0) {
 			$('.mtree').removeClass('jet');
 			$('.mtree').addClass('transit');
 			$('#velo-file-tree').css({
@@ -2075,11 +2146,13 @@ $(function() {
 			$('#velo-text-edit').css({
 				'background-color': '#141414'
 			});
-			if(typeof codeMirror !== 'undefined'){
+			if (typeof codeMirror !== 'undefined') {
 				codeMirror.setOption('theme', 'twilight');
 			}
 		}
-		$('#velo-options-bar').find(':button').css({'background-color': 'rgb(1, 1, 1)'});
+		$('#velo-options-bar').find(':button').css({
+			'background-color': 'rgb(1, 1, 1)'
+		});
 	}
 
 	function setDay() {
@@ -2102,19 +2175,21 @@ $(function() {
 		$('.mtree').removeClass('transit');
 		$('.mtree').addClass('jet');
 		//handle velo window
-		if($('#velo_window').length != 0){
+		if ($('#velo_window').length != 0) {
 			$('#velo-file-tree').css({
 				'background-color': '#FAFFFF'
 			});
 			$('#velo-text-edit').css({
 				'background-color': '#f7f7f7'
 			});
-			if(typeof codeMirror !== 'undefined'){
+			if (typeof codeMirror !== 'undefined') {
 				codeMirror.setOption('theme', '3024-day');
-			} 
+			}
 		}
-		$('#velo-options-bar').find(':button').css({'background-color': 'rgb(192, 192, 192)'});
-		
+		$('#velo-options-bar').find(':button').css({
+			'background-color': 'rgb(192, 192, 192)'
+		});
+
 	}
 
 
@@ -2370,8 +2445,8 @@ $(function() {
 	}
 
 
-	function mtree(id){
-		if(typeof id === 'undefined'){
+	function mtree(id) {
+		if (typeof id === 'undefined') {
 			id = 'tile-contents';
 		}
 		/*
