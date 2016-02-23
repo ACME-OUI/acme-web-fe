@@ -229,8 +229,7 @@ $(function() {
 					break;
 
 				case 'esgf':
-					content = '<div id="esgf-node-tree"></div>';
-					initFileTree('esgf_window');
+					
 					break;
 
 				case 'velo':
@@ -243,9 +242,10 @@ $(function() {
 
 					}
 			}
-
+			console.log( $('#' + name + '_window') )
 			if ($('#' + name + '_window').length == 0) {
 				var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + content + header3 + '</li>';
+				console.log("got here");
 				add_tile(new_tile, name + '_window', {
 					ignore: 'true'
 				}, function() {
@@ -257,13 +257,11 @@ $(function() {
 		});
 	});
 
-	$(document).ready(function () {
 
+	$(document).ready(function() {
 		check_credentials('velo', function(code) {
 			if (code == 200) {
-
 				setup_velo();
-
 			} else {
 				content = ['<form id="velo_login">',
 					'<h2 class="form-signin-heading">Please Sign In</h2>',
@@ -273,8 +271,8 @@ $(function() {
 					'<input type="password" id="velo_password" name="velo_password" class="form-control" placeholder="Password">',
 					'<a id="submit_velo_user" class="btn btn-success" href="javascript:void(0);">Submit</a>'
 				].join('');
-				var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + content + header3 + '</li>';
-				add_sidebar_window(new_tile, name + '_window', {
+				var new_tile = '<li id="velo_window" class="side-window">' + header1 + 'velo' + header2 + content + header3 + '</li>';
+				add_sidebar_window(new_tile, 'velo_window', {
 					ignore: 'true'
 				}, function() {
 					$('#search-btn').click(function() {
@@ -356,6 +354,20 @@ $(function() {
 			velo_start_run();
 		});
 	}
+
+	$(document).ready(function() {
+		content = '<div id="esgf-node-tree"></div>';
+		name = 'esgf';
+		initFileTree('esgf_window');
+		var new_tile = '<li id="' + name + '_window" class="side-window">' + header1 + name + header2 + content + header3 + '</li>';
+		add_sidebar_window(new_tile, name + '_window', {
+			ignore: 'true'
+		}, function() {
+			$('#search-btn').click(function() {
+				nodeSearch(document.getElementById("node-search-name").value);
+			});
+		});
+	})
 
 	//setup the hander to fix the windows after a resize
 	$(window).resize(function() {
@@ -1022,8 +1034,9 @@ $(function() {
 	 **/
 
 	function add_sidebar_window(html, id, options, callback) {
-		$('#side-menu').append(html);
 		var w = $('#' + id);
+		$(w).replaceWith(html);
+		console.log(id);
 		$(w).css({
 			'z-index': 1,
 			'opacity': 1

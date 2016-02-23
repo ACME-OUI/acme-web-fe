@@ -7,9 +7,7 @@ ul.mtree {
 ul.mtree ul {
   margin-left: 1em;
 }
-ul.mtree li {
-  list-style: none;
-}
+
 ul.mtree a {
   display: block;
 }

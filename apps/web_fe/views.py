@@ -29,6 +29,7 @@ from subprocess import Popen, PIPE
 from sets import Set
 
 
+
 # General
 
 
@@ -136,6 +137,7 @@ def check_credentials(request):
                                 print 'esgf log in failed'
                                 response[s] = 'fail'
                         if c.service == 'velo':
+                            velo_api = VeloAPI.Velo()
                             lib_path = os.path.abspath(
                                 os.path.join('apps', 'velo'))
                             sys.path.append(lib_path)
@@ -165,7 +167,7 @@ def check_credentials(request):
                         if c.service == 'jira':
                             print 'Working on jira....'
                     except:
-                        print_debug(e)
+                        print_debug(c)
                         return HttpResponse(status=500)
 
             return HttpResponse(json.dumps(response))
