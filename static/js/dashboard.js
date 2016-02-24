@@ -18,14 +18,18 @@ $(function() {
 
 
 	var docHeight, docWidth, maxCols, maxHeight, tileHeight, tileWidth;
+	var widthScale = .75; //represents the portion of the window allocated to tiles. Side bar is currently 25%
 	calcMaxSize();
-	var maxWidth = $(window).width() * .75;
-	$('.wrapper').width(maxWidth);
 	$('.wrapper').height(maxHeight * tileHeight);
+	$('.wrapper').css({
+    	"width": $(window).width() * widthScale,
+    	"float": "right"
+    });
 	$('.tile-board').css({
 		'height': maxHeight * tileHeight
 	});
 	var tiles = [];
+
 	var resize_handle_html = '<span class="gs-resize-handle gs-resize-handle-both"></span>';
 	// Define a widget
 	var header3 = '';
@@ -607,7 +611,7 @@ $(function() {
 	}
 
 	function initCodeMirror(text) {
-		name = "velo-text-edit";
+		name = "velo_text_edit_window";
 		content = '<div id="velo-text-edit"</div>'
 
 		if($("#" + name ).length == 0) {
@@ -1816,6 +1820,11 @@ $(function() {
 				"width": t.attr('sizex') * tileWidth,
 				"height": t.attr('sizey') * tileHeight
 			});
+
+			console.log( tile_offset.top );
+			console.log( tile_offset.left );
+			console.log( t.attr('sizex') * tileWidth);
+			console.log( t.attr('sizey') * tileHeight );
 			update_board(tiles[i]);
 		};
 	}
@@ -2284,7 +2293,7 @@ $(function() {
 	function calcMaxSize() {
 		docHeight = $(window).height() - $('.navbar').height() - 10;
 		docHeight -= docHeight % 10;
-		docWidth = $(document).width();
+		docWidth = $(window).width();
 		docWidth -= docWidth % 10;
 		var dimensionComponents = factor(docHeight).sort(function(a, b) {
 			return a.factor - b.factor

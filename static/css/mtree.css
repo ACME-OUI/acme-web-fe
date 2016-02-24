@@ -1,5 +1,5 @@
 ul.mtree {
-  opacity: 0;
+  opacity: 1;
   margin-left: 0;
   padding: 0.2em;
   height: 100%;
@@ -7,7 +7,9 @@ ul.mtree {
 ul.mtree ul {
   margin-left: 1em;
 }
-
+ul.mtree li {
+  list-style: none;
+}
 ul.mtree a {
   display: block;
 }
