@@ -19,8 +19,8 @@ $(function() {
 
 	var docHeight, docWidth, maxCols, maxHeight, tileHeight, tileWidth;
 	calcMaxSize();
-
-	$('.wrapper').width(maxCols * tileWidth);
+	var maxWidth = $(window).width() * .75;
+	$('.wrapper').width(maxWidth);
 	$('.wrapper').height(maxHeight * tileHeight);
 	$('.tile-board').css({
 		'height': maxHeight * tileHeight
@@ -245,7 +245,7 @@ $(function() {
 			console.log( $('#' + name + '_window') )
 			if ($('#' + name + '_window').length == 0) {
 				var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + content + header3 + '</li>';
-				console.log("got here");
+
 				add_tile(new_tile, name + '_window', {
 					ignore: 'true'
 				}, function() {
@@ -318,8 +318,6 @@ $(function() {
 			'	    <ul class="mtree" id="velo-mtree">',
 			'	    </ul>',
 			'   </div>',
-			'</div>',
-			'<div id="velo-text-edit"',
 			'</div>'
 		].join('');
 
@@ -426,7 +424,7 @@ $(function() {
 				}
 				opts.color = color;
 				var spinner = new Spinner(opts).spin();
-				document.getElementById('velo-text-edit').appendChild(spinner.el);
+				//document.getElementById('velo-text-edit').appendChild(spinner.el);
 
 				var file_to_save = $('#velo-mtree .mtree-active .mtree-unsaved');
 				var filename = file_to_save.text();
@@ -609,6 +607,19 @@ $(function() {
 	}
 
 	function initCodeMirror(text) {
+		name = "velo-text-edit";
+		content = '<div id="velo-text-edit"</div>'
+
+		if($("#" + name ).length == 0) {
+			var new_tile = '<li id="' + name + '" class="tile"> ' + header1 + "File Editor" + header2 + content + header3 + '</li>';
+			add_tile(new_tile, name , {
+				ignore: 'true'
+			}, function() {
+				$('#search-btn').click(function() {
+					nodeSearch(document.getElementById("node-search-name").value);
+				});
+			});
+		}
 		$.getScript("static/js/codemirror.js", function() {
 			if (mode == 'night') {
 				var theme = 'twilight';
@@ -645,7 +656,7 @@ $(function() {
 			}
 			opts.color = color;
 			var spinner = new Spinner(opts).spin();
-			document.getElementById('velo-text-edit').appendChild(spinner.el);
+			//document.getElementById('velo-text-edit').appendChild(spinner.el);
 			var path = id.split('/');
 			filename = path.pop();
 			var path = path.join('/');
@@ -663,8 +674,9 @@ $(function() {
 					$('#velo-text-edit').append(contents);
 					// var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + contents + header3 + '</li>';
 					// (new_tile, name + '_window', {ignore: 'true'});
-				} else {
-					initCodeMirror(response.responseText);
+				}
+				else {
+				initCodeMirror(response.responseText);
 				}
 			}, function(response) {
 				spinner.stop();
@@ -748,6 +760,7 @@ $(function() {
 							$('ul[data-path="' + parentFolder + '"]').append('<li class="mtree-drag mtree-file"><a href="#" data-path="' + response[i] + '">' + path[path.length - 1] + '</a></li>');
 							$('a[data-path="' + response[i] + '"]').addClass('velo-file');
 							$('a[data-path="' + response[i] + '"]').click(function(event) {
+								console.log("clicked");
 								getFile($(event.target).attr('data-path'));
 							});
 						}
@@ -1197,6 +1210,10 @@ $(function() {
 				"width": $(w).attr('sizex') * tileWidth,
 				"height": $(w).attr('sizey') * tileHeight
 			});
+			console.log(tileWidth);
+			console.log(tileHeight);
+			console.log(options.sizex);
+			console.log(options.sizey);
 		} else {
 			positionFixup();
 		}
@@ -2267,7 +2284,7 @@ $(function() {
 	function calcMaxSize() {
 		docHeight = $(window).height() - $('.navbar').height() - 10;
 		docHeight -= docHeight % 10;
-		docWidth = $(window).width();
+		docWidth = $(document).width();
 		docWidth -= docWidth % 10;
 		var dimensionComponents = factor(docHeight).sort(function(a, b) {
 			return a.factor - b.factor
