@@ -19,10 +19,11 @@ $(function() {
 
 	var docHeight, docWidth, maxCols, maxHeight, tileHeight, tileWidth;
 	var widthScale = .75; //represents the portion of the window allocated to tiles. Side bar is currently 25%
+	var sidebarWidth = ($(window).width() * .25)
 	calcMaxSize();
 	$('.wrapper').height(maxHeight * tileHeight);
 	$('.wrapper').css({
-    	"width": $(window).width() * widthScale,
+    	"width": ($(window).width() * widthScale),
     	"float": "right"
     });
 	$('.tile-board').css({
@@ -646,7 +647,8 @@ $(function() {
 	}
 
 	function codeMirrorTextChanged(event) {
-		$($('#velo-mtree .mtree-active > a')[1]).addClass('mtree-unsaved');
+		console.log("Fired change event");
+		$('#velo-mtree .mtree-active > a').addClass('mtree-unsaved');
 	}
 
 
@@ -1814,10 +1816,11 @@ $(function() {
 				'sizey': layout[tiles.length - 1][i].sizey(maxHeight)
 			});
 			var tile_offset = offset_from_location(parseInt(t.attr('row')), parseInt(t.attr('col')));
+			var scaledLeft = (tile_offset.left - sidebarWidth) * widthScale; 
 			t.css({
 				"top": tile_offset.top,
 				"left": tile_offset.left,
-				"width": t.attr('sizex') * tileWidth,
+				"width": t.attr('sizex') * tileWidth * widthScale,
 				"height": t.attr('sizey') * tileHeight
 			});
 
