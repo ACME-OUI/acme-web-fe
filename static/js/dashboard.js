@@ -119,8 +119,6 @@ $(function() {
 	 	End setup variables
 	 	***************************************/
 
-
-
 	//find if the user has a default layout, if so load it
 	function loadDefaultLayout() {
 		var jsonObj = new Object;
@@ -433,8 +431,11 @@ $(function() {
 				//document.getElementById('velo-text-edit').appendChild(spinner.el);
 
 				var file_to_save = $('#velo-mtree .mtree-active .mtree-unsaved');
+				console.log(file_to_save);
 				var filename = file_to_save.text();
 				var remote_path = file_to_save.attr('data-path');
+				console.log("logging remote path:");
+				console.log(remote_path);
 
 				var text = codeMirror.getValue();
 				var outgoing_request = {
@@ -481,6 +482,8 @@ $(function() {
 					'data-path': path,
 					'id': ''
 				});
+				console.log("creating path:");
+				console.log(path);
 				$('a[data-path="' + path + '"]').click(function(e) {
 					getFile($(e.target).attr('data-path'));
 				})
@@ -649,7 +652,7 @@ $(function() {
 
 	function codeMirrorTextChanged(event) {
 		console.log("Fired change event");
-		$('#velo-mtree .mtree-active > a').addClass('mtree-unsaved');
+		$($('#velo-mtree .mtree-active > a')[1]).addClass('mtree-unsaved');
 	}
 
 
@@ -2482,6 +2485,7 @@ $(function() {
 				jsonObj.data = errorStr;
 				console.log(jsonObj);
 				fail_callback(status);
+
 			}
 		});
 		return ajax_obj;
@@ -2647,4 +2651,5 @@ $(function() {
 			End mtree.js
 		*/
 	}
+
 });
