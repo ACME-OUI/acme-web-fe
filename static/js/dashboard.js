@@ -1855,8 +1855,9 @@ $(function() {
 	 */
 	function offset_from_location(row, col) {
 		var offset = $('.tile-board').offset();
-		offset.left += (col - 1) * tileWidth;
+		offset.left += (col - 1) * tileWidth; //account for other tiles
 		offset.top += (row - 1) * tileHeight;
+		offset.left = ((offset.left - sidebarWidth) * widthScale) + sidebarWidth; //reduce widths to the portion of the screen not used by the sidebar
 		return offset;
 	}
 
@@ -2330,7 +2331,7 @@ $(function() {
 			maxCols = Math.floor(docWidth / 50);
 		} else {
 			dimensionComponents = dimensionComponents[Math.floor(dimensionComponents.length / 2)];
-			tileWidth = dimensionComponents.factor;
+			tileWidth = dimensionComponents.factor; //uhhhhh hopefully this is right
 			maxCols = dimensionComponents.multiplicator;
 		}
 	}
