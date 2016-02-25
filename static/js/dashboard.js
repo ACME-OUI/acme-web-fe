@@ -1815,8 +1815,7 @@ $(function() {
 				'sizex': layout[tiles.length - 1][i].sizex(maxCols),
 				'sizey': layout[tiles.length - 1][i].sizey(maxHeight)
 			});
-			var tile_offset = offset_from_location(parseInt(t.attr('row')), parseInt(t.attr('col')));
-			var scaledLeft = (tile_offset.left - sidebarWidth) * widthScale; 
+			var tile_offset = offset_from_location(parseInt(t.attr('row')), parseInt(t.attr('col'))); 
 			t.css({
 				"top": tile_offset.top,
 				"left": tile_offset.left,
@@ -1898,7 +1897,7 @@ $(function() {
 			startGrid.css({
 				'top': targetOffset.top,
 				'left': targetOffset.left,
-				'width': parseInt(startGrid.attr('sizex')) * tileWidth,
+				'width': parseInt(startGrid.attr('sizex')) * tileWidth * widthScale,
 				'height': parseInt(startGrid.attr('sizey')) * tileHeight
 			});
 			update_board(dragStartId);
@@ -1912,7 +1911,7 @@ $(function() {
 			targetGrid.css({
 				'top': dragStartOffset.top,
 				'left': dragStartOffset.left,
-				'width': parseInt(targetGrid.attr('sizex')) * tileWidth,
+				'width': parseInt(targetGrid.attr('sizex')) * tileWidth * widthScale,
 				'height': parseInt(targetGrid.attr('sizey')) * tileHeight
 			});
 			update_board(targetId);
