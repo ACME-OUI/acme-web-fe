@@ -19,8 +19,9 @@ $(function() {
 
 	var docHeight, docWidth, maxCols, maxHeight, tileHeight, tileWidth;
 	var widthScale = .75; //represents the portion of the window allocated to tiles. Side bar is currently 25%
-	var sidebarWidth = ($(window).width() * .25)
+	var sidebarWidth = ($(window).width() * (1 - widthScale));
 	calcMaxSize();
+	$('#slide-menu-left').css('width', sidebarWidth);
 	$('.wrapper').height(maxHeight * tileHeight);
 	$('.wrapper').css({
     	"width": ($(window).width() * widthScale),
