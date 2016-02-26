@@ -31,7 +31,7 @@ $(function() {
 		'height': maxHeight * tileHeight
 	});
 	var tiles = [];
-
+	var instance = 0; //variable that increments for every codemirror launched.
 	var resize_handle_html = '<span class="gs-resize-handle gs-resize-handle-both"></span>';
 	// Define a widget
 	var header3 = '';
@@ -418,6 +418,10 @@ $(function() {
 
 	});
 
+	function velo_editor_save_file(event) {
+		console.log("Editor save event fired.");
+		console.log("Instance id : " + event.data.id);
+	}
 	function velo_save_file() {
 		if ($('.mtree-active').length > 0) {
 			$.getScript("static/js/spin.js", function() {
@@ -616,10 +620,14 @@ $(function() {
 	}
 
 	function initCodeMirror(text) {
-		name = "velo_text_edit_window";
-		content = '<div id="velo-text-edit"</div>'
-
+		console.log("Instance var = " + instance);
+		name = "velo_text_edit" + instance + "_window";
+		var id = '"velo-editor-save' + instance + '"';
+		content = '<div id="velo-text-edit' + instance + '"><button class="fa fa-floppy-o velo-button" id=' + id + ' title="Save"></button></div>'; // eg <div id="velo-text-edit0"</div>
 		if($("#" + name ).length == 0) {
+			var new_tile = $("<li></li>");
+			$(new_tile).attr('data-code-mirror', instance);
+			$(new_tile).html(header1 + "File Editor" + header2 + content + header3);
 			var new_tile = '<li id="' + name + '" class="tile"> ' + header1 + "File Editor" + header2 + content + header3 + '</li>';
 			add_tile(new_tile, name , {
 				ignore: 'true'
@@ -629,25 +637,28 @@ $(function() {
 				});
 			});
 		}
+		$('#velo-editor-save' + instance).on("click", {id:instance}, function(event){ //store instance into event.data.id
+			velo_editor_save_file(event);
+		});
 		$.getScript("static/js/codemirror.js", function() {
 			if (mode == 'night') {
 				var theme = 'twilight';
 			} else {
 				theme = '3024-day';
 			}
-			codeMirror = CodeMirror(document.getElementById('velo-text-edit'), {
+			codeMirror = CodeMirror(document.getElementById('velo-text-edit' + instance), {
 				'theme': theme,
 				'dragDrop': false,
 				'lineNumbers': true,
 				'showCursorWhenSelecting': true,
 				'mode': 'text/python'
 			});
+			instance++;
 			codeMirror.setValue(text);
 			codeMirror.on('change', function(event) {
 				codeMirrorTextChanged(event);
 			});
 		});
-
 	}
 
 	function codeMirrorTextChanged(event) {
@@ -686,7 +697,7 @@ $(function() {
 					// (new_tile, name + '_window', {ignore: 'true'});
 				}
 				else {
-				initCodeMirror(response.responseText);
+				initCodeMirror(response.responseText, data);
 				}
 			}, function(response) {
 				spinner.stop();
