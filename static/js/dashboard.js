@@ -214,7 +214,7 @@ $(function() {
 
 					// for example
 					var view = cdat.show({
-						file: 'http://test.opendap.org/opendap/data/nc/coads_climatology.nc',
+						file: 'http://test.opendap.org/opendap/hyrax/data/nc/coads_climatology.nc.nc4?',
 						variable: 'SST',
 						node: '#cdat-vis'
 					}).then(
@@ -230,15 +230,6 @@ $(function() {
 						}
 					);
 
-					break;
-
-				case 'esgf':
-					
-					break;
-
-				case 'velo':
-
-					//removed because velo window should be static
 					break;
 
 				default:
@@ -518,7 +509,7 @@ $(function() {
 				$('a[data-path="' + path + '"]').click(function(e) {
 					getFile($(e.target).attr('data-path'));
 				})
-				initCodeMirror('');
+				initCodeMirror('', path);
 			}
 		});
 	}
@@ -1234,6 +1225,7 @@ $(function() {
 		});
 
 		$(w).find('.remove').click(function(e) {
+
 			$('#' + id).remove();
 			for (var i = tiles.length - 1; i >= 0; i--) {
 				if (tiles[i] == id) {
