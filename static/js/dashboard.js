@@ -421,6 +421,28 @@ $(function() {
 	function velo_editor_save_file(event) {
 		console.log("Editor save event fired.");
 		console.log("Instance id : " + event.data.id);
+		console.log(event.data.codeMirror.getValue());
+		if ($('#velo-mtree .editor-' + event.data.id).length > 0) {
+			var file_to_save = $('#velo-mtree .editor-' + event.data.id);
+			console.log(file_to_save);
+			var filename = file_to_save.text();
+			var remote_path = file_to_save.attr('data-path');
+			console.log("logging remote path:");
+			console.log(remote_path);
+			var text = event.data.codeMirror.getValue();
+			var outgoing_request = {
+				text: text,
+				remote_path: remote_path,
+				filename: filename
+			}
+			console.log(outgoing_request);
+			get_data('velo_save_file/', 'POST', outgoing_request, function() {
+				alert('file saved!');
+				$('#velo-mtree .mtree-unsaved').removeClass('mtree-unsaved');
+			}, function() {
+				alert('failed to save file');
+			});
+		};
 	}
 	function velo_save_file() {
 		if ($('.mtree-active').length > 0) {
@@ -475,6 +497,11 @@ $(function() {
 				if (isFolder(newFileName)) {
 					newFileName += '.txt';
 				}
+				//never removes new file class?
+				//never adds velo-file class
+				//TODO: create seperate file save or consider new file possibility in current save. 
+				// other option: create new file and immediately save to velo thus eliminating need to conditionals
+				// since the file will be on velo, clicking the file before saving will not result in error
 				$('#velo-new-file-text-input-form').remove();
 				$('#velo-new-file-text-input-list').append(newFileHtml);
 				$('#velo-new-file').text(newFileName);
@@ -619,7 +646,7 @@ $(function() {
 		});
 	}
 
-	function initCodeMirror(text) {
+	function initCodeMirror(text, data) {
 		console.log("Instance var = " + instance);
 		name = "velo_text_edit" + instance + "_window";
 		var id = '"velo-editor-save' + instance + '"';
@@ -637,9 +664,6 @@ $(function() {
 				});
 			});
 		}
-		$('#velo-editor-save' + instance).on("click", {id:instance}, function(event){ //store instance into event.data.id
-			velo_editor_save_file(event);
-		});
 		$.getScript("static/js/codemirror.js", function() {
 			if (mode == 'night') {
 				var theme = 'twilight';
@@ -653,6 +677,10 @@ $(function() {
 				'showCursorWhenSelecting': true,
 				'mode': 'text/python'
 			});
+			$('#velo-editor-save' + instance).on("click", {id:instance, codeMirror:codeMirror}, function(event){ //store instance into event.data.id
+				velo_editor_save_file(event);
+			});
+			$('a[data-path="' + data + '"]').addClass('editor-' + instance);
 			instance++;
 			codeMirror.setValue(text);
 			codeMirror.on('change', function(event) {
@@ -681,10 +709,13 @@ $(function() {
 			var path = id.split('/');
 			filename = path.pop();
 			var path = path.join('/');
+			console.log(id);
 			data = {
 				'filename': filename,
 				'path': path
 			}
+			console.log("logging id from getfile:")
+			console.log(id);
 			get_data('get_file/', 'POST', data, function(response) {
 				spinner.stop();
 				$('#velo-text-edit').empty();
@@ -697,7 +728,7 @@ $(function() {
 					// (new_tile, name + '_window', {ignore: 'true'});
 				}
 				else {
-				initCodeMirror(response.responseText, data);
+				initCodeMirror(response.responseText, id);
 				}
 			}, function(response) {
 				spinner.stop();
@@ -781,7 +812,8 @@ $(function() {
 							$('ul[data-path="' + parentFolder + '"]').append('<li class="mtree-drag mtree-file"><a href="#" data-path="' + response[i] + '">' + path[path.length - 1] + '</a></li>');
 							$('a[data-path="' + response[i] + '"]').addClass('velo-file');
 							$('a[data-path="' + response[i] + '"]').click(function(event) {
-								console.log("clicked");
+
+								console.log($(event.target).attr('data-path'));
 								getFile($(event.target).attr('data-path'));
 							});
 						}
