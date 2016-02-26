@@ -33,6 +33,8 @@ class VeloService(object):
             return Response(self.commands['init'](data))
 
     def init_velo(self, data):
+        # TODO: Validate password as well as user when calling init_velo
+        # Process: Hash user and password using HMAC, use as key for velo_instances
         if data['velo_user'] in self.velo_instances:
             return 'Success'
         if 'velo_pass' not in data:

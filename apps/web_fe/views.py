@@ -27,7 +27,7 @@ import datetime
 import requests
 from subprocess import Popen, PIPE
 from sets import Set
-
+from velo import VeloAPI
 
 
 # General
@@ -120,7 +120,6 @@ def check_credentials(request):
             data = json.loads(request.body)
             response = {}
             creds = Credential.objects.filter(site_user_name=request.user)
-            velo_started = False
             if len(creds) != 0:
                 for c in creds:
                     try:
@@ -137,21 +136,20 @@ def check_credentials(request):
                                 print 'esgf log in failed'
                                 response[s] = 'fail'
                         if c.service == 'velo':
-                            velo_api = VeloAPI.Velo()
-                            lib_path = os.path.abspath(
-                                os.path.join('apps', 'velo'))
-                            sys.path.append(lib_path)
-
-                            rm = velo_api.init(c.service_user_name, c.password)
-
-                            if rm.getRepositoryUrlBase() == 'u\'http://acmetest.ornl.gov:80/alfresco\'':
-                                response[s] = 'success'
-                                velo_api.shutdown_jvm()
-                                print 'velo log in successful'
+                            user, password = c.service_user_name, c.password
+                            velo_creds = {
+                                          "velo_user": user,
+                                          "velo_pass": password,
+                                          "command": "init"
+                                         }
+                            result = velo_request(velo_creds)
+                            print "got here"
+                            #TODO: Extract values out to CAPITAL_NAMED_CONSTANTS
+                            if result == "Success":
+                                print "velo login successful"
                             else:
-                                velo_api.shutdown_jvm()
-                                response[s] = 'fail'
-                                print 'Error in velo initialization', rm.getRepositoryUrlBase()
+                                print "velo login failed"
+                                response[s] = "fail"
 
                         if c.service == 'github':
                             import github3
