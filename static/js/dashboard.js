@@ -655,6 +655,10 @@ $(function() {
 				});
 			});
 		}
+		$('#velo-text-edit'+instance).on("click", {instance:instance}, function(event) {
+			$('#velo-mtree .mtree-active').removeClass('mtree-active');
+			$('.editor-'+event.data.instance).parent('li').addClass('mtree-active');
+		});
 		$.getScript("static/js/codemirror.js", function() {
 			if (mode == 'night') {
 				var theme = 'twilight';
