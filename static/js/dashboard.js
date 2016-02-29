@@ -315,7 +315,7 @@ $(function() {
 			'   </div>',
 			'</div>'
 		].join('');
-
+		name = 'Velo';
 		var new_window = '<li id="velo_window" class="side-window">' + header1 + name + header2 + content + header3 + '</li>';
 		add_sidebar_window(new_window, 'velo_window', {
 			ignore: 'true'
@@ -429,7 +429,7 @@ $(function() {
 			console.log(outgoing_request);
 			get_data('velo_save_file/', 'POST', outgoing_request, function() {
 				alert('file saved!');
-				$('#velo-mtree .mtree-unsaved').removeClass('mtree-unsaved');
+				$(file_to_save).removeClass('mtree-unsaved');
 			}, function() {
 				alert('failed to save file');
 			});
@@ -646,7 +646,7 @@ $(function() {
 			var new_tile = $("<li></li>");
 			$(new_tile).attr('data-code-mirror', instance);
 			$(new_tile).html(header1 + "File Editor" + header2 + content + header3);
-			var new_tile = '<li id="' + name + '" class="tile"> ' + header1 + "File Editor" + header2 + content + header3 + '</li>';
+			var new_tile = '<li id="' + name + '" class="tile"> ' + header1 + data + header2 + content + header3 + '</li>';
 			add_tile(new_tile, name , {
 				ignore: 'true'
 			}, function() {
@@ -680,9 +680,15 @@ $(function() {
 		});
 	}
 
+
 	function codeMirrorTextChanged(event) {
-		console.log("Fired change event");
-		$($('#velo-mtree .mtree-active > a')[1]).addClass('mtree-unsaved');
+		var elem = $('#velo-mtree .mtree-active > a')
+		if($(elem[1]).length > 0){
+			$(elem[1]).addClass('mtree-unsaved');
+		}
+		else {
+			$(elem[0]).addClass('mtree-unsaved');
+		}
 	}
 
 
