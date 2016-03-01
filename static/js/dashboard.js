@@ -60,6 +60,12 @@ $(function() {
 	contents += '  <p>The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men.</p>';
 	header3 += ' </div></div></div>';
 
+	var altheader1 = ['<div class="tile-panel panel-default">',
+		' <div class="tile-panel-heading">',
+		'  <div class="panel-header-title text-center">',
+		'     <p style="text-align: center">'
+	].join('');
+
 	var velo_context_menu_html = ['<div id="velo_context_menu">',
 		'  <a href="#" id="velo_context_menu_delete">Delete</a>',
 		'  <a href="#" id="velo_context_menu_rename">Rename</a>',
@@ -266,7 +272,7 @@ $(function() {
 					'<input type="password" id="velo_password" name="velo_password" class="form-control" placeholder="Password">',
 					'<a id="submit_velo_user" class="btn btn-success" href="javascript:void(0);">Submit</a>'
 				].join('');
-				var new_tile = '<li id="velo_window" class="side-window">' + header1 + 'velo' + header2 + content + header3 + '</li>';
+				var new_tile = '<li id="velo_window" class="side-window">' + altheader1 + 'velo' + header2 + content + header3 + '</li>';
 				add_sidebar_window(new_tile, 'velo_window', {
 					ignore: 'true'
 				}, function() {
@@ -316,7 +322,7 @@ $(function() {
 			'</div>'
 		].join('');
 		name = 'Velo';
-		var new_window = '<li id="velo_window" class="side-window">' + header1 + name + header2 + content + header3 + '</li>';
+		var new_window = '<li id="velo_window" class="side-window">' + altheader1 + name + header2 + content + header3 + '</li>';
 		add_sidebar_window(new_window, 'velo_window', {
 			ignore: 'true'
 		}, function() {
@@ -352,7 +358,7 @@ $(function() {
 		content = '<div id="esgf-node-tree"></div>';
 		name = 'esgf';
 		initFileTree('esgf_window');
-		var new_tile = '<li id="' + name + '_window" class="side-window">' + header1 + name + header2 + content + header3 + '</li>';
+		var new_tile = '<li id="' + name + '_window" class="side-window">' + altheader1 + name + header2 + content + header3 + '</li>';
 		add_sidebar_window(new_tile, name + '_window', {
 			ignore: 'true'
 		}, function() {
