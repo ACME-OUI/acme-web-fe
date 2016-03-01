@@ -314,6 +314,7 @@ $(function() {
 			'       <button class="fa fa-file-text-o velo-button" id="velo-options-bar-new-file" title="New File"></button>',
 			'       <button class="fa fa-folder-o velo-button" id="velo-options-bar-new-folder" title="New Folder"></button>',
 			'       <button class="fa fa-play-circle velo-button" id="velo-options-bar-start-run" title="Start Run"></button>',
+			'       <button class="fa fa-refresh velo-button" id="velo-options-bar-refresh" title="Refresh"></button>',
 			'   </div>',
 			'   <div id="velo-mtree-container">',
 			'	    <ul class="mtree" id="velo-mtree">',
@@ -351,6 +352,9 @@ $(function() {
 		});
 		$('#velo-options-bar-start-run').click(function() {
 			velo_start_run();
+		});
+		$('#velo-options-bar-refresh').click(function() {
+			velo_refresh();
 		});
 	}
 
@@ -512,6 +516,18 @@ $(function() {
 				});
 				console.log("creating path:");
 				console.log(path);
+				var text = '';
+				var outgoing_request = {
+					text: text,
+					remote_path: path,
+					filename: newFileName
+				}
+				console.log(outgoing_request);
+				get_data('velo_save_file/', 'POST', outgoing_request, function() {
+					alert('file saved!');
+				}, function() {
+					alert('failed to save file');
+				});
 				$('a[data-path="' + path + '"]').click(function(e) {
 					getFile($(e.target).attr('data-path'));
 				})
