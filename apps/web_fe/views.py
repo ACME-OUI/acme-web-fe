@@ -220,13 +220,58 @@ def dashboard(request):
     import xml.etree.ElementTree as ET
     from StringIO import StringIO
     try:
+        from local_settings import VISUALIZATION_LAUNCHER
+    except ImportError:
+        VISUALIZATION_LAUNCHER = None
+        '''
+    nodes = ESGFNode.objects.all()
+    print "got to 1"
+    r = requests.get(
+        'https://pcmdi.llnl.gov/esgf-node-manager/registration.xml')
+    if r.status_code == 200:
+        print "######### Node Manager is back online!  ############"
+        tree = ET.parse(StringIO(r.content))
+        for node in tree.getroot():
+            print node
+            new_node = ESGFNode(host=node.attrib['hostname'])
+            new_node.save()
+        for node in ESGFNode.objects.all():
+            print "refreshing"
+            node.refresh()
+    else:
+        if len(nodes) == 0:
+            # bootstrapping off of the australian node since its up
+            bootstrap_node = ESGFNode(host='esg2.nci.org.au')
+            bootstrap_node.save()
+            bootstrap_node.refresh()
+            print bootstrap_node.node_data
+        else:
+            node_list = [
+                'dev.esg.anl.gov', 'esg.bnu.edu.cn', 'esg.ccs.ornl.gov']
+            for node_name in node_list:
+                new_node = ESGFNode.objects.filter(host=node_name)
+                if len(new_node) == 0:
+                    new_node = ESGFNode(host=node_name)
+                    new_node.save()
+
+            for node in nodes:
+                node.refresh()
+                    '''
+    data = {'vis_launcher': VISUALIZATION_LAUNCHER}
+    return HttpResponse(render_template(request, "web_fe/dashboard.html", data))
+
+    '''
+    import xml.etree.ElementTree as ET
+    from StringIO import StringIO
+    try:
+
         from django.conf import settings
         VISUALIZATION_LAUNCHER = settings.VISUALIZATION_LAUNCHER
     except ImportError:
         VISUALIZATION_LAUNCHER = None
     data = {'vis_launcher': VISUALIZATION_LAUNCHER}
     return HttpResponse(render_template(request, "web_fe/dashboard.html", data))
-
+    '''
 
 @login_required
 def save_layout(request):

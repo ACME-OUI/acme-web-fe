@@ -685,7 +685,7 @@ $(function() {
 	}
 
 
-	function codeMirrorTextChanged(event) {
+	function codeMirrorTextChanged(event, i) {
 		var elem = $('#velo-mtree .mtree-active > a')
 		if($(elem[1]).length > 0){
 			$(elem[1]).addClass('mtree-unsaved');
@@ -723,10 +723,8 @@ $(function() {
 				if (response.type == 'image') {
 					var name = 'image-viewer';
 					var contents = '<div id="velo-image"><img src="/acme/userdata/image/' + response.location + '"></div>'
-					$('#velo-text-edit').empty();
-					$('#velo-text-edit').append(contents);
-					// var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + contents + header3 + '</li>';
-					// (new_tile, name + '_window', {ignore: 'true'});
+					var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + contents + header3 + '</li>';
+					add_tile(new_tile, name + '_window', {ignore: 'true'});
 				}
 				else {
 				initCodeMirror(response.responseText, id);
