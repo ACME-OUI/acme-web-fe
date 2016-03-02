@@ -31,6 +31,7 @@ $(function() {
 		'height': maxHeight * tileHeight
 	});
 	var tiles = [];
+	var imgInstance = 0;
 	var instance = 0; //variable that increments for every codemirror launched.
 	var resize_handle_html = '<span class="gs-resize-handle gs-resize-handle-both"></span>';
 	// Define a widget
@@ -498,11 +499,6 @@ $(function() {
 				if (isFolder(newFileName)) {
 					newFileName += '.txt';
 				}
-				//never removes new file class?
-				//never adds velo-file class
-				//TODO: create seperate file save or consider new file possibility in current save. 
-				// other option: create new file and immediately save to velo thus eliminating need to conditionals
-				// since the file will be on velo, clicking the file before saving will not result in error
 				$('#velo-new-file-text-input-form').remove();
 				$('#velo-new-file-text-input-list').append(newFileHtml);
 				$('#velo-new-file').text(newFileName);
@@ -522,6 +518,8 @@ $(function() {
 					remote_path: path,
 					filename: newFileName
 				}
+				//Saving new files since other actions will cause the tree to be refreshed.
+				//If they are not saved, refreshing the file tree will remove new files. 
 				console.log(outgoing_request);
 				get_data('velo_save_file/', 'POST', outgoing_request, function() {
 					alert('file saved!');
@@ -587,6 +585,12 @@ $(function() {
 
 	function velo_start_run() {
 
+	}
+
+	function velo_refresh() {
+		id = 'velo_window';
+		$('#velo-mtree').empty();
+		initFileTree(id);
 	}
 
 	function esgf_context_menu(e) {
@@ -732,21 +736,19 @@ $(function() {
 			var path = id.split('/');
 			filename = path.pop();
 			var path = path.join('/');
-			console.log(id);
 			data = {
 				'filename': filename,
 				'path': path
 			}
-			console.log("logging id from getfile:")
-			console.log(id);
 			get_data('get_file/', 'POST', data, function(response) {
 				spinner.stop();
 				$('#velo-text-edit').empty();
 				if (response.type == 'image') {
-					var name = 'image-viewer';
+					var name = 'image_viewer_' + imgInstance;
 					var contents = '<div id="velo-image"><img src="/acme/userdata/image/' + response.location + '"></div>'
 					var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + contents + header3 + '</li>';
 					add_tile(new_tile, name + '_window', {ignore: 'true'});
+					imgInstance++;
 				}
 				else {
 				initCodeMirror(response.responseText, id);
@@ -1127,17 +1129,6 @@ $(function() {
 		$(w).css({
 			'z-index': 1,
 			'opacity': 1
-		});
-		console.log('setting options button id to ' + id + '_window_options');
-		$(w).find('.fa-cog').parent().attr({
-			id: id + '_options'
-		});
-		$(w).find('.fa-times').parent().attr({
-			id: id + '_close'
-		});
-
-		$(w).find('.options').click(function(e) {
-
 		});
 
 		if (callback != null)

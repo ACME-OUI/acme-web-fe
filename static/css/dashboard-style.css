@@ -41,6 +41,15 @@ body {
     margin-left: 29%;
 }
 
+#velo-image img{
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 /*============================================================================
     Velo window
   ============================================================================*/
