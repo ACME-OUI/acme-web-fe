@@ -357,6 +357,7 @@ $(function() {
 		$('#velo-options-bar-refresh').click(function() {
 			velo_refresh();
 		});
+		load_layout();
 	}
 
 	$(document).ready(function() {
@@ -663,7 +664,7 @@ $(function() {
 		});
 	}
 
-	function initCodeMirror(text, data) {
+	function initCodeMirror(text, path, options) {
 		console.log("Instance var = " + instance);
 		name = "velo_text_edit" + instance + "_window";
 		var id = '"velo-editor-save' + instance + '"';
@@ -672,7 +673,7 @@ $(function() {
 			var new_tile = $("<li></li>");
 			$(new_tile).attr('data-code-mirror', instance);
 			$(new_tile).html(header1 + "File Editor" + header2 + content + header3);
-			var new_tile = '<li id="' + name + '" class="tile"> ' + header1 + data + header2 + content + header3 + '</li>';
+			var new_tile = '<li id="' + name + '" class="tile" data-path="' + path + '" > ' + header1 + path + header2 + content + header3 + '</li>';
 			add_tile(new_tile, name , {
 				ignore: 'true'
 			}, function() {
@@ -701,7 +702,7 @@ $(function() {
 			$('#velo-editor-save' + instance).on("click", {id:instance, codeMirror:codeMirror}, function(event){ //store instance into event.data.id
 				velo_editor_save_file(event);
 			});
-			$('a[data-path="' + data + '"]').addClass('editor-' + instance);
+			$('a[data-path="' + path + '"]').addClass('editor-' + instance);
 			instance++;
 			codeMirror.setValue(text);
 			codeMirror.on('change', function(event) {
@@ -723,7 +724,7 @@ $(function() {
 
 
 
-	function getFile(id) {
+	function getFile(id, options) {
 		$.getScript("static/js/spin.js", function() {
 			if (mode == 'night') {
 				var color = '#fff';
@@ -744,14 +745,20 @@ $(function() {
 				spinner.stop();
 				$('#velo-text-edit').empty();
 				if (response.type == 'image') {
-					var name = 'image_viewer_' + imgInstance;
+					var name = 'Image Viewer: ' + id;
+					var windowId = 'image_viewer_' + imgInstance;
 					var contents = '<div id="velo-image"><img src="/acme/userdata/image/' + response.location + '"></div>'
-					var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + contents + header3 + '</li>';
-					add_tile(new_tile, name + '_window', {ignore: 'true'});
+					var new_tile = '<li id="' + windowId + '_window" class="tile" data-path="' + id + '">' + header1 + name + header2 + contents + header3 + '</li>';
+					if(!options){
+						add_tile(new_tile, windowId + '_window', {ignore: 'true'});	
+					}
+					else {
+						add_tile(new_tile, windowId + '_window', options);
+					}
 					imgInstance++;
 				}
 				else {
-				initCodeMirror(response.responseText, id);
+				initCodeMirror(response.responseText, id, options);
 				}
 			}, function(response) {
 				spinner.stop();
@@ -1122,7 +1129,7 @@ $(function() {
 	 * Based off the add tile function, but with the tile system removed. 
 	 **/
 
-	function add_sidebar_window(html, id, options, callback) {
+	function add_sidebar_window(html, id) {
 		var w = $('#' + id);
 		$(w).replaceWith(html);
 		console.log(id);
@@ -1130,14 +1137,8 @@ $(function() {
 			'z-index': 1,
 			'opacity': 1
 		});
-
-		if (callback != null)
-			callback();
 		return $(w);
 	};
-
-
-
 
 
 	/**
@@ -2039,31 +2040,48 @@ $(function() {
 	// 	leftMenuToggle();
 	// });
 
-	$('#save-layout').click(function() {
-		leftMenuToggle();
-		createMask('save-menu');
+	// window.onbeforeunload =	function save_layout() { //TODO: make this use ajax instead of local storage
+	// 	var pathsToSave = [];
+	// 	if(typeof(Storage) !== "undefined") {
+	//     	$('.tile-holder .tile').each( function (index, element) {
+	//     		pathsToSave.push($(element).attr('data-path'));
+	// 		});
+	// 		localStorage.setItem("pathsToLoad", JSON.stringify(pathsToSave));
+	// 		console.log(JSON.parse(localStorage.getItem("pathsToLoad")));
+	// 	}
+	// 	 else {
+	// 		console.log('Unable to save layout. Browser does not support local storage.')
+	// 	}
+	// }
 
-		var saveMenu = document.createElement('div');
-		$(saveMenu).addClass('bvc');
-		$(saveMenu).addClass('save-layout');
-		$(saveMenu).attr({
-			'id': 'save-menu'
-		});
-		var saveMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
-		saveMenuHtml += '<form name="save-layout-form" id="save-form">';
-		saveMenuHtml += 'Layout Name:<br><input type="text" id="layout-name">';
-		saveMenuHtml += '<input type="submit" value="Save" id="save-btn"><br>';
-		saveMenuHtml += '<input type="checkbox" name="default" value="default" id="default">Default Layout';
-		saveMenuHtml += '</form></div><div class="bevel bl br"></div>';
-		$(saveMenu).html(saveMenuHtml);
-		$('body').append(saveMenu);
-		$('#save-btn').click(function(event) {
-			event.preventDefault();
-			var layout_name = document.getElementById('layout-name').value;
-			var layout = [];
+
+	$('#save-layout').click(function() {
+	//	save_layout();
+	//	leftMenuToggle();
+	// 	createMask('save-menu');
+
+	// 	var saveMenu = document.createElement('div');
+	// 	$(saveMenu).addClass('bvc');
+	// 	$(saveMenu).addClass('save-layout');
+	// 	$(saveMenu).attr({
+	// 		'id': 'save-menu'
+	// 	});
+	// 	var saveMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
+	// 	saveMenuHtml += '<form name="save-layout-form" id="save-form">';
+	// 	saveMenuHtml += 'Layout Name:<br><input type="text" id="layout-name">';
+	// 	saveMenuHtml += '<input type="submit" value="Save" id="save-btn"><br>';
+	// 	saveMenuHtml += '<input type="checkbox" name="default" value="default" id="default">Default Layout';
+	// 	saveMenuHtml += '</form></div><div class="bevel bl br"></div>';
+	// 	$(saveMenu).html(saveMenuHtml);
+	// 	$('body').append(saveMenu);
+	 	$('#save-btn').click(function(event) {
+	 		event.preventDefault();
+	 		var layout_name = 'default';
+	 		var layout = [];
 			$('.tile').each(function() {
 				layout.push({
 					tileName: $(this).attr('id').substr(0, $(this).attr('id').indexOf('_')),
+					tilePath: $(this).attr('data-path'),
 					x: parseInt($(this).attr('col')) / maxCols,
 					y: parseInt($(this).attr('row')) / maxHeight,
 					sizex: parseInt($(this).attr('sizex')) / maxCols,
@@ -2076,6 +2094,7 @@ $(function() {
 				mode = 'day'
 			}
 			var data = {
+				instance: instance,
 				name: layout_name,
 				mode: mode,
 				style: 'balanced',
@@ -2083,52 +2102,54 @@ $(function() {
 				default_layout: document.getElementById('default').checked
 			};
 
-			get_data('save_layout/', 'POST', data, function() {
-				alert('Layout saved');
-			}, function() {
-				alert('Please use unique layout name');
-			});
-			fadeOutMask('save-menu');
-		});
+	 		get_data('save_layout/', 'POST', data, function() {
+	 			alert('Layout saved');
+	 		}, function() {
+	 			alert('Please use a unique layout name');
+	 		});
+	// 		fadeOutMask('save-menu');
+	 	});
 	});
 
 
-	$('#load-layout').click(function() {
-		var options = {};
-		get_data('load_layout/', 'GET', new Object(), function(request) {
+	// $('#load-layout').click(function() {
+	// 	var options = {};
+	// 	get_data('load_layout/', 'GET', new Object(), function(request) {
 			//parse response
-			options = request;
-			createMask('load-layout-menu');
+			
+			// createMask('load-layout-menu');
 
-			//create load menu and populate with values
-			var loadMenu = document.createElement('div');
-			$(loadMenu).addClass('bvc');
-			$(loadMenu).addClass('save-layout');
-			$(loadMenu).attr({
-				'id': 'load-layout-menu'
-			});
-			var loadMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
-			loadMenuHtml += '<form name="load-layout-form" id="save-form">';
-			loadMenuHtml += 'Select Layout:<br><select id="select-layout">';
-			$.each(options, function(k, v) {
-				loadMenuHtml += '<option value="' + v.name + '" id="layout-' + v.name + '">' + v.name + '</option>';
-			});
-			loadMenuHtml += '</select><input type="submit" value="Load" id="load-button">';
-			loadMenuHtml += '</form></div><div class="bevel bl br"></div>';
-			$(loadMenu).html(loadMenuHtml);
-			$('body').append(loadMenu);
+			// //create load menu and populate with values
+			// var loadMenu = document.createElement('div');
+			// $(loadMenu).addClass('bvc');
+			// $(loadMenu).addClass('save-layout');
+			// $(loadMenu).attr({
+			// 	'id': 'load-layout-menu'
+			// });
+			// var loadMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
+			// loadMenuHtml += '<form name="load-layout-form" id="save-form">';
+			// loadMenuHtml += 'Select Layout:<br><select id="select-layout">';
+			// $.each(options, function(k, v) {
+			// 	loadMenuHtml += '<option value="' + v.name + '" id="layout-' + v.name + '">' + v.name + '</option>';
+			// });
+			// loadMenuHtml += '</select><input type="submit" value="Load" id="load-button">';
+			// loadMenuHtml += '</form></div><div class="bevel bl br"></div>';
+			// $(loadMenu).html(loadMenuHtml);
+			// $('body').append(loadMenu);
 
 
-			$('#load-button').click(function() {
-				var name = document.forms['load-layout-form'].elements[0].options[document.forms['load-layout-form'].elements[0].selectedIndex].text;
+			$('#load-layout').click(function() {
+				//var name = document.forms['load-layout-form'].elements[0].options[document.forms['load-layout-form'].elements[0].selectedIndex].text;
+				name ='default';
 				var data = {
 					'layout_name': name
 				};
 				get_data('load_layout/', 'POST', data, function(request) {
-					fadeOutMask('load-layout-menu');
+					//fadeOutMask('load-layout-menu');
 					$('.tile').each(function() {
 						$(this).remove();
 					});
+					options = request;
 					tiles = [];
 					layout = []
 					$.each(request.board_layout, function(k, v) {
@@ -2140,12 +2161,6 @@ $(function() {
 					fadeOutMask('load-layout-menu');
 				});
 			});
-		}, function() {
-			alert('failed to load layout');
-		});
-
-		leftMenuToggle();
-	});
 
 
 	/**
