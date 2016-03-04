@@ -58,7 +58,7 @@ $(function() {
 		'  <div class="tile-contents">'
 	].join('');
 	// Widget Contents
-	contents += '  <p>The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men.</p>';
+	content = '<div class="content"></div>';
 	header3 += ' </div></div></div>';
 
 	var altheader1 = ['<div class="tile-panel panel-default">',
@@ -528,9 +528,12 @@ $(function() {
 					alert('failed to save file');
 				});
 				$('a[data-path="' + path + '"]').click(function(e) {
-					getFile($(e.target).attr('data-path'));
-				})
-				initCodeMirror('', path);
+					var path = $(e.target).attr('data-path');
+					var id = 'dashboard_tile_' + instance;
+					var content = '<div class="content"></div>';
+					var new_tile = '<li id="' + id + '" class="tile" data-path="' + path + '" > ' + header1 + path + header2 + content + header3 + '</li>';
+					add_tile(new_tile, id , {ignore: 'true'}, initCodeMirror('', id, path));
+				});
 			}
 		});
 	}
@@ -664,27 +667,14 @@ $(function() {
 		});
 	}
 
-	function initCodeMirror(text, path, options) {
+	function initCodeMirror(text, id, path) {
 		console.log("Instance var = " + instance);
-		name = "velo_text_edit" + instance + "_window";
-		var id = '"velo-editor-save' + instance + '"';
-		content = '<div id="velo-text-edit' + instance + '"><button class="fa fa-floppy-o velo-button" id=' + id + ' title="Save"></button></div>'; // eg <div id="velo-text-edit0"</div>
-		if($("#" + name ).length == 0) {
-			var new_tile = $("<li></li>");
-			$(new_tile).attr('data-code-mirror', instance);
-			$(new_tile).html(header1 + "File Editor" + header2 + content + header3);
-			var new_tile = '<li id="' + name + '" class="tile" data-path="' + path + '" > ' + header1 + path + header2 + content + header3 + '</li>';
-			add_tile(new_tile, name , {
-				ignore: 'true'
-			}, function() {
-				$('#search-btn').click(function() {
-					nodeSearch(document.getElementById("node-search-name").value);
-				});
-			});
-		}
-		$('#velo-text-edit'+instance).on("click", {instance:instance}, function(event) {
+		var saveId = '"velo-editor-save-' + instance + '"';
+		content = '<div id="velo-text-edit-' + instance + '"><button class="fa fa-floppy-o velo-button" id=' + saveId + ' title="Save"></button></div>';
+		$('#' + id + ' .content').append(content);
+		$('#velo-text-edit-'+instance).on("click", {instance:instance}, function(event) {
 			$('#velo-mtree .mtree-active').removeClass('mtree-active');
-			$('.editor-'+event.data.instance).parent('li').addClass('mtree-active');
+			$('[data-editor="event.data.instance"]').parent('li').addClass('mtree-active');
 		});
 		$.getScript("static/js/codemirror.js", function() {
 			if (mode == 'night') {
@@ -692,18 +682,17 @@ $(function() {
 			} else {
 				theme = '3024-day';
 			}
-			codeMirror = CodeMirror(document.getElementById('velo-text-edit' + instance), {
+			codeMirror = CodeMirror(document.getElementById('velo-text-edit-' + instance), {
 				'theme': theme,
 				'dragDrop': false,
 				'lineNumbers': true,
 				'showCursorWhenSelecting': true,
 				'mode': 'text/python'
 			});
-			$('#velo-editor-save' + instance).on("click", {id:instance, codeMirror:codeMirror}, function(event){ //store instance into event.data.id
+			$('#velo-editor-save-' + instance).on("click", {id:instance, codeMirror:codeMirror}, function(event){ //store instance into event.data.id
 				velo_editor_save_file(event);
 			});
-			$('a[data-path="' + path + '"]').addClass('editor-' + instance);
-			instance++;
+			$('a[data-path="' + path + '"]').attr('data-editor', instance);
 			codeMirror.setValue(text);
 			codeMirror.on('change', function(event) {
 				codeMirrorTextChanged(event);
@@ -724,7 +713,7 @@ $(function() {
 
 
 
-	function getFile(id, options) {
+	function getFile(url, id) {
 		$.getScript("static/js/spin.js", function() {
 			if (mode == 'night') {
 				var color = '#fff';
@@ -734,7 +723,7 @@ $(function() {
 			opts.color = color;
 			var spinner = new Spinner(opts).spin();
 			//document.getElementById('velo-text-edit').appendChild(spinner.el);
-			var path = id.split('/');
+			var path = url.split('/');
 			filename = path.pop();
 			var path = path.join('/');
 			data = {
@@ -745,20 +734,16 @@ $(function() {
 				spinner.stop();
 				$('#velo-text-edit').empty();
 				if (response.type == 'image') {
-					var name = 'Image Viewer: ' + id;
-					var windowId = 'image_viewer_' + imgInstance;
+					// var name = 'Image Viewer: ' + id;
+					// var windowId = 'image_viewer_' + imgInstance;
 					var contents = '<div id="velo-image"><img src="/acme/userdata/image/' + response.location + '"></div>'
-					var new_tile = '<li id="' + windowId + '_window" class="tile" data-path="' + id + '">' + header1 + name + header2 + contents + header3 + '</li>';
-					if(!options){
-						add_tile(new_tile, windowId + '_window', {ignore: 'true'});	
-					}
-					else {
-						add_tile(new_tile, windowId + '_window', options);
-					}
-					imgInstance++;
+					// var new_tile = '<li id="' + windowId + '_window" class="tile" data-path="' + id + '">' + header1 + name + header2 + contents + header3 + '</li>';
+					// add_tile(new_tile, windowId + '_window', {ignore: 'true'});	
+					// imgInstance++;
+					$('#' + id + ' .content').append(contents);
 				}
 				else {
-				initCodeMirror(response.responseText, id, options);
+				initCodeMirror(response.responseText, id, url);
 				}
 			}, function(response) {
 				spinner.stop();
@@ -844,7 +829,11 @@ $(function() {
 							$('a[data-path="' + response[i] + '"]').click(function(event) {
 
 								console.log($(event.target).attr('data-path'));
-								getFile($(event.target).attr('data-path'));
+								var id = 'dashboard_tile_' + instance;
+								var path = $(event.target).attr('data-path');
+								content = '<div class="content"></div>';
+								var new_tile = '<li id="' + id + '" class="tile" data-path="' + path + '" > ' + header1 + path + header2 + content + header3 + '</li>';
+								add_tile(new_tile, id , { ignore: 'true'}, getFile(path, id));
 							});
 						}
 					}
@@ -1295,8 +1284,10 @@ $(function() {
 			'opacity': 1
 		}, 'slow', 'easeOutCubic');
 
-		if (callback != null)
+		if (callback != null) {
 			callback();
+			instance++;
+		}
 		return $(w);
 	};
 
