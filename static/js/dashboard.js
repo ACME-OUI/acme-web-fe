@@ -425,8 +425,8 @@ $(function() {
 		console.log("Editor save event fired.");
 		console.log("Instance id : " + event.data.id);
 		console.log(event.data.codeMirror.getValue());
-		if ($('#velo-mtree .editor-' + event.data.id).length > 0) {
-			var file_to_save = $('#velo-mtree .editor-' + event.data.id);
+		if ($('#velo-mtree [data-editor="' + event.data.id + '"]').length > 0) {
+			var file_to_save = $('#velo-mtree [data-editor="' + event.data.id + '"]');
 			console.log(file_to_save);
 			var filename = file_to_save.text();
 			var remote_path = file_to_save.attr('data-path');
@@ -674,7 +674,8 @@ $(function() {
 		$('#' + id + ' .content').append(content);
 		$('#velo-text-edit-'+instance).on("click", {instance:instance}, function(event) {
 			$('#velo-mtree .mtree-active').removeClass('mtree-active');
-			$('[data-editor="event.data.instance"]').parent('li').addClass('mtree-active');
+			console.log()
+			$('#velo-mtree [data-editor="' + event.data.instance + '"]').parent('li').addClass('mtree-active');
 		});
 		$.getScript("static/js/codemirror.js", function() {
 			if (mode == 'night') {
