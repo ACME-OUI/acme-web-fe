@@ -143,7 +143,6 @@ def check_credentials(request):
                                           "command": "init"
                                          }
                             result = velo_request(velo_creds)
-                            print "got here"
                             #TODO: Extract values out to CAPITAL_NAMED_CONSTANTS
                             if result == "Success":
                                 print "velo login successful"
@@ -225,7 +224,6 @@ def dashboard(request):
         VISUALIZATION_LAUNCHER = None
         '''
     nodes = ESGFNode.objects.all()
-    print "got to 1"
     r = requests.get(
         'https://pcmdi.llnl.gov/esgf-node-manager/registration.xml')
     if r.status_code == 200:
@@ -278,7 +276,6 @@ def save_layout(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-
             layout = TileLayout.objects.filter(
                 layout_name=data['name'], user_name=str(request.user))
             if len(layout) == 0:

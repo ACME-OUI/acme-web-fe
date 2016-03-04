@@ -99,8 +99,8 @@ $(function() {
 	var mode = {
 		light: 'day'
 	}
+	setDay();
 	boardSetup(maxCols, maxHeight);
-	loadDefaultLayout();
 	var opts = {
 		lines: 17, // The number of lines to draw
 		length: 40, // The length of each line
@@ -357,7 +357,7 @@ $(function() {
 		$('#velo-options-bar-refresh').click(function() {
 			velo_refresh();
 		});
-		load_layout();
+		loadDefaultLayout();
 	}
 
 	$(document).ready(function() {
@@ -2066,13 +2066,13 @@ $(function() {
 	// 	saveMenuHtml += '</form></div><div class="bevel bl br"></div>';
 	// 	$(saveMenu).html(saveMenuHtml);
 	// 	$('body').append(saveMenu);
-	 	$('#save-btn').click(function(event) {
-	 		event.preventDefault();
+	 	// $('#save-btn').click(function(event) {
+	 	// 	event.preventDefault();
 	 		var layout_name = 'default';
 	 		var layout = [];
 			$('.tile').each(function() {
 				layout.push({
-					tileName: $(this).attr('id').substr(0, $(this).attr('id').indexOf('_')),
+					tileName: $(this).attr('id'),
 					tilePath: $(this).attr('data-path'),
 					x: parseInt($(this).attr('col')) / maxCols,
 					y: parseInt($(this).attr('row')) / maxHeight,
@@ -2091,7 +2091,7 @@ $(function() {
 				mode: mode,
 				style: 'balanced',
 				layout: layout,
-				default_layout: document.getElementById('default').checked
+				default_layout: 1//document.getElementById('default').checked
 			};
 
 	 		get_data('save_layout/', 'POST', data, function() {
@@ -2099,8 +2099,9 @@ $(function() {
 	 		}, function() {
 	 			alert('Please use a unique layout name');
 	 		});
+	 		console.log("save clicked");
 	// 		fadeOutMask('save-menu');
-	 	});
+	// 	});
 	});
 
 
@@ -2183,7 +2184,7 @@ $(function() {
 	 * mode -> the day/night mode of the layout
 	 */
 	function loadLayout(layout, mode) {
-		fadeOutMask();
+		//fadeOutMask();
 		if (mode == 'day') {
 			setDay();
 		} else if (mode == 'night') {
@@ -2192,14 +2193,18 @@ $(function() {
 		mode.light = mode
 
 		for (var i = 0; i < layout.length; i++) {
-			var name = layout[i].tileName;
-			var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + contents + header3 + '</li>';
-			add_tile(new_tile, name + '_window', {
+			var path = layout[i].tilePath;
+			var tileId = 'dashboard_tile_' + instance;
+			var content = '<div class="content"></div>';
+			var new_tile = '<li id="' + tileId + '" class="tile" data-path="'+ path +'">' + header1 + path + header2 + content + header3 + '</li>';
+			console.log("loading tile with path: " + path);
+			console.log("loading tile with id: " + tileId);
+			add_tile(new_tile, tileId, {
 				x: layout[i].x - needsFixX(),
 				y: layout[i].y - needsFixY(),
 				sizex: layout[i].sizex,
 				sizey: layout[i].sizey
-			});
+			}, function() {getFile(path, tileId)});
 		}
 	}
 
