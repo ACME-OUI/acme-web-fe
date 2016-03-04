@@ -833,9 +833,9 @@ $(function() {
 								var path = $(event.target).attr('data-path');
 								content = '<div class="content"></div>';
 								var new_tile = '<li id="' + id + '" class="tile" data-path="' + path + '" > ' + header1 + path + header2 + content + header3 + '</li>';
-								add_tile(new_tile, id , { ignore: 'true'}, getFile(path, id));
-							});
-						}
+								add_tile(new_tile, id , { ignore: 'true'}, getFile(path, id)); 
+							}); //this is totally not doing what i thought it would, but it works. Pretty sure that getFile
+						}       //is getting called instead of being passed as a callback. 
 					}
 
 					mtree('velo-mtree-container');
@@ -1286,8 +1286,8 @@ $(function() {
 
 		if (callback != null) {
 			callback();
-			instance++;
 		}
+		instance++;
 		return $(w);
 	};
 

@@ -322,7 +322,7 @@ nav.slide-menu-left button.close-menu {
 /* bevel size, left offset and color settings next 3 lines */ 
 .bvc { left: -15px }
 .bevel, .content { border-width: 15px }
-.bevel, .content { border-color: #efefef; border-style:solid; }
+.bevel, .content { border-color: #F7F7F7; border-style:solid; }
 
 .bvc {
     width: 30%; /* width of overall box, variable or fixed */ 
@@ -337,7 +337,7 @@ nav.slide-menu-left button.close-menu {
 .bvc .tr, .bvc .br { border-right-color: transparent; }
 .bvc .tl, .bvc .bl { border-left-color: transparent; }
 .content {
-    background: #efefef;
+    background: #F7F7F7;
     width: 100%;
     height:100%;
     border-top: 0;
