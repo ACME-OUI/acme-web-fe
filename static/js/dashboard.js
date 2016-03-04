@@ -1264,7 +1264,7 @@ $(function() {
 			$(w).css({
 				"top": tile_offset.top,
 				"left": tile_offset.left,
-				"width": $(w).attr('sizex') * tileWidth,
+				"width": $(w).attr('sizex') * tileWidth * widthScale,
 				"height": $(w).attr('sizey') * tileHeight
 			});
 			console.log(tileWidth);
