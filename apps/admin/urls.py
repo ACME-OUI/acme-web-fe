@@ -8,5 +8,6 @@ urlpatterns = patterns(
     (r'^$', lambda r: HttpResponseRedirect('acme/dashboard')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^acme/', include('web_fe.urls')),
-    url(r'^issues/', include('issues.urls'))
+    url(r'^issues/', include('issues.urls')),
+    url(r'^poller/', include('poller.urls')),
 )
