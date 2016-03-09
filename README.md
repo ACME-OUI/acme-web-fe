@@ -21,7 +21,7 @@ acme-site
 
     You need to have installed openssl, myproxy-devel, libffi
 
-    pip install U -r requirements.txt
+    pip install -U -r requirements.txt
 
     _Note_
     If the Jpype install fails because of missing Python.h, you're missing the python dev tools.
@@ -62,7 +62,7 @@ acme-site
 
 **update db**
 
-    python mange.py migrate
+    python manage.py migrate
 
 **running**
 

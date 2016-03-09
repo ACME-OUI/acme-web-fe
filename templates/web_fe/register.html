@@ -15,7 +15,7 @@
     <h2>Create An Account</h2>
       {% csrf_token %}
         {% for field in user_form %}
-          {% with attr="form-control, placeholder:"|add:field.name %}
+          {% with attr="form-control" %}
             {{ field|addattributes:attr|safe}}
             {% if field.errors %}
               <div class="alert alert-danger" role="alert">

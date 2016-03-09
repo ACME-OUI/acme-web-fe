@@ -27,6 +27,7 @@ import datetime
 import requests
 from subprocess import Popen, PIPE
 from sets import Set
+from velo import VeloAPI
 
 
 # General
@@ -119,7 +120,6 @@ def check_credentials(request):
             data = json.loads(request.body)
             response = {}
             creds = Credential.objects.filter(site_user_name=request.user)
-            velo_started = False
             if len(creds) != 0:
                 for c in creds:
                     try:
@@ -136,20 +136,20 @@ def check_credentials(request):
                                 print 'esgf log in failed'
                                 response[s] = 'fail'
                         if c.service == 'velo':
-                            lib_path = os.path.abspath(
-                                os.path.join('apps', 'velo'))
-                            sys.path.append(lib_path)
-
-                            rm = velo_api.init(c.service_user_name, c.password)
-
-                            if rm.getRepositoryUrlBase() == 'u\'http://acmetest.ornl.gov:80/alfresco\'':
-                                response[s] = 'success'
-                                velo_api.shutdown_jvm()
-                                print 'velo log in successful'
+                            user, password = c.service_user_name, c.password
+                            velo_creds = {
+                                "velo_user": user,
+                                "velo_pass": password,
+                                "command": "init"
+                            }
+                            result = velo_request(velo_creds)
+                            print "got here"
+                            # TODO: Extract values out to CAPITAL_NAMED_CONSTANTS
+                            if result == "Success":
+                                print "velo login successful"
                             else:
-                                velo_api.shutdown_jvm()
-                                response[s] = 'fail'
-                                print 'Error in velo initialization', rm.getRepositoryUrlBase()
+                                print "velo login failed"
+                                response[s] = "fail"
 
                         if c.service == 'github':
                             import github3
@@ -165,7 +165,7 @@ def check_credentials(request):
                         if c.service == 'jira':
                             print 'Working on jira....'
                     except:
-                        print_debug(e)
+                        print_debug(c)
                         return HttpResponse(status=500)
 
             return HttpResponse(json.dumps(response))
@@ -220,12 +220,58 @@ def dashboard(request):
     import xml.etree.ElementTree as ET
     from StringIO import StringIO
     try:
+        from local_settings import VISUALIZATION_LAUNCHER
+    except ImportError:
+        VISUALIZATION_LAUNCHER = None
+        '''
+    nodes = ESGFNode.objects.all()
+    print "got to 1"
+    r = requests.get(
+        'https://pcmdi.llnl.gov/esgf-node-manager/registration.xml')
+    if r.status_code == 200:
+        print "######### Node Manager is back online!  ############"
+        tree = ET.parse(StringIO(r.content))
+        for node in tree.getroot():
+            print node
+            new_node = ESGFNode(host=node.attrib['hostname'])
+            new_node.save()
+        for node in ESGFNode.objects.all():
+            print "refreshing"
+            node.refresh()
+    else:
+        if len(nodes) == 0:
+            # bootstrapping off of the australian node since its up
+            bootstrap_node = ESGFNode(host='esg2.nci.org.au')
+            bootstrap_node.save()
+            bootstrap_node.refresh()
+            print bootstrap_node.node_data
+        else:
+            node_list = [
+                'dev.esg.anl.gov', 'esg.bnu.edu.cn', 'esg.ccs.ornl.gov']
+            for node_name in node_list:
+                new_node = ESGFNode.objects.filter(host=node_name)
+                if len(new_node) == 0:
+                    new_node = ESGFNode(host=node_name)
+                    new_node.save()
+
+            for node in nodes:
+                node.refresh()
+                    '''
+    data = {'vis_launcher': VISUALIZATION_LAUNCHER}
+    return HttpResponse(render_template(request, "web_fe/dashboard.html", data))
+
+    '''
+    import xml.etree.ElementTree as ET
+    from StringIO import StringIO
+    try:
+
         from django.conf import settings
         VISUALIZATION_LAUNCHER = settings.VISUALIZATION_LAUNCHER
     except ImportError:
         VISUALIZATION_LAUNCHER = None
     data = {'vis_launcher': VISUALIZATION_LAUNCHER}
     return HttpResponse(render_template(request, "web_fe/dashboard.html", data))
+    '''
 
 
 @login_required

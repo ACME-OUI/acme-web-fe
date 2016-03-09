@@ -146,6 +146,7 @@ INSTALLED_APPS = (
     'captcha',
     'web_fe',
     'issues',
+    'poller',
 )
 
 # Use nose to run all tests
