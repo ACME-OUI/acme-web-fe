@@ -1,0 +1,83 @@
+[
+  {
+    "model": "poller.UserRuns",
+    "pk": 1,
+    "fields": {
+      "user": "Bob",
+      "runspec": {"filename": "velo/example/path.py"},
+      "status": "new"
+    }
+  },
+  {
+    "model": "poller.UserRuns",
+    "pk": 2,
+    "fields": {
+      "user": "Bob",
+      "runspec": {"filename": "velo/example/path.py"},
+      "status": "in_progress"
+    }
+  },
+  {
+    "model": "poller.UserRuns",
+    "pk": 3,
+    "fields": {
+      "user": "Bob",
+      "runspec": {"filename": "velo/example/path.py"},
+      "status": "complete"
+    }
+  },
+  {
+    "model": "poller.UserRuns",
+    "pk": 4,
+    "fields": {
+      "user": "Bob",
+      "runspec": {"filename": "velo/example/path.py"},
+      "status": "failed"
+    }
+  },
+  {
+    "model": "poller.UserRuns",
+    "pk": 5,
+    "fields": {
+      "user": "Joe",
+      "runspec": {"filename": "velo/example/path.py"},
+      "status": "new"
+    }
+  },
+  {
+    "model": "poller.UserRuns",
+    "pk": 6,
+    "fields": {
+      "user": "Joe",
+      "runspec": {"filename": "velo/example/path.py"},
+      "status": "in_progress"
+    }
+  },
+  {
+    "model": "poller.UserRuns",
+    "pk": 7,
+    "fields": {
+      "user": "Joe",
+      "runspec": {"filename": "velo/example/path.py"},
+      "status": "complete"
+    }
+  },
+  {
+    "model": "poller.UserRuns",
+    "pk": 8,
+    "fields": {
+      "user": "Joe",
+      "runspec": {"filename": "velo/example/path.py"},
+      "status": "failed"
+    }
+  },
+  {
+    "model": "poller.UserRuns",
+    "pk": 9,
+    "fields": {
+      "user": "Tim",
+      "runspec": {"filename": "velo/example/path.py"},
+      "status": "new"
+    }
+  }
+]

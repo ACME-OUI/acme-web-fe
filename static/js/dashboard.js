@@ -588,7 +588,17 @@ $(function() {
 	}
 
 	function velo_start_run() {
-
+		data = {
+			user: $("#velo_window .mtree-root a").html(),
+			runspec: $("#velo_window .mtree-active a").data("path"),
+		}
+		//data = JSON.stringify(data);
+		get_data('../poller/', 'POST', data
+				, function(response) {
+					alert('Success creating new run');
+				}, function(response) {
+					alert('Error when creating new run');
+				})
 	}
 
 	function velo_refresh() {
