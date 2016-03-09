@@ -20,7 +20,9 @@ def index(request):
                     data = UserRuns.objects.filter(status='complete')
                 elif status == 'failed':
                     data = UserRuns.objects.filter(status='failed')
-
+                else:
+                    print "got here"
+                    return HttpResponse(status=404)
                 obj_list = []
                 for obj in data:
                     obj_dict = {}
@@ -34,7 +36,7 @@ def index(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            new_run = UserRuns.objects.create(user = data['user'], runspec = data['runspec'], status = 'new')
+            new_run = UserRuns.objects.create(user=data['user'], runspec=data['runspec'], status='new')
             new_run.save
             return HttpResponse("Successfully posted ")
         except Exception as e:

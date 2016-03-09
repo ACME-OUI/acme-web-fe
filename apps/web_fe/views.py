@@ -138,13 +138,13 @@ def check_credentials(request):
                         if c.service == 'velo':
                             user, password = c.service_user_name, c.password
                             velo_creds = {
-                                          "velo_user": user,
-                                          "velo_pass": password,
-                                          "command": "init"
-                                         }
+                                "velo_user": user,
+                                "velo_pass": password,
+                                "command": "init"
+                            }
                             result = velo_request(velo_creds)
                             print "got here"
-                            #TODO: Extract values out to CAPITAL_NAMED_CONSTANTS
+                            # TODO: Extract values out to CAPITAL_NAMED_CONSTANTS
                             if result == "Success":
                                 print "velo login successful"
                             else:
@@ -272,6 +272,7 @@ def dashboard(request):
     data = {'vis_launcher': VISUALIZATION_LAUNCHER}
     return HttpResponse(render_template(request, "web_fe/dashboard.html", data))
     '''
+
 
 @login_required
 def save_layout(request):

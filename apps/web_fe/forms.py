@@ -15,7 +15,7 @@ class UserForm(forms.ModelForm):
 
 
 class UserCreationForm(django.contrib.auth.forms.UserCreationForm):
-    email = forms.EmailField(widget=forms.EmailInput(attrs = {'placeholder': 'E-Mail'}),required=True)
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'E-Mail'}), required=True)
     captcha = ReCaptchaField(attrs={'theme': 'blackglass'})
     password1 = forms.CharField(label="Password",
                                 widget=forms.PasswordInput(attrs={"placeholder": "Password"}))
@@ -26,8 +26,8 @@ class UserCreationForm(django.contrib.auth.forms.UserCreationForm):
         model = User
         fields = ("username", "email", "first_name", "last_name")
         widgets = {
-                'username' : forms.TextInput(attrs = {'placeholder': 'User Name'}),
-                'email' : forms.EmailInput(attrs = {'placeholder': 'E-Mail'}),
-                'first_name' : forms.TextInput(attrs = {'placeholder': 'First Name'}),
-                'last_name' : forms.TextInput(attrs = {'placeholder': 'Last Name'}),
-                }
+            'username': forms.TextInput(attrs={'placeholder': 'User Name'}),
+            'email': forms.EmailInput(attrs={'placeholder': 'E-Mail'}),
+            'first_name': forms.TextInput(attrs={'placeholder': 'First Name'}),
+            'last_name': forms.TextInput(attrs={'placeholder': 'Last Name'}),
+        }
