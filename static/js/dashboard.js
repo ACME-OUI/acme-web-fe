@@ -99,8 +99,8 @@ $(function() {
 	var mode = {
 		light: 'day'
 	}
+	setDay();
 	boardSetup(maxCols, maxHeight);
-	loadDefaultLayout();
 	var opts = {
 		lines: 17, // The number of lines to draw
 		length: 40, // The length of each line
@@ -131,11 +131,13 @@ $(function() {
 		var jsonObj = new Object;
 		jsonObj.result = '';
 		jsonObj.data = '';
-
+		console.log("sending request for layouts");
 		get_data('load_layout/', 'GET', jsonObj, function(request) {
 			var found_default = false;
 			$.each(request, function(k, v) {
 				if (v.default == true) {
+					console.log("found default layout");
+					console.log(v.name);
 					found_default = true;
 					getFixVal(v.layout);
 					loadLayout(v.layout, v.mode);
@@ -357,7 +359,7 @@ $(function() {
 		$('#velo-options-bar-refresh').click(function() {
 			velo_refresh();
 		});
-		load_layout();
+		loadDefaultLayout();
 	}
 
 	$(document).ready(function() {
@@ -531,7 +533,7 @@ $(function() {
 					var path = $(e.target).attr('data-path');
 					var id = 'dashboard_tile_' + instance;
 					var content = '<div class="content"></div>';
-					var new_tile = '<li id="' + id + '" class="tile" data-path="' + path + '" > ' + header1 + path + header2 + content + header3 + '</li>';
+					var new_tile = '<li id="' + id + '" class="tile" data-path="' + path + '" data-tileid="'+ instance +'" > ' + header1 + path + header2 + content + header3 + '</li>';
 					add_tile(new_tile, id , {ignore: 'true'}, initCodeMirror('', id, path));
 				});
 			}
@@ -678,6 +680,7 @@ $(function() {
 	}
 
 	function initCodeMirror(text, id, path) {
+		var instance = $('#' + id).data('tileid');
 		console.log("Instance var = " + instance);
 		var saveId = '"velo-editor-save-' + instance + '"';
 		content = '<div id="velo-text-edit-' + instance + '"><button class="fa fa-floppy-o velo-button" id=' + saveId + ' title="Save"></button></div>';
@@ -843,7 +846,7 @@ $(function() {
 								var id = 'dashboard_tile_' + instance;
 								var path = $(event.target).attr('data-path');
 								content = '<div class="content"></div>';
-								var new_tile = '<li id="' + id + '" class="tile" data-path="' + path + '" > ' + header1 + path + header2 + content + header3 + '</li>';
+								var new_tile = '<li id="' + id + '" class="tile" data-path="' + path + '" data-tileid="' + instance + '" > ' + header1 + path + header2 + content + header3 + '</li>';
 								add_tile(new_tile, id , { ignore: 'true'}, getFile(path, id)); 
 							}); //this is totally not doing what i thought it would, but it works. Pretty sure that getFile
 						}       //is getting called instead of being passed as a callback. 
@@ -1274,7 +1277,7 @@ $(function() {
 			$(w).css({
 				"top": tile_offset.top,
 				"left": tile_offset.left,
-				"width": $(w).attr('sizex') * tileWidth,
+				"width": $(w).attr('sizex') * tileWidth * widthScale,
 				"height": $(w).attr('sizey') * tileHeight
 			});
 			console.log(tileWidth);
@@ -2026,143 +2029,43 @@ $(function() {
 	***********************************/
 	var body = document.body;
 
-	// function leftMenuToggle() {
-	// 	$('#slide-menu-left').toggle('slide', {
-	// 		direction: 'left',
-	// 		easing: 'easeOutCubic'
-	// 	}, 500);
-	// 	if ($('#toggle-left-a').text() == 'Open Menu') {
-	// 		$('#toggle-left-a').text('Close Menu');
-	// 	} else {
-	// 		$('#toggle-left-a').text('Open Menu');
-	// 	}
-	// }
-
-	// $('#toggle-slide-left').click(function(e) {
-	// 	leftMenuToggle();
-	// });
-
-	// window.onbeforeunload =	function save_layout() { //TODO: make this use ajax instead of local storage
-	// 	var pathsToSave = [];
-	// 	if(typeof(Storage) !== "undefined") {
-	//     	$('.tile-holder .tile').each( function (index, element) {
-	//     		pathsToSave.push($(element).attr('data-path'));
-	// 		});
-	// 		localStorage.setItem("pathsToLoad", JSON.stringify(pathsToSave));
-	// 		console.log(JSON.parse(localStorage.getItem("pathsToLoad")));
-	// 	}
-	// 	 else {
-	// 		console.log('Unable to save layout. Browser does not support local storage.')
-	// 	}
-	// }
-
-
-	$('#save-layout').click(function() {
-	//	save_layout();
-	//	leftMenuToggle();
-	// 	createMask('save-menu');
-
-	// 	var saveMenu = document.createElement('div');
-	// 	$(saveMenu).addClass('bvc');
-	// 	$(saveMenu).addClass('save-layout');
-	// 	$(saveMenu).attr({
-	// 		'id': 'save-menu'
-	// 	});
-	// 	var saveMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
-	// 	saveMenuHtml += '<form name="save-layout-form" id="save-form">';
-	// 	saveMenuHtml += 'Layout Name:<br><input type="text" id="layout-name">';
-	// 	saveMenuHtml += '<input type="submit" value="Save" id="save-btn"><br>';
-	// 	saveMenuHtml += '<input type="checkbox" name="default" value="default" id="default">Default Layout';
-	// 	saveMenuHtml += '</form></div><div class="bevel bl br"></div>';
-	// 	$(saveMenu).html(saveMenuHtml);
-	// 	$('body').append(saveMenu);
-	 	$('#save-btn').click(function(event) {
-	 		event.preventDefault();
-	 		var layout_name = 'default';
-	 		var layout = [];
-			$('.tile').each(function() {
-				layout.push({
-					tileName: $(this).attr('id').substr(0, $(this).attr('id').indexOf('_')),
-					tilePath: $(this).attr('data-path'),
-					x: parseInt($(this).attr('col')) / maxCols,
-					y: parseInt($(this).attr('row')) / maxHeight,
-					sizex: parseInt($(this).attr('sizex')) / maxCols,
-					sizey: parseInt($(this).attr('sizey')) / maxHeight
-				});
+	window.onbeforeunload =	function() {
+		var layout_name = 'default';
+ 		var layout = [];
+		$('.tile').each(function() {
+			layout.push({
+				tileName: $(this).attr('id'),
+				tilePath: $(this).attr('data-path'),
+				x: parseInt($(this).attr('col')) / maxCols,
+				y: parseInt($(this).attr('row')) / maxHeight,
+				sizex: parseInt($(this).attr('sizex')) / maxCols,
+				sizey: parseInt($(this).attr('sizey')) / maxHeight
 			});
-			if ($('body').hasClass('night')) {
-				var mode = 'night';
-			} else {
-				mode = 'day'
-			}
-			var data = {
-				instance: instance,
-				name: layout_name,
-				mode: mode,
-				style: 'balanced',
-				layout: layout,
-				default_layout: document.getElementById('default').checked
-			};
+		});
+		console.log(layout);
+		if ($('body').hasClass('night')) {
+			var mode = 'night';
+		} else {
+			mode = 'day'
+		}
+		var data = {
+			instance: instance,
+			name: layout_name,
+			mode: mode,
+			style: 'balanced',
+			layout: layout,
+			default_layout: 1
+		};
 
-	 		get_data('save_layout/', 'POST', data, function() {
-	 			alert('Layout saved');
-	 		}, function() {
-	 			alert('Please use a unique layout name');
-	 		});
-	// 		fadeOutMask('save-menu');
-	 	});
-	});
+ 		get_data('save_layout/', 'POST', data, function() {
+ 			return undefined; //alert('Layout saved');
+ 		}, function() {
+ 			return "Failed to save layout";//alert('Please use a unique layout name');
+ 		}, false); //false forces a synchronous connection
 
-
-	// $('#load-layout').click(function() {
-	// 	var options = {};
-	// 	get_data('load_layout/', 'GET', new Object(), function(request) {
-			//parse response
-			
-			// createMask('load-layout-menu');
-
-			// //create load menu and populate with values
-			// var loadMenu = document.createElement('div');
-			// $(loadMenu).addClass('bvc');
-			// $(loadMenu).addClass('save-layout');
-			// $(loadMenu).attr({
-			// 	'id': 'load-layout-menu'
-			// });
-			// var loadMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
-			// loadMenuHtml += '<form name="load-layout-form" id="save-form">';
-			// loadMenuHtml += 'Select Layout:<br><select id="select-layout">';
-			// $.each(options, function(k, v) {
-			// 	loadMenuHtml += '<option value="' + v.name + '" id="layout-' + v.name + '">' + v.name + '</option>';
-			// });
-			// loadMenuHtml += '</select><input type="submit" value="Load" id="load-button">';
-			// loadMenuHtml += '</form></div><div class="bevel bl br"></div>';
-			// $(loadMenu).html(loadMenuHtml);
-			// $('body').append(loadMenu);
+	}
 
 
-			$('#load-layout').click(function() {
-				//var name = document.forms['load-layout-form'].elements[0].options[document.forms['load-layout-form'].elements[0].selectedIndex].text;
-				name ='default';
-				var data = {
-					'layout_name': name
-				};
-				get_data('load_layout/', 'POST', data, function(request) {
-					//fadeOutMask('load-layout-menu');
-					$('.tile').each(function() {
-						$(this).remove();
-					});
-					options = request;
-					tiles = [];
-					layout = []
-					$.each(request.board_layout, function(k, v) {
-						layout.push(layoutFix(v));
-					});
-					loadLayout(layout, request.mode);
-				}, function() {
-					alert('failed to load layout');
-					fadeOutMask('load-layout-menu');
-				});
-			});
 
 
 	/**
@@ -2193,7 +2096,8 @@ $(function() {
 	 * mode -> the day/night mode of the layout
 	 */
 	function loadLayout(layout, mode) {
-		fadeOutMask();
+		//fadeOutMask();
+		console.log("load layout called");
 		if (mode == 'day') {
 			setDay();
 		} else if (mode == 'night') {
@@ -2201,16 +2105,20 @@ $(function() {
 		}
 		mode.light = mode
 
-		for (var i = 0; i < layout.length; i++) {
-			var name = layout[i].tileName;
-			var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + contents + header3 + '</li>';
-			add_tile(new_tile, name + '_window', {
-				x: layout[i].x - needsFixX(),
-				y: layout[i].y - needsFixY(),
-				sizex: layout[i].sizex,
-				sizey: layout[i].sizey
-			});
-		}
+		$.each(layout, function(index, tile){
+			var path = tile.tilePath;
+			var tileId = 'dashboard_tile_' + index;
+			var content = '<div class="content"></div>';
+			var new_tile = '<li id="' + tileId + '" class="tile" data-path="'+ path +'" data-tileid="'+ index +'">' + header1 + path + header2 + content + header3 + '</li>';
+			console.log("loading tile with path: " + path);
+			console.log("loading tile with id: " + tileId);
+			add_tile(new_tile, tileId, {
+				x: tile.x - needsFixX(),
+				y: tile.y - needsFixY(),
+				sizex: tile.sizex,
+				sizey: tile.sizey
+			}, getFile(path, tileId));
+		});
 	}
 
 	function createMask(id, opacity) {
@@ -2524,9 +2432,8 @@ $(function() {
 		return null;
 	}
 
-	function get_data(url, type, jsonObj, success_callback, fail_callback) {
+	function get_data(url, type, jsonObj, success_callback, fail_callback, async=true) {
 		var csrftoken = get_csrf();
-
 		// var jsonObj = new Object;®
 		// jsonObj.result = '';
 		// jsonObj.data = '';
@@ -2534,6 +2441,7 @@ $(function() {
 		var ajax_obj = $.ajax({
 			type: type,
 			url: url,
+			async: async,
 			data: data,
 			dataType: 'json',
 			success: function(data) {
