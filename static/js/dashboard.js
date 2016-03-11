@@ -136,6 +136,8 @@ $(function() {
 			var found_default = false;
 			$.each(request, function(k, v) {
 				if (v.default == true) {
+					console.log("found default layout");
+					console.log(v.name);
 					found_default = true;
 					getFixVal(v.layout);
 					loadLayout(v.layout, v.mode);
@@ -531,7 +533,7 @@ $(function() {
 					var path = $(e.target).attr('data-path');
 					var id = 'dashboard_tile_' + instance;
 					var content = '<div class="content"></div>';
-					var new_tile = '<li id="' + id + '" class="tile" data-path="' + path + '" > ' + header1 + path + header2 + content + header3 + '</li>';
+					var new_tile = '<li id="' + id + '" class="tile" data-path="' + path + '" data-tileid="'+ instance +'" > ' + header1 + path + header2 + content + header3 + '</li>';
 					add_tile(new_tile, id , {ignore: 'true'}, initCodeMirror('', id, path));
 				});
 			}
@@ -668,6 +670,7 @@ $(function() {
 	}
 
 	function initCodeMirror(text, id, path) {
+		var instance = $('#' + id).data('tileid');
 		console.log("Instance var = " + instance);
 		var saveId = '"velo-editor-save-' + instance + '"';
 		content = '<div id="velo-text-edit-' + instance + '"><button class="fa fa-floppy-o velo-button" id=' + saveId + ' title="Save"></button></div>';
@@ -833,7 +836,7 @@ $(function() {
 								var id = 'dashboard_tile_' + instance;
 								var path = $(event.target).attr('data-path');
 								content = '<div class="content"></div>';
-								var new_tile = '<li id="' + id + '" class="tile" data-path="' + path + '" > ' + header1 + path + header2 + content + header3 + '</li>';
+								var new_tile = '<li id="' + id + '" class="tile" data-path="' + path + '" data-tileid="' + instance + '" > ' + header1 + path + header2 + content + header3 + '</li>';
 								add_tile(new_tile, id , { ignore: 'true'}, getFile(path, id)); 
 							}); //this is totally not doing what i thought it would, but it works. Pretty sure that getFile
 						}       //is getting called instead of being passed as a callback. 
@@ -2048,7 +2051,7 @@ $(function() {
  			return undefined; //alert('Layout saved');
  		}, function() {
  			return "Failed to save layout";//alert('Please use a unique layout name');
- 		});
+ 		}, false); //false forces a synchronous connection
 
 	}
 
@@ -2096,7 +2099,7 @@ $(function() {
 			var path = tile.tilePath;
 			var tileId = 'dashboard_tile_' + index;
 			var content = '<div class="content"></div>';
-			var new_tile = '<li id="' + tileId + '" class="tile" data-path="'+ path +'">' + header1 + path + header2 + content + header3 + '</li>';
+			var new_tile = '<li id="' + tileId + '" class="tile" data-path="'+ path +'" data-tileid="'+ index +'">' + header1 + path + header2 + content + header3 + '</li>';
 			console.log("loading tile with path: " + path);
 			console.log("loading tile with id: " + tileId);
 			add_tile(new_tile, tileId, {
@@ -2419,9 +2422,8 @@ $(function() {
 		return null;
 	}
 
-	function get_data(url, type, jsonObj, success_callback, fail_callback) {
+	function get_data(url, type, jsonObj, success_callback, fail_callback, async=true) {
 		var csrftoken = get_csrf();
-
 		// var jsonObj = new Object;®
 		// jsonObj.result = '';
 		// jsonObj.data = '';
@@ -2429,6 +2431,7 @@ $(function() {
 		var ajax_obj = $.ajax({
 			type: type,
 			url: url,
+			async: async,
 			data: data,
 			dataType: 'json',
 			success: function(data) {

@@ -273,13 +273,16 @@ def dashboard(request):
 
 @login_required
 def save_layout(request):
+    print "got save request"
     if request.method == 'POST':
         try:
+            print "got post save request"
             data = json.loads(request.body)
             layout = TileLayout.objects.filter(
                 layout_name=data['name'], user_name=str(request.user))
             if len(layout) == 0:
                 if data['default_layout'] == 1:
+                    print 'got to 1'
                     isDefault = TileLayout.objects.filter(
                         user_name=request.user, default=1)
                     if isDefault:
@@ -292,6 +295,9 @@ def save_layout(request):
                 layout.save()
                 return HttpResponse(status=200)
             else:
+                print 'got to 2'
+                print data['name']
+                print data['default_layout']
                 for x in layout:
                     x.board_layout = json.dumps(data['layout'])
                     x.mode = data['mode']
