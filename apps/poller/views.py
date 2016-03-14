@@ -16,6 +16,17 @@ def index(request):
             if status:
                 if status == 'all':
                     data = UserRuns.objects.all()
+                elif status == 'next':
+                    data = UserRuns.objects.filter(status='new').order_by('created')
+                    if not data:
+                        return JsonResponse({}, safe=False)
+                    else:
+                        data = data[0]
+                        r = {}
+                        r['runspec'] = data.runspec
+                        r['id'] = data.id
+                        r['user'] = data.user
+                        return JsonResponse(r, safe=False)
                 elif status == 'new':
                     data = UserRuns.objects.filter(status='new')
                 elif status == 'in_progress':
@@ -28,9 +39,12 @@ def index(request):
                     print "Invalid status recieved"
                     return HttpResponse(status=404)
                 obj_list = []
+                #if data is empty:
                 for obj in data:
                     obj_dict = {}
                     obj_dict['runspec'] = obj.runspec
+                    obj_dict['id'] = obj.id
+                    obj_dict['user'] = obj.user
                     obj_list.append(obj_dict)
                 return JsonResponse(obj_list, safe=False)
             else:
@@ -39,7 +53,17 @@ def index(request):
             print e
             return HttpResponse(status=500)
 
-    if request.method == 'POST':
+    if request.method == 'POST': # Verify user and runspec?
+        try:
+            data = json.loads(request.body)
+            new_run = UserRuns.objects.create(user=data['user'], runspec=data['runspec'], status='new')
+            new_run.save()
+            return HttpResponse("Successfully updated status")
+        except Exception as e:
+            print e
+            return HttpResponse(status=500)
+
+    if request.method == 'PATCH':
         try:
             data = json.loads(request.body)
             if 'id' in data:
@@ -54,9 +78,7 @@ def index(request):
                     return HttpResponse(status=500)
                 return HttpResponse("Success")
             else:
-                new_run = UserRuns.objects.create(user=data['user'], runspec=data['runspec'], status='new')
-                new_run.save()
-                return HttpResponse("Successfully updated status")
+                return HttpResponse(status=400)
         except Exception as e:
             print e
             return HttpResponse(status=500)
