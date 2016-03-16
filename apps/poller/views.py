@@ -5,6 +5,7 @@ from django.template import Template
 from django.http import HttpResponse
 from django.http import JsonResponse
 from poller.models import UserRuns
+from django.conf import settings
 import json
 import pdb
 
@@ -56,9 +57,12 @@ def index(request):
     if request.method == 'POST': # Verify user and runspec?
         try:
             data = json.loads(request.body)
-            new_run = UserRuns.objects.create(user=data['user'], runspec=data['runspec'], status='new')
-            new_run.save()
-            return HttpResponse("Successfully updated status")
+            if 'user' and 'runspec' in data:
+                new_run = UserRuns.objects.create(user=data['user'], runspec=data['runspec'], status='new')
+                new_run.save()
+                return HttpResponse("Successfully updated status")
+            else:
+                return HttpResponse(status=400)
         except Exception as e:
             print e
             return HttpResponse(status=500)
@@ -76,9 +80,46 @@ def index(request):
                 except Exception as e:
                     print e
                     return HttpResponse(status=500)
-                return HttpResponse("Success")
+                return HttpResponse(status=200)
             else:
                 return HttpResponse(status=400)
         except Exception as e:
             print e
             return HttpResponse(status=500)
+
+    if request.method == 'PUT':
+        #if settings.DEBUG == True
+            try:
+                data = json.loads(request.body)
+                if 'user' and 'runspec' in data:
+                    new_run = UserRuns.objects.create(user=data['user'], runspec=data['runspec'], status='new', test=True)
+                    new_run.save()
+                    return HttpResponse(status=200) # Success
+                else:
+                    return HttpResponse(status=400) # Request must have both user and runspec
+            except Exception as e:
+                print e
+                return HttpResponse(status=500)        
+        # else:
+        #     JsonResponse(status=404)
+
+    if request.method == 'DELETE':
+        # if settings.DEBUG == True
+            try:
+                data = json.loads(request.body)
+                if 'id' in data:
+                    UserRuns.objects.get(id=data['id']).delete()
+                else:
+                    return HttpResponse(status=400)
+            except Exception as e:
+                print e
+                return HttpResponse(status=500)
+        # else:
+        #     JsonResponse(status=404)
+
+
+
+
+
+
+
