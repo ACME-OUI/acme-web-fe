@@ -89,6 +89,7 @@ class Testresponses(LiveServerTestCase):
         r3 = requests.get(self.live_server_url + '/poller/', params=payload1)
         if r3.content:
             data = json.loads(r3.content)
+            pdb.set_trace()
             self.assertTrue(oldid != data['id'])
 
     def test_next_repeat(self):
