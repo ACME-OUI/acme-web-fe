@@ -7,7 +7,7 @@ from django.test import LiveServerTestCase
 import pdb
 
 class Testresponses(LiveServerTestCase):
-    fixtures = ['initial_data.json']
+    fixtures = ['testdata.json']
 
     def setUp(self):
         unittest.TestCase.setUp(self)
@@ -53,7 +53,7 @@ class Testresponses(LiveServerTestCase):
         r = requests.get(self.live_server_url + '/poller/', params=payload)
         self.assertTrue(r.status_code == requests.codes.ok)
         data = json.loads(r.content)
-        payload = json.dumps({'id': data['id'], 'status': 'In_progress'})
+        payload = json.dumps({'id': data['id'], 'status': 'in_progress'})
         s = requests.Session()
         r1 = s.get(self.live_server_url + '/poller/')
         self.assertTrue(r1.status_code == requests.codes.ok)
@@ -82,14 +82,13 @@ class Testresponses(LiveServerTestCase):
         csrf_token = r1.cookies['csrftoken']
         # finished getting csrf token
         headers = {'Content-type': 'application/json',  "X-CSRFToken":csrf_token, 'Referer': self.live_server_url + '/poller/'}
-        payload2 = json.dumps({'id': data['id'], 'status': 'In_progress'}) # converts from python object to JSON string
+        payload2 = json.dumps({'id': data['id'], 'status': 'in_progress'}) # converts from python object to JSON string
         r2 = s.patch(self.live_server_url + '/poller/', data=payload2, headers=headers)
         self.assertTrue(r2.status_code == requests.codes.ok)
         # finished posting updated status for user run 1
         r3 = requests.get(self.live_server_url + '/poller/', params=payload1)
         if r3.content:
             data = json.loads(r3.content)
-            pdb.set_trace()
             self.assertTrue(oldid != data['id'])
 
     def test_next_repeat(self):
@@ -98,6 +97,20 @@ class Testresponses(LiveServerTestCase):
             r = requests.get(self.live_server_url + '/poller/', params=payload1)
             self.assertTrue(r.status_code == requests.codes.ok)
 
+    def test_bad_status(self):
+        payload = {'status': 'next'}
+        r = requests.get(self.live_server_url + '/poller/', params=payload)
+        self.assertTrue(r.status_code == requests.codes.ok)
+        data = json.loads(r.content)
+        payload = json.dumps({'id': data['id'], 'status': 'bad_status'})
+        s = requests.Session()
+        r1 = s.get(self.live_server_url + '/poller/')
+        self.assertTrue(r1.status_code == requests.codes.ok)
+        csrf_token = r1.cookies['csrftoken']
+        headers = {'Content-type': 'application/json',  "X-CSRFToken":csrf_token, 'Referer': self.live_server_url + '/poller/'}
+        r2 = s.patch(self.live_server_url + '/poller/', data=payload, headers=headers)
+        self.assertTrue(r2.status_code == 400)
 
+            
 
 os.system('clear')

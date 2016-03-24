@@ -513,14 +513,15 @@
                 $('<h3/>').append(template),
                 vlist
             ]);
-            panel = cdat.make_panel(
-                content.get(0),
-                null,
-                {
-                    selector: '.vtk-view-container',
-                    title: '<span><i class="fa fa-picture-o"></i>Plot window</span>',
-                    overflow: 'hidden'
-                });
+            // panel = make_panel(
+            //     content.get(0),
+            //     null,
+            //     {
+            //         selector: '.vtk-view-container',
+            //         title: '<span><i class="fa fa-picture-o"></i>Plot window</span>',
+            //         overflow: 'hidden'
+            //     });
+            return content;
         }
     };
 

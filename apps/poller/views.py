@@ -27,6 +27,7 @@ def index(request):
                         r['runspec'] = data.runspec
                         r['id'] = data.id
                         r['user'] = data.user
+                        r['destination'] = data.destination
                         r['casename'] = data.casename
                         r['mppwidth'] = data.mppwidth
                         r['stop_option'] = data.stop_option
@@ -56,6 +57,7 @@ def index(request):
                     obj_dict['runspec'] = obj.runspec
                     obj_dict['id'] = obj.id
                     obj_dict['user'] = obj.user
+                    obj_dict['destination'] = obj.destination
                     obj_dict['casename'] = obj.casename
                     obj_dict['mppwidth'] = obj.mppwidth
                     obj_dict['stop_option'] = obj.stop_option
@@ -78,7 +80,7 @@ def index(request):
         try:
             data = json.loads(request.body)
             if 'user' and 'runspec' in data:
-                new_run = UserRuns.objects.create(status='new', user=data['user'], runspec=data['runspec'], casename=data['casename'], mppwidth=data['mppwidth'], 
+                new_run = UserRuns.objects.create(status='new', user=data['user'], runspec=data['runspec'], destination=data['destination'], casename=data['casename'], mppwidth=data['mppwidth'], 
                                                 stop_option=data['stop_option'], stop_n=data['stop_n'], walltime=data['walltime'], mach=data['mach'],
                                                 compset=data['compset'], res=data['res'], project=data['project'], compiler=data['compiler'])
                 new_run.save()
@@ -92,9 +94,9 @@ def index(request):
     if request.method == 'PATCH':
         try:
             data = json.loads(request.body)
-            if 'id' in data:
+            if str(data['id']).isdigit() and data['status'] in ['new', 'in_progress', 'complete', 'failed']:
                 db_id = data['id']
-                newstatus = data['status'].lower() # Just in case, we lower the string
+                newstatus = data['status']
                 try:
                     entry = UserRuns.objects.get(id=db_id)
                     entry.status = newstatus
@@ -105,6 +107,9 @@ def index(request):
                 return HttpResponse(status=200)
             else:
                 return HttpResponse(status=400)
+        except KeyError as e:
+            print e
+            return HttpResponse(status=400)
         except Exception as e:
             print e
             return HttpResponse(status=500)
@@ -114,7 +119,7 @@ def index(request):
             try:
                 data = json.loads(request.body)
                 if 'user' and 'runspec' in data:
-                    new_run = UserRuns.objects.create(status='new', user=data['user'], runspec=data['runspec'], casename=data['casename'], mppwidth=data['mppwidth'], 
+                    new_run = UserRuns.objects.create(status='new', user=data['user'], runspec=data['runspec'], destination=data['destination'], casename=data['casename'], mppwidth=data['mppwidth'], 
                                                 stop_option=data['stop_option'], stop_n=data['stop_n'], walltime=data['walltime'], mach=data['mach'],
                                                 compset=data['compset'], res=data['res'], project=data['project'], compiler=data['compiler'])
                     new_run.save()

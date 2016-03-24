@@ -12,6 +12,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import Group
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 
 from web_fe.models import TileLayout, Credential, ESGFNode
 from pyesgf.search import SearchConnection
@@ -28,6 +29,8 @@ import requests
 from subprocess import Popen, PIPE
 from sets import Set
 from velo import VeloAPI
+import vtk_launcher
+# from search import files
 
 
 # General
@@ -711,3 +714,56 @@ def print_debug(e):
     print '5', traceback.tb_lineno(sys.exc_info()[2])
     ex_type, ex, tb = sys.exc_info()
     print '6', traceback.print_tb(tb)
+
+# ******
+# VTK
+# ******
+def _refresh(request):
+    """Refresh the visualization session information."""
+    # check the session for a vtkweb instance
+    vis = request.session.get('vtkweb')
+    if vis is None or vtk_launcher.status(vis.get('id', '')) is None:
+        # open a visualization instance
+        vis = vtk_launcher.new_instance()
+        request.session['vtkweb'] = vis
+    return dict(vis)
+
+def vtk_viewer(request):
+    """Open the main visualizer view."""
+    data = {}
+    data['base'] = base_path
+    data['files'] = [
+            f for f in os.listdir(base_path)
+            if not os.path.isdir(os.path.join(base_path, f))
+            ]
+    data['dirs'] = [
+            f for f in os.listdir(base_path)
+            if os.path.isdir(os.path.join(base_path, f))
+            ]
+    return render(
+            request,
+            'vtk_view/cdat_viewer.html',
+            data
+            )
+
+def vtk_test(request, test="cone"):
+    return render(request, 'vtk_view/view_test.html', {"test": test})
+
+@csrf_exempt  # should probably fix this at some point
+def vtkweb_launcher(request):
+    """Proxy requests to the configured launcher service."""
+    import requests
+    VISUALIZATION_LAUNCHER = 'http://aims1.llnl.gov/vtk'
+    if getattr(settings, 'VISUALIZATION_LAUNCHER'):
+        VISUALIZATION_LAUNCHER = settings.VISUALIZATION_LAUNCHER
+    if not VISUALIZATION_LAUNCHER:
+        # unconfigured launcher
+        return HttpResponse(status=404)
+    # TODO: add status and delete methods
+    if request.method == 'POST':
+        req = requests.post(VISUALIZATION_LAUNCHER, request.body)
+        if req.ok:
+            return HttpResponse(req.content)
+        else:
+            return HttpResponse(status=500)
+    return HttpResponse(status=404)

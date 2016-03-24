@@ -30,6 +30,7 @@ $(function() {
 	$('.tile-board').css({
 		'height': maxHeight * tileHeight
 	});
+	var plotcount = 0;
 	var tiles = [];
 	var imgInstance = 0;
 	var instance = 0; //variable that increments for every codemirror launched.
@@ -261,6 +262,20 @@ $(function() {
 		});
 	});
 
+	$('#new-plot').click(function(e){
+		var name = 'Plot ' + plotcount;
+		var plotid = 'plot' + plotcount;
+		var content = '<div class="plot-content" data-plot="'+plotcount+'"></div>'
+		plotcount++;
+		if ($('#' + plotid + '_window').length == 0) {
+				var new_tile = '<li id="' + plotid + '_window" class="tile">' + header1 + name + header2 + content + header3 + '</li>';
+				add_tile(new_tile, plotid + '_window', {
+					ignore: 'true'
+				}, function() {new_plot(plotid + '_window')});
+			}
+	});
+
+
 
 	$(document).ready(function() {
 		check_credentials('velo', function(code) {
@@ -325,7 +340,7 @@ $(function() {
 			'   </div>',
 			'</div>'
 		].join('');
-		name = 'Velo';
+		var name = 'Velo';
 		var new_window = '<li id="velo_window" class="side-window">' + altheader1 + name + header2 + content + header3 + '</li>';
 		add_sidebar_window(new_window, 'velo_window', {
 			ignore: 'true'
@@ -363,10 +378,10 @@ $(function() {
 	}
 
 	$(document).ready(function() {
-		content = '<div id="esgf-node-tree"></div>';
-		name = 'esgf';
+		var content = '<div id="esgf-node-tree"></div>';
+		var name = 'esgf';
 		initFileTree('esgf_window');
-		var new_tile = '<li id="' + name + '_window" class="side-window">' + altheader1 + name + header2 + content + header3 + '</li>';
+		var new_tile = '<li id="' + name + '_window" class="side-window">' + altheader1 +  name.toUpperCase()  + header2 + content + header3 + '</li>';
 		add_sidebar_window(new_tile, name + '_window', {
 			ignore: 'true'
 		}, function() {
@@ -375,6 +390,14 @@ $(function() {
 			});
 		});
 	})
+
+	$(document).ready(function() {
+		var content = '<div class="cdatweb-plot-selectors cdatweb-tree"><ul class="qtree"><li><a>Graphic Methods</a><ul class="cdatweb-plot-types"></ul></li><li><a>Templates</a><ul class="cdatweb-plot-templates"></ul></li></ul></div>';
+		var new_tile = '<li id="cdat_window" class="side-window">' + altheader1 + 'CDATWeb' + header2 + content + header3 + '</li>';
+		add_sidebar_window(new_tile, 'cdat_window', {
+			ignore: 'true'
+		});
+	});
 
 	//setup the hander to fix the windows after a resize
 	$(window).resize(function() {
@@ -678,6 +701,122 @@ $(function() {
 			});
 		});
 	}
+
+  function make_draggable(node, ondrag) {
+      node.draggable({
+          appendTo: '.vtk-view-container',
+          zIndex: ~(1 << 31), // because jsPanel, sigh...
+          containment: '.vtk-view-container',
+          helper: "clone",
+          addClass: "cdat-grabbing",
+          opacity: 0.75
+      }).addClass('cdat-draggable')
+          .on('start', function(evt) {
+              if (ondrag) {
+              		console.log("dragging");
+                  ondrag.call(node, evt);
+              }
+          });
+
+      return node;
+  }
+
+  $("body").ready(function() {
+      //MATT
+      $('#new_plot').click(function() {
+          var new_tile = '<li id="' + counter + '" class="tile" >' + header1 + 'plot ' + counter + header2 + contents + header3 + '</li>';
+          add_tile(new_tile, counter, { ignore: 'true' } /* , call back function here */);
+          counter = counter + 1;
+      });
+      
+      $('#cdat_esgf_submit').click(function() { esgf_search_submit() });
+      
+      $('#show_esgf_form').click(function() {
+          $('#esgf_search').toggle();
+      });
+      
+      $('#hide_esgf_form').click(function() {
+          $('#esgf_search').hide();
+      });
+
+      $(".cdatweb-file-browser > ul > li > a.cdatweb-dir").click(function(e) {
+          if ($(this).attr("data-loaded") === "true") {
+              return;
+          }
+          get_children($(this).attr("data-path"), $(this).next("ul"), 1);
+          $(this).attr('data-loaded', 'true');
+          e.preventDefault();
+      });
+
+      $(".cdatweb-file-browser > ul > li > a.cdatweb-file").click(function(e) {
+          if ($(this).attr("data-loaded") === "true") {
+              return;
+          }
+          get_variables($(this).attr("data-path"), $(this).next("ul"), 1);
+          $(this).attr('data-loaded', 'true');
+          e.preventDefault();
+      });
+
+      cdat.get_graphics_methods().then(
+          function(plots) {
+            var parent = $(".cdatweb-plot-types");
+            var item = $("<li><a></a><ul class='qtree'></ul></li>");
+            var child = $("<li><a></a></li>");
+            var plot_fam_item, plot_family, plot_item;
+            for (plot_family in plots) {
+                if (plots.hasOwnProperty(plot_family) === false) {
+                    continue;
+                }
+                plot_fam_item = item.clone();
+                plot_fam_item.attr('id', plot_family);
+                plot_fam_item.find('a').text(plot_family);
+                for (plot_type in plots[plot_family]) {
+                    plot_item = child.clone();
+                    plot_item.attr('id', plot_type);
+                    plot_item
+                        .addClass('cdat-plot-method')
+                        .attr('data-type', plot_type)
+                        .attr('data-family', plot_family)
+                        .attr('data-nvars', plots[plot_family][plot_type].nvars)
+                        .text(plot_type);
+                    plot_item.hide();
+                    make_draggable(plot_item);
+                    plot_fam_item.find("ul").append(plot_item);
+                }
+                parent.append(plot_fam_item);
+                plot_fam_item.hide();
+            }
+          },
+          function() {
+          		alert("call failed");
+              console.log(arguments)
+          },
+          function() {
+          	alert("what the hell");
+          }
+      );
+
+      cdat.get_templates().then(
+          function(templates) {
+              parent = $(".cdatweb-plot-templates");
+              var item = $("<li><a></a><ul class='qtree'></ul></li>");
+              var temp_fam_item, temp_name;
+              for (temp_name = 0; temp_name < templates.length; temp_name++) {
+                  temp_fam_item = item.clone();
+                  temp_fam_item.attr('id', templates[temp_name])
+                      .text(templates[temp_name])
+                      .addClass('cdat-template-option');
+                  make_draggable(temp_fam_item);
+                  parent.append(temp_fam_item);
+                  temp_fam_item.hide();
+              }
+          },
+          function() {
+              console.log(arguments)
+          }
+      );
+      $(".qtree").quicktree();
+  });
 
 	function initCodeMirror(text, id, path) {
 		var instance = $('#' + id).data('tileid');
@@ -2432,8 +2571,11 @@ $(function() {
 		return null;
 	}
 
-	function get_data(url, type, jsonObj, success_callback, fail_callback, async=true) {
+	function get_data(url, type, jsonObj, success_callback, fail_callback, async) {
 		var csrftoken = get_csrf();
+		if (async === undefined) {
+			async = true;
+		}
 		// var jsonObj = new Object;®
 		// jsonObj.result = '';
 		// jsonObj.data = '';
@@ -2628,9 +2770,16 @@ $(function() {
 			}
 		}
 
-		/*
+		/*w
 			End mtree.js
 		*/
+	}
+	function new_plot(id) {
+		console.log("making cdat window");
+		var content = cdat.make_plot_panel();
+		console.log(content);
+		console.log($('#'+id + " .plot-content"));
+		$('#'+id + " .plot-content").append(content);
 	}
 
 });
