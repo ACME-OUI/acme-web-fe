@@ -425,8 +425,8 @@
             $('.cdat-temporary-window').remove();
 
             content = $('<div/>').addClass('cdat-plot-panel')
-                .css('width', '500px')
-                .css('height', '500px');
+                // .css('width', '500px')
+                // .css('height', '500px');
 
             method = $('<span/>')
                 .addClass('cdat-graphic-method label label-default')
