@@ -703,6 +703,7 @@ $(function() {
 	}
 
   function make_draggable(node, ondrag) {
+  	console.log("making drggable?");
       node.draggable({
           appendTo: '.vtk-view-container',
           zIndex: ~(1 << 31), // because jsPanel, sigh...
@@ -721,6 +722,7 @@ $(function() {
       return node;
   }
 
+//WARNING COPY PASTED CODE. This function contains code that needs to be removed. 
   $("body").ready(function() {
       //MATT
       $('#new_plot').click(function() {
@@ -788,11 +790,7 @@ $(function() {
             }
           },
           function() {
-          		alert("call failed");
-              console.log(arguments)
-          },
-          function() {
-          	alert("what the hell");
+              console.log(arguments);
           }
       );
 
@@ -2774,6 +2772,7 @@ $(function() {
 			End mtree.js
 		*/
 	}
+
 	function new_plot(id) {
 		console.log("making cdat window");
 		var content = cdat.make_plot_panel();
