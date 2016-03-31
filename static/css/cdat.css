@@ -17,13 +17,13 @@
   cursor: pointer;
 }
 
-.cdatweb-tree {
-  /*padding-right: 2em;*/
-}
-
 .cdat-draggable {
   cursor: grab;
   cursor: -webkit-grab;
+}
+
+.cdat-draggable.holding {
+  cursor: grabbing;
 }
 
 .cdat-draggable.ui-draggable-dragging {
@@ -104,10 +104,19 @@ ul.qtree li.ui-draggable {
   -o-transition: all 300ms ease-out;
   transition: all 300ms ease-out;
 }
+
 ul.qtree li.ui-draggable:hover {
   background: #FFC000;
   color: #FFF;
 }
+
+ul.qtree li.ui-draggable.mousehold {
+  background: #428BCA;
+}
+
+/*ul.qtree li.ui-draggable:active { 
+  background: #428BCA;
+}*/
 
 .cdat-draggable.ui-draggable-dragging {
   cursor: grabbing;

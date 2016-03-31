@@ -10,7 +10,8 @@
     function make_droppable(node, cls, drop) {
         node.droppable({
             accept: cls,
-            hoverClass: 'label-success'
+            hoverClass: 'label-success',
+            tolerance: "pointer",
         });
         node.on('drop', function (evt, ui) {
             evt.preventDefault();

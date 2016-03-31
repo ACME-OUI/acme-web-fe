@@ -703,7 +703,6 @@ $(function() {
 	}
 
   function make_draggable(node, ondrag) {
-  	console.log("making drggable?");
       node.draggable({
           appendTo: '.vtk-view-container',
           zIndex: ~(1 << 31), // because jsPanel, sigh...
@@ -730,34 +729,16 @@ $(function() {
           add_tile(new_tile, counter, { ignore: 'true' } /* , call back function here */);
           counter = counter + 1;
       });
-      
-      $('#cdat_esgf_submit').click(function() { esgf_search_submit() });
-      
-      $('#show_esgf_form').click(function() {
-          $('#esgf_search').toggle();
-      });
-      
-      $('#hide_esgf_form').click(function() {
-          $('#esgf_search').hide();
-      });
 
-      $(".cdatweb-file-browser > ul > li > a.cdatweb-dir").click(function(e) {
-          if ($(this).attr("data-loaded") === "true") {
-              return;
-          }
-          get_children($(this).attr("data-path"), $(this).next("ul"), 1);
-          $(this).attr('data-loaded', 'true');
-          e.preventDefault();
-      });
-
-      $(".cdatweb-file-browser > ul > li > a.cdatweb-file").click(function(e) {
-          if ($(this).attr("data-loaded") === "true") {
-              return;
-          }
-          get_variables($(this).attr("data-path"), $(this).next("ul"), 1);
-          $(this).attr('data-loaded', 'true');
-          e.preventDefault();
-      });
+      $.getScript("static/js/spin.js", function() {
+			if (mode == 'night') {
+				var color = '#fff';
+			} else {
+				color = '#000';
+			}
+			opts.color = color;
+			var spinner = new Spinner(opts).spin();
+			document.getElementById('cdat_window').appendChild(spinner.el);
 
       cdat.get_graphics_methods().then(
           function(plots) {
@@ -790,11 +771,12 @@ $(function() {
             }
           },
           function() {
+          	console.log("Failed to get Graphic Methods");
               console.log(arguments);
           }
       );
 
-      cdat.get_templates().then(
+      	cdat.get_templates().then(
           function(templates) {
               parent = $(".cdatweb-plot-templates");
               var item = $("<li><a></a><ul class='qtree'></ul></li>");
@@ -808,12 +790,19 @@ $(function() {
                   parent.append(temp_fam_item);
                   temp_fam_item.hide();
               }
+              spinner.stop();
           },
           function() {
-              console.log(arguments)
+          	spinner.stop();
+          	console.log("Failed to get templates");
+            console.log(arguments)
           }
-      );
-      $(".qtree").quicktree();
+      	);
+      	$(".qtree").quicktree();
+      }, function() {
+				spinner.stop();
+				alert('Something Happened');
+			});
   });
 
 	function initCodeMirror(text, id, path) {
@@ -2780,5 +2769,15 @@ $(function() {
 		console.log($('#'+id + " .plot-content"));
 		$('#'+id + " .plot-content").append(content);
 	}
+
+$(document).on("mousedown", 'ul.qtree li.ui-draggable', function(event) { 
+    $(event.target).addClass('mousehold');
+});
+
+//An awful fix for mouseup not removing class on a dragged element
+$(document).on("mouseup", function(event) { 
+    $('.mousehold').removeClass('mousehold');
+});
+
 
 });
