@@ -246,8 +246,7 @@ $(function() {
 					{
 
 					}
-			}
-			console.log( $('#' + name + '_window') )
+				}
 			if ($('#' + name + '_window').length == 0) {
 				var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + content + header3 + '</li>';
 
@@ -268,7 +267,7 @@ $(function() {
 		var content = '<div class="plot-content" data-plot="'+plotcount+'"></div>'
 		plotcount++;
 		if ($('#' + plotid + '_window').length == 0) {
-				var new_tile = '<li id="' + plotid + '_window" class="tile">' + header1 + name + header2 + content + header3 + '</li>';
+				var new_tile = '<li id="' + plotid + '_window" class="tile" data-type="plot">' + header1 + name + header2 + content + header3 + '</li>';
 				add_tile(new_tile, plotid + '_window', {
 					ignore: 'true'
 				}, function() {new_plot(plotid + '_window')});
@@ -813,7 +812,6 @@ $(function() {
 		$('#' + id + ' .content').append(content);
 		$('#velo-text-edit-'+instance).on("click", {instance:instance}, function(event) {
 			$('#velo-mtree .mtree-active').removeClass('mtree-active');
-			console.log()
 			$('#velo-mtree [data-editor="' + event.data.instance + '"]').parent('li').addClass('mtree-active');
 		});
 		$.getScript("static/js/codemirror.js", function() {
@@ -1261,7 +1259,6 @@ $(function() {
 	function add_sidebar_window(html, id) {
 		var w = $('#' + id);
 		$(w).replaceWith(html);
-		console.log(id);
 		$(w).css({
 			'z-index': 1,
 			'opacity': 1
@@ -2159,14 +2156,23 @@ $(function() {
 		var layout_name = 'default';
  		var layout = [];
 		$('.tile').each(function() {
-			layout.push({
+			var obj = {
+				tileType: $(this).attr('data-type'),
 				tileName: $(this).attr('id'),
 				tilePath: $(this).attr('data-path'),
 				x: parseInt($(this).attr('col')) / maxCols,
 				y: parseInt($(this).attr('row')) / maxHeight,
 				sizex: parseInt($(this).attr('sizex')) / maxCols,
 				sizey: parseInt($(this).attr('sizey')) / maxHeight
-			});
+			};
+			if ($(this).attr('data-type') === 'plot') {
+				obj.graphicMethod = $(this).find(".cdat-graphic-method").text()
+				obj.graphicTemplate = $(this).find(".cdat-graphic-template").text()
+				// console.log("printing plot saving");
+				console.log(obj.graphicTemplate);
+				console.log(obj.graphicMethod);
+			}
+			layout.push(obj);
 		});
 		console.log(layout);
 		if ($('body').hasClass('night')) {
@@ -2186,7 +2192,7 @@ $(function() {
  		get_data('save_layout/', 'POST', data, function() {
  			return undefined; //alert('Layout saved');
  		}, function() {
- 			return "Failed to save layout";//alert('Please use a unique layout name');
+ 			return "Failed to save layout"; //alert('Please use a unique layout name');
  		}, false); //false forces a synchronous connection
 
 	}
@@ -2238,12 +2244,31 @@ $(function() {
 			var new_tile = '<li id="' + tileId + '" class="tile" data-path="'+ path +'" data-tileid="'+ index +'">' + header1 + path + header2 + content + header3 + '</li>';
 			console.log("loading tile with path: " + path);
 			console.log("loading tile with id: " + tileId);
-			add_tile(new_tile, tileId, {
+			if (tile.tileType == 'plot') {
+				var plotvars = {
+					template: tile.graphicTemplate,
+					method: tile.graphicMethod,
+					variable: []
+				}
+				var name = 'Plot ' + plotcount;
+				var plotid = 'plot' + plotcount;
+				var content = '<div class="plot-content" data-plot="'+plotcount+'"></div>'
+				plotcount++;
+				if ($('#' + plotid + '_window').length == 0) {
+					var new_tile = '<li id="' + plotid + '_window" class="tile" data-type="plot">' + header1 + name + header2 + content + header3 + '</li>';
+					add_tile(new_tile, plotid + '_window', {
+						ignore: 'true'
+					}, function() {new_plot(plotid + '_window', plotvars)});
+				}
+			}
+			else {
+				add_tile(new_tile, tileId, {
 				x: tile.x - needsFixX(),
 				y: tile.y - needsFixY(),
 				sizex: tile.sizex,
 				sizey: tile.sizey
-			}, getFile(path, tileId));
+				}, getFile(path, tileId));
+			}
 		});
 	}
 
@@ -2762,21 +2787,30 @@ $(function() {
 		*/
 	}
 
-	function new_plot(id) {
+	function new_plot(id, plotvars) {
 		console.log("making cdat window");
 		var content = cdat.make_plot_panel();
 		console.log(content);
 		console.log($('#'+id + " .plot-content"));
-		$('#'+id + " .plot-content").append(content);
+		var elem = $('#'+id + " .plot-content");
+		elem.append(content);
+		console.log(plotvars);
+		if (plotvars) {
+			elem.find(".cdat-graphic-method").text(plotvars.method);
+			elem.find(".cdat-graphic-template").text(plotvars.template);
+		}
 	}
 
 $(document).on("mousedown", 'ul.qtree li.ui-draggable', function(event) { 
     $(event.target).addClass('mousehold');
+    //$(this).css({'cursor':'grabbing'});
 });
 
 //An awful fix for mouseup not removing class on a dragged element
 $(document).on("mouseup", function(event) { 
     $('.mousehold').removeClass('mousehold');
+    //$(this).css({'cursor':'pointer'});
+
 });
 
 
