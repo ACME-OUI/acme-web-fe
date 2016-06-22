@@ -147,6 +147,8 @@ INSTALLED_APPS = (
     'web_fe',
     'issues',
     'poller',
+    'esgf',
+    'cdat',
 )
 
 # Use nose to run all tests

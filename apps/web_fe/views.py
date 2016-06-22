@@ -13,7 +13,7 @@ from django.contrib.auth.models import Group
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
-from web_fe.models import TileLayout, Credential, ESGFNode
+from web_fe.models import TileLayout, Credential
 from pyesgf.search import SearchConnection
 import sys
 import json
@@ -28,9 +28,7 @@ import requests
 from subprocess import Popen, PIPE
 from sets import Set
 from velo import VeloAPI
-
-
-# General
+from util.utilities import print_debug
 
 
 def render_template(request, template, context):
@@ -95,10 +93,11 @@ def add_credentials(request):
                         c = Credential(service_user_name=data[s]['username'], password=data[s][
                                        'password'], service=s, site_user_name=str(request.user))
                         c.save()
-
-                return HttpResponse(render_template(request, 'web_fe/add_credentials.html', {'added': 'true'}))
+                res = render_template(request, 'web_fe/add_credentials.html', {'added': 'true'})
+                return HttpResponse(res)
             else:
-                return HttpResponse(render_template(request, 'web_fe/add_credentials.html', {'added': 'false'}))
+                res = render_template(request, 'web_fe/add_credentials.html', {'added': 'false'})
+                return HttpResponse(res)
         except Exception as e:
             print_debug(e)
             return HttpResponse(status=500)
@@ -205,14 +204,17 @@ def register(request):
                 username=request.POST['username'], password=request.POST['password1'])
             if user:
                 login(request, user)
-                messages.success(
-                    request, 'User: ' + request.POST['username'] + ' successfully created an account and logged in')
+                message = 'User: %s created an account and logged in' % request.POST['username']
+                messages.success(request, )
         else:
             print user_form.errors
     else:
         user_form = UserCreationForm()
 
-    return render_to_response("web_fe/register.html", {"user_form": user_form, "registered": registered}, context)
+    return render_to_response("web_fe/register.html", {
+        "user_form": user_form,
+        "registered": registered
+        }, context)
 
 
 @login_required
@@ -291,8 +293,12 @@ def save_layout(request):
                             i.default = 0
                             i.save()
 
-                layout = TileLayout(user_name=str(request.user), layout_name=data['name'], board_layout=json.dumps(
-                    data['layout']), mode=data['mode'], default=data['default_layout'])
+                layout = TileLayout(
+                    user_name=str(request.user),
+                    layout_name=data['name'],
+                    board_layout=json.dumps(data['layout']),
+                    mode=data['mode'],
+                    default=data['default_layout'])
                 layout.save()
                 return HttpResponse(status=200)
             else:
@@ -339,87 +345,6 @@ def load_layout(request):
         except Exception as e:
             print_debug(e)
             return HttpResponse(status=500)
-
-
-@login_required
-def node_info(request):
-    if request.method == 'GET':
-        try:
-            response = {}
-            nodes = ESGFNode.objects.all()
-            for node in nodes:
-                response[node.short_name] = node.node_data
-                if 'children' not in response[node.short_name]:
-                    continue
-
-                if 'Node' in response[node.short_name]['children']:
-                    response[node.short_name]['children']['Node'][
-                        'attributes']['status'] = str(node.available)
-                    response[node.short_name]['children']['Node'][
-                        'attributes']['last_seen'] = str(node.last_seen)
-                else:
-                    response[node.short_name]['children']['Node'] = {}
-                    response[node.short_name]['children'][
-                        'Node']['attributes'] = {}
-                    response[node.short_name]['children']['Node'][
-                        'attributes']['status'] = str(node.available)
-                    response[node.short_name]['children']['Node'][
-                        'attributes']['last_seen'] = str(node.last_seen)
-                    response[node.short_name]['children']['Node'][
-                        'attributes']['hostname'] = node.short_name
-            return HttpResponse(json.dumps(response))
-        except Exception as e:
-            print_debug(e)
-            return HttpResponse(status=500)
-    elif request.method == 'POST':
-        print "Unexpected POST request"
-        return HttpResponse(status=500)
-
-
-@login_required
-def load_facets(request):
-    if request.method == 'POST':
-        nodes = json.loads(request.body)
-        facets = {}
-        for node in nodes:
-            try:
-                conn = SearchConnection(
-                    'http://' + node + '/esg-search/', distrib=True)
-                context = conn.new_context()
-                for facet in context.get_facet_options():
-                    facets[facet] = context.facet_counts[facet]
-            except Exception as e:
-                print_debug(e)
-                return HttpResponse(status=500)
-        return HttpResponse(json.dumps(facets))
-    else:
-        return HttpResponse(status=500)
-
-
-@login_required
-def node_search(request):
-    if request.method == 'POST':
-        searchString = json.loads(request.body)
-        print searchString
-        if 'nodes' in searchString:
-            response = {}
-            for node in searchString['nodes']:
-                try:
-                    conn = SearchConnection(
-                        'http://' + node + '/esg-search/', distrib=True)
-                    print searchString['terms']
-                    context = conn.new_context(**searchString['terms'])
-                    rs = context.search()
-                    response['hits'] = context.hit_count
-                    for i in range(len(rs)):
-                        response[str(i)] = rs[i].json
-
-                except Exception as e:
-                    print_debug(e)
-
-            return HttpResponse(json.dumps(response))
-    else:
-        return HttpResponse(status=500)
 
 
 @login_required
@@ -671,40 +596,3 @@ def credential_check_existance(request):
             return HttpResponse(status=500)
     else:
         return HttpResponse(status=404)
-
-
-@csrf_exempt  # should probably fix this at some point
-@login_required
-def vtkweb_launcher(request):
-    """Proxy requests to the configured launcher service."""
-    import requests
-    try:
-        from django.conf import settings
-        VISUALIZATION_LAUNCHER = settings.VISUALIZATION_LAUNCHER
-    except ImportError:
-        VISUALIZATION_LAUNCHER = None
-
-    if not VISUALIZATION_LAUNCHER:
-        # unconfigured launcher
-        return HttpResponse(status=404)
-
-    # TODO: add status and delete methods
-    if request.method == 'POST':
-        req = requests.post(VISUALIZATION_LAUNCHER, request.body)
-        if req.ok:
-            return HttpResponse(req.content)
-        else:
-            return HttpResponse(status=500)
-
-    return HttpResponse(status=404)
-
-
-def print_debug(e):
-    import traceback
-    print '1', e.__doc__
-    print '2', sys.exc_info()
-    print '3', sys.exc_info()[0]
-    print '4', sys.exc_info()[1]
-    print '5', traceback.tb_lineno(sys.exc_info()[2])
-    ex_type, ex, tb = sys.exc_info()
-    print '6', traceback.print_tb(tb)

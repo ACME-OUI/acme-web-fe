@@ -1,7 +1,7 @@
 appnope==0.1.0
 cffi==1.1.2
 coverage==3.7.1
-cryptography==0.9.1
+cryptography
 decorator==3.4.2
 Django==1.8
 django-recaptcha==1.0.3

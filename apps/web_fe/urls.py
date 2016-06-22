@@ -24,11 +24,7 @@ urlpatterns = patterns('',
                            name='save_layout'),
                        url(r'^load_layout/', views.load_layout,
                            name='load_layout'),
-                       url(r'^node_info/', views.node_info),
-                       url(r'^node_search/', views.node_search),
-                       url(r'^load_facets/', views.load_facets),
                        url(r'^userdata/image/(?P<path>.*\.png)$', views.send_image),
-                       url(r'^vtk/', views.vtkweb_launcher),
                        # url(r'^esgf_download/', views.esgf_download),
                        )
 
