@@ -9,6 +9,7 @@ from django.conf import settings
 import json
 import pdb
 
+
 def index(request):
     if request.method == 'GET':
         try:
@@ -51,7 +52,7 @@ def index(request):
                     print "Invalid status recieved"
                     return HttpResponse(status=404)
                 obj_list = []
-                #if data is empty:
+                # if data is empty:
                 for obj in data:
                     obj_dict = {}
                     obj_dict['runspec'] = obj.runspec
@@ -80,9 +81,21 @@ def index(request):
         try:
             data = json.loads(request.body)
             if 'user' and 'runspec' in data:
-                new_run = UserRuns.objects.create(status='new', user=data['user'], runspec=data['runspec'], destination=data['destination'], casename=data['casename'], mppwidth=data['mppwidth'], 
-                                                stop_option=data['stop_option'], stop_n=data['stop_n'], walltime=data['walltime'], mach=data['mach'],
-                                                compset=data['compset'], res=data['res'], project=data['project'], compiler=data['compiler'])
+                new_run = UserRuns.objects.create(
+                    status='new',
+                    user=data['user'],
+                    runspec=data['runspec'],
+                    destination=data['destination'],
+                    casename=data['casename'],
+                    mppwidth=data['mppwidth'],
+                    stop_option=data['stop_option'],
+                    stop_n=data['stop_n'],
+                    walltime=data['walltime'],
+                    mach=data['mach'],
+                    compset=data['compset'],
+                    res=data['res'],
+                    project=data['project'],
+                    compiler=data['compiler'])
                 new_run.save()
                 return HttpResponse("Successfully updated status")
             else:
@@ -115,20 +128,33 @@ def index(request):
             return HttpResponse(status=500)
 
     if request.method == 'PUT':
-        #if settings.DEBUG == True
+        # if settings.DEBUG == True
             try:
                 data = json.loads(request.body)
                 if 'user' and 'runspec' in data:
-                    new_run = UserRuns.objects.create(status='new', user=data['user'], runspec=data['runspec'], destination=data['destination'], casename=data['casename'], mppwidth=data['mppwidth'], 
-                                                stop_option=data['stop_option'], stop_n=data['stop_n'], walltime=data['walltime'], mach=data['mach'],
-                                                compset=data['compset'], res=data['res'], project=data['project'], compiler=data['compiler'])
+                    new_run = UserRuns.objects.create(
+                        status='new', user=data['user'],
+                        runspec=data['runspec'],
+                        destination=data['destination'],
+                        casename=data['casename'],
+                        mppwidth=data['mppwidth'],
+                        stop_option=data['stop_option'],
+                        stop_n=data['stop_n'],
+                        walltime=data['walltime'],
+                        mach=data['mach'],
+                        compset=data['compset'],
+                        res=data['res'],
+                        project=data['project'],
+                        compiler=data['compiler'])
                     new_run.save()
-                    return HttpResponse(status=200) # Success
+                    # Success
+                    return HttpResponse(status=200)
                 else:
-                    return HttpResponse(status=400) # Request must have both user and runspec
+                    # Request must have both user and runspec
+                    return HttpResponse(status=400)
             except Exception as e:
                 print e
-                return HttpResponse(status=500)        
+                return HttpResponse(status=500)
         # else:
         #     JsonResponse(status=404)
 
@@ -145,10 +171,3 @@ def index(request):
                 return HttpResponse(status=500)
         # else:
         #     JsonResponse(status=404)
-
-
-
-
-
-
-

@@ -5,7 +5,6 @@ from django.template import RequestContext, loader
 from django.forms.models import model_to_dict
 from django.forms.utils import ErrorList
 from django.core.context_processors import csrf
-from django.views.decorators.csrf import csrf_exempt
 from django.core.files import File
 from forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
@@ -14,9 +13,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 
-from web_fe.models import TileLayout, Credential, ESGFNode
-from pyesgf.search import SearchConnection
-import sys
+from web_fe.models import TileLayout, Credential
 import json
 import simplejson
 import os
@@ -24,16 +21,9 @@ import urllib
 import urllib2
 import base64
 import time
-import datetime
 import requests
-from subprocess import Popen, PIPE
-from sets import Set
-from velo import VeloAPI
-import vtk_launcher
-# from search import files
-
-
-# General
+from sendfile import sendfile
+from util.utilities import print_debug
 
 
 def render_template(request, template, context):
@@ -98,10 +88,11 @@ def add_credentials(request):
                         c = Credential(service_user_name=data[s]['username'], password=data[s][
                                        'password'], service=s, site_user_name=str(request.user))
                         c.save()
-
-                return HttpResponse(render_template(request, 'web_fe/add_credentials.html', {'added': 'true'}))
+                res = render_template(request, 'web_fe/add_credentials.html', {'added': 'true'})
+                return HttpResponse(res)
             else:
-                return HttpResponse(render_template(request, 'web_fe/add_credentials.html', {'added': 'false'}))
+                res = render_template(request, 'web_fe/add_credentials.html', {'added': 'false'})
+                return HttpResponse(res)
         except Exception as e:
             print_debug(e)
             return HttpResponse(status=500)
@@ -146,7 +137,7 @@ def check_credentials(request):
                                 "command": "init"
                             }
                             result = velo_request(velo_creds)
-                            #TODO: Extract values out to CAPITAL_NAMED_CONSTANTS
+                            # TODO: Extract values out to CAPITAL_NAMED_CONSTANTS
                             if result == "Success":
                                 print "velo login successful"
                             else:
@@ -207,14 +198,18 @@ def register(request):
                 username=request.POST['username'], password=request.POST['password1'])
             if user:
                 login(request, user)
-                messages.success(
-                    request, 'User: ' + request.POST['username'] + ' successfully created an account and logged in')
+                message = 'User: %s created an account and logged in' % request.POST['username']
+                messages.success(request, )
         else:
             print user_form.errors
     else:
         user_form = UserCreationForm()
 
-    return render_to_response("web_fe/register.html", {"user_form": user_form, "registered": registered}, context)
+    data = {
+        "user_form": user_form,
+        "registered": registered
+    }
+    return render_to_response("web_fe/register.html", data, context)
 
 
 @login_required
@@ -294,8 +289,12 @@ def save_layout(request):
                             i.default = 0
                             i.save()
 
-                layout = TileLayout(user_name=str(request.user), layout_name=data['name'], board_layout=json.dumps(
-                    data['layout']), mode=data['mode'], default=data['default_layout'])
+                layout = TileLayout(
+                    user_name=str(request.user),
+                    layout_name=data['name'],
+                    board_layout=json.dumps(data['layout']),
+                    mode=data['mode'],
+                    default=data['default_layout'])
                 layout.save()
                 return HttpResponse(status=200)
             else:
@@ -348,320 +347,6 @@ def load_layout(request):
 
 
 @login_required
-def node_info(request):
-    if request.method == 'GET':
-        try:
-            response = {}
-            nodes = ESGFNode.objects.all()
-            for node in nodes:
-                response[node.short_name] = node.node_data
-                if 'children' not in response[node.short_name]:
-                    continue
-
-                if 'Node' in response[node.short_name]['children']:
-                    response[node.short_name]['children']['Node'][
-                        'attributes']['status'] = str(node.available)
-                    response[node.short_name]['children']['Node'][
-                        'attributes']['last_seen'] = str(node.last_seen)
-                else:
-                    response[node.short_name]['children']['Node'] = {}
-                    response[node.short_name]['children'][
-                        'Node']['attributes'] = {}
-                    response[node.short_name]['children']['Node'][
-                        'attributes']['status'] = str(node.available)
-                    response[node.short_name]['children']['Node'][
-                        'attributes']['last_seen'] = str(node.last_seen)
-                    response[node.short_name]['children']['Node'][
-                        'attributes']['hostname'] = node.short_name
-            return HttpResponse(json.dumps(response))
-        except Exception as e:
-            print_debug(e)
-            return HttpResponse(status=500)
-    elif request.method == 'POST':
-        print "Unexpected POST request"
-        return HttpResponse(status=500)
-
-
-@login_required
-def load_facets(request):
-    if request.method == 'POST':
-        nodes = json.loads(request.body)
-        facets = {}
-        for node in nodes:
-            try:
-                conn = SearchConnection(
-                    'http://' + node + '/esg-search/', distrib=True)
-                context = conn.new_context()
-                for facet in context.get_facet_options():
-                    facets[facet] = context.facet_counts[facet]
-            except Exception as e:
-                print_debug(e)
-                return HttpResponse(status=500)
-        return HttpResponse(json.dumps(facets))
-    else:
-        return HttpResponse(status=500)
-
-
-@login_required
-def node_search(request):
-    if request.method == 'POST':
-        searchString = json.loads(request.body)
-        print searchString
-        if 'nodes' in searchString:
-            response = {}
-            for node in searchString['nodes']:
-                try:
-                    conn = SearchConnection(
-                        'http://' + node + '/esg-search/', distrib=True)
-                    print searchString['terms']
-                    context = conn.new_context(**searchString['terms'])
-                    rs = context.search()
-                    response['hits'] = context.hit_count
-                    for i in range(len(rs)):
-                        response[str(i)] = rs[i].json
-
-                except Exception as e:
-                    print_debug(e)
-
-            return HttpResponse(json.dumps(response))
-    else:
-        return HttpResponse(status=500)
-
-
-@login_required
-def get_folder(request):
-    if request.method == 'POST':
-        folder = json.loads(request.body)['file']
-        try:
-            cred = Credential.objects.get(
-                site_user_name=request.user, service='velo')
-            if folder == '/User Documents/':
-                folder += cred.service_user_name
-            request = {
-                'velo_user': cred.service_user_name,
-                'velo_pass': cred.password,
-                'command': 'get_folder',
-                'folder': folder
-            }
-            out = velo_request(request)
-            out = out.split(',')
-            out.insert(0, folder)
-            out = [o for o in out if o != '']
-            return HttpResponse(json.dumps(out))
-
-        except Exception as e:
-            print_debug(e)
-            return HttpResponse(status=500)
-    else:
-        return HttpResponse(status=404)
-
-
-@login_required
-def get_file(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            filename = data['filename']
-            remote_file_path = data['path'] + '/' + filename
-            cred = Credential.objects.get(
-                site_user_name=request.user, service='velo')
-
-            local_path = os.getcwd() + '/userdata/' + \
-                cred.service_user_name + '/'
-
-            # Create the local directories if they dont exist
-            remote_path = remote_file_path.split('/')
-            prefix = local_path[
-                :local_path.index(cred.service_user_name) + len(cred.service_user_name)] + '/'
-            if not os.path.isdir(prefix):
-                os.makedirs(prefix)
-
-            for i in range(remote_path.index(cred.service_user_name) + 1, len(remote_path) - 1):
-                if not os.path.isdir(prefix + remote_path[i]):
-                    prefix += remote_path[i] + '/'
-                    os.makedirs(prefix)
-
-            request = {
-                'velo_user': cred.service_user_name,
-                'velo_pass': cred.password,
-                'command': 'get_file',
-                'remote_path': remote_file_path,
-                'local_path': prefix,
-                'filename': filename
-            }
-            response = velo_request(request)
-            if 'Failed to download file' in response:
-                print response
-                return HttpResponse(status=500)
-
-            path = prefix + filename
-            path_components = path.split("/")
-            path = os.path.join(
-                path_components[path_components.index(cred.service_user_name) + 1:])
-            if filename.split('.').pop() == 'png':
-                response = {
-                    'type': 'image',
-                    'location': path
-                }
-                return HttpResponse(json.dumps(response))
-            else:
-                out = response.splitlines(True)
-                return HttpResponse(out, content_type='text/plain')
-
-        except Exception as e:
-            print_debug(e)
-            return HttpResponse(status=500)
-    else:
-        return HttpResponse(status=404)
-
-
-@login_required
-def send_image(request, path):
-    from sendfile import sendfile
-    import os
-    cred = Credential.objects.get(service='velo', site_user_name=request.user)
-    fullpath = os.path.join('userdata', cred.service_user_name, path)
-
-    print fullpath
-    if os.path.isfile(fullpath):
-        return sendfile(request, fullpath)
-    else:
-        return HttpResponse(status=404)
-
-
-@login_required
-def velo_save_file(request):
-    if request.method == 'POST':
-        try:
-            incoming_file = json.loads(request.body)
-            filename = incoming_file['filename']
-            remote_path = incoming_file['remote_path']
-            text = incoming_file['text']
-
-            cred = Credential.objects.get(
-                site_user_name=request.user, service="velo")
-
-            local_path = os.path.join(
-                os.getcwd(), 'userdata', cred.service_user_name)
-            remote_path = remote_path[:remote_path.index(filename)]
-            print 'filename:', filename, 'remote_path:', remote_path
-
-            try:
-                f = open(os.path.join(local_path, filename), 'w')
-                f.write(text)
-                f.close()
-            except Exception as e:
-                print_debug(e)
-                print 'I/O failure when saving file for velo'
-                return HttpResponse(status=500)
-
-            data = {
-                'velo_user': cred.service_user_name,
-                'velo_pass': cred.password,
-                'remote_path': remote_path,
-                'local_path': local_path,
-                'filename': filename,
-                'command': 'save_file'
-            }
-            if velo_request(data) >= 0:
-                return HttpResponse(status=200)
-            else:
-                print out, err
-                return HttpResponse(status=500)
-        except Exception as e:
-            print_debug(e)
-            return HttpResponse(status=500)
-    else:
-        return HttpResponse(status=404)
-
-
-@login_required
-def velo_delete(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            name = data['name']
-
-            cred = Credential.objects.get(
-                site_user_name=request.user, service="velo")
-
-            data = {
-                'command': 'delete',
-                'velo_user': cred.service_user_name,
-                'velo_pass': cred.password,
-                'resource': name
-            }
-            if velo_request(data) >= 0:
-                return HttpResponse(status=200)
-            else:
-                return HttpResponse(status=500)
-        except Exception as e:
-            print_debug(e)
-            return HttpResponse(status=500)
-    else:
-        return HttpResponse(status=404)
-
-
-def check_velo_initialized(user):
-    request = json.dumps({
-        'velo_user': user,
-        'command': 'is_initialized'
-    })
-    response = requests.post('http://localhost:8080', request).content
-    if 'true' in response:
-        return True
-    elif 'false' in response:
-        return False
-    else:
-        return 'error'
-
-
-def velo_request(data):
-    if not check_velo_initialized(data['velo_user']):
-        request = json.dumps({
-            'command': 'init',
-            'velo_user': data['velo_user'],
-            'velo_pass': data['velo_pass'],
-        })
-        response = requests.post('http://localhost:8080', request).content
-        if 'Success' not in response:
-            return 'Failed to initialize velo'
-    if 'velo_user' not in data:
-        return 'No user in velo request'
-    if 'velo_pass' not in data:
-        return 'No password in velo request'
-    return requests.post('http://localhost:8080', json.dumps(data)).content
-
-
-@login_required
-def velo_new_folder(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            foldername = data['foldername']
-
-            cred = Credential.objects.get(
-                site_user_name=request.user, service="velo")
-
-            request = {
-                'velo_user': cred.service_user_name,
-                'velo_pass': cred.password,
-                'command': 'create_folder',
-                'foldername': foldername
-            }
-
-            if velo_request(request) == 'Success':
-                return HttpResponse(status=200)
-            else:
-                return HttpResponse(status=500)
-        except Exception as e:
-            print_debug(e)
-            return HttpResponse(status=500)
-    else:
-        return HttpResponse(status=404)
-
-
-@login_required
 def credential_check_existance(request):
     if request.method == 'POST':
         try:
@@ -679,91 +364,12 @@ def credential_check_existance(request):
         return HttpResponse(status=404)
 
 
-@csrf_exempt  # should probably fix this at some point
 @login_required
-def vtkweb_launcher(request):
-    """Proxy requests to the configured launcher service."""
-    import requests
-    try:
-        from django.conf import settings
-        VISUALIZATION_LAUNCHER = settings.VISUALIZATION_LAUNCHER
-    except ImportError:
-        VISUALIZATION_LAUNCHER = None
+def send_image(request, path):
+    cred = Credential.objects.get(service='velo', site_user_name=request.user)
+    fullpath = os.path.join('userdata', cred.service_user_name, path)
 
-    if not VISUALIZATION_LAUNCHER:
-        # unconfigured launcher
+    if os.path.isfile(fullpath):
+        return sendfile(request, fullpath)
+    else:
         return HttpResponse(status=404)
-
-    # TODO: add status and delete methods
-    if request.method == 'POST':
-        req = requests.post(VISUALIZATION_LAUNCHER, request.body)
-        if req.ok:
-            return HttpResponse(req.content)
-        else:
-            return HttpResponse(status=500)
-
-    return HttpResponse(status=404)
-
-
-def print_debug(e):
-    import traceback
-    print '1', e.__doc__
-    print '2', sys.exc_info()
-    print '3', sys.exc_info()[0]
-    print '4', sys.exc_info()[1]
-    print '5', traceback.tb_lineno(sys.exc_info()[2])
-    ex_type, ex, tb = sys.exc_info()
-    print '6', traceback.print_tb(tb)
-
-# ******
-# VTK
-# ******
-def _refresh(request):
-    """Refresh the visualization session information."""
-    # check the session for a vtkweb instance
-    vis = request.session.get('vtkweb')
-    if vis is None or vtk_launcher.status(vis.get('id', '')) is None:
-        # open a visualization instance
-        vis = vtk_launcher.new_instance()
-        request.session['vtkweb'] = vis
-    return dict(vis)
-
-def vtk_viewer(request):
-    """Open the main visualizer view."""
-    data = {}
-    data['base'] = base_path
-    data['files'] = [
-            f for f in os.listdir(base_path)
-            if not os.path.isdir(os.path.join(base_path, f))
-            ]
-    data['dirs'] = [
-            f for f in os.listdir(base_path)
-            if os.path.isdir(os.path.join(base_path, f))
-            ]
-    return render(
-            request,
-            'vtk_view/cdat_viewer.html',
-            data
-            )
-
-def vtk_test(request, test="cone"):
-    return render(request, 'vtk_view/view_test.html', {"test": test})
-
-@csrf_exempt  # should probably fix this at some point
-def vtkweb_launcher(request):
-    """Proxy requests to the configured launcher service."""
-    import requests
-    VISUALIZATION_LAUNCHER = 'http://aims1.llnl.gov/vtk'
-    if getattr(settings, 'VISUALIZATION_LAUNCHER'):
-        VISUALIZATION_LAUNCHER = settings.VISUALIZATION_LAUNCHER
-    if not VISUALIZATION_LAUNCHER:
-        # unconfigured launcher
-        return HttpResponse(status=404)
-    # TODO: add status and delete methods
-    if request.method == 'POST':
-        req = requests.post(VISUALIZATION_LAUNCHER, request.body)
-        if req.ok:
-            return HttpResponse(req.content)
-        else:
-            return HttpResponse(status=500)
-    return HttpResponse(status=404)

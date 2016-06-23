@@ -6,6 +6,7 @@ from poller.models import UserRuns
 from django.test import LiveServerTestCase
 import pdb
 
+
 class Testresponses(LiveServerTestCase):
     fixtures = ['testdata.json']
 
@@ -58,22 +59,26 @@ class Testresponses(LiveServerTestCase):
         r1 = s.get(self.live_server_url + '/poller/')
         self.assertTrue(r1.status_code == requests.codes.ok)
         csrf_token = r1.cookies['csrftoken']
-        headers = {'Content-type': 'application/json',  "X-CSRFToken":csrf_token, 'Referer': self.live_server_url + '/poller/'}
+        headers = {
+            'Content-type': 'application/json',
+            "X-CSRFToken": csrf_token,
+            'Referer': self.live_server_url + '/poller/'
+        }
         r2 = s.patch(self.live_server_url + '/poller/', data=payload, headers=headers)
         self.assertTrue(r2.status_code == requests.codes.ok)
 
     def test_queueing(self):
-        # 
+        #
         # Test gets next run from queue, updates its status, and gets the next run after that.
         # The result should be a different id from the database
-        # 
+        #
         payload1 = {'status': 'next'}
         r = requests.get(self.live_server_url + '/poller/', params=payload1)
         self.assertTrue(r.status_code == requests.codes.ok)
-        #pdb.set_trace()
-        data = json.loads(r.content) # converts from JSON to python object
+        # pdb.set_trace()
+        data = json.loads(r.content)  # converts from JSON to python object
         if data == {}:
-            self.assertTrue(False) # abort test if there are no items in queue
+            self.assertTrue(False)  # abort test if there are no items in queue
         oldid = data['id']
         # finished getting first user run 1
         s = requests.Session()
@@ -81,8 +86,13 @@ class Testresponses(LiveServerTestCase):
         self.assertTrue(r1.status_code == requests.codes.ok)
         csrf_token = r1.cookies['csrftoken']
         # finished getting csrf token
-        headers = {'Content-type': 'application/json',  "X-CSRFToken":csrf_token, 'Referer': self.live_server_url + '/poller/'}
-        payload2 = json.dumps({'id': data['id'], 'status': 'in_progress'}) # converts from python object to JSON string
+        headers = {
+            'Content-type': 'application/json',
+            "X-CSRFToken": csrf_token,
+            'Referer': self.live_server_url + '/poller/'
+        }
+        # converts from python object to JSON string
+        payload2 = json.dumps({'id': data['id'], 'status': 'in_progress'})
         r2 = s.patch(self.live_server_url + '/poller/', data=payload2, headers=headers)
         self.assertTrue(r2.status_code == requests.codes.ok)
         # finished posting updated status for user run 1
@@ -107,10 +117,13 @@ class Testresponses(LiveServerTestCase):
         r1 = s.get(self.live_server_url + '/poller/')
         self.assertTrue(r1.status_code == requests.codes.ok)
         csrf_token = r1.cookies['csrftoken']
-        headers = {'Content-type': 'application/json',  "X-CSRFToken":csrf_token, 'Referer': self.live_server_url + '/poller/'}
+        headers = {
+            'Content-type': 'application/json',
+            "X-CSRFToken": csrf_token,
+            'Referer': self.live_server_url + '/poller/'
+        }
         r2 = s.patch(self.live_server_url + '/poller/', data=payload, headers=headers)
         self.assertTrue(r2.status_code == 400)
 
-            
 
 os.system('clear')

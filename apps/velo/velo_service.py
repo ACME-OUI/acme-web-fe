@@ -39,7 +39,7 @@ class VeloService(object):
             return 'Success'
         if 'velo_pass' not in data:
             return 'No password given to velo init'
-        print '\n [+] Running init '
+        print '\n[+] Running init '
         v = VeloAPI.Velo()
         VeloAPI.start_jvm()
         v.init_velo(data['velo_user'], data['velo_pass'])
