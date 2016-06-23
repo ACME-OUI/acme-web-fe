@@ -12,6 +12,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import Group
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 
 from web_fe.models import TileLayout, Credential
 from pyesgf.search import SearchConnection
@@ -29,6 +30,7 @@ from subprocess import Popen, PIPE
 from sets import Set
 from velo import VeloAPI
 from util.utilities import print_debug
+import vtk_launcher
 
 
 def render_template(request, template, context):
@@ -142,8 +144,7 @@ def check_credentials(request):
                                 "command": "init"
                             }
                             result = velo_request(velo_creds)
-                            print "got here"
-                            # TODO: Extract values out to CAPITAL_NAMED_CONSTANTS
+                            #TODO: Extract values out to CAPITAL_NAMED_CONSTANTS
                             if result == "Success":
                                 print "velo login successful"
                             else:
@@ -227,7 +228,6 @@ def dashboard(request):
         VISUALIZATION_LAUNCHER = None
         '''
     nodes = ESGFNode.objects.all()
-    print "got to 1"
     r = requests.get(
         'https://pcmdi.llnl.gov/esgf-node-manager/registration.xml')
     if r.status_code == 200:
@@ -278,14 +278,16 @@ def dashboard(request):
 
 @login_required
 def save_layout(request):
+    print "got save request"
     if request.method == 'POST':
         try:
+            print "got post save request"
             data = json.loads(request.body)
-
             layout = TileLayout.objects.filter(
                 layout_name=data['name'], user_name=str(request.user))
             if len(layout) == 0:
                 if data['default_layout'] == 1:
+                    print 'got to 1'
                     isDefault = TileLayout.objects.filter(
                         user_name=request.user, default=1)
                     if isDefault:
@@ -302,6 +304,9 @@ def save_layout(request):
                 layout.save()
                 return HttpResponse(status=200)
             else:
+                print 'got to 2'
+                print data['name']
+                print data['default_layout']
                 for x in layout:
                     x.board_layout = json.dumps(data['layout'])
                     x.mode = data['mode']
@@ -596,3 +601,94 @@ def credential_check_existance(request):
             return HttpResponse(status=500)
     else:
         return HttpResponse(status=404)
+
+
+@csrf_exempt  # should probably fix this at some point
+@login_required
+def vtkweb_launcher(request):
+    """Proxy requests to the configured launcher service."""
+    import requests
+    try:
+        from django.conf import settings
+        VISUALIZATION_LAUNCHER = settings.VISUALIZATION_LAUNCHER
+    except ImportError:
+        VISUALIZATION_LAUNCHER = None
+
+    if not VISUALIZATION_LAUNCHER:
+        # unconfigured launcher
+        return HttpResponse(status=404)
+
+    # TODO: add status and delete methods
+    if request.method == 'POST':
+        req = requests.post(VISUALIZATION_LAUNCHER, request.body)
+        if req.ok:
+            return HttpResponse(req.content)
+        else:
+            return HttpResponse(status=500)
+
+    return HttpResponse(status=404)
+
+
+def print_debug(e):
+    import traceback
+    print '1', e.__doc__
+    print '2', sys.exc_info()
+    print '3', sys.exc_info()[0]
+    print '4', sys.exc_info()[1]
+    print '5', traceback.tb_lineno(sys.exc_info()[2])
+    ex_type, ex, tb = sys.exc_info()
+    print '6', traceback.print_tb(tb)
+
+# ******
+# VTK
+# ******
+def _refresh(request):
+    """Refresh the visualization session information."""
+    # check the session for a vtkweb instance
+    vis = request.session.get('vtkweb')
+    if vis is None or vtk_launcher.status(vis.get('id', '')) is None:
+        # open a visualization instance
+        vis = vtk_launcher.new_instance()
+        request.session['vtkweb'] = vis
+    return dict(vis)
+
+def vtk_viewer(request):
+    """Open the main visualizer view."""
+    data = {}
+    data['base'] = base_path
+    data['files'] = [
+            f for f in os.listdir(base_path)
+            if not os.path.isdir(os.path.join(base_path, f))
+            ]
+    data['dirs'] = [
+            f for f in os.listdir(base_path)
+            if os.path.isdir(os.path.join(base_path, f))
+            ]
+    return render(
+            request,
+            'vtk_view/cdat_viewer.html',
+            data
+            )
+
+def vtk_test(request, test="cone"):
+    return render(request, 'vtk_view/view_test.html', {"test": test})
+
+@csrf_exempt  # should probably fix this at some point
+def vtkweb_launcher(request):
+    """Proxy requests to the configured launcher service."""
+    import requests
+    VISUALIZATION_LAUNCHER = 'http://aims1.llnl.gov/vtk'
+    if getattr(settings, 'VISUALIZATION_LAUNCHER'):
+        VISUALIZATION_LAUNCHER = settings.VISUALIZATION_LAUNCHER
+    if not VISUALIZATION_LAUNCHER:
+        # unconfigured launcher
+        return HttpResponse(status=404)
+    # TODO: add status and delete methods
+    if request.method == 'POST':
+        req = requests.post(VISUALIZATION_LAUNCHER, request.body)
+        if req.ok:
+            return HttpResponse(req.content)
+        else:
+            return HttpResponse(status=500)
+    return HttpResponse(status=404)
+>>>>>>> upstream/master

@@ -10,7 +10,8 @@
     function make_droppable(node, cls, drop) {
         node.droppable({
             accept: cls,
-            hoverClass: 'label-success'
+            hoverClass: 'label-success',
+            tolerance: "pointer",
         });
         node.on('drop', function (evt, ui) {
             evt.preventDefault();
@@ -425,8 +426,8 @@
             $('.cdat-temporary-window').remove();
 
             content = $('<div/>').addClass('cdat-plot-panel')
-                .css('width', '500px')
-                .css('height', '500px');
+                // .css('width', '500px')
+                // .css('height', '500px');
 
             method = $('<span/>')
                 .addClass('cdat-graphic-method label label-default')
@@ -513,14 +514,15 @@
                 $('<h3/>').append(template),
                 vlist
             ]);
-            panel = cdat.make_panel(
-                content.get(0),
-                null,
-                {
-                    selector: '.vtk-view-container',
-                    title: '<span><i class="fa fa-picture-o"></i>Plot window</span>',
-                    overflow: 'hidden'
-                });
+            // panel = make_panel(
+            //     content.get(0),
+            //     null,
+            //     {
+            //         selector: '.vtk-view-container',
+            //         title: '<span><i class="fa fa-picture-o"></i>Plot window</span>',
+            //         overflow: 'hidden'
+            //     });
+            return content;
         }
     };
 
