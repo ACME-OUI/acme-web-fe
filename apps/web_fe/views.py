@@ -205,10 +205,11 @@ def register(request):
     else:
         user_form = UserCreationForm()
 
-    return render_to_response("web_fe/register.html", {
+    data = {
         "user_form": user_form,
         "registered": registered
-        }, context)
+    }
+    return render_to_response("web_fe/register.html", data, context)
 
 
 @login_required
