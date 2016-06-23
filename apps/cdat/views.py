@@ -45,18 +45,14 @@ def vtk_viewer(request):
     data = {}
     data['base'] = base_path
     data['files'] = [
-            f for f in os.listdir(base_path)
-            if not os.path.isdir(os.path.join(base_path, f))
-            ]
+        f for f in os.listdir(base_path)
+        if not os.path.isdir(os.path.join(base_path, f))
+    ]
     data['dirs'] = [
-            f for f in os.listdir(base_path)
-            if os.path.isdir(os.path.join(base_path, f))
-            ]
-    return render(
-            request,
-            'vtk_view/cdat_viewer.html',
-            data
-            )
+        f for f in os.listdir(base_path)
+        if os.path.isdir(os.path.join(base_path, f))
+    ]
+    return render(request, 'vtk_view/cdat_viewer.html', data)
 
 
 def vtk_test(request, test="cone"):

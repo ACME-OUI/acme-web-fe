@@ -6,24 +6,24 @@ from esgf import views as esgf_views
 from cdat import views as cdat_views
 
 velo_patterns = [
-        url(r'^get_folder/$', velo_views.get_folder),
-        url(r'^get_file/$', velo_views.get_file),
-        url(r'^velo_save_file/$', velo_views.save_file),
-        url(r'^velo_new_folder/$', velo_views.new_folder),
-        url(r'^velo_delete/$', velo_views.delete),
+    url(r'^get_folder/$', velo_views.get_folder),
+    url(r'^get_file/$', velo_views.get_file),
+    url(r'^velo_save_file/$', velo_views.save_file),
+    url(r'^velo_new_folder/$', velo_views.new_folder),
+    url(r'^velo_delete/$', velo_views.delete),
 ]
 
 esgf_patterns = [
-        url(r'^node_info/$', esgf_views.node_info),
-        url(r'^node_search/$', esgf_views.node_search),
-        url(r'^load_facets/$', esgf_views.load_facets),
+    url(r'^node_info/$', esgf_views.node_info),
+    url(r'^node_search/$', esgf_views.node_search),
+    url(r'^load_facets/$', esgf_views.load_facets),
 ]
 
 cdat_patterns = [
-        url(r'^vtk/', cdat_views.vtkweb_launcher),
-        url(r'^_refresh', cdat_views._refresh),
-        url(r'^vtk_viewer', cdat_views.vtk_viewer),
-        url(r'^vtk_test', cdat_views.vtk_test),
+    url(r'^vtk/', cdat_views.vtkweb_launcher),
+    url(r'^_refresh', cdat_views._refresh),
+    url(r'^vtk_viewer', cdat_views.vtk_viewer),
+    url(r'^vtk_test', cdat_views.vtk_test),
 ]
 
 urlpatterns = patterns('',
