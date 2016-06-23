@@ -149,6 +149,7 @@ INSTALLED_APPS = (
     'poller',
     'esgf',
     'cdat',
+    'velo',
 )
 
 # Use nose to run all tests

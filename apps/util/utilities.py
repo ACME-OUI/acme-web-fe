@@ -1,3 +1,7 @@
+import sys
+import traceback
+
+
 def get_client_ip(request):
     """see: http://stackoverflow.com/a/4581997"""
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -9,7 +13,6 @@ def get_client_ip(request):
 
 
 def print_debug(e):
-    import traceback
     print '1', e.__doc__
     print '2', sys.exc_info()
     print '3', sys.exc_info()[0]

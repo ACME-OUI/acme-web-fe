@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
-from util.utilities import get_client_ip
+from util.utilities import get_client_ip, print_debug
 import json
 from models import ESGFNode
+from django.contrib.auth.decorators import login_required
 
 
 @login_required
