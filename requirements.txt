@@ -1,6 +1,6 @@
 cffi==1.1.2
 coverage==3.7.1
-cryptography==0.9.1
+cryptography
 decorator==3.4.2
 Django==1.8
 django-recaptcha==1.0.3
@@ -40,4 +40,3 @@ Unidecode==0.4.18
 uritemplate.py==0.3.0
 Werkzeug==0.10.4
 -e git+https://github.com/originell/jpype.git#egg=jpype
-
