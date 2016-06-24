@@ -9,52 +9,74 @@ $(function() {
 
 	// call the vis server setup
 	cdat.setup()
-		.then(function () { console.log('Vis instance launched'); },
-		      function () { console.log(arguments); });
+		.then(function() {
+				console.log('Vis instance launched');
+			},
+			function() {
+				console.log(arguments);
+			});
 
 
 	var docHeight, docWidth, maxCols, maxHeight, tileHeight, tileWidth;
+	var widthScale = .75; //represents the portion of the window allocated to tiles. Side bar is currently 25%
+	var sidebarWidth = ($(window).width() * (1 - widthScale));
 	calcMaxSize();
-
-	$('.wrapper').width(maxCols * tileWidth);
+	$('#slide-menu-left').css('width', sidebarWidth);
 	$('.wrapper').height(maxHeight * tileHeight);
+	$('.wrapper').css({
+    	"width": ($(window).width() * widthScale),
+    	"float": "right"
+    });
 	$('.tile-board').css({
 		'height': maxHeight * tileHeight
 	});
+	var plotcount = 0;
 	var tiles = [];
+	var imgInstance = 0;
+	var instance = 0; //variable that increments for every codemirror launched.
 	var resize_handle_html = '<span class="gs-resize-handle gs-resize-handle-both"></span>';
 	// Define a widget
 	var header3 = '';
 	var contents = '';
 	var optionContents = '';
-	var header1 = [	'<div class="tile-panel panel-default">',
-					' <div class="tile-panel-heading">',
-					'  <div class="panel-header-title text-center">',
-					'    <button type="button" class="btn btn-default btn-xs options" style="float:left;">',
-					'     <span class="fa fa-cog" aria-label="Options"></span>',
-					'    </button>',
-					'    <button type="button" class="btn btn-default btn-xs remove"  style="float:right;">',
-					'     <span class="fa fa-times" aria-label="Close"></span>',
-					'    </button>',
-					'     <p style="text-align: center">' ].join('');
+	var header1 = ['<div class="tile-panel panel-default">',
+		' <div class="tile-panel-heading">',
+		'  <div class="panel-header-title text-center">',
+		'    <button type="button" class="btn btn-default btn-xs options" style="float:left;">',
+		'     <span class="fa fa-cog" aria-label="Options"></span>',
+		'    </button>',
+		'    <button type="button" class="btn btn-default btn-xs remove"  style="float:right;">',
+		'     <span class="fa fa-times" aria-label="Close"></span>',
+		'    </button>',
+		'     <p style="text-align: center">'
+	].join('');
 	// Widget Name
-	header2 = [		'     <p>',
-					'   </div>',
-					'  </div>',
-					' </div>',
-					' <div class="tile-panel-body" data-direction="horizontal" data-mode="slid">',
-					'  <div class="tile-contents">' ].join('');
+	header2 = ['     <p>',
+		'   </div>',
+		'  </div>',
+		' </div>',
+		' <div class="tile-panel-body" data-direction="horizontal" data-mode="slid">',
+		'  <div class="tile-contents">'
+	].join('');
 	// Widget Contents
-	contents += '  <p>The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men.</p>';
+	content = '<div class="content"></div>';
 	header3 += ' </div></div></div>';
 
-	var velo_context_menu_html = [	'<div id="velo_context_menu">',
-									'  <a href="#" id="velo_context_menu_delete">Delete</a>',
-									'  <a href="#" id="velo_context_menu_rename">Rename</a>',
-									'</div>' ].join('');
-	var esgf_context_menu_html = [	'<div id="esgf_context_menu">',
-									'  <a href="#" id="esgf_context_menu_search">Search</a>',
-									'</div>' ].join('');
+	var altheader1 = ['<div class="tile-panel panel-default">',
+		' <div class="tile-panel-heading">',
+		'  <div class="panel-header-title text-center">',
+		'     <p style="text-align: center">'
+	].join('');
+
+	var velo_context_menu_html = ['<div id="velo_context_menu">',
+		'  <a href="#" id="velo_context_menu_delete">Delete</a>',
+		'  <a href="#" id="velo_context_menu_rename">Rename</a>',
+		'</div>'
+	].join('');
+	var esgf_context_menu_html = ['<div id="esgf_context_menu">',
+		'  <a href="#" id="esgf_context_menu_search">Search</a>',
+		'</div>'
+	].join('');
 
 	var dragStartX = 0;
 	var dragStartY = 0;
@@ -78,8 +100,8 @@ $(function() {
 	var mode = {
 		light: 'day'
 	}
+	setDay();
 	boardSetup(maxCols, maxHeight);
-	loadDefaultLayout();
 	var opts = {
 		lines: 17, // The number of lines to draw
 		length: 40, // The length of each line
@@ -105,37 +127,37 @@ $(function() {
 	 	End setup variables
 	 	***************************************/
 
-
-
 	//find if the user has a default layout, if so load it
 	function loadDefaultLayout() {
 		var jsonObj = new Object;
 		jsonObj.result = '';
 		jsonObj.data = '';
-
+		console.log("sending request for layouts");
 		get_data('load_layout/', 'GET', jsonObj, function(request) {
 			var found_default = false;
 			$.each(request, function(k, v) {
 				if (v.default == true) {
+					console.log("found default layout");
+					console.log(v.name);
 					found_default = true;
 					getFixVal(v.layout);
 					loadLayout(v.layout, v.mode);
 				}
 			});
-			if(!found_default){
+			if (!found_default) {
 				fixValY = 0;
 				fixValX = 0;
 				mode = 'day';
 			}
-		}, function(request){
+		}, function(request) {
 			fixValY = 0;
 			fixValX = 0;
 			mode = 'day';
 		});
 	}
 
-	function getFixVal(layouts){
-		if(layouts.length == 0){
+	function getFixVal(layouts) {
+		if (layouts.length == 0) {
 			fixValY = 0;
 			fixValX = 0;
 			mode = 'day';
@@ -202,88 +224,32 @@ $(function() {
 
 					// for example
 					var view = cdat.show({
-						file: 'http://test.opendap.org/dap/netcdf/examples/cami_0000-09-01_64x128_L26_c030918.nc',
-						variable: 'TS',
+						file: 'http://test.opendap.org/opendap/hyrax/data/nc/coads_climatology.nc.nc4?',
+						variable: 'SST',
 						node: '#cdat-vis'
 					}).then(
-						function () {
+						function() {
 							console.log('cdat vis success');
 							// bind resize handler
 							$('#cdat-vis').on('resizestop', view.render);
 
 							// also need to bind `view.close` to some event triggered when the window closes
 						},
-						function () {console.log(arguments);}
+						function() {
+							console.log(arguments);
+						}
 					);
 
-					break;
-
-				case 'esgf':
-					content = '<div id="esgf-node-tree"></div>';
-					initFileTree('esgf_window');
-					break;
-
-				case 'velo':
-
-					if ($('#velo_window').length == 0) {
-
-						check_credentials('velo', function(code){
-							if(code == 200){
-								
-								setup_velo();
-
-							} else {
-								content = [ '<form id="velo_login">',
-											'<h2 class="form-signin-heading">Please Sign In</h2>',
-											'<label for="velo_username" class="sr-only">User name:</label>',
-											'<input type="text" id="velo_username" name="velo_username" class="form-control" placeholder="User Name">',
-											'<label for="velo_password" class="sr-only">Password:</label>',
-											'<input type="password" id="velo_password" name="velo_password" class="form-control" placeholder="Password">',
-											'<a id="submit_velo_user" class="btn btn-success" href="javascript:void(0);">Submit</a>'
-										].join('');
-								var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + content + header3 + '</li>';
-								add_tile(new_tile, name + '_window', {
-									ignore: 'true'
-								}, function() {
-									$('#search-btn').click(function() {
-										nodeSearch(document.getElementById("node-search-name").value);
-									});
-								});
-								$('#submit_velo_user').click(function(){
-									var data = {};
-									var cred = {
-										'username': document.getElementById('velo_username').value,
-										'password': document.getElementById('velo_password').value
-									};
-									data['velo'] = cred;
-									get_data(
-										'add_credentials/',
-										'POST',
-										data,
-										function(){
-											$('#velo_window').remove();
-											removeHelper($('#'+'velo_window'));
-											setup_velo();
-										},
-										function(){
-											alert('failed to save credentials');
-										});
-								});
-							}
-						});
-
-						return;
-					}
 					break;
 
 				default:
 					{
 
 					}
-			}
-
+				}
 			if ($('#' + name + '_window').length == 0) {
 				var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + content + header3 + '</li>';
+
 				add_tile(new_tile, name + '_window', {
 					ignore: 'true'
 				}, function() {
@@ -295,24 +261,87 @@ $(function() {
 		});
 	});
 
-	function setup_velo(){
-		content = [ '<div id="velo-file-tree">',
-					'   <div id="velo-options-bar">',
-					'       <button class="fa fa-floppy-o velo-button" id="velo-options-bar-save" title="Save"></button>',
-					'       <button class="fa fa-file-text-o velo-button" id="velo-options-bar-new-file" title="New File"></button>',
-					'       <button class="fa fa-folder-o velo-button" id="velo-options-bar-new-folder" title="New Folder"></button>',
-					'       <button class="fa fa-play-circle velo-button" id="velo-options-bar-start-run" title="Start Run"></button>',
-					'   </div>',
-					'   <div id="velo-mtree-container">',
-					'	    <ul class="mtree" id="velo-mtree">',
-					'	    </ul>',
-					'   </div>',
-					'</div>',
-					'<div id="velo-text-edit"',
-					'</div>'].join('');
-		
-		var new_tile = '<li id="velo_window" class="tile">' + header1 + name + header2 + content + header3 + '</li>';
-		add_tile(new_tile, 'velo_window', {
+	$('#new-plot').click(function(e){
+		var name = 'Plot ' + plotcount;
+		var plotid = 'plot' + plotcount;
+		var content = '<div class="plot-content" data-plot="'+plotcount+'"></div>'
+		plotcount++;
+		if ($('#' + plotid + '_window').length == 0) {
+				var new_tile = '<li id="' + plotid + '_window" class="tile" data-type="plot">' + header1 + name + header2 + content + header3 + '</li>';
+				add_tile(new_tile, plotid + '_window', {
+					ignore: 'true'
+				}, function() {new_plot(plotid + '_window')});
+			}
+	});
+
+
+
+	$(document).ready(function() {
+		check_credentials('velo', function(code) {
+			if (code == 200) {
+				setup_velo();
+			} else {
+				content = ['<form id="velo_login">',
+					'<h2 class="form-signin-heading">Please Sign In</h2>',
+					'<label for="velo_username" class="sr-only">User name:</label>',
+					'<input type="text" id="velo_username" name="velo_username" class="form-control" placeholder="User Name">',
+					'<label for="velo_password" class="sr-only">Password:</label>',
+					'<input type="password" id="velo_password" name="velo_password" class="form-control" placeholder="Password">',
+					'<a id="submit_velo_user" class="btn btn-success" href="javascript:void(0);">Submit</a>'
+				].join('');
+				var new_tile = '<li id="velo_window" class="side-window">' + altheader1 + 'velo' + header2 + content + header3 + '</li>';
+				add_sidebar_window(new_tile, 'velo_window', {
+					ignore: 'true'
+				}, function() {
+					$('#search-btn').click(function() {
+						nodeSearch(document.getElementById("node-search-name").value);
+					});
+				});
+				$('#submit_velo_user').click(function() {
+					var data = {};
+					var cred = {
+						'username': document.getElementById('velo_username').value,
+						'password': document.getElementById('velo_password').value
+					};
+					data['velo'] = cred;
+					get_data(
+						'add_credentials/',
+						'POST',
+						data,
+						function() {
+							$('#velo_window').remove();
+							removeHelper($('#' + 'velo_window'));
+							setup_velo();
+						},
+						function() {
+							alert('failed to save credentials');
+						});
+				});
+			}
+		});
+
+		return;
+	})
+
+
+	function setup_velo() {
+		content = ['<div id="velo-file-tree">',
+			'   <div id="velo-options-bar">',
+			'       <button class="fa fa-floppy-o velo-button" id="velo-options-bar-save" title="Save"></button>',
+			'       <button class="fa fa-file-text-o velo-button" id="velo-options-bar-new-file" title="New File"></button>',
+			'       <button class="fa fa-folder-o velo-button" id="velo-options-bar-new-folder" title="New Folder"></button>',
+			'       <button class="fa fa-play-circle velo-button" id="velo-options-bar-start-run" title="Start Run"></button>',
+			'       <button class="fa fa-refresh velo-button" id="velo-options-bar-refresh" title="Refresh"></button>',
+			'   </div>',
+			'   <div id="velo-mtree-container">',
+			'	    <ul class="mtree" id="velo-mtree">',
+			'	    </ul>',
+			'   </div>',
+			'</div>'
+		].join('');
+		var name = 'Velo';
+		var new_window = '<li id="velo_window" class="side-window">' + altheader1 + name + header2 + content + header3 + '</li>';
+		add_sidebar_window(new_window, 'velo_window', {
 			ignore: 'true'
 		}, function() {
 			$('#search-btn').click(function() {
@@ -321,25 +350,53 @@ $(function() {
 		});
 		initFileTree('velo_window');
 		var background = '';
-		if(mode == 'day'){
+		if (mode == 'day') {
 			background = 'rgb(192, 192, 192)';
 		} else {
 			background = 'rgb(1, 1, 1)';
 		}
-		$('#velo-options-bar').find(':button').css({'background-color': background});
-		$('#velo-options-bar-save').click(function(){
+		$('#velo-options-bar').find(':button').css({
+			'background-color': background
+		});
+		$('#velo-options-bar-save').click(function() {
 			velo_save_file();
 		});
-		$('#velo-options-bar-new-file').click(function(){
+		$('#velo-options-bar-new-file').click(function() {
 			velo_new_file();
 		});
-		$('#velo-options-bar-new-folder').click(function(){
+		$('#velo-options-bar-new-folder').click(function() {
 			velo_new_folder();
 		});
-		$('#velo-options-bar-start-run').click(function(){
+		$('#velo-options-bar-start-run').click(function() {
 			velo_start_run();
 		});
+		$('#velo-options-bar-refresh').click(function() {
+			velo_refresh();
+		});
+		loadDefaultLayout();
 	}
+
+	$(document).ready(function() {
+		var content = '<div id="esgf-node-tree"></div>';
+		var name = 'esgf';
+		initFileTree('esgf_window');
+		var new_tile = '<li id="' + name + '_window" class="side-window">' + altheader1 +  name.toUpperCase()  + header2 + content + header3 + '</li>';
+		add_sidebar_window(new_tile, name + '_window', {
+			ignore: 'true'
+		}, function() {
+			$('#search-btn').click(function() {
+				nodeSearch(document.getElementById("node-search-name").value);
+			});
+		});
+	})
+
+	$(document).ready(function() {
+		var content = '<div class="cdatweb-plot-selectors cdatweb-tree"><ul class="qtree"><li><a>Graphic Methods</a><ul class="cdatweb-plot-types"></ul></li><li><a>Templates</a><ul class="cdatweb-plot-templates"></ul></li></ul></div>';
+		var new_tile = '<li id="cdat_window" class="side-window">' + altheader1 + 'CDATWeb' + header2 + content + header3 + '</li>';
+		add_sidebar_window(new_tile, 'cdat_window', {
+			ignore: 'true'
+		});
+	});
 
 	//setup the hander to fix the windows after a resize
 	$(window).resize(function() {
@@ -362,27 +419,76 @@ $(function() {
 		} else {
 			var new_tile = '<li id="' + "nodeSelect" + '_window" class="tile">' + header1 + "nodeSelect" + header2 + header3 + '</li>';
 			add_tile(new_tile, "nodeSelect_window");
+
+			$('#side-menu').append(html);
+			var w = $('#' + id);
+			$(w).css({
+				'z-index': 1,
+				'opacity': 0
+			});
+			console.log('setting options button id to ' + id + '_window_options');
+			$(w).find('.fa-cog').parent().attr({
+				id: id + '_options'
+			});
+			$(w).find('.fa-times').parent().attr({
+				id: id + '_close'
+			});
+
+			$(w).find('.options').click(function(e) {
+
+			});
+
+
 		}
 		var nodeName = $(this).find('a').text();
 		populateNodeSelect(nodeName);
 
 	});
 
-	function velo_save_file(){
-		if($('.mtree-active').length > 0 ){
+	function velo_editor_save_file(event) {
+		console.log("Editor save event fired.");
+		console.log("Instance id : " + event.data.id);
+		console.log(event.data.codeMirror.getValue());
+		if ($('#velo-mtree [data-editor="' + event.data.id + '"]').length > 0) {
+			var file_to_save = $('#velo-mtree [data-editor="' + event.data.id + '"]');
+			console.log(file_to_save);
+			var filename = file_to_save.text();
+			var remote_path = file_to_save.attr('data-path');
+			console.log("logging remote path:");
+			console.log(remote_path);
+			var text = event.data.codeMirror.getValue();
+			var outgoing_request = {
+				text: text,
+				remote_path: remote_path,
+				filename: filename
+			}
+			console.log(outgoing_request);
+			get_data('velo_save_file/', 'POST', outgoing_request, function() {
+				alert('file saved!');
+				$(file_to_save).removeClass('mtree-unsaved');
+			}, function() {
+				alert('failed to save file');
+			});
+		};
+	}
+	function velo_save_file() {
+		if ($('.mtree-active').length > 0) {
 			$.getScript("static/js/spin.js", function() {
 				if (mode == 'night') {
 					var color = '#fff';
 				} else {
 					color = '#000';
 				}
-				opts.color = color; 
+				opts.color = color;
 				var spinner = new Spinner(opts).spin();
-				document.getElementById('velo-text-edit').appendChild(spinner.el);
+				//document.getElementById('velo-text-edit').appendChild(spinner.el);
 
 				var file_to_save = $('#velo-mtree .mtree-active .mtree-unsaved');
+				console.log(file_to_save);
 				var filename = file_to_save.text();
 				var remote_path = file_to_save.attr('data-path');
+				console.log("logging remote path:");
+				console.log(remote_path);
 
 				var text = codeMirror.getValue();
 				var outgoing_request = {
@@ -391,11 +497,11 @@ $(function() {
 					filename: filename
 				}
 				console.log(outgoing_request);
-				get_data('velo_save_file/', 'POST', outgoing_request, function(){
+				get_data('velo_save_file/', 'POST', outgoing_request, function() {
 					spinner.stop();
 					alert('file saved!');
 					$('#velo-mtree .mtree-active .mtree-unsaved').removeClass('mtree-unsaved');
-				}, function(){
+				}, function() {
 					spinner.stop();
 					alert('failed to save file');
 				});
@@ -403,21 +509,22 @@ $(function() {
 		}
 	}
 
-	function velo_new_file(){
-		var newFileHtml = [	'<li id="velo-new-file-text-input-list">',
-								'    <form id="velo-new-file-text-input-form">',
-								'    	<input type="text" placeholder="New File Name" id="velo-new-file-text-input"></input>',
-								'    </form>',
-								'</li>'].join('');
+	function velo_new_file() {
+		var newFileHtml = ['<li id="velo-new-file-text-input-list">',
+			'    <form id="velo-new-file-text-input-form">',
+			'    	<input type="text" placeholder="New File Name" id="velo-new-file-text-input"></input>',
+			'    </form>',
+			'</li>'
+		].join('');
 		$('#velo-mtree .mtree-active ul').prepend(newFileHtml);
 		$("#velo-new-file-text-input").keypress(function(event) {
-		    if (event.which == 13) {
-		    	newFileHtml = '<a href="#" id="velo-new-file"></a>';
-		    	var newFileName = document.getElementById('velo-new-file-text-input').value;
-		    	if(isFolder(newFileName)){
-		    		newFileName += '.txt';
-		    	}
-		    	$('#velo-new-file-text-input-form').remove();
+			if (event.which == 13) {
+				newFileHtml = '<a href="#" id="velo-new-file"></a>';
+				var newFileName = document.getElementById('velo-new-file-text-input').value;
+				if (isFolder(newFileName)) {
+					newFileName += '.txt';
+				}
+				$('#velo-new-file-text-input-form').remove();
 				$('#velo-new-file-text-input-list').append(newFileHtml);
 				$('#velo-new-file').text(newFileName);
 				$('#velo-new-file').addClass('velo-file');
@@ -428,24 +535,44 @@ $(function() {
 					'data-path': path,
 					'id': ''
 				});
-				$('a[data-path="' + path + '"]').click(function(e){
-					getFile($(e.target).attr('data-path'));
-				})
-				initCodeMirror('');
-		    }
+				console.log("creating path:");
+				console.log(path);
+				var text = '';
+				var outgoing_request = {
+					text: text,
+					remote_path: path,
+					filename: newFileName
+				}
+				//Saving new files since other actions will cause the tree to be refreshed.
+				//If they are not saved, refreshing the file tree will remove new files. 
+				console.log(outgoing_request);
+				get_data('velo_save_file/', 'POST', outgoing_request, function() {
+					alert('file saved!');
+				}, function() {
+					alert('failed to save file');
+				});
+				$('a[data-path="' + path + '"]').click(function(e) {
+					var path = $(e.target).attr('data-path');
+					var id = 'dashboard_tile_' + instance;
+					var content = '<div class="content"></div>';
+					var new_tile = '<li id="' + id + '" class="tile" data-path="' + path + '" data-tileid="'+ instance +'" > ' + header1 + path + header2 + content + header3 + '</li>';
+					add_tile(new_tile, id , {ignore: 'true'}, initCodeMirror('', id, path));
+				});
+			}
 		});
 	}
 
-	function velo_new_folder(){
-		var newFolderHtml = [	'<li id="velo-new-folder-text-input-list">',
-								'    <form id="velo-new-folder-text-input-form">',
-								'    	<input type="text" placeholder="New Folder Name" id="velo-new-folder-text-input"></input>',
-								'    </form>',
-								'</li>'].join('');
+	function velo_new_folder() {
+		var newFolderHtml = ['<li id="velo-new-folder-text-input-list">',
+			'    <form id="velo-new-folder-text-input-form">',
+			'    	<input type="text" placeholder="New Folder Name" id="velo-new-folder-text-input"></input>',
+			'    </form>',
+			'</li>'
+		].join('');
 		$('#velo-mtree .mtree-active ul').prepend(newFolderHtml);
 		$("#velo-new-folder-text-input").keypress(function(event) {
-		    if (event.which == 13) {
-		        newFolderHtml = '<a href="#" id="new-velo-folder"></a><ul class="mtree-level-2" style="overflow: hidden; height: 0px; display: none;"></ul>';
+			if (event.which == 13) {
+				newFolderHtml = '<a href="#" id="new-velo-folder"></a><ul class="mtree-level-2" style="overflow: hidden; height: 0px; display: none;"></ul>';
 				var newFolderName = document.getElementById('velo-new-folder-text-input').value;
 				$('#velo-new-folder-text-input-form').remove();
 				$('#velo-new-folder-text-input-list').addClass('mtree-node mtree-closed');
@@ -465,35 +592,53 @@ $(function() {
 					}
 				});
 
-				$('#velo-mtree .mtree').bind('contextmenu',function(e){
+				$('#velo-mtree .mtree').bind('contextmenu', function(e) {
 					e.preventDefault();
-					if(e.button == 2){
+					if (e.button == 2) {
 						velo_context_menu(e);
 					}
 				});
 
-				get_data('velo_new_folder/', 'POST', {'foldername':newFolderName}, function(response){
+				get_data('velo_new_folder/', 'POST', {
+					'foldername': newFolderName
+				}, function(response) {
 					alert('Success creating new folder');
-				}, function(response){
+				}, function(response) {
 					alert('Error when creating new folder');
 				})
-		    }
+			}
 		});
 
 	}
 
-	function velo_start_run(){
-
+	function velo_start_run() {
+		data = {
+			user: $("#velo_window .mtree-root a").html(),
+			runspec: $("#velo_window .mtree-active a").data("path"),
+		}
+		//data = JSON.stringify(data);
+		get_data('../poller/', 'POST', data
+				, function(response) {
+					alert('Success creating new run');
+				}, function(response) {
+					alert('Error when creating new run');
+				})
 	}
 
-	function esgf_context_menu(e){
+	function velo_refresh() {
+		id = 'velo_window';
+		$('#velo-mtree').empty();
+		initFileTree(id);
+	}
+
+	function esgf_context_menu(e) {
 		$('body').append(esgf_context_menu_html);
 		$('#esgf_context_menu').offset({
 			'top': e.clientY,
 			'left': e.clientX
 		});
 		createMask('esgf_context_menu', 0);
-		$('#esgf_context_menu_search').click(function(e){
+		$('#esgf_context_menu_search').click(function(e) {
 			//$('#esgf_window .tile-contents').empty();
 			fadeOutMask('esgf_context_menu');
 			var target = $('#esgf-mtree .mtree-active ul').attr('data-node');
@@ -501,17 +646,17 @@ $(function() {
 		});
 	}
 
-	function velo_context_menu(e){
+	function velo_context_menu(e) {
 		$.getScript("static/js/spin.js", function() {
 			if (mode == 'night') {
 				var color = '#fff';
 			} else {
 				color = '#000';
 			}
-			opts.color = color; 
-			
+			opts.color = color;
+
 			var name = $(e.target).siblings().attr('data-path');
-			if(typeof name === 'undefined'){
+			if (typeof name === 'undefined') {
 				name = $(e.target).attr('data-path');
 			}
 			$('body').append(velo_context_menu_html);
@@ -520,104 +665,228 @@ $(function() {
 				'left': e.clientX
 			});
 			$('#velo_context_menu_delete').attr({
-				'data-name':name
+				'data-name': name
 			});
 			$('#velo_context_menu_rename').attr({
-				'data-name':name
+				'data-name': name
 			});
 			createMask('velo_context_menu', 0);
-			$('#velo_context_menu_delete').click(function(e){
+			$('#velo_context_menu_delete').click(function(e) {
 				var spinner = new Spinner(opts).spin();
 				document.getElementById('velo-file-tree').appendChild(spinner.el);
 				data = {
 					'name': $('#velo_context_menu_delete').attr('data-name')
 				};
-				get_data('velo_delete/', 'POST', data, function(response){
+				get_data('velo_delete/', 'POST', data, function(response) {
 					spinner.stop();
 					var target = $('ul[data-path="' + JSON.parse(data)['name'] + '"]');
-					if(target.length == 0){
+					if (target.length == 0) {
 						target = $('a[data-path="' + JSON.parse(data)['name'] + '"]');
 					}
-					target.parent().fadeOut().queue(function(){
+					target.parent().fadeOut().queue(function() {
 						target.parent().remove();
 					});
-				}, function(response){
+				}, function(response) {
 					spinner.stop();
 					alert('delete failure');
 				});
 				fadeOutMask('velo_context_menu');
 			});
-			$('#velo_context_menu_rename').click(function(e){
+			$('#velo_context_menu_rename').click(function(e) {
 				var spinner = new Spinner(opts).spin();
 				document.getElementById('velo-file-tree').appendChild(spinner.el);
 
 				fadeOutMask('velo_context_menu');
 			});
 		});
-	}	
+	}
 
-	function initCodeMirror(text) {
+  function make_draggable(node, ondrag) {
+      node.draggable({
+          appendTo: '.vtk-view-container',
+          zIndex: ~(1 << 31), // because jsPanel, sigh...
+          containment: '.vtk-view-container',
+          helper: "clone",
+          addClass: "cdat-grabbing",
+          opacity: 0.75
+      }).addClass('cdat-draggable')
+          .on('start', function(evt) {
+              if (ondrag) {
+              		console.log("dragging");
+                  ondrag.call(node, evt);
+              }
+          });
+
+      return node;
+  }
+
+//WARNING COPY PASTED CODE. This function contains code that needs to be removed. 
+  $("body").ready(function() {
+      //MATT
+      $('#new_plot').click(function() {
+          var new_tile = '<li id="' + counter + '" class="tile" >' + header1 + 'plot ' + counter + header2 + contents + header3 + '</li>';
+          add_tile(new_tile, counter, { ignore: 'true' } /* , call back function here */);
+          counter = counter + 1;
+      });
+
+      $.getScript("static/js/spin.js", function() {
+			if (mode == 'night') {
+				var color = '#fff';
+			} else {
+				color = '#000';
+			}
+			opts.color = color;
+			var spinner = new Spinner(opts).spin();
+			document.getElementById('cdat_window').appendChild(spinner.el);
+
+      cdat.get_graphics_methods().then(
+          function(plots) {
+            var parent = $(".cdatweb-plot-types");
+            var item = $("<li><a></a><ul class='qtree'></ul></li>");
+            var child = $("<li><a></a></li>");
+            var plot_fam_item, plot_family, plot_item;
+            for (plot_family in plots) {
+                if (plots.hasOwnProperty(plot_family) === false) {
+                    continue;
+                }
+                plot_fam_item = item.clone();
+                plot_fam_item.attr('id', plot_family);
+                plot_fam_item.find('a').text(plot_family);
+                for (plot_type in plots[plot_family]) {
+                    plot_item = child.clone();
+                    plot_item.attr('id', plot_type);
+                    plot_item
+                        .addClass('cdat-plot-method')
+                        .attr('data-type', plot_type)
+                        .attr('data-family', plot_family)
+                        .attr('data-nvars', plots[plot_family][plot_type].nvars)
+                        .text(plot_type);
+                    plot_item.hide();
+                    make_draggable(plot_item);
+                    plot_fam_item.find("ul").append(plot_item);
+                }
+                parent.append(plot_fam_item);
+                plot_fam_item.hide();
+            }
+          },
+          function() {
+          	console.log("Failed to get Graphic Methods");
+              console.log(arguments);
+          }
+      );
+
+      	cdat.get_templates().then(
+          function(templates) {
+              parent = $(".cdatweb-plot-templates");
+              var item = $("<li><a></a><ul class='qtree'></ul></li>");
+              var temp_fam_item, temp_name;
+              for (temp_name = 0; temp_name < templates.length; temp_name++) {
+                  temp_fam_item = item.clone();
+                  temp_fam_item.attr('id', templates[temp_name])
+                      .text(templates[temp_name])
+                      .addClass('cdat-template-option');
+                  make_draggable(temp_fam_item);
+                  parent.append(temp_fam_item);
+                  temp_fam_item.hide();
+              }
+              spinner.stop();
+          },
+          function() {
+          	spinner.stop();
+          	console.log("Failed to get templates");
+            console.log(arguments)
+          }
+      	);
+      	$(".qtree").quicktree();
+      }, function() {
+				spinner.stop();
+				alert('Something Happened');
+			});
+  });
+
+	function initCodeMirror(text, id, path) {
+		var instance = $('#' + id).data('tileid');
+		console.log("Instance var = " + instance);
+		var saveId = '"velo-editor-save-' + instance + '"';
+		content = '<div id="velo-text-edit-' + instance + '"><button class="fa fa-floppy-o velo-button" id=' + saveId + ' title="Save"></button></div>';
+		$('#' + id + ' .content').append(content);
+		$('#velo-text-edit-'+instance).on("click", {instance:instance}, function(event) {
+			$('#velo-mtree .mtree-active').removeClass('mtree-active');
+			$('#velo-mtree [data-editor="' + event.data.instance + '"]').parent('li').addClass('mtree-active');
+		});
 		$.getScript("static/js/codemirror.js", function() {
 			if (mode == 'night') {
 				var theme = 'twilight';
 			} else {
 				theme = '3024-day';
 			}
-			codeMirror = CodeMirror(document.getElementById('velo-text-edit'), {
+			codeMirror = CodeMirror(document.getElementById('velo-text-edit-' + instance), {
 				'theme': theme,
 				'dragDrop': false,
 				'lineNumbers': true,
 				'showCursorWhenSelecting': true,
 				'mode': 'text/python'
 			});
+			$('#velo-editor-save-' + instance).on("click", {id:instance, codeMirror:codeMirror}, function(event){ //store instance into event.data.id
+				velo_editor_save_file(event);
+			});
+			$('a[data-path="' + path + '"]').attr('data-editor', instance);
 			codeMirror.setValue(text);
-			codeMirror.on('change', function(event){
+			codeMirror.on('change', function(event) {
 				codeMirrorTextChanged(event);
 			});
 		});
-
-	}
-
-	function codeMirrorTextChanged(event){
-		$($('#velo-mtree .mtree-active > a')[1]).addClass('mtree-unsaved');
 	}
 
 
+	function codeMirrorTextChanged(event, i) {
+		var elem = $('#velo-mtree .mtree-active > a')
+		if($(elem[1]).length > 0){
+			$(elem[1]).addClass('mtree-unsaved');
+		}
+		else {
+			$(elem[0]).addClass('mtree-unsaved');
+		}
+	}
 
-	function getFile(id){
+
+
+	function getFile(url, id) {
 		$.getScript("static/js/spin.js", function() {
 			if (mode == 'night') {
 				var color = '#fff';
 			} else {
 				color = '#000';
 			}
-			opts.color = color; 
+			opts.color = color;
 			var spinner = new Spinner(opts).spin();
-			document.getElementById('velo-text-edit').appendChild(spinner.el);
-			var path = id.split('/');
+			//document.getElementById('velo-text-edit').appendChild(spinner.el);
+			var path = url.split('/');
 			filename = path.pop();
 			var path = path.join('/');
 			data = {
 				'filename': filename,
 				'path': path
 			}
-			get_data('get_file/', 'POST', data, function(response){
+			get_data('get_file/', 'POST', data, function(response) {
 				spinner.stop();
 				$('#velo-text-edit').empty();
-				if(response.type == 'image'){
-					var name = 'image-viewer';
+				if (response.type == 'image') {
+					// var name = 'Image Viewer: ' + id;
+					// var windowId = 'image_viewer_' + imgInstance;
 					var contents = '<div id="velo-image"><img src="/acme/userdata/image/' + response.location + '"></div>'
-					$('#velo-text-edit').empty();
-					$('#velo-text-edit').append(contents);
-					// var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + contents + header3 + '</li>';
-					// (new_tile, name + '_window', {ignore: 'true'});
-				} else {
-					initCodeMirror(response.responseText);
+					// var new_tile = '<li id="' + windowId + '_window" class="tile" data-path="' + id + '">' + header1 + name + header2 + contents + header3 + '</li>';
+					// add_tile(new_tile, windowId + '_window', {ignore: 'true'});	
+					// imgInstance++;
+					$('#' + id + ' .content').append(contents);
 				}
-			}, function(response){
+				else {
+				initCodeMirror(response.responseText, id, url);
+				}
+			}, function(response) {
 				spinner.stop();
-				alert('Faild to retrieve file from server');
-			} );
+				alert('Failed to retrieve file from server');
+			});
 		});
 	}
 
@@ -629,7 +898,7 @@ $(function() {
 			} else {
 				color = '#000';
 			}
-			opts.color = color; 
+			opts.color = color;
 			var spinner = new Spinner(opts).spin();
 			if (mode == 'day') {
 				$('#velo-file-tree').css({
@@ -652,7 +921,7 @@ $(function() {
 					'background-color': '#141414'
 				});
 			}
-			if(window_id == 'velo_window'){
+			if (window_id == 'velo_window') {
 				document.getElementById('velo_window').appendChild(spinner.el);
 				/*
 					The server adds the CURRENT_USER/velo_credentials to the end of the folder request
@@ -660,12 +929,12 @@ $(function() {
 				request = {
 					'file': '/User Documents/'
 				}
-				
+
 				get_data('get_folder/', 'POST', request, function(response) {
 					spinner.stop();
 					response.sort();
 					for (var i = 0; i < response.length; i++) {
-						if(response[i] == '/User Documents/' || response[i] == 'Velo Initialized...'){
+						if (response[i] == '/User Documents/' || response[i] == 'Velo Initialized...') {
 							response.splice(i, 1);
 							i--;
 							continue;
@@ -679,7 +948,7 @@ $(function() {
 							}
 							parentFolder = parentFolder.substring(0, parentFolder.length - 1);
 							var parentFolderEl = $('ul[data-path="' + parentFolder + '"]');
-							if(parentFolderEl.length == 0){
+							if (parentFolderEl.length == 0) {
 								$('#velo-mtree.mtree').append('<li class="mtree-root"><a href="#">' + path[path.length - 1] + '</a><ul data-path="' + response[i] + '"></ul></li>');
 								continue;
 							}
@@ -693,19 +962,25 @@ $(function() {
 								parentFolder += path[j] + '/';
 							}
 							parentFolder = parentFolder.substring(0, parentFolder.length - 1);
-							$('ul[data-path="'+ parentFolder + '"]').append('<li class="mtree-drag mtree-file"><a href="#" data-path="' + response[i] + '">' + path[path.length - 1] + '</a></li>');
+							$('ul[data-path="' + parentFolder + '"]').append('<li class="mtree-drag mtree-file"><a href="#" data-path="' + response[i] + '">' + path[path.length - 1] + '</a></li>');
 							$('a[data-path="' + response[i] + '"]').addClass('velo-file');
-							$('a[data-path="' + response[i] + '"]').click(function(event){
-								getFile( $(event.target).attr('data-path') );
-							});
-						}
+							$('a[data-path="' + response[i] + '"]').click(function(event) {
+
+								console.log($(event.target).attr('data-path'));
+								var id = 'dashboard_tile_' + instance;
+								var path = $(event.target).attr('data-path');
+								content = '<div class="content"></div>';
+								var new_tile = '<li id="' + id + '" class="tile" data-path="' + path + '" data-tileid="' + instance + '" > ' + header1 + path + header2 + content + header3 + '</li>';
+								add_tile(new_tile, id , { ignore: 'true'}, getFile(path, id)); 
+							}); //this is totally not doing what i thought it would, but it works. Pretty sure that getFile
+						}       //is getting called instead of being passed as a callback. 
 					}
 
 					mtree('velo-mtree-container');
 
-					$('#velo-mtree.mtree').bind('contextmenu',function(e){
+					$('#velo-mtree.mtree').bind('contextmenu', function(e) {
 						e.preventDefault();
-						if(e.button == 2){
+						if (e.button == 2) {
 							velo_context_menu(e);
 						}
 					});
@@ -722,7 +997,7 @@ $(function() {
 					// });
 					//$('.mtree-drag-and-sort').disableSelection();
 					$('.mtree-drop').droppable({
-						drop: function(event, ui){
+						drop: function(event, ui) {
 							console.log(event);
 							console.log(ui);
 
@@ -732,43 +1007,42 @@ $(function() {
 					spinner.stop();
 					alert('error getting home folder');
 				});
-			}
-			else if(window_id == 'esgf_window'){
+			} else if (window_id == 'esgf_window') {
 				document.getElementById('esgf_window').appendChild(spinner.el);
-				get_data('node_info/', 'GET', {}, function(response){
+				get_data('node_info/', 'GET', {}, function(response) {
 					spinner.stop();
 					$('#esgf-node-tree').append('<ul class="mtree" id="esgf-mtree"></ul>');
 					var node_array = Object.keys(response);
 					var length = node_array.length;
-					if(length > 10){
+					if (length > 10) {
 						length = 10
 					}
-					for(var i = 0; i < length; i++){
+					for (var i = 0; i < length; i++) {
 
 						var node_attrib = Object.keys(response[node_array[i]]['attributes']);
 						//var node_child = Object.keys(response[node_array[i]]['children']);
 						var node_child = 'Node';
-						if(response[node_array[i]]['children'][node_child]){
+						if (response[node_array[i]]['children'][node_child]) {
 							var host = response[node_array[i]]['children'][node_child]['attributes']['hostname'];
 							$('#esgf-mtree').append('<li><a href="#">' + node_array[i] + '</a><ul data-node="' + host + '"></li>');
 							$('ul[data-node="' + host + '"]').append('<input type="checkbox" class="node-check-box" value="' + host + '">Search Node</input>');
-							for(var j = 0; j < node_attrib.length; j++){
+							for (var j = 0; j < node_attrib.length; j++) {
 								var attribute;
 								var children;
-								if(node_attrib[j] == 'timeStamp'){
-									var d = new Date(0); 
+								if (node_attrib[j] == 'timeStamp') {
+									var d = new Date(0);
 									d.setUTCSeconds(response[node_array[i]]['attributes'][node_attrib[j]] / 1000);
 									attribute = 'date node came online ' + d;
 								} else {
 									attribute = response[node_array[i]]['attributes'][node_attrib[j]];
 								}
 								children = Object.keys(response[node_array[i]]['children'][node_child]['attributes']);
-								
-								$('ul[data-node="' + host + '"]').append('<li><table><tr><td>' + node_attrib[j] + '</td><td style="text-align: right;"> ' + attribute + '</td></tr></table></li>');					
+
+								$('ul[data-node="' + host + '"]').append('<li><table><tr><td>' + node_attrib[j] + '</td><td style="text-align: right;"> ' + attribute + '</td></tr></table></li>');
 							}
-							for(var k = 0; k < children.length; k++){
-								if(children[k] == 'timeStamp'){
-									var d = new Date(0); 
+							for (var k = 0; k < children.length; k++) {
+								if (children[k] == 'timeStamp') {
+									var d = new Date(0);
 									d.setUTCSeconds(response[node_array[i]]['children'][node_child]['attributes'][children[k]] / 1000);
 									attribute = 'node online at ' + d;
 								} else {
@@ -778,14 +1052,14 @@ $(function() {
 							}
 						}
 					}
-					$('#esgf-mtree.mtree').bind('contextmenu',function(e){
+					$('#esgf-mtree.mtree').bind('contextmenu', function(e) {
 						e.preventDefault();
-						if(e.button == 2){
+						if (e.button == 2) {
 							esgf_context_menu(e);
 						}
 					});
 					mtree('esgf-node-tree');
-				}, function(response){
+				}, function(response) {
 					alert('Error getting node list');
 					spinner.stop();
 				});
@@ -826,10 +1100,10 @@ $(function() {
 			type: 'POST',
 			dataType: 'json',
 			statusCode: {
-				200: function(response){
+				200: function(response) {
 					cb(response.status);
 				},
-				500: function(response){
+				500: function(response) {
 					cb(response.status);
 				}
 			},
@@ -854,19 +1128,19 @@ $(function() {
 			} else {
 				color = '#000';
 			}
-			opts.color = color; 
+			opts.color = color;
 			var spinner = new Spinner(opts).spin();
 
-			
+
 			//get  facets
 			var nodes_to_search = [];
-			$.each($('.node-check-box:checked'), function(box, value){
+			$.each($('.node-check-box:checked'), function(box, value) {
 				nodes_to_search.push($(value).val());
 			});
 			esgf_search_nodes = nodes_to_search;
 			$('#esgf_window #esgf-node-tree').remove();
 			document.getElementById('esgf_window').appendChild(spinner.el);
-			get_data('load_facets/', 'POST', nodes_to_search, function(response){
+			get_data('load_facets/', 'POST', nodes_to_search, function(response) {
 				spinner.stop();
 				var newHtml = '<div id="esgf-node-search"><ul class="mtree" id="esgf-node-search-mtree"></ul></div>';
 				$('#esgf_window .tile-contents').append(newHtml);
@@ -876,20 +1150,20 @@ $(function() {
 				$('#esgf_window .tile-contents').prepend(newHtml);
 				var keys = Object.keys(response).sort();
 
-				for(var i = 0; i < keys.length; i++){
+				for (var i = 0; i < keys.length; i++) {
 					var facet = response[keys[i]];
 					var facet_html = '<li><a href="#">' + keys[i] + '</a><ul data-facet="' + keys[i] + '" class="facet"></ul></li>';
 					$('#esgf-node-search-mtree').append(facet_html);
 					var facet_options = Object.keys(response[keys[i]]).sort();
-					for(var j=0; j < facet_options.length; j++){
+					for (var j = 0; j < facet_options.length; j++) {
 						var facet_options_html = '<li><table><tr><td><a href="#">' + facet_options[j] + '</a></td><td style="text-align: right;">' + response[keys[i]][facet_options[j]] + '</td></tr></table></li>';
 						$('ul[data-facet="' + keys[i] + '"').append(facet_options_html);
 					}
-					$('ul[data-facet="' + keys[i] + '"]').click(function(e){
+					$('ul[data-facet="' + keys[i] + '"]').click(function(e) {
 						esgf_search_terms[$(e.target).parents('.facet').attr('data-facet')] = $(e.target).text();
 						var terms = Object.keys(esgf_search_terms);
 						var terms_string = '';
-						for(var i = 0; i < terms.length; i++){
+						for (var i = 0; i < terms.length; i++) {
 							terms_string += terms[i] + '=' + esgf_search_terms[terms[i]] + ',';
 						}
 						terms_string = terms_string.substring(0, terms_string.length - 1);
@@ -897,15 +1171,15 @@ $(function() {
 					});
 				}
 				mtree('esgf-node-search');
-				$('#esgf-search-submit').click(function(){
+				$('#esgf-search-submit').click(function() {
 					var terms = document.getElementById('esgf-search-terms').value.split(/[=,]+/);
 					esgf_search_terms = {};
-					for(var i = 0; i < terms.length - 1; i+=2){
+					for (var i = 0; i < terms.length - 1; i += 2) {
 						esgf_search_terms[terms[i]] = terms[i + 1];
 					}
 					esgfSearch();
 				});
-			}, function(){
+			}, function() {
 				spinner.stop();
 				alert('Failed to load node facets');
 			});
@@ -919,7 +1193,7 @@ $(function() {
 			} else {
 				color = '#000';
 			}
-			opts.color = color; 
+			opts.color = color;
 			var spinner = new Spinner(opts).spin();
 			document.getElementById('esgf_window').appendChild(spinner.el);
 			data = {
@@ -927,19 +1201,19 @@ $(function() {
 				'terms': esgf_search_terms
 			}
 
-			function display_response(r, parent, hitnum){
+			function display_response(r, parent, hitnum) {
 				keys = Object.keys(r).sort();
 				var branch = '';
 
-				for(var i = 0; i < keys.length; i++){
-					if(typeof r[keys[i]] != 'object'){
+				for (var i = 0; i < keys.length; i++) {
+					if (typeof r[keys[i]] != 'object') {
 						branch = '<li><table><tr><td>' + keys[i] + '</td><td style="float:right;"> ' + r[keys[i]] + '</td></tr></table></li>';
 						parent.append(branch);
 					} else {
 						branch = '<li><a href="#">' + keys[i] + '</a><ul data-branch="' + hitnum + keys[i] + '"></ul></li>';
 						parent.append(branch);
 						var subkeys = Object.keys(r[keys[i]]);
-						for(var j = 0; j < subkeys.length; j++){
+						for (var j = 0; j < subkeys.length; j++) {
 							branch = '<li><table><tr><td>' + subkeys[j] + '</td><td style="float:right;"> ' + r[keys[i]][subkeys[j]] + '</td></tr></table></li>';
 							$('ul[data-branch="' + hitnum + keys[i] + '"]').append(branch);
 						}
@@ -950,7 +1224,7 @@ $(function() {
 
 			get_data('node_search/', 'POST', data, function(response) {
 				spinner.stop();
-				
+
 				var searchDisplay = '<div id="esgf-search-display"><ul class="mtree" id="esgf-search-display-mtree"></ul></div>';
 				if ($('#esgf-search-display').length == 0) {
 					$('#esgf_window .tile-contents').append(searchDisplay);
@@ -959,8 +1233,8 @@ $(function() {
 					$('#esgf_window .tile-contents').append(searchDisplay);
 				}
 				for (var i in response) {
-					if(i != 'hits'){
-						$('#esgf-search-display-mtree').append('<li><a href="#">Dataset: ' + (parseInt(i)+1) + '</a><ul data-branch="' + i + '"></ul></li>');
+					if (i != 'hits') {
+						$('#esgf-search-display-mtree').append('<li><a href="#">Dataset: ' + (parseInt(i) + 1) + '</a><ul data-branch="' + i + '"></ul></li>');
 						display_response(response[i], $('ul[data-branch="' + i + '"]'), i);
 					}
 				}
@@ -976,6 +1250,21 @@ $(function() {
 		});
 	}
 
+
+	/**
+	 * Adds a given window to the sidebar.
+	 * Based off the add tile function, but with the tile system removed. 
+	 **/
+
+	function add_sidebar_window(html, id) {
+		var w = $('#' + id);
+		$(w).replaceWith(html);
+		$(w).css({
+			'z-index': 1,
+			'opacity': 1
+		});
+		return $(w);
+	};
 
 
 	/**
@@ -993,12 +1282,12 @@ $(function() {
 			'opacity': 0
 		});
 		console.log('setting options button id to ' + id + '_window_options');
-	 	$(w).find('.fa-cog').parent().attr({ 
-	 		id: id + '_options'
-	 	});
-	 	$(w).find('.fa-times').parent().attr({ 
-	 		id: id + '_close'
-	 	});
+		$(w).find('.fa-cog').parent().attr({
+			id: id + '_options'
+		});
+		$(w).find('.fa-times').parent().attr({
+			id: id + '_close'
+		});
 
 		$(w).draggable({
 			//containment: '.tile-board',
@@ -1084,6 +1373,7 @@ $(function() {
 		});
 
 		$(w).find('.remove').click(function(e) {
+
 			$('#' + id).remove();
 			for (var i = tiles.length - 1; i >= 0; i--) {
 				if (tiles[i] == id) {
@@ -1110,9 +1400,13 @@ $(function() {
 			$(w).css({
 				"top": tile_offset.top,
 				"left": tile_offset.left,
-				"width": $(w).attr('sizex') * tileWidth,
+				"width": $(w).attr('sizex') * tileWidth * widthScale,
 				"height": $(w).attr('sizey') * tileHeight
 			});
+			console.log(tileWidth);
+			console.log(tileHeight);
+			console.log(options.sizex);
+			console.log(options.sizey);
 		} else {
 			positionFixup();
 		}
@@ -1127,8 +1421,10 @@ $(function() {
 			'opacity': 1
 		}, 'slow', 'easeOutCubic');
 
-		if (callback != null)
+		if (callback != null) {
 			callback();
+		}
+		instance++;
 		return $(w);
 	};
 
@@ -1708,13 +2004,18 @@ $(function() {
 				'sizex': layout[tiles.length - 1][i].sizex(maxCols),
 				'sizey': layout[tiles.length - 1][i].sizey(maxHeight)
 			});
-			var tile_offset = offset_from_location(parseInt(t.attr('row')), parseInt(t.attr('col')));
+			var tile_offset = offset_from_location(parseInt(t.attr('row')), parseInt(t.attr('col'))); 
 			t.css({
 				"top": tile_offset.top,
 				"left": tile_offset.left,
-				"width": t.attr('sizex') * tileWidth,
+				"width": t.attr('sizex') * tileWidth * widthScale,
 				"height": t.attr('sizey') * tileHeight
 			});
+
+			console.log( tile_offset.top );
+			console.log( tile_offset.left );
+			console.log( t.attr('sizex') * tileWidth);
+			console.log( t.attr('sizey') * tileHeight );
 			update_board(tiles[i]);
 		};
 	}
@@ -1742,8 +2043,9 @@ $(function() {
 	 */
 	function offset_from_location(row, col) {
 		var offset = $('.tile-board').offset();
-		offset.left += (col - 1) * tileWidth;
+		offset.left += (col - 1) * tileWidth; //account for other tiles
 		offset.top += (row - 1) * tileHeight;
+		offset.left = ((offset.left - sidebarWidth) * widthScale) + sidebarWidth; //reduce widths to the portion of the screen not used by the sidebar
 		return offset;
 	}
 
@@ -1784,7 +2086,7 @@ $(function() {
 			startGrid.css({
 				'top': targetOffset.top,
 				'left': targetOffset.left,
-				'width': parseInt(startGrid.attr('sizex')) * tileWidth,
+				'width': parseInt(startGrid.attr('sizex')) * tileWidth * widthScale,
 				'height': parseInt(startGrid.attr('sizey')) * tileHeight
 			});
 			update_board(dragStartId);
@@ -1798,7 +2100,7 @@ $(function() {
 			targetGrid.css({
 				'top': dragStartOffset.top,
 				'left': dragStartOffset.left,
-				'width': parseInt(targetGrid.attr('sizex')) * tileWidth,
+				'width': parseInt(targetGrid.attr('sizex')) * tileWidth * widthScale,
 				'height': parseInt(targetGrid.attr('sizey')) * tileHeight
 			});
 			update_board(targetId);
@@ -1850,129 +2152,52 @@ $(function() {
 	***********************************/
 	var body = document.body;
 
-	function leftMenuToggle() {
-		$('#slide-menu-left').toggle('slide', {
-			direction: 'left',
-			easing: 'easeOutCubic'
-		}, 500);
-		if ($('#toggle-left-a').text() == 'Open Menu') {
-			$('#toggle-left-a').text('Close Menu');
+	window.onbeforeunload =	function() {
+		var layout_name = 'default';
+ 		var layout = [];
+		$('.tile').each(function() {
+			var obj = {
+				tileType: $(this).attr('data-type'),
+				tileName: $(this).attr('id'),
+				tilePath: $(this).attr('data-path'),
+				x: parseInt($(this).attr('col')) / maxCols,
+				y: parseInt($(this).attr('row')) / maxHeight,
+				sizex: parseInt($(this).attr('sizex')) / maxCols,
+				sizey: parseInt($(this).attr('sizey')) / maxHeight
+			};
+			if ($(this).attr('data-type') === 'plot') {
+				obj.graphicMethod = $(this).find(".cdat-graphic-method").text()
+				obj.graphicTemplate = $(this).find(".cdat-graphic-template").text()
+				// console.log("printing plot saving");
+				console.log(obj.graphicTemplate);
+				console.log(obj.graphicMethod);
+			}
+			layout.push(obj);
+		});
+		console.log(layout);
+		if ($('body').hasClass('night')) {
+			var mode = 'night';
 		} else {
-			$('#toggle-left-a').text('Open Menu');
+			mode = 'day'
 		}
+		var data = {
+			instance: instance,
+			name: layout_name,
+			mode: mode,
+			style: 'balanced',
+			layout: layout,
+			default_layout: 1
+		};
+
+ 		get_data('save_layout/', 'POST', data, function() {
+ 			return undefined; //alert('Layout saved');
+ 		}, function() {
+ 			return "Failed to save layout"; //alert('Please use a unique layout name');
+ 		}, false); //false forces a synchronous connection
+
 	}
 
-	$('#toggle-slide-left').click(function(e) {
-		leftMenuToggle();
-	});
 
-	$('#save-layout').click(function() {
-		leftMenuToggle();
-		createMask('save-menu');
-
-		var saveMenu = document.createElement('div');
-		$(saveMenu).addClass('bvc');
-		$(saveMenu).addClass('save-layout');
-		$(saveMenu).attr({
-			'id': 'save-menu'
-		});
-		var saveMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
-		saveMenuHtml += '<form name="save-layout-form" id="save-form">';
-		saveMenuHtml += 'Layout Name:<br><input type="text" id="layout-name">';
-		saveMenuHtml += '<input type="submit" value="Save" id="save-btn"><br>';
-		saveMenuHtml += '<input type="checkbox" name="default" value="default" id="default">Default Layout';
-		saveMenuHtml += '</form></div><div class="bevel bl br"></div>';
-		$(saveMenu).html(saveMenuHtml);
-		$('body').append(saveMenu);
-		$('#save-btn').click(function(event) {
-			event.preventDefault();
-			var layout_name = document.getElementById('layout-name').value;
-			var layout = [];
-			$('.tile').each(function() {
-				layout.push({
-					tileName: $(this).attr('id').substr(0, $(this).attr('id').indexOf('_')),
-					x: parseInt($(this).attr('col')) / maxCols,
-					y: parseInt($(this).attr('row')) / maxHeight,
-					sizex: parseInt($(this).attr('sizex')) / maxCols,
-					sizey: parseInt($(this).attr('sizey')) / maxHeight
-				});
-			});
-			if ($('body').hasClass('night')) {
-				var mode = 'night';
-			} else {
-				mode = 'day'
-			}
-			var data = {
-				name: layout_name,
-				mode: mode,
-				style: 'balanced',
-				layout: layout,
-				default_layout: document.getElementById('default').checked
-			};
-
-			get_data('save_layout/', 'POST', data, function() {
-				alert('Layout saved');
-			}, function() {
-				alert('Please use unique layout name');
-			});
-			fadeOutMask('save-menu');
-		});
-	});
-
-
-	$('#load-layout').click(function() {
-		var options = {};
-		get_data('load_layout/', 'GET', new Object(), function(request) {
-			//parse response
-			options = request;
-			createMask('load-layout-menu');
-
-			//create load menu and populate with values
-			var loadMenu = document.createElement('div');
-			$(loadMenu).addClass('bvc');
-			$(loadMenu).addClass('save-layout');
-			$(loadMenu).attr({
-				'id': 'load-layout-menu'
-			});
-			var loadMenuHtml = '<div class="bevel tl tr"></div><div class="content">'
-			loadMenuHtml += '<form name="load-layout-form" id="save-form">';
-			loadMenuHtml += 'Select Layout:<br><select id="select-layout">';
-			$.each(options, function(k, v) {
-				loadMenuHtml += '<option value="' + v.name + '" id="layout-' + v.name + '">' + v.name + '</option>';
-			});
-			loadMenuHtml += '</select><input type="submit" value="Load" id="load-button">';
-			loadMenuHtml += '</form></div><div class="bevel bl br"></div>';
-			$(loadMenu).html(loadMenuHtml);
-			$('body').append(loadMenu);
-			
-
-			$('#load-button').click(function() {
-				var name = document.forms['load-layout-form'].elements[0].options[document.forms['load-layout-form'].elements[0].selectedIndex].text;
-				var data = {
-					'layout_name': name
-				};
-				get_data('load_layout/', 'POST', data, function(request) {
-					fadeOutMask('load-layout-menu');
-					$('.tile').each(function() {
-						$(this).remove();
-					});
-					tiles = [];
-					layout = []
-					$.each(request.board_layout, function(k, v) {
-						layout.push(layoutFix(v));
-					});
-					loadLayout(layout, request.mode);
-				}, function() {
-					alert('failed to load layout');
-					fadeOutMask('load-layout-menu');
-				});
-			});
-		}, function() {
-			alert('failed to load layout');
-		});
-
-		leftMenuToggle();
-	});
 
 
 	/**
@@ -2003,7 +2228,8 @@ $(function() {
 	 * mode -> the day/night mode of the layout
 	 */
 	function loadLayout(layout, mode) {
-		fadeOutMask();
+		//fadeOutMask();
+		console.log("load layout called");
 		if (mode == 'day') {
 			setDay();
 		} else if (mode == 'night') {
@@ -2011,25 +2237,48 @@ $(function() {
 		}
 		mode.light = mode
 
-		for (var i = 0; i < layout.length; i++) {
-			var name = layout[i].tileName;
-			var new_tile = '<li id="' + name + '_window" class="tile">' + header1 + name + header2 + contents + header3 + '</li>';
-			add_tile(new_tile, name + '_window', {
-				x: layout[i].x - needsFixX(),
-				y: layout[i].y - needsFixY(),
-				sizex: layout[i].sizex,
-				sizey: layout[i].sizey
-			});
-		}
+		$.each(layout, function(index, tile){
+			var path = tile.tilePath;
+			var tileId = 'dashboard_tile_' + index;
+			var content = '<div class="content"></div>';
+			var new_tile = '<li id="' + tileId + '" class="tile" data-path="'+ path +'" data-tileid="'+ index +'">' + header1 + path + header2 + content + header3 + '</li>';
+			console.log("loading tile with path: " + path);
+			console.log("loading tile with id: " + tileId);
+			if (tile.tileType == 'plot') {
+				var plotvars = {
+					template: tile.graphicTemplate,
+					method: tile.graphicMethod,
+					variable: []
+				}
+				var name = 'Plot ' + plotcount;
+				var plotid = 'plot' + plotcount;
+				var content = '<div class="plot-content" data-plot="'+plotcount+'"></div>'
+				plotcount++;
+				if ($('#' + plotid + '_window').length == 0) {
+					var new_tile = '<li id="' + plotid + '_window" class="tile" data-type="plot">' + header1 + name + header2 + content + header3 + '</li>';
+					add_tile(new_tile, plotid + '_window', {
+						ignore: 'true'
+					}, function() {new_plot(plotid + '_window', plotvars)});
+				}
+			}
+			else {
+				add_tile(new_tile, tileId, {
+				x: tile.x - needsFixX(),
+				y: tile.y - needsFixY(),
+				sizex: tile.sizex,
+				sizey: tile.sizey
+				}, getFile(path, tileId));
+			}
+		});
 	}
 
-	function createMask(id, opacity){
+	function createMask(id, opacity) {
 		var mask = document.createElement('div');
 		$(mask).addClass('mask');
 		$(mask).attr({
 			'id': 'mask'
 		});
-		if(typeof opacity !== 'undefined'){
+		if (typeof opacity !== 'undefined') {
 			$(mask).css({
 				'opacity': opacity
 			});
@@ -2066,7 +2315,7 @@ $(function() {
 		});
 		$('#dark-mode-toggle').text('Dark mode is on');
 		//handle velo window
-		if($('#velo_window').length != 0){
+		if ($('#velo_window').length != 0) {
 			$('.mtree').removeClass('jet');
 			$('.mtree').addClass('transit');
 			$('#velo-file-tree').css({
@@ -2075,11 +2324,13 @@ $(function() {
 			$('#velo-text-edit').css({
 				'background-color': '#141414'
 			});
-			if(typeof codeMirror !== 'undefined'){
+			if (typeof codeMirror !== 'undefined') {
 				codeMirror.setOption('theme', 'twilight');
 			}
 		}
-		$('#velo-options-bar').find(':button').css({'background-color': 'rgb(1, 1, 1)'});
+		$('#velo-options-bar').find(':button').css({
+			'background-color': 'rgb(1, 1, 1)'
+		});
 	}
 
 	function setDay() {
@@ -2102,19 +2353,21 @@ $(function() {
 		$('.mtree').removeClass('transit');
 		$('.mtree').addClass('jet');
 		//handle velo window
-		if($('#velo_window').length != 0){
+		if ($('#velo_window').length != 0) {
 			$('#velo-file-tree').css({
 				'background-color': '#FAFFFF'
 			});
 			$('#velo-text-edit').css({
 				'background-color': '#f7f7f7'
 			});
-			if(typeof codeMirror !== 'undefined'){
+			if (typeof codeMirror !== 'undefined') {
 				codeMirror.setOption('theme', '3024-day');
-			} 
+			}
 		}
-		$('#velo-options-bar').find(':button').css({'background-color': 'rgb(192, 192, 192)'});
-		
+		$('#velo-options-bar').find(':button').css({
+			'background-color': 'rgb(192, 192, 192)'
+		});
+
 	}
 
 
@@ -2213,7 +2466,7 @@ $(function() {
 			maxCols = Math.floor(docWidth / 50);
 		} else {
 			dimensionComponents = dimensionComponents[Math.floor(dimensionComponents.length / 2)];
-			tileWidth = dimensionComponents.factor;
+			tileWidth = dimensionComponents.factor; //uhhhhh hopefully this is right
 			maxCols = dimensionComponents.multiplicator;
 		}
 	}
@@ -2330,9 +2583,11 @@ $(function() {
 		return null;
 	}
 
-	function get_data(url, type, jsonObj, success_callback, fail_callback) {
+	function get_data(url, type, jsonObj, success_callback, fail_callback, async) {
 		var csrftoken = get_csrf();
-
+		if (async === undefined) {
+			async = true;
+		}
 		// var jsonObj = new Object;®
 		// jsonObj.result = '';
 		// jsonObj.data = '';
@@ -2340,6 +2595,7 @@ $(function() {
 		var ajax_obj = $.ajax({
 			type: type,
 			url: url,
+			async: async,
 			data: data,
 			dataType: 'json',
 			success: function(data) {
@@ -2364,14 +2620,15 @@ $(function() {
 				jsonObj.data = errorStr;
 				console.log(jsonObj);
 				fail_callback(status);
+
 			}
 		});
 		return ajax_obj;
 	}
 
 
-	function mtree(id){
-		if(typeof id === 'undefined'){
+	function mtree(id) {
+		if (typeof id === 'undefined') {
 			id = 'tile-contents';
 		}
 		/*
@@ -2525,8 +2782,36 @@ $(function() {
 			}
 		}
 
-		/*
+		/*w
 			End mtree.js
 		*/
 	}
+
+	function new_plot(id, plotvars) {
+		console.log("making cdat window");
+		var content = cdat.make_plot_panel();
+		console.log(content);
+		console.log($('#'+id + " .plot-content"));
+		var elem = $('#'+id + " .plot-content");
+		elem.append(content);
+		console.log(plotvars);
+		if (plotvars) {
+			elem.find(".cdat-graphic-method").text(plotvars.method);
+			elem.find(".cdat-graphic-template").text(plotvars.template);
+		}
+	}
+
+$(document).on("mousedown", 'ul.qtree li.ui-draggable', function(event) { 
+    $(event.target).addClass('mousehold');
+    //$(this).css({'cursor':'grabbing'});
+});
+
+//An awful fix for mouseup not removing class on a dragged element
+$(document).on("mouseup", function(event) { 
+    $('.mousehold').removeClass('mousehold');
+    //$(this).css({'cursor':'pointer'});
+
+});
+
+
 });

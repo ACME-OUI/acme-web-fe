@@ -182,7 +182,7 @@ class TestNodeInfo(TestCase):
 
     def test_node_info(self):
 
-        node = 'esgf-pcmdi-9'
+        node = 'esgf-pcmdi'
         response = self.client.post(
             '/acme/node_info/', content_type='application/json', data=json.dumps({'node': node}))
 
@@ -226,7 +226,7 @@ class TestNodeSearch(TestCase):
 
     def test_node_connection(self):
         request = {
-            'node': 'http://pcmdi9.llnl.gov/esg-search/',
+            'node': 'http://pcmdi.llnl.gov/esg-search/',
             'test_connection': 'true'
         }
         try:
@@ -245,7 +245,7 @@ class TestNodeSearch(TestCase):
     def test_node_search(self):
 
         request = {
-            'node': 'http://pcmdi9.llnl.gov/esg-search/',
+            'node': 'http://pcmdi.llnl.gov/esg-search/',
             'institute': 'LLNL'
         }
         request = json.dumps(request)
