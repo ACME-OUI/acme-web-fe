@@ -1,40 +1,24 @@
 import jpype
-import time
 from jpype import *
+import time
 import os
-
 jvmPath = jpype.getDefaultJVMPath()
 
 
 def start_jvm():
-    # include the velo python API jar file here
     path = os.getcwd()
     acme = 'acme-web-fe'
     index = path.find(acme)
     path = path[:index]
+    veloPath = "-Djava.class.path=%sacme-web-fe/static/java/VeloAPI.jar" % path
+    if not jpype.isJVMStarted():
+        jpype.startJVM(jvmPath, veloPath)
 
-    if jpype.isJVMStarted():
-        return
-    jpype.startJVM(
-        jvmPath, "-Djava.class.path=" + path + "acme-web-fe/static/java/VeloAPI.jar")
-
-    global velo, cms, jobConfig, fileObj, tifConstants
-
-    velo = JPackage("velo").mgr.VeloManager
-    cms = JPackage("gov").pnnl.velo.model.CmsPath
-    jobConfig = JPackage("gov").pnnl.velo.tif.model.JobConfig
-    tifConstants = JPackage("gov").pnnl.velo.util.VeloTifConstants
-
-
-def print_debug(e):
-    import traceback
-    print '1', e.__doc__
-    print '2', sys.exc_info()
-    print '3', sys.exc_info()[0]
-    print '4', sys.exc_info()[1]
-    print '5', traceback.tb_lineno(sys.exc_info()[2])
-    ex_type, ex, tb = sys.exc_info()
-    print '6', traceback.print_tb(tb)
+        global velo, cms, jobConfig, fileObj, tifConstants
+        velo = JPackage("velo").mgr.VeloManager
+        cms = JPackage("gov").pnnl.velo.model.CmsPath
+        jobConfig = JPackage("gov").pnnl.velo.tif.model.JobConfig
+        tifConstants = JPackage("gov").pnnl.velo.util.VeloTifConstants
 
 
 class Velo(object):
@@ -245,3 +229,14 @@ class Velo(object):
 
     def shutdown_jvm(self):
         jpype.shutdownJVM()
+
+
+def print_debug(e):
+    import traceback
+    print '1', e.__doc__
+    print '2', sys.exc_info()
+    print '3', sys.exc_info()[0]
+    print '4', sys.exc_info()[1]
+    print '5', traceback.tb_lineno(sys.exc_info()[2])
+    ex_type, ex, tb = sys.exc_info()
+    print '6', traceback.print_tb(tb)

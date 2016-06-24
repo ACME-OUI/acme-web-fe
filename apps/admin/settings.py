@@ -31,10 +31,12 @@ if os.getenv('build_on_travis', None):
     GITHUB_KEY = ''
     JIRA_USER = ''
     JIRA_PASSWORD = ''
+    VISUALIZATION_LAUNCHER = None
 else:
     from local_settings import *  # noqa
 
 USERDATA_ROOT = os.path.join(os.getcwd(), 'userdata')
+
 
 # Django settings for admin project.
 
@@ -144,6 +146,10 @@ INSTALLED_APPS = (
     'captcha',
     'web_fe',
     'issues',
+    'poller',
+    'esgf',
+    'cdat',
+    'velo',
 )
 
 # Use nose to run all tests

@@ -1,7 +1,30 @@
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.conf.urls import patterns, include, url
 from web_fe import views
+from velo import views as velo_views
+from esgf import views as esgf_views
+from cdat import views as cdat_views
 
+velo_patterns = [
+    url(r'^get_folder/$', velo_views.get_folder),
+    url(r'^get_file/$', velo_views.get_file),
+    url(r'^velo_save_file/$', velo_views.save_file),
+    url(r'^velo_new_folder/$', velo_views.new_folder),
+    url(r'^velo_delete/$', velo_views.delete),
+]
+
+esgf_patterns = [
+    url(r'^node_info/$', esgf_views.node_info),
+    url(r'^node_search/$', esgf_views.node_search),
+    url(r'^load_facets/$', esgf_views.load_facets),
+]
+
+cdat_patterns = [
+    url(r'^vtk/', cdat_views.vtkweb_launcher),
+    url(r'^_refresh', cdat_views._refresh),
+    url(r'^vtk_viewer', cdat_views.vtk_viewer),
+    url(r'^vtk_test', cdat_views.vtk_test),
+]
 
 urlpatterns = patterns('',
                        url(r'^$', views.index, name='index'),
@@ -14,22 +37,14 @@ urlpatterns = patterns('',
                        url(r'^dashboard/?$', views.dashboard, name='dashboard'),
                        url(r'^credential_check_existance/',
                            views.credential_check_existance),
-                       url(r'^get_folder/', views.get_folder),
-                       url(r'^get_file/', views.get_file),
-                       url(r'^velo_save_file/', views.velo_save_file),
-                       url(r'^velo_new_folder/', views.velo_new_folder),
-                       url(r'^velo_delete/', views.velo_delete),
-
                        url(r'^save_layout/', views.save_layout,
                            name='save_layout'),
                        url(r'^load_layout/', views.load_layout,
                            name='load_layout'),
-                       url(r'^node_info/', views.node_info),
-                       url(r'^node_search/', views.node_search),
-                       url(r'^load_facets/', views.load_facets),
                        url(r'^userdata/image/(?P<path>.*\.png)$', views.send_image),
-                       url(r'^vtk/', views.vtkweb_launcher),
-                       # url(r'^esgf_download/', views.esgf_download),
+                       url(r'^velo/', include(velo_patterns)),
+                       url(r'^esgf/', include(esgf_patterns)),
+                       url(r'^cdat/', include(cdat_patterns)),
                        )
 
 urlpatterns += staticfiles_urlpatterns()
