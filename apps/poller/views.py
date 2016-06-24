@@ -1,74 +1,72 @@
 from django.shortcuts import render
-from django.core.context_processors import csrf
-from django.views.decorators.csrf import csrf_exempt
-from django.template import Template
 from django.http import HttpResponse
 from django.http import JsonResponse
 from poller.models import UserRuns
-from django.conf import settings
 import json
-import pdb
 
 
-def index(request):
+def update(request):
     if request.method == 'GET':
         try:
-            status = request.GET.get('status')
+            request_type = request.GET.get('request')
             user = request.GET.get('user')
-            if status:
-                if status == 'all':
-                    data = UserRuns.objects.all()
-                elif status == 'next':
+            if request_type:
+                if request_type == 'all':
+                    if user:
+                        data = UserRuns.objects.filter(user=user)
+                    else:
+                        data = UserRuns.objects.all()
+                elif request_type == 'next':
                     data = UserRuns.objects.filter(status='new').order_by('created')
                     if not data:
                         return JsonResponse({}, safe=False)
                     else:
                         data = data[0]
                         r = {}
-                        r['runspec'] = data.runspec
                         r['id'] = data.id
                         r['user'] = data.user
-                        r['destination'] = data.destination
-                        r['casename'] = data.casename
-                        r['mppwidth'] = data.mppwidth
-                        r['stop_option'] = data.stop_option
-                        r['stop_n'] = data.stop_n
-                        r['walltime'] = data.walltime
-                        r['mach'] = data.mach
-                        r['compset'] = data.compset
-                        r['res'] = data.res
-                        r['project'] = data.project
-                        r['compiler'] = data.compiler
+                        r['config_options'] = data.config_options
                         return JsonResponse(r, safe=False)
-                elif status == 'new':
-                    data = UserRuns.objects.filter(status='new')
-                elif status == 'in_progress':
-                    data = UserRuns.objects.filter(status='in_progress')
-                elif status == 'complete':
-                    data = UserRuns.objects.filter(status='complete')
-                elif status == 'failed':
-                    data = UserRuns.objects.filter(status='failed')
+                elif request_type == 'new':
+                    if user:
+                        data = UserRuns.objects.filter(status='new', user=user)
+                    else:
+                        data = UserRuns.objects.filter(status='new')
+                elif request_type == 'in_progress':
+                    if user:
+                        data = UserRuns.objects.filter(status='in_progress', user=user)
+                    else:
+                        data = UserRuns.objects.filter(status='in_progress')
+                elif request_type == 'complete':
+                    if user:
+                        data = UserRuns.objects.filter(status='complete', user=user)
+                    else:
+                        data = UserRuns.objects.filter(status='complete')
+                elif request_type == 'failed':
+                    if user:
+                        data = UserRuns.objects.filter(status='failed', user=user)
+                    else:
+                        data = UserRuns.objects.filter(status='failed')
+                elif request_type == 'job':
+                    job_id = request.GET.get('job_id')
+                    if job_id:
+                        try:
+                            data = UserRuns.objects.get(id=job_id)
+                        except Exception as e:
+                            print e
+                            print 'job_id: ', job_id
+                            return HttpResponse(status=400)  # Currently throws 400 on bad id. Might want empty object instead
+                    else:
+                        return HttpResponse(status=400)
                 else:
-                    print "Invalid status recieved"
-                    return HttpResponse(status=404)
+                    print "Invalid request recieved"
+                    return HttpResponse(status=400)
                 obj_list = []
-                # if data is empty:
                 for obj in data:
                     obj_dict = {}
-                    obj_dict['runspec'] = obj.runspec
                     obj_dict['id'] = obj.id
                     obj_dict['user'] = obj.user
-                    obj_dict['destination'] = obj.destination
-                    obj_dict['casename'] = obj.casename
-                    obj_dict['mppwidth'] = obj.mppwidth
-                    obj_dict['stop_option'] = obj.stop_option
-                    obj_dict['stop_n'] = obj.stop_n
-                    obj_dict['walltime'] = obj.walltime
-                    obj_dict['mach'] = obj.mach
-                    obj_dict['compset'] = obj.compset
-                    obj_dict['res'] = obj.res
-                    obj_dict['project'] = obj.project
-                    obj_dict['compiler'] = obj.compiler
+                    obj_dict['config_options'] = obj.config_options
                     obj_list.append(obj_dict)
                 return JsonResponse(obj_list, safe=False)
             else:
@@ -80,24 +78,16 @@ def index(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            if 'user' and 'runspec' in data:
+            if 'user' and 'config_options' in data:
+                user = data['user']
+                del data['user']
                 new_run = UserRuns.objects.create(
                     status='new',
-                    user=data['user'],
-                    runspec=data['runspec'],
-                    destination=data['destination'],
-                    casename=data['casename'],
-                    mppwidth=data['mppwidth'],
-                    stop_option=data['stop_option'],
-                    stop_n=data['stop_n'],
-                    walltime=data['walltime'],
-                    mach=data['mach'],
-                    compset=data['compset'],
-                    res=data['res'],
-                    project=data['project'],
-                    compiler=data['compiler'])
+                    config_options=data['config_options'],
+                    user=user
+                )
                 new_run.save()
-                return HttpResponse("Successfully updated status")
+                return JsonResponse({'id': new_run.id})  # TODO: write tests for this
             else:
                 return HttpResponse(status=400)
         except Exception as e:
@@ -128,24 +118,14 @@ def index(request):
             return HttpResponse(status=500)
 
     if request.method == 'PUT':
-        # if settings.DEBUG == True
             try:
                 data = json.loads(request.body)
-                if 'user' and 'runspec' in data:
+                if 'user' and 'config_options' in data:
                     new_run = UserRuns.objects.create(
-                        status='new', user=data['user'],
-                        runspec=data['runspec'],
-                        destination=data['destination'],
-                        casename=data['casename'],
-                        mppwidth=data['mppwidth'],
-                        stop_option=data['stop_option'],
-                        stop_n=data['stop_n'],
-                        walltime=data['walltime'],
-                        mach=data['mach'],
-                        compset=data['compset'],
-                        res=data['res'],
-                        project=data['project'],
-                        compiler=data['compiler'])
+                        status='new',
+                        user=data['user'],
+                        config_options = data['config_options'],
+                    )
                     new_run.save()
                     # Success
                     return HttpResponse(status=200)
