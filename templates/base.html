@@ -9,8 +9,9 @@
     <title> {% block title %} ACME {% endblock %}</title>
     <!-- Bootstrap core CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
-    <!-- For the jsPanel -->    
-    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <!-- For the jsPanel -->
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <!-- <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script> -->
     <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
     {% load staticfiles %}
@@ -73,12 +74,7 @@
 
             {% endblock %}
             <li id="acme-link"><a href="/acme">ACME</a></li>
-            <li id="issues-link"><a href="/issues">Submit Issue</a></li>
             <li id="dashboard-link"><a href="/acme/dashboard">Dashboard</a></li>
-            <li id="uvcdat-link"><a href="http://uvcdat.llnl.gov">UV-CDAT</a></li>
-            <li id="globus-link"><a href="https://acme.globus.org">Globus</a></li>
-            <li id="classic-link"><a href="http://acme-dev-0.ornl.gov/exploratory_analysis/">Classic Viewer</a></li>
-            <li id="cdatweb-link"><a href="http://acme-cdatweb.ornl.gov">CDATWEB</a></li>
             {% if user.is_authenticated %}
             <li class="navbar-right"><a href="/acme/add_credentials">{{ user.username }}</a></li>
             <li class="navbar-right"><a href="/acme/logout">Log Out</a></li>
@@ -108,7 +104,7 @@
     <div id="footer" class="footer">
     <hr>
       <a href="#">Privacy &amp; Legal Notice</a> &nbsp;
-      <a href="https://github.com/aims-group/acme-site/issues">Site Issues</a>
+      <a href="https://github.com/ACME-OUI/acme-web-fe/issues">Site Issues</a>
     </div>
   </div><!-- /.container -->
 </body>

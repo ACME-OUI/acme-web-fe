@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os
 import urlparse
 from werkzeug.wrappers import Request, Response
@@ -32,11 +33,13 @@ class VeloService(object):
             return Response(self.commands['init'](data))
 
     def init_velo(self, data):
+        # TODO: Validate password as well as user when calling init_velo
+        # Process: Hash user and password using HMAC, use as key for velo_instances
         if data['velo_user'] in self.velo_instances:
             return 'Success'
         if 'velo_pass' not in data:
             return 'No password given to velo init'
-        print '\n [+] Running init '
+        print '\n[+] Running init '
         v = VeloAPI.Velo()
         VeloAPI.start_jvm()
         v.init_velo(data['velo_user'], data['velo_pass'])

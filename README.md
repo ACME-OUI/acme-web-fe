@@ -4,6 +4,9 @@ acme-site
 ## Please Read the [Development Guidelines](https://github.com/ACME-OUI/acme-web-fe/wiki/Development-Guidelines)
 
 ###ACME Dashboard
+
+####Python: This application requires  2.7.9 &lt; Python &lt; 3.0
+
 **init**
 
     fork git@github.com:acme-oui/acme-web-fe.git
@@ -16,9 +19,9 @@ acme-site
     virtualenv env
     source env/bin/activate
 
-    You need to have installed openssl or myproxy-devel
+    You need to have installed openssl, myproxy-devel, libffi
 
-    pip install -r requirements.txt
+    pip install -U -r requirements.txt
 
     _Note_
     If the Jpype install fails because of missing Python.h, you're missing the python dev tools.
@@ -59,7 +62,7 @@ acme-site
 
 **update db**
 
-    python mange.py migrate
+    python manage.py migrate
 
 **running**
 
