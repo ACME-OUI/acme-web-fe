@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- for recaptcha -->
-    
+
     <title> {% block title %} ACME {% endblock %}</title>
     <!-- Bootstrap core CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
@@ -50,10 +50,9 @@
         margin-top:1em;
       }
     </style>
-
-
-    <script src="{% static "js/bootstrap.min.js" %}"></script>
+    <script src="{% static "js/resources/bootstrap.min.js" %}"></script>
   </head>
+  
   <body role="document" class="day">
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="container">
@@ -83,21 +82,21 @@
             <li class="navbar-right"><a href="/acme/login?next={% url 'index' %}">Log In</a></li>
             {% endif %}
           </ul>
-          
+
         </div><!--.nav-collapse -->
       </div>
     </div>
     {% block dropmenu %}
 
     {% endblock %}
-    
+
     <div class="container theme-showcase" role="main">
       {% if messages %}
           {% for message in messages %}
           <div class="alert {% if message.tags %} {{ message.tags }} {% else %} alert-info {% endif %}" role="alert">{{ message }}</div>
           {% endfor %}
       {% endif %}
-      {% block content %}   
+      {% block content %}
 
       {% endblock %}
     </div>

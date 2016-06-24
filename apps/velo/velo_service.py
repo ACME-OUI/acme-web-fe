@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-import os
-import urlparse
 from werkzeug.wrappers import Request, Response
 from werkzeug.routing import Map, Rule
 from werkzeug.exceptions import HTTPException, NotFound
@@ -12,12 +10,24 @@ from jinja2 import Environment, FileSystemLoader
 import VeloAPI
 import pickle
 import json
+import os
+import urlparse
+import sys
+
+
+debug = False
+if len(sys.argv) > 1 and sys.argv[1] == '-d':
+    print "[+] Launching Velo service in debug mode"
+    debug = True
 
 
 class VeloService(object):
 
     def dispatch_request(self, request):
         data = json.loads(request.get_data())
+        if debug:
+            print "[+] Dispatching velo request"
+            print "[+] data:", data
         if 'velo_user' not in data:
             debug_out = "DEBUG OUTPUT, DUMPING velo_instances \n"
             debug_out += ' '.join(self.velo_instances)
