@@ -12,13 +12,13 @@ class Testresponses(LiveServerTestCase):
 
     def setUp(self):
         unittest.TestCase.setUp(self)
-        # self.url = 'http://127.0.0.1:8000/poller/update/'
 
     def test_get_next(self):
         payload = {'request': 'next'}
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
         self.assertTrue(r.status_code == requests.codes.ok)
-
+# --------------------------------------------------------------------------------
+# Tests when request is 'all'
     def test_get_all_no_user(self):
         payload = {'request': 'all'}
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
@@ -31,6 +31,21 @@ class Testresponses(LiveServerTestCase):
         for record in json.loads(r.content):
             self.assertTrue(record['user'] == 'acmetest')
 
+    def test_post_all_with_user(self):
+        payload = {'request': 'all', 'user': 'acmetest', 'status': 'complete'}
+        r = requests.post(self.live_server_url + '/poller/update/', data=payload)
+        self.assertEquals(r.status_code, requests.codes.ok)
+        payload = {'request': 'all', 'user': 'acmetest'}
+        r = requests.get(self.live_server_url + '/poller/update/', params=payload)
+        for job in r.json():
+            self.assertEquals(job['status'], 'complete')
+        payload = {'request': 'all', 'user': 'acme'}
+        r = requests.get(self.live_server_url + '/poller/update/', params=payload)
+        for job in r.json():
+            self.assertNotEquals(job['status'], 'complete')
+
+# --------------------------------------------------------------------------------
+# Tests when request is 'new'
     def test_get_new_no_user(self):
         payload = {'request': 'new'}
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
@@ -42,12 +57,13 @@ class Testresponses(LiveServerTestCase):
         self.assertTrue(r.status_code == requests.codes.ok)
         for record in json.loads(r.content):
             self.assertTrue(record['user'] == 'acmetest')
-
+# --------------------------------------------------------------------------------
+# Tests when request is 'in_progress'
     def test_get_in_progress(self):
         payload = {'request': 'in_progress'}
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
         self.assertTrue(r.status_code == requests.codes.ok)
-
+# --------------------------------------------------------------------------------
     def test_get_complete(self):
         payload = {'request': 'complete'}
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
@@ -140,4 +156,4 @@ class Testresponses(LiveServerTestCase):
         self.assertTrue(r2.status_code == 400)
 
 
-os.system('clear')
+# os.system('clear')

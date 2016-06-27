@@ -1,10 +1,12 @@
+from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
 from poller.models import UserRuns
 import json
+import pdb
 
-
+@csrf_exempt
 def update(request):
     if request.method == 'GET':
         try:
@@ -13,9 +15,18 @@ def update(request):
             if request_type:
                 if request_type == 'all':
                     if user:
-                        data = UserRuns.objects.filter(user=user)
+                        db_objs = UserRuns.objects.filter(user=user)
                     else:
-                        data = UserRuns.objects.all()
+                        db_objs = UserRuns.objects.all()
+                    data = []
+                    for entry in db_objs:
+                        data.append({
+                            'id': entry.id,
+                            'config_options': entry.config_options,
+                            'user': entry.user,
+                            'status': entry.status,
+                        })
+                    return JsonResponse(data, safe=False)
                 elif request_type == 'next':
                     data = UserRuns.objects.filter(status='new').order_by('created')
                     if not data:
@@ -77,21 +88,42 @@ def update(request):
 
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)
-            if 'user' and 'config_options' in data:
-                user = data['user']
-                del data['user']
-                new_run = UserRuns.objects.create(
-                    status='new',
-                    config_options=data['config_options'],
-                    user=user
-                )
-                new_run.save()
-                return JsonResponse({'id': new_run.id})  # TODO: write tests for this
-            else:
-                return HttpResponse(status=400)
+            request_type = request.POST.get('request')
+            user = request.POST.get('user')
+            status = request.POST.get('status')
+            if request_type == 'all':
+                if user:
+                    if status in ['new', 'in_progress', 'complete', 'failed']:
+                        jobs = UserRuns.objects.filter(user=user)
+                        for job in jobs:
+                            job.status = status
+                            job.save()
+                        return HttpResponse(status=200)
+                else:
+                    if status in ['new', 'in_progress', 'complete', 'failed']:
+                        jobs = UserRuns.objects.all()
+                        for job in jobs:
+                            job.status = status
+                            job.save()
+                        return HttpResponse(status=200)
+                return HttpResponse(status=400)  # If request was 'all' and we get to here, the request was bad
+            if request_type == 'new':
+                data = json.loads(request.body)
+                if 'user' and 'config_options' in data:
+                    user = data['user']
+                    del data['user']
+                    new_run = UserRuns.objects.create(
+                        status='new',
+                        config_options=data['config_options'],
+                        user=user
+                    )
+                    new_run.save()
+                    return JsonResponse({'id': new_run.id})  # TODO: write tests for this
+                else:
+                    return HttpResponse(status=400)
         except Exception as e:
             print e
+            pdb.set_trace()
             return HttpResponse(status=500)
 
     if request.method == 'PATCH':
