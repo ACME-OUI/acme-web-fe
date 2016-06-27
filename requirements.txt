@@ -1,5 +1,5 @@
 appnope==0.1.0
-cffi==1.1.2
+cffi==1.7.0
 coverage==3.7.1
 cryptography
 decorator==3.4.2
