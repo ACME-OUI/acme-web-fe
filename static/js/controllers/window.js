@@ -22,7 +22,13 @@
           }]
       }]
   }
-  var layout = new window.GoldenLayout(GoldenLayoutConfig, $('#layoutContainer'));
+  var layout,
+      savedState = localStorage.getItem( 'savedState' );
+  if( savedState !== null ) {
+      layout = new window.GoldenLayout( JSON.parse( savedState ), $('#layoutContainer') );
+  } else {
+      layout = new window.GoldenLayout( GoldenLayoutConfig, $('#layoutContainer') );
+  }
 
   var addMenuItem = function( title, text ) {
     var element = $( '<li>' + text + '</li>' );
