@@ -49,47 +49,9 @@
   <script type="text/javascript" src="{% static "js/resources/cdat.js" %}"></script>
   <script type="text/javascript">cdat.visualization_launcher = "{{ vis_launcher }}";</script>
 
-  <script type="text/javascript">
-    console.log("initializing window system");
-    var GoldenLayoutConfig = {
-        settings:{
-            hasHeaders: true
-        },
-        content:[{
-            type: 'row',
-            content: [{
-                type: 'component',
-                componentName: 'ESGF',
-                componentState: { templateId: 'esgf_wrapper' }
-            },{
-                type: 'component',
-                componentName: 'CDAT',
-                componentState: { templateId: 'cdat_wrapper' }
-            },{
-                type: 'component',
-                componentName: 'Velo',
-                componentState: { templateId: 'velo_wrapper' }
-            }]
-        }]
-    }
-    var layout = new GoldenLayout(GoldenLayoutConfig);
-    layout.registerComponent( 'ESGF', function( container, state ){
-      var templateHtml = $( '#' + state.templateId ).html();
-      container.getElement().html( templateHtml );
-    });
-    layout.registerComponent( 'CDAT', function( container, state ){
-      var templateHtml = $( '#' + state.templateId ).html();
-      container.getElement().html( templateHtml );
-    });
-    layout.registerComponent( 'Velo', function( container, state ){
-      var templateHtml = $( '#' + state.templateId ).html();
-      container.getElement().html( templateHtml );
-    });
-    layout.on( 'initialised', function(){
-      angular.bootstrap( document.body, [ 'dashboard' ]);
-    });
-    layout.init();
-  </script>
+  <!-- Dashboard -->
+  <link rel="stylesheet" href="{% static "css/dashboard.css"%}">
+
 
   <!--Dashboard main-->
   <!-- <script type="text/javascript" src="{% static "js/dashboard.js" %}"></script> -->
@@ -99,7 +61,7 @@
 
 {% block dropmenu %}
 
-  <nav class="menu" id="slide-menu-left" style="top: 50px; z-index:22;">
+  <!-- <nav class="menu" id="slide-menu-left" style="top: 50px; z-index:22;">
     <ul id="side-menu">
       <div id="velo_window"></div>
       <div id="esgf_window"></div>
@@ -107,40 +69,44 @@
       <li><button type="button" class="btn menu-btn" id="new-plot">New Plot</button></li>
     </ul>
     <br>
-    <button type="button" class="btn menu-btn" id="dark-mode-toggle">Dark mode is off</button>
+    <button type="button" class="btn menu-btn" id="dark-mode-toggle">Dark mode is off</button>1
     <button type="button" class="btn menu-btn" id="save-layout">Store Current Layout</button>
     <button type="button" class="btn menu-btn" id="load-layout">Load Previous Layout</button>
-  </nav>
+  </nav> -->
   <!-- Nav left menu -->
 
 {% endblock %}
 
 {% block content %}
-  <div class="wrapper" id="wrapper">
-    <div class="tile-board" ng-controller="DashboardControl">
+
+{% endblock %}
+{% block layout %}
+  <div class="wrapper" id="layout-wrapper">
+    <ul id="menuContainer"></ul>
+    <div class="layoutContainer" id="layoutContainer" ng-controller="DashboardControl">
       <div class="">
         <template type="text/html" id="cdat_wrapper">
-          <div class="cdat_window" ng-controller="CDATControl">
+          <div class="cdat_window" ng-controller="CDATControl" ng-init="init()">
 
           </div>
         </template>
       </div>
       <div class="">
         <template type="text/html" id="esgf_wrapper">
-          <div class="esgf_window" ng-controller="ESGFControl">
+          <div class="esgf_window" ng-controller="ESGFControl" ng-init="init()">
 
           </div>
         </template>
       </div>
       <div class="">
         <template type="text/html" id="velo_wrapper">
-          <div class="velo_window" ng-controller="VeloControl">
+          <div class="velo_window" ng-controller="VeloControl" ng-init="init()">
 
           </div>
         </template>
       </div>
-      <ul class="tile-holder">
-      </ul>
     </div>
   </div>
+  <script type="text/javascript" src="{% static "js/controllers/window.js"%}"></script>
+
 {% endblock %}
