@@ -1,10 +1,31 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from util.utilities import get_client_ip, print_debug
-import json
-from models import ESGFNode
 from django.contrib.auth.decorators import login_required
+from models import ESGFNode
+from pyesgf.logon import LogonManager
+from util.utilities import print_debug
+import json
 
+
+
+def download(request):
+    return HttpResponse(status=200)
+
+def logon(request):
+    print '[+] Got a logon request'
+    credential = json.loads(request.body)
+    if 'username' not in credential or 'password' not in credential:
+        return HttpResponse(status=403)
+    lm = LogonManager()
+    try:
+        lm.logon_with_openid(credential['username'], credential['password'], bootstrap=True)
+    except Exception as e:
+        print_debug(e)
+    if lm.is_logged_on():
+        return HttpResponse(status=200)
+    else:
+        return HttpResponse(status=403)
 
 @login_required
 def node_info(request):
