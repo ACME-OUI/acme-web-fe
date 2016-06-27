@@ -2572,16 +2572,7 @@ $(function() {
 		}
 	}
 
-	function get_csrf() {
-		var nameEQ = "csrftoken=";
-		var ca = document.cookie.split(';');
-		for (var i = 0; i < ca.length; i++) {
-			var c = ca[i];
-			while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-			if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-		}
-		return null;
-	}
+
 
 	function get_data(url, type, jsonObj, success_callback, fail_callback, async) {
 		var csrftoken = get_csrf();
@@ -2787,19 +2778,6 @@ $(function() {
 		*/
 	}
 
-	function new_plot(id, plotvars) {
-		console.log("making cdat window");
-		var content = cdat.make_plot_panel();
-		console.log(content);
-		console.log($('#'+id + " .plot-content"));
-		var elem = $('#'+id + " .plot-content");
-		elem.append(content);
-		console.log(plotvars);
-		if (plotvars) {
-			elem.find(".cdat-graphic-method").text(plotvars.method);
-			elem.find(".cdat-graphic-template").text(plotvars.template);
-		}
-	}
 
 $(document).on("mousedown", 'ul.qtree li.ui-draggable', function(event) {
     $(event.target).addClass('mousehold');
