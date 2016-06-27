@@ -39,13 +39,13 @@ function get_templates(){
                   }
                 }
               }
-            }  
+            }
           }
 
           if (obj.length == 0){
             html = html + "<tr><td>no templates found</td></tr>";
           }
-          html = html + "</table>" 
+          html = html + "</table>"
           $('#avaiabletree').html(html);
         }
         else{
@@ -54,7 +54,7 @@ function get_templates(){
         }
       },
       error: function(request, status, error){
-        alert(request + " | " +  status + " | " +  error);  
+        alert(request + " | " +  status + " | " +  error);
       }
     });
   }
@@ -69,7 +69,7 @@ function get_user_path(){
   var user_info = getinfo();
   var username = user_info['aun'];
   var path = "company_home/User%20Documents/" + username;
-  return path; 
+  return path;
 }
 
 function clone_template(name){
@@ -93,10 +93,10 @@ function clone_template(name){
       }
       else{
         $('#message').html("completed");
-      }  
+      }
     },
     error: function(request, status, error){
-      alert(request + " | " +  status + " | " +  error);  
+      alert(request + " | " +  status + " | " +  error);
     }
   });
 }
@@ -138,13 +138,13 @@ function get_children_home(path_in){
                   }
                 }
               }
-            }  
+            }
           }
-        }  
+        }
         if(obj.length == 0){
           html = html + "<tr><td>No cases found</td></tr>";
         }
-        html = html + "</table>" 
+        html = html + "</table>"
         $('#getchildren').html(html);
       }
       else{
@@ -225,11 +225,11 @@ function get_children_edit(path_in){
               }
             }
           }
-        }  
+        }
         if(obj.length == 0){
           html = html + "<tr><td>folder empty</td></tr>";
         }
-        html = html + "</table>" 
+        html = html + "</table>"
         $('#usertree').html(html);
       }
       else{
@@ -263,7 +263,7 @@ function get_file_content(path_in){
         var parts = old_path.split('/');
         var unselected_whole = parts[parts.length - 1];
         var unselected_parts = unselected_whole.split(".");
-        var unselected = unselected_parts[0]; 
+        var unselected = unselected_parts[0];
 
         m_current_path = path;
         var parts = path.split('/');
@@ -340,7 +340,7 @@ function get_resources(path){
     success: function(data){
       temp = data.key;
       messages = JSON.stringify(temp, null, 4);
-           
+
       $('#display-messages').html(messages);
     },
     error: function(request, status, error){
@@ -350,6 +350,5 @@ function get_resources(path){
 }
 
 function run_workflow(){
-  //alert("run");
   $('.nav-tabs a[href="#output"]').tab('show');
 }
