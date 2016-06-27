@@ -12,8 +12,12 @@
 ESGF_CREDENTIALS = '~/.esg/credentials.pem'
 
 # List of all current ESGF nodes
-ESGF_HOSTNAMES = [
-    'pcmdi.llnl.gov'
+NODE_HOSTNAMES = [
+    'pcmdi.llnl.gov',
+    'esgf-node.ipsl.upmc.fr',
+    'esg-dn1.nsc.liu.se',
+    'esgdata.gfdl.noaa.gov',
+    'esgf.nccs.nasa.gov'
 ]
 
 ESGF_SEARCH_SUFFIX = '/esg-search/search'
