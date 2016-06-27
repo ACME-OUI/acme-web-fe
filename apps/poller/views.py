@@ -1,4 +1,5 @@
 from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
@@ -59,8 +60,8 @@ def update(request):
                     else:
                         data = UserRuns.objects.filter(status='failed')
                 elif request_type == 'job':
-                    job_id = request.GET.get('job_id')
-                    if job_id:
+                    job_id = request.GET.get('job_id')  # todo: write tests for this
+                    if job_id and job_id.isdigit():
                         try:
                             data = UserRuns.objects.get(id=job_id)
                         except Exception as e:
@@ -108,19 +109,27 @@ def update(request):
                         return HttpResponse(status=200)
                 return HttpResponse(status=400)  # If request was 'all' and we get to here, the request was bad
             if request_type == 'new':
-                data = json.loads(request.body)
-                if 'user' and 'config_options' in data:
-                    user = data['user']
-                    del data['user']
+                config_options = request.POST.get('config_options')
+                if 'user' and 'config_options':
                     new_run = UserRuns.objects.create(
                         status='new',
-                        config_options=data['config_options'],
+                        config_options=config_options,
                         user=user
                     )
                     new_run.save()
                     return JsonResponse({'id': new_run.id})  # TODO: write tests for this
                 else:
                     return HttpResponse(status=400)
+            if request_type == 'in_progress' or 'complete':
+                job_id = request.POST.get('job_id')
+                if job_id.isdigit():
+                    try:
+                        job = UserRuns.objects.get(id=job_id)
+                        job.status = request_type
+                        job.save()
+                        return HttpResponse(status=200)
+                    except ObjectDoesNotExist:
+                        return HttpResponse(status=400)
         except Exception as e:
             print e
             pdb.set_trace()

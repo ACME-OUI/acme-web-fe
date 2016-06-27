@@ -34,7 +34,7 @@ class Testresponses(LiveServerTestCase):
     def test_post_all_with_user(self):
         payload = {'request': 'all', 'user': 'acmetest', 'status': 'complete'}
         r = requests.post(self.live_server_url + '/poller/update/', data=payload)
-        self.assertEquals(r.status_code, requests.codes.ok)
+        self.assertTrue(r.status_code == requests.codes.ok)
         payload = {'request': 'all', 'user': 'acmetest'}
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
         for job in r.json():
@@ -57,12 +57,35 @@ class Testresponses(LiveServerTestCase):
         self.assertTrue(r.status_code == requests.codes.ok)
         for record in json.loads(r.content):
             self.assertTrue(record['user'] == 'acmetest')
+
+    def test_post_new(self):
+        payload = {'request': 'new', 'user': 'test', 'config_options': json.dumps({'testdata': 'hello'})}
+        r = requests.post(self.live_server_url + '/poller/update/', data=payload)
+        self.assertTrue(r.status_code == requests.codes.ok)
+        payload = {'request': 'all', 'user': 'test'}
+        r = requests.get(self.live_server_url + '/poller/update/', params=payload)
+        self.assertTrue(r.status_code == requests.codes.ok)
+        for job in r.json():
+            self.assertEquals(job['status'], 'new')
 # --------------------------------------------------------------------------------
 # Tests when request is 'in_progress'
     def test_get_in_progress(self):
         payload = {'request': 'in_progress'}
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
         self.assertTrue(r.status_code == requests.codes.ok)
+
+    def test_postin_progress(self):
+        payload = {'request': 'in_progress', 'user': 'test'}
+        r = requests.post(self.live_server_url + '/poller/update/', data=payload)
+        self.assertTrue(r.status_code == requests.codes.ok)
+        payload = {'request': 'all', 'user': 'acmetest'}
+        r = requests.get(self.live_server_url + '/poller/update/', params=payload)
+        for job in r.json():
+            self.assertEquals(job['status'], 'complete')
+        payload = {'request': 'all', 'user': 'acme'}
+        r = requests.get(self.live_server_url + '/poller/update/', params=payload)
+        for job in r.json():
+            self.assertNotEquals(job['status'], 'complete')
 # --------------------------------------------------------------------------------
     def test_get_complete(self):
         payload = {'request': 'complete'}
@@ -74,28 +97,6 @@ class Testresponses(LiveServerTestCase):
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
         self.assertTrue(r.status_code == requests.codes.ok)
 
-    def test_get_csrf(self):
-        r = requests.get(self.live_server_url + '/poller/update/')
-        self.assertTrue(r.status_code == requests.codes.ok)
-        csrf = r.cookies['csrftoken']
-
-    def test_update_status(self):
-        payload = {'request': 'next'}
-        r = requests.get(self.live_server_url + '/poller/update/', params=payload)
-        self.assertTrue(r.status_code == requests.codes.ok)
-        data = json.loads(r.content)
-        payload = json.dumps({'id': data['id'], 'status': 'in_progress'})
-        s = requests.Session()
-        r1 = s.get(self.live_server_url + '/poller/update/')
-        self.assertTrue(r1.status_code == requests.codes.ok)
-        csrf_token = r1.cookies['csrftoken']
-        headers = {
-            'Content-type': 'application/json',
-            "X-CSRFToken": csrf_token,
-            'Referer': self.live_server_url + '/poller/update/'
-        }
-        r2 = s.patch(self.live_server_url + '/poller/update/', data=payload, headers=headers)
-        self.assertTrue(r2.status_code == requests.codes.ok)
 
     def test_queueing(self):
         #
@@ -132,10 +133,15 @@ class Testresponses(LiveServerTestCase):
             self.assertTrue(oldid != data['id'])
 
     def test_next_repeat(self):
-        payload1 = {'status': 'next'}
+        payload = {'request': 'next'}
+        r = requests.get(self.live_server_url + '/poller/update/', params=payload)
+        datanew = json.loads(r.content)
+        dataold = ''
         for i in range(20):
-            r = requests.get(self.live_server_url + '/poller/update/', params=payload1)
-            self.assertTrue(r.status_code == requests.codes.ok)
+            dataold = datanew
+            r = requests.get(self.live_server_url + '/poller/update/', params=payload)
+            datanew = json.loads(r.content)
+            self.assertTrue(dataold['id'] == datanew['id'])
 
     def test_bad_status(self):
         payload = {'request': 'next'}
