@@ -8,7 +8,7 @@ import os
 from django.contrib.auth.decorators import login_required
 
 
-@login_required
+# @login_required
 def delete(request):
     if request.method == 'POST':
         try:
@@ -35,18 +35,28 @@ def delete(request):
         return HttpResponse(status=404)
 
 
-@login_required
+# @login_required
 def get_folder(request):
+
     if request.method == 'POST':
         folder = json.loads(request.body)['file']
         try:
             cred = Credential.objects.get(
                 site_user_name=request.user, service='velo')
+            if not cred:
+                print "Unable to find user in credential store"
+                return HttpResponse(status=500)
             if folder == '/User Documents/':
                 folder += cred.service_user_name
+            # request = {
+            #     'velo_user': cred.service_user_name,
+            #     'velo_pass': cred.password,
+            #     'command': 'get_folder',
+            #     'folder': folder
+            # }
             request = {
-                'velo_user': cred.service_user_name,
-                'velo_pass': cred.password,
+                'velo_user': 'acmetest',
+                'velo_pass': 'acmetest',
                 'command': 'get_folder',
                 'folder': folder
             }
@@ -63,7 +73,7 @@ def get_folder(request):
         return HttpResponse(status=404)
 
 
-@login_required
+# @login_required
 def get_file(request):
     if request.method == 'POST':
         try:
@@ -135,6 +145,7 @@ def check_velo_initialized(user):
 
 
 def velo_request(data):
+    print "velo request"
     if not check_velo_initialized(data['velo_user']):
         request = json.dumps({
             'command': 'init',
@@ -151,13 +162,11 @@ def velo_request(data):
     return requests.post('http://localhost:8080', json.dumps(data)).content
 
 
-@login_required
 def new_folder(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             foldername = data['foldername']
-
             cred = Credential.objects.get(
                 site_user_name=request.user, service="velo")
 
@@ -179,7 +188,7 @@ def new_folder(request):
         return HttpResponse(status=404)
 
 
-@login_required
+# @login_required
 def save_file(request):
     if request.method == 'POST':
         try:
