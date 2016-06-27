@@ -7,6 +7,10 @@
 
     };
 
+    $scope.add_window = function(window_name){
+      
+    }
+
 
 
     $scope.get_csrf = function() {
