@@ -3,8 +3,9 @@ import unittest
 import json
 import requests
 from constants import NODE_HOSTNAMES
+import inspect
 
-class ESGFTestLogon(LiveServerTestCase):
+class TestLogon(LiveServerTestCase):
 
     def setUp(self):
         unittest.TestCase.setUp(self)
@@ -12,40 +13,84 @@ class ESGFTestLogon(LiveServerTestCase):
         self.password = 'ACM#t3st'
 
     def test_logon_success(self):
-        credential = json.dumps({
+        print "\n---->[+] Starting " + inspect.stack()[0][3]
+        credential = {
             'username': self.username,
             'password': self.password
-        })
-        response_code = requests.get(self.live_server_url + '/acme/esgf/logon/', data=credential).status_code
-        self.assertTrue( response_code == requests.codes.ok)
+        }
+        response_code = requests.get(self.live_server_url + '/acme/esgf/logon/', params=credential).status_code
+        self.assertTrue( response_code == 200)
 
     def test_logon_fail(self):
-        credential = json.dumps({
-            'username': 'abra',
+        print "\n---->[+] Starting " + inspect.stack()[0][3]
+        credential = {
+            'username': 'http://abra',
             'password': 'cadabra'
-        })
-        response_code = requests.get(self.live_server_url + '/acme/esgf/logon/', data=credential).status_code
-        self.assertFalse( response_code == requests.codes.ok)
+        }
+        response_code = requests.get(self.live_server_url + '/acme/esgf/logon/', params=credential).status_code
+        self.assertFalse( response_code == 200)
 
-class ESGFTestLoadFacet(LiveServerTestCase):
 
-    def test_load_facet(self):
-        nodes = json.dumps({
-            'nodes': NODE_HOSTNAMES
-        })
-        response = requests.get(self.live_server_url + '/acme/esgf/load_facets/', data=nodes)
-        self.assertTrue( response.status_code == requests.codes.ok )
+class TestLoadFacet(LiveServerTestCase):
 
-class ESGFTestNodeSearch(LiveServerTestCase):
+    def test_load_facet_success(self):
+        print "\n---->[+] Starting " + inspect.stack()[0][3]
+        data = json.dumps(NODE_HOSTNAMES[0:1])
+        response = requests.get(self.live_server_url + '/acme/esgf/load_facets/', params={'nodes': data})
+        self.assertTrue( response.status_code == 200 )
 
-    def test_node_search(self):
+    def test_load_facet_failure(self):
+        print "\n---->[+] Starting " + inspect.stack()[0][3]
+        data = json.dumps(['this', 'is', 'not', 'ahostname'])
+        response = requests.get(self.live_server_url + '/acme/esgf/load_facets/', params={'nodes': data})
+        self.assertFalse( response.status_code == 200 )
+
+
+class TestNodeSearch(LiveServerTestCase):
+
+    def setUp(self):
+        self.valid_nodes = NODE_HOSTNAMES[0:1]
+        self.invalid_nodes = ['not.a.node.gov', 'also.not.a.node.gov']
+        self.valid_terms = {'project': 'ACME'}
+        self.invalid_terms = {'not_a_valid': 'search_term'}
+
+    def test_node_search_success(self):
+        print "\n---->[+] Starting " + inspect.stack()[0][3]
         request = json.dumps({
-            'nodes': NODE_HOSTNAMES,
-            'terms': {
-                'project': 'ACME',
-                'Versionnum': 'v0_3'
-            }
+            'nodes': self.valid_nodes,
+            'terms': self.valid_terms
         })
-        response = requests.get(self.live_server_url + '/acme/esgf/node_search/', data=request)
-        print response.content
-        self.assertTrue( response.status_code == requests.codes.ok )
+        response = requests.get(self.live_server_url + '/acme/esgf/node_search/', params={'searchString':request})
+        self.assertTrue( response.status_code == 200 )
+        self.assertTrue( len(response.content) > 100 )
+
+    def test_node_search_bad_node(self):
+        print "\n---->[+] Starting " + inspect.stack()[0][3]
+        request = json.dumps({
+            'nodes': self.invalid_nodes,
+            'terms': self.valid_terms
+        })
+        response = requests.get(self.live_server_url + '/acme/esgf/node_search/', params={'searchString':request})
+        self.assertFalse( response.status_code == 200 )
+        self.assertFalse( len(response.content) > 100 )
+
+    def test_node_search_bad_term(self):
+        print "\n---->[+] Starting " + inspect.stack()[0][3]
+        request = json.dumps({
+            'nodes': self.valid_nodes,
+            'terms': self.invalid_terms
+        })
+        response = requests.get(self.live_server_url + '/acme/esgf/node_search/', params={'searchString':request})
+        self.assertFalse( response.status_code == 200 )
+        self.assertFalse( len(response.content) > 100 )
+
+
+class TestDownload(LiveServerTestCase):
+
+    def setUp(self):
+        self.url = 'http://aims3.llnl.gov/thredds/fileServer/cmip5_css01_data/cmip5/output1/LASG-CESS/FGOALS-g2/midHolocene/day/seaIce/day/r1i1p1/v1/usi/usi_day_FGOALS-g2_midHolocene_r1i1p1_05320101-05321231.nc'
+
+    def test_download(self):
+        print "\n---->[+] Starting " + inspect.stack()[0][3]
+        response = requests.get(self.live_server_url + '/acme/esgf/download', params={'url': self.url})
+        self.assertTrue( response.status_code == 200 )
