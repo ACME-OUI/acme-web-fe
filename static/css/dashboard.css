@@ -5,6 +5,7 @@
 
 body {
     overflow-x: hidden;
+    overflow-y: hidden;
     -webkit-transition: all 0.3s;
     -moz-transition: all 0.3s;
     -ms-transition: all 0.3s;
@@ -18,12 +19,24 @@ body {
   width: 1165px;
 }
 
-/*#layout-wrapper {
-    height: 90vh;
-    width:98vw;
-    margin-left: 1em;
-    margin-right: 1em;
-}*/
+._md-center {
+       top: 50%;
+       left: 50%;
+       transform: translate3d(-50%, 0, 0);
+}
+
+
+.dashboard-show-hide {
+  transition: all linear 0.3s;
+}
+
+.dashboard-show-hide.ng-hide {
+  opacity: 0;
+}
+
+.btn {
+  color: #fff!important;
+}
 
 /*============================================================================
    layout
@@ -152,6 +165,9 @@ body {
    ESGF window
   ============================================================================*/
 
+  .esgf_window {
+    padding: 1em;
+  }
 
   #esgf_context_menu {
     width: 100px;

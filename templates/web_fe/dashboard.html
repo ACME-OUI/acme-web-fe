@@ -4,12 +4,10 @@
 
 {% load staticfiles %}
 
-  <!-- AngularJS -->
-  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.21/angular.min.js"></script>
-  <script type="text/javascript" src="{% static "js/controllers/app.js" %}"></script>
-  <script type="text/javascript" src="{% static "js/controllers/cdat.js" %}"></script>
-  <script type="text/javascript" src="{% static "js/controllers/esgf.js" %}"></script>
-  <script type="text/javascript" src="{% static "js/controllers/velo.js" %}"></script>
+  <!-- Materialize -->
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css">
+  <link href="//fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
 
   <!-- Golden-Layout -->
   <script type="text/javascript" src="{% static "js/resources/goldenlayout.min.js"%}"></script>
@@ -17,15 +15,27 @@
 	<link type="text/css" rel="stylesheet" href="{% static "css/goldenlayout-dark-theme.css"%}"/>
   <link type="text/css" rel="stylesheet" href="{% static "css/goldenlayout-light-theme.css"%}"/>
 
+  <!-- AngularJS -->
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-aria.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-animate.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-messages.min.js"></script>
+  <script src="{% static "js/controllers/app.js" %}"></script>
+  <script src="{% static "js/controllers/cdat.js" %}"></script>
+  <script src="{% static "js/controllers/esgf.js" %}"></script>
+  <script src="{% static "js/controllers/velo.js" %}"></script>
+  <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
+
   <!-- AngularJS Tree -->
   <script type="text/javascript" src="{% static "js/resources/angular-tree-control.js"%}"></script>
-  <link rel="stylesheet" href="{% static "css/tree-controll.css"%}">
+  <link rel="stylesheet" href="{% static "css/tree-control.css"%}">
 
   <!-- Bootstrap -->
   <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.js"></script>
 
   <!-- Font Awesome -->
-  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  <!-- <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"> -->
 
   <!-- Slick Carousel -->
   <script type="text/javascript" src="{% static "js/resources/slick.js" %}"></script>
@@ -37,6 +47,7 @@
   <link rel="stylesheet" href="{% static "css/3024-day.css" %}">
   <link rel="stylesheet" href="{% static "css/codemirror.css" %}">
 
+
   <!-- mTree -->
   <!-- <link rel="stylesheet" href="{% static "css/mtree.css" %}">
   <script src='http://cdnjs.cloudflare.com/ajax/libs/velocity/0.2.1/jquery.velocity.min.js'></script> -->
@@ -47,11 +58,11 @@
   <link rel="stylesheet" href="{% static "css/cdat.css" %}">
 
   <!-- vtkweb -->
-  <script type="text/javascript" src="{% static "vtkweb/js/autobahn.min.js" %}"></script>
+  <!-- <script type="text/javascript" src="{% static "vtkweb/js/autobahn.min.js" %}"></script>
   <script type="text/javascript" src="{% static "vtkweb/js/jquery.hammer.min.js" %}"></script>
   <script type="text/javascript" src="{% static "vtkweb/js/vtkweb-all.js" %}"></script>
   <script type="text/javascript" src="{% static "js/resources/cdat.js" %}"></script>
-  <script type="text/javascript">cdat.visualization_launcher = "{{ vis_launcher }}";</script>
+  <script type="text/javascript">cdat.visualization_launcher = "{{ vis_launcher }}";</script> -->
 
   <!-- Dashboard -->
   <link rel="stylesheet" href="{% static "css/dashboard.css"%}">
@@ -87,7 +98,7 @@
 {% block layout %}
   <div class="wrapper" id="layout-wrapper">
     <ul id="menuContainer"></ul>
-    <div class="layoutContainer" id="layoutContainer" ng-controller="DashboardControl">
+    <div class="layoutContainer" id="layoutContainer" ng-controller="DashboardControl" ng-init="init()">
       <div class="">
         <template type="text/html" id="cdat_wrapper">
           <div class="cdat_window" ng-controller="CDATControl" ng-init="init()">
@@ -97,10 +108,25 @@
       </div>
       <div class="">
         <template type="text/html" id="esgf_wrapper">
-          <div class="esgf_window" ng-controller="ESGFControl" ng-init="init()" style="background-color: #555;">
-            <treecontrol class="tree-classic" tree-model="treedata" on-selection="showSelected(node)">
-              <button ng-click="buttonClick($event, node)">Click Me!</button> label: [[node.label]] ([[node.id]] ) [[$index]]
-            </treecontrol>
+          <div class="esgf_window" ng-controller="ESGFControl" ng-init="init()">
+
+            <form class="dashboard-show-hide" ng-show="nodes_been_selected == false">
+              <p ng-repeat="node in node_list">
+                <input type="checkbox" id="[[node + $id]]" />
+                <label for="[[node + $id]]">[[node]]</label>
+              </p>
+              <a class="waves-effect waves-light btn" ng-click="select_nodes($id)"> select </a>
+            </form>
+            <div class="dashboard-show-hide" ng-show="nodes_been_selected == true">
+              <a class="waves-effect waves-light btn" ng-click="nodes_been_selected = false">
+                <i class="material-icons left">ic_arrow_back</i>
+              </a>
+              <br>
+              <treecontrol class="tree-classic" tree-model="treedata" on-selection="showSelected(node)">
+                <button ng-click="buttonClick($event, node)">Click Me!</button> label: [[node.label]] ([[node.id]] ) [[$index]]
+              </treecontrol>
+            </div>
+
           </div>
         </template>
       </div>
@@ -114,5 +140,7 @@
     </div>
   </div>
   <script type="text/javascript" src="{% static "js/controllers/window.js"%}"></script>
+
+
 
 {% endblock %}
