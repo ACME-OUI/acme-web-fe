@@ -8,7 +8,7 @@
     };
 
     $scope.add_window = function(window_name){
-      
+
     }
 
 
@@ -23,5 +23,9 @@
   		}
   		return null;
   	}
-  }]);
+  }])
+  .config(function($interpolateProvider) {
+    $interpolateProvider.startSymbol('[[');
+    return $interpolateProvider.endSymbol(']]');
+  });
 }).call(this);
