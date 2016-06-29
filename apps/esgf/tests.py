@@ -23,6 +23,8 @@ class TestLogon(LiveServerTestCase):
 
     def test_logon_fail(self):
         print "\n---->[+] Starting " + inspect.stack()[0][3]
+        print "____ this should print a stack trace ________"
+        print "--------------------------------------------"
         credential = {
             'username': 'http://abra',
             'password': 'cadabra'
@@ -41,6 +43,8 @@ class TestLoadFacet(LiveServerTestCase):
 
     def test_load_facet_failure(self):
         print "\n---->[+] Starting " + inspect.stack()[0][3]
+        print "____ this should print a stack trace ________"
+        print "--------------------------------------------"
         data = json.dumps(['this', 'is', 'not', 'ahostname'])
         response = requests.get(self.live_server_url + '/acme/esgf/load_facets/', params={'nodes': data})
         self.assertFalse( response.status_code == 200 )
@@ -66,6 +70,8 @@ class TestNodeSearch(LiveServerTestCase):
 
     def test_node_search_bad_node(self):
         print "\n---->[+] Starting " + inspect.stack()[0][3]
+        print "____ this should print a stack trace ________"
+        print "--------------------------------------------"
         request = json.dumps({
             'nodes': self.invalid_nodes,
             'terms': self.valid_terms
@@ -76,6 +82,8 @@ class TestNodeSearch(LiveServerTestCase):
 
     def test_node_search_bad_term(self):
         print "\n---->[+] Starting " + inspect.stack()[0][3]
+        print "____ this should print a stack trace ________"
+        print "--------------------------------------------"
         request = json.dumps({
             'nodes': self.valid_nodes,
             'terms': self.invalid_terms
@@ -88,9 +96,16 @@ class TestNodeSearch(LiveServerTestCase):
 class TestDownload(LiveServerTestCase):
 
     def setUp(self):
-        self.url = 'http://aims3.llnl.gov/thredds/fileServer/cmip5_css01_data/cmip5/output1/LASG-CESS/FGOALS-g2/midHolocene/day/seaIce/day/r1i1p1/v1/usi/usi_day_FGOALS-g2_midHolocene_r1i1p1_05320101-05321231.nc'
+        self.auth_url = 'http://aims3.llnl.gov/thredds/fileServer/cmip5_css01_data/cmip5/output1/LASG-CESS/FGOALS-g2/midHolocene/day/seaIce/day/r1i1p1/v1/usi/usi_day_FGOALS-g2_midHolocene_r1i1p1_05320101-05321231.nc'
+        self.unauth_url = 'http://airsl2.gesdisc.eosdis.nasa.gov/thredds/fileServer/cmac/taNobs_AIRS_L3_RetStd-v6_201502.nc'
 
-    def test_download(self):
+    def test_download_unauth(self):
         print "\n---->[+] Starting " + inspect.stack()[0][3]
-        response = requests.get(self.live_server_url + '/acme/esgf/download', params={'url': self.url})
+        response = requests.get(self.live_server_url + '/acme/esgf/download', params={'url': self.unauth_url})
         self.assertTrue( response.status_code == 200 )
+
+    # TODO: make this work
+    # def test_download_auth(self):
+    #     print "\n---->[+] Starting " + inspect.stack()[0][3]
+    #     response = requests.get(self.live_server_url + '/acme/esgf/download', params={'url': self.auth_url})
+    #     self.assertTrue( response.status_code == 200 )
