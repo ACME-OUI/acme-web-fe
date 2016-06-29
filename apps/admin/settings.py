@@ -136,6 +136,7 @@ ROOT_URLCONF = 'admin.urls'
 WSGI_APPLICATION = 'admin.wsgi.application'
 
 INSTALLED_APPS = (
+    'django_nose',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -153,10 +154,12 @@ INSTALLED_APPS = (
 )
 
 # Use nose to run all tests
-# TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 NOSE_ARGS = [
-    "apps",
+    '--with-coverage',
+    '--cover-package=esgf,velo,cdat,web_fe',
+    '--verbosity=2'
 ]
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
