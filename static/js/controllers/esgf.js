@@ -6,4 +6,16 @@ angular.module('esgf', [])
     console.log('[+] Initializing ESGF window');
   }
 
+  function Parent($scope) {
+    $scope.treedata=createSubTree(3, 4, "");
+    $scope.lastClicked = null;
+    $scope.buttonClick = function($event, node) {
+        $scope.lastClicked = node;
+        $event.stopPropagation();
+    }
+    $scope.showSelected = function(sel) {
+        $scope.selectedNode = sel;
+    };
+  }
+
 }])
