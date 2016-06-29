@@ -6,7 +6,7 @@ from models import ESGFNode
 from pyesgf.logon import LogonManager
 from pyesgf.search import SearchConnection
 from util.utilities import print_debug
-from constants import ESGF_SEARCH_SUFFIX, ESGF_CREDENTIALS
+from constants import ESGF_SEARCH_SUFFIX, ESGF_CREDENTIALS, NODE_HOSTNAMES
 import json
 import requests
 import os.path
@@ -36,45 +36,45 @@ import shutil
 import urllib2, httplib
 from os.path import expanduser, join
 
-class HTTPSClientAuthHandler(urllib2.HTTPSHandler):
-    '''
-    HTTP handler that transmits an X509 certificate as part of the request
-    '''
-
-    def __init__(self, key, cert):
-            urllib2.HTTPSHandler.__init__(self)
-            self.key = key
-            self.cert = cert
-    def https_open(self, req):
-            return self.do_open(self.getConnection, req)
-    def getConnection(self, host, timeout=300):
-            return httplib.HTTPSConnection(host, key_file=self.key, cert_file=self.cert)
-
-def esgf_download(url, toDirectory="/tmp"):
-    '''
-    Function to download a single file from ESGF.
-
-    :param url: the URL of the file to download
-    :param toDirectory: target directory where the file will be written
-    '''
-
-    # setup HTTP handler
-    certFile = expanduser(ESGF_CREDENTIALS)
-    opener = urllib2.build_opener(HTTPSClientAuthHandler(certFile,certFile))
-    opener.add_handler(urllib2.HTTPCookieProcessor())
-
-    # download file
-    localFilePath = join(toDirectory,url.split('/')[-1])
-    print "\nDownloading url: %s to local path: %s ..." % (url, localFilePath)
-    localFile=open( localFilePath, 'w')
-    webFile=opener.open(url)
-    localFile.write(webFile.read())
-
-    # cleanup
-    localFile.close()
-    webFile.close()
-    opener.close()
-    print "... done"
+# class HTTPSClientAuthHandler(urllib2.HTTPSHandler):
+#     '''
+#     HTTP handler that transmits an X509 certificate as part of the request
+#     '''
+#
+#     def __init__(self, key, cert):
+#             urllib2.HTTPSHandler.__init__(self)
+#             self.key = key
+#             self.cert = cert
+#     def https_open(self, req):
+#             return self.do_open(self.getConnection, req)
+#     def getConnection(self, host, timeout=300):
+#             return httplib.HTTPSConnection(host, key_file=self.key, cert_file=self.cert)
+#
+# def esgf_download(url, toDirectory="/tmp"):
+#     '''
+#     Function to download a single file from ESGF.
+#
+#     :param url: the URL of the file to download
+#     :param toDirectory: target directory where the file will be written
+#     '''
+#
+#     # setup HTTP handler
+#     certFile = expanduser(ESGF_CREDENTIALS)
+#     opener = urllib2.build_opener(HTTPSClientAuthHandler(certFile,certFile))
+#     opener.add_handler(urllib2.HTTPCookieProcessor())
+#
+#     # download file
+#     localFilePath = join(toDirectory,url.split('/')[-1])
+#     print "\nDownloading url: %s to local path: %s ..." % (url, localFilePath)
+#     localFile=open( localFilePath, 'w')
+#     webFile=opener.open(url)
+#     localFile.write(webFile.read())
+#
+#     # cleanup
+#     localFile.close()
+#     webFile.close()
+#     opener.close()
+#     print "... done"
 
 def download(request):
     credential = {
@@ -89,7 +89,7 @@ def download(request):
         print "logging in"
         lm.logon_with_openid(credential['username'], credential['password'], bootstrap=bootstrap)
     except Exception as e:
-        print_debug(e)
+        # print_debug(e)
         return HttpResponse(status=403)
     if lm.is_logged_on():
         print "...login success"
@@ -108,7 +108,7 @@ def download(request):
             print "...download success"
             return HttpResponse(status=200)
         except Exception as e:
-            print_debug(e)
+            # print_debug(e)
             return HttpResponse(status=400)
     else:
         return HttpResponse(status=403)
@@ -119,12 +119,14 @@ def download(request):
 # Inputs: username, password
 # returns: status 200 if successful, 403 otherwise
 def logon(request):
+
     credential = {
         'username': request.GET.get('username'),
         'password': request.GET.get('password')
     }
-    if 'username' not in credential or 'password' not in credential:
+    if len(credential['username']) == 0 or len(credential['password']) == 0:
         return HttpResponse(status=400)
+
     lm = LogonManager()
     bootstrap = False
     if not os.path.exists(ESGF_CREDENTIALS):
@@ -132,7 +134,7 @@ def logon(request):
     try:
         lm.logon_with_openid(credential['username'], credential['password'], bootstrap=bootstrap)
     except Exception as e:
-        print_debug(e)
+        # print_debug(e)
         return HttpResponse(status=403)
     if lm.is_logged_on():
         return HttpResponse(status=200)
@@ -144,7 +146,7 @@ def logon(request):
 #         credential = json.loads(request.body)
 #     except ValueError as e:
 #         print request.body
-#         print_debug(e)
+#         # print_debug(e)
 #         return HttpResponse(status=400)
 #
 #     if 'username' not in credential or 'password' not in credential:
@@ -156,7 +158,7 @@ def logon(request):
 #             bootstrap = True
 #         lm.logon_with_openid(credential['username'], credential['password'], bootstrap=bootstrap)
 #     except Exception as e:
-#         print_debug(e)
+#         # print_debug(e)
 #     if lm.is_logged_on():
 #         return HttpResponse(status=200)
 #     else:
@@ -180,7 +182,7 @@ def load_facets(request):
             for facet in context.get_facet_options():
                 facets[facet] = context.facet_counts[facet]
         except Exception as e:
-            print_debug(e)
+            # print_debug(e)
             return HttpResponse(status=500)
     return HttpResponse(json.dumps(facets))
 
@@ -192,7 +194,7 @@ def node_search(request):
     searchString = json.loads(request.GET.get('searchString'))
     print searchString
     if 'nodes' not in searchString:
-        return HttpResponse(status=403)
+        return HttpResponse(status=400)
 
     response = {}
     for node in searchString['nodes']:
@@ -208,38 +210,44 @@ def node_search(request):
                 response[str(i)] = rs[i].json
 
         except Exception as e:
-            print_debug(e)
+            # print_debug(e)
             return HttpResponse(status=400)
 
     return HttpResponse(json.dumps(response))
 
+# TODO: Once the node manager is running, this should call their API to get the current lise of nodes
+def node_list(request):
+    response = json.dumps(NODE_HOSTNAMES)
+    return HttpResponse(response)
 
-@login_required
-def node_info(request):
-    try:
-        response = {}
-        nodes = ESGFNode.objects.all()
-        for node in nodes:
-            response[node.short_name] = node.node_data
-            if 'children' not in response[node.short_name]:
-                continue
-
-            if 'Node' in response[node.short_name]['children']:
-                response[node.short_name]['children']['Node'][
-                    'attributes']['status'] = str(node.available)
-                response[node.short_name]['children']['Node'][
-                    'attributes']['last_seen'] = str(node.last_seen)
-            else:
-                response[node.short_name]['children']['Node'] = {}
-                response[node.short_name]['children'][
-                    'Node']['attributes'] = {}
-                response[node.short_name]['children']['Node'][
-                    'attributes']['status'] = str(node.available)
-                response[node.short_name]['children']['Node'][
-                    'attributes']['last_seen'] = str(node.last_seen)
-                response[node.short_name]['children']['Node'][
-                    'attributes']['hostname'] = node.short_name
-        return HttpResponse(json.dumps(response))
-    except Exception as e:
-        print_debug(e)
-        return HttpResponse(status=500)
+# Im not sure if we're still going to need this. Will update once I have a better idea
+#
+# @login_required
+# def node_info(request):
+#     try:
+#         response = {}
+#         nodes = ESGFNode.objects.all()
+#         for node in nodes:
+#             response[node.short_name] = node.node_data
+#             if 'children' not in response[node.short_name]:
+#                 continue
+#
+#             if 'Node' in response[node.short_name]['children']:
+#                 response[node.short_name]['children']['Node'][
+#                     'attributes']['status'] = str(node.available)
+#                 response[node.short_name]['children']['Node'][
+#                     'attributes']['last_seen'] = str(node.last_seen)
+#             else:
+#                 response[node.short_name]['children']['Node'] = {}
+#                 response[node.short_name]['children'][
+#                     'Node']['attributes'] = {}
+#                 response[node.short_name]['children']['Node'][
+#                     'attributes']['status'] = str(node.available)
+#                 response[node.short_name]['children']['Node'][
+#                     'attributes']['last_seen'] = str(node.last_seen)
+#                 response[node.short_name]['children']['Node'][
+#                     'attributes']['hostname'] = node.short_name
+#         return HttpResponse(json.dumps(response))
+#     except Exception as e:
+#         # print_debug(e)
+#         return HttpResponse(status=500)

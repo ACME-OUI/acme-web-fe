@@ -32,6 +32,16 @@ class TestLogon(LiveServerTestCase):
         response_code = requests.get(self.live_server_url + '/acme/esgf/logon/', params=credential).status_code
         self.assertFalse( response_code == 200)
 
+    def test_logon_fail_no_cred(self):
+        print "\n---->[+] Starting " + inspect.stack()[0][3]
+        print "--------------------------------------------"
+        credential = {
+            'asdf': 'http://abra',
+            'fdsa': 'cadabra'
+        }
+        response_code = requests.get(self.live_server_url + '/acme/esgf/logon/', params=credential).status_code
+        self.assertTrue( response_code == 400)
+
 
 class TestLoadFacet(LiveServerTestCase):
 
@@ -68,6 +78,16 @@ class TestNodeSearch(LiveServerTestCase):
         self.assertTrue( response.status_code == 200 )
         self.assertTrue( len(response.content) > 100 )
 
+    def test_node_search_no_node(self):
+        print "\n---->[+] Starting " + inspect.stack()[0][3]
+        request = json.dumps({
+            'asdf': self.valid_nodes,
+            'terms': self.valid_terms
+        })
+        response = requests.get(self.live_server_url + '/acme/esgf/node_search/', params={'searchString':request})
+        self.assertTrue( response.status_code == 400 )
+        self.assertTrue( len(response.content) < 100 )
+
     def test_node_search_bad_node(self):
         print "\n---->[+] Starting " + inspect.stack()[0][3]
         print "____ this should print a stack trace ________"
@@ -92,17 +112,31 @@ class TestNodeSearch(LiveServerTestCase):
         self.assertFalse( response.status_code == 200 )
         self.assertFalse( len(response.content) > 100 )
 
+class TestNodeList(LiveServerTestCase):
+
+    def test_get_node_list(self):
+        print "\n---->[+] Starting " + inspect.stack()[0][3]
+        response = requests.get(self.live_server_url + '/acme/esgf/node_list')
+        self.assertTrue( response.status_code == 200 )
+        self.assertTrue( 'pcmdi.llnl.gov' in json.loads(response.content) )
+
 
 class TestDownload(LiveServerTestCase):
 
     def setUp(self):
         self.auth_url = 'http://aims3.llnl.gov/thredds/fileServer/cmip5_css01_data/cmip5/output1/LASG-CESS/FGOALS-g2/midHolocene/day/seaIce/day/r1i1p1/v1/usi/usi_day_FGOALS-g2_midHolocene_r1i1p1_05320101-05321231.nc'
         self.unauth_url = 'http://airsl2.gesdisc.eosdis.nasa.gov/thredds/fileServer/cmac/taNobs_AIRS_L3_RetStd-v6_201502.nc'
+        self.bad_url = 'http://not.a.site.llnl.gov/not_a_file.nc'
 
     def test_download_unauth(self):
         print "\n---->[+] Starting " + inspect.stack()[0][3]
         response = requests.get(self.live_server_url + '/acme/esgf/download', params={'url': self.unauth_url})
         self.assertTrue( response.status_code == 200 )
+
+    def test_download_bad_url(self):
+        print "\n---->[+] Starting " + inspect.stack()[0][3]
+        response = requests.get(self.live_server_url + '/acme/esgf/download', params={'url': self.bad_url})
+        self.assertTrue( response.status_code == 400 )
 
     # TODO: make this work
     # def test_download_auth(self):
