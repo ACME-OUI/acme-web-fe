@@ -14,11 +14,12 @@ velo_patterns = [
 ]
 
 esgf_patterns = [
-    url(r'^node_info/$', esgf_views.node_info),
+    # url(r'^node_info/$', esgf_views.node_info),
     url(r'^node_search/$', esgf_views.node_search),
     url(r'^load_facets/$', esgf_views.load_facets),
     url(r'^download/$', esgf_views.download),
     url(r'^logon/$', esgf_views.logon),
+    url(r'^node_list/$', esgf_views.node_list),
 ]
 
 cdat_patterns = [
