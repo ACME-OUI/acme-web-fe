@@ -22,8 +22,8 @@
           }]
       }]
   }
-  var layout,
-      savedState = localStorage.getItem( 'savedState' );
+  layout = undefined;
+  var savedState = localStorage.getItem( 'savedState' );
   if( savedState !== null ) {
       layout = new window.GoldenLayout( JSON.parse( savedState ), $('#layoutContainer') );
   } else {
@@ -31,14 +31,14 @@
   }
 
   var addMenuItem = function( title, text ) {
-    var element = $( '<li>' + text + '</li>' );
+    var element = $( '<li>' + title + '</li>' );
     $( '#menuContainer' ).append( element );
 
     var newItemConfig = {
         title: title,
         type: 'component',
         componentName: title,
-        componentState: { text: text }
+        componentState: { templateId: text }
     };
 
     layout.createDragSource( element, newItemConfig );
@@ -66,8 +66,8 @@
   });
   layout.init();
 
-  addMenuItem('ESGF', 'ESGF');
-  addMenuItem('CDAT', 'CDAT');
-  addMenuItem('Velo', 'Velo');
+  addMenuItem('ESGF', 'esgf_wrapper');
+  addMenuItem('CDAT', 'cdat_wrapper');
+  addMenuItem('Velo', 'velo_wrapper');
 
 }).call(this);
