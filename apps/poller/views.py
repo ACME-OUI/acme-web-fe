@@ -64,6 +64,13 @@ def update(request):
                     if job_id and job_id.isdigit():
                         try:
                             data = UserRuns.objects.get(id=job_id)
+                            obj = {
+                                'id': data.id,
+                                'user': data.user,
+                                'status': data.status,
+                                'config_options': data.config_options
+                            }
+                            return JsonResponse(obj, safe=False)
                         except Exception as e:
                             print e
                             print 'job_id: ', job_id
@@ -74,10 +81,12 @@ def update(request):
                     print "Invalid request recieved"
                     return HttpResponse(status=400)
                 obj_list = []
+
                 for obj in data:
                     obj_dict = {}
                     obj_dict['id'] = obj.id
                     obj_dict['user'] = obj.user
+                    obj_dict['status'] = obj.status
                     obj_dict['config_options'] = obj.config_options
                     obj_list.append(obj_dict)
                 return JsonResponse(obj_list, safe=False)
@@ -120,7 +129,7 @@ def update(request):
                     return JsonResponse({'id': new_run.id})  # TODO: write tests for this
                 else:
                     return HttpResponse(status=400)
-            if request_type == 'in_progress' or 'complete':
+            if request_type == 'in_progress' or 'complete' or 'failed':
                 job_id = request.POST.get('job_id')
                 if job_id.isdigit():
                     try:
@@ -132,55 +141,51 @@ def update(request):
                         return HttpResponse(status=400)
         except Exception as e:
             print e
-            pdb.set_trace()
+            print 'here'
             return HttpResponse(status=500)
 
-    if request.method == 'PATCH':
-        try:
-            data = json.loads(request.body)
-            if str(data['id']).isdigit() and data['status'] in ['new', 'in_progress', 'complete', 'failed']:
-                db_id = data['id']
-                newstatus = data['status']
-                try:
-                    entry = UserRuns.objects.get(id=db_id)
-                    entry.status = newstatus
-                    entry.save()
-                except Exception as e:
-                    print e
-                    return HttpResponse(status=500)
-                return HttpResponse(status=200)
-            else:
-                return HttpResponse(status=400)
-        except KeyError as e:
-            print e
-            return HttpResponse(status=400)
-        except Exception as e:
-            print e
-            return HttpResponse(status=500)
-
-    if request.method == 'PUT':
-            try:
-                data = json.loads(request.body)
-                if 'user' and 'config_options' in data:
-                    new_run = UserRuns.objects.create(
-                        status='new',
-                        user=data['user'],
-                        config_options = data['config_options'],
-                    )
-                    new_run.save()
-                    # Success
-                    return HttpResponse(status=200)
-                else:
-                    # Request must have both user and runspec
-                    return HttpResponse(status=400)
-            except Exception as e:
-                print e
-                return HttpResponse(status=500)
-        # else:
-        #     JsonResponse(status=404)
+    # if request.method == 'PATCH':
+    #     try:
+    #         data = json.loads(request.body)
+    #         if str(data['id']).isdigit() and data['status'] in ['new', 'in_progress', 'complete', 'failed']:
+    #             db_id = data['id']
+    #             newstatus = data['status']
+    #             try:
+    #                 entry = UserRuns.objects.get(id=db_id)
+    #                 entry.status = newstatus
+    #                 entry.save()
+    #             except Exception as e:
+    #                 print e
+    #                 return HttpResponse(status=500)
+    #             return HttpResponse(status=200)
+    #         else:
+    #             return HttpResponse(status=400)
+    #     except KeyError as e:
+    #         print e
+    #         return HttpResponse(status=400)
+    #     except Exception as e:
+    #         print e
+    #         return HttpResponse(status=500)
+    #
+    # if request.method == 'PUT':
+    #         try:
+    #             data = json.loads(request.body)
+    #             if 'user' and 'config_options' in data:
+    #                 new_run = UserRuns.objects.create(
+    #                     status='new',
+    #                     user=data['user'],
+    #                     config_options = data['config_options'],
+    #                 )
+    #                 new_run.save()
+    #                 # Success
+    #                 return HttpResponse(status=200)
+    #             else:
+    #                 return HttpResponse(status=400)
+    #         except Exception as e:
+    #             print e
+    #             return HttpResponse(status=500)
 
     if request.method == 'DELETE':
-        # if settings.DEBUG == True
             try:
                 data = json.loads(request.body)
                 if 'id' in data:
@@ -190,5 +195,3 @@ def update(request):
             except Exception as e:
                 print e
                 return HttpResponse(status=500)
-        # else:
-        #     JsonResponse(status=404)

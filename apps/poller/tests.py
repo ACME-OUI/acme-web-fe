@@ -74,29 +74,47 @@ class Testresponses(LiveServerTestCase):
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
         self.assertTrue(r.status_code == requests.codes.ok)
 
-    def test_postin_progress(self):
-        payload = {'request': 'in_progress', 'user': 'test'}
+    def test_post_in_progress(self):
+        payload = {'request': 'in_progress', 'job_id': 1}
         r = requests.post(self.live_server_url + '/poller/update/', data=payload)
         self.assertTrue(r.status_code == requests.codes.ok)
-        payload = {'request': 'all', 'user': 'acmetest'}
+        payload = {'request': 'job', 'job_id': 1}
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
-        for job in r.json():
-            self.assertEquals(job['status'], 'complete')
-        payload = {'request': 'all', 'user': 'acme'}
-        r = requests.get(self.live_server_url + '/poller/update/', params=payload)
-        for job in r.json():
-            self.assertNotEquals(job['status'], 'complete')
+        self.assertTrue(r.status_code == requests.codes.ok)
+        data = json.loads(r.content)
+        self.assertEquals(data['status'], 'in_progress')
+
 # --------------------------------------------------------------------------------
     def test_get_complete(self):
         payload = {'request': 'complete'}
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
         self.assertTrue(r.status_code == requests.codes.ok)
 
+    def test_post_comlete(self):
+        payload = {'request': 'complete', 'job_id': 1}
+        r = requests.post(self.live_server_url + '/poller/update/', data=payload)
+        self.assertTrue(r.status_code == requests.codes.ok)
+        payload = {'request': 'job', 'job_id': 1}
+        r = requests.get(self.live_server_url + '/poller/update/', params=payload)
+        self.assertTrue(r.status_code == requests.codes.ok)
+        data = json.loads(r.content)
+        self.assertEquals(data['status'], 'complete')
+# --------------------------------------------------------------------------------
     def test_get_failed(self):
         payload = {'request': 'failed'}
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
         self.assertTrue(r.status_code == requests.codes.ok)
 
+    def test_post_failed(self):
+        payload = {'request': 'failed', 'job_id': 1}
+        r = requests.post(self.live_server_url + '/poller/update/', data=payload)
+        self.assertTrue(r.status_code == requests.codes.ok)
+        payload = {'request': 'job', 'job_id': 1}
+        r = requests.get(self.live_server_url + '/poller/update/', params=payload)
+        self.assertTrue(r.status_code == requests.codes.ok)
+        data = json.loads(r.content)
+        self.assertEquals(data['status'], 'failed')
+# --------------------------------------------------------------------------------
 
     def test_queueing(self):
         #
@@ -143,22 +161,14 @@ class Testresponses(LiveServerTestCase):
             datanew = json.loads(r.content)
             self.assertTrue(dataold['id'] == datanew['id'])
 
-    def test_bad_status(self):
-        payload = {'request': 'next'}
-        r = requests.get(self.live_server_url + '/poller/update/', params=payload)
-        self.assertTrue(r.status_code == requests.codes.ok)
-        data = json.loads(r.content)
-        payload = json.dumps({'id': data['id'], 'status': 'bad_status'})
-        s = requests.Session()
-        r1 = s.get(self.live_server_url + '/poller/update/')
-        self.assertTrue(r1.status_code == requests.codes.ok)
-        csrf_token = r1.cookies['csrftoken']
-        headers = {
-            'Content-type': 'application/json',
-            "X-CSRFToken": csrf_token,
-            'Referer': self.live_server_url + '/poller/update/'
-        }
-        r2 = s.patch(self.live_server_url + '/poller/update/', data=payload, headers=headers)
+    def test_get_bad_request(self):
+        payload = {'request': 'bad_parameter', 'job_id': 1, 'status': 'complete'}
+        r2 = requests.get(self.live_server_url + '/poller/update/', data=payload)
+        self.assertTrue(r2.status_code == 400)
+
+    def test_post_bad_request(self):
+        payload = {'request': 'bad_parameter', 'job_id': 1, 'status': 'complete'}
+        r2 = requests.post(self.live_server_url + '/poller/update/', data=payload)
         self.assertTrue(r2.status_code == 400)
 
 
