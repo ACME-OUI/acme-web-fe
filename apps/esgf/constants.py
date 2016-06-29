@@ -14,12 +14,18 @@ ESGF_CREDENTIALS = '~/.esg/credentials.pem'
 # List of all current ESGF nodes
 NODE_HOSTNAMES = [
     'pcmdi.llnl.gov',
+    'esgf-node.jpl.nasa.gov',
+    'esgf-index1.ceda.ac.uk',
+    'esgf-data.dkrz.de',
+    'esg-dn1.nsc.liu.se',
     'esgf-node.ipsl.upmc.fr',
+    'esgf.nci.org.au'
     'esg-dn1.nsc.liu.se',
     'esgdata.gfdl.noaa.gov',
-    'esgf.nccs.nasa.gov'
+    'esgf.nccs.nasa.gov',
+    'esg.ccs.ornl.gov'
 ]
 
-ESGF_SEARCH_SUFFIX = '/esg-search/search'
+ESGF_SEARCH_SUFFIX = '/esg-search/'
 
 DATA_DIRECTORY = '/tmp'
