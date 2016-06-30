@@ -25,6 +25,10 @@ body {
        transform: translate3d(-50%, 0, 0);
 }
 
+.lm_content {
+  overflow-y: auto;
+}
+
 
 .dashboard-show-hide {
   transition: all linear 0.3s;
