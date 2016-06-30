@@ -6,7 +6,7 @@
     $scope.init = () => {
       console.log('[+] Initializing dashboard');
     }
-    
+
 
     $scope.addMenuItem = function( title, text ) {
       var element = $( '<li>' + title + '</li>' );
@@ -24,12 +24,11 @@
 
 
     $scope.showToast = function(message) {
-      var pinTo = $scope.getToastPosition();
       $mdToast.show(
         $mdToast.simple()
           .textContent(message)
           .position('center')
-          .hideDelay(3000)
+          .hideDelay(1200)
       );
     };
 
