@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from django.http import JsonResponse
 from poller.models import UserRuns
+import json
 
 @csrf_exempt
 def update(request):
@@ -13,77 +14,55 @@ def update(request):
             if request_type:
                 if request_type == 'all':
                     if user:
-                        db_objs = UserRuns.objects.filter(user=user)
+                        data = UserRuns.objects.filter(user=user)
                     else:
-                        db_objs = UserRuns.objects.all()
-                    data = []
-                    for entry in db_objs:
-                        data.append({
-                            'id': entry.id,
-                            'config_options': entry.config_options,
-                            'user': entry.user,
-                            'status': entry.status,
-                        })
-                    return JsonResponse(data, safe=False)
+                        data = UserRuns.objects.all()
                 elif request_type == 'next':
                     data = UserRuns.objects.filter(status='new').order_by('created')
                     if not data:
                         return JsonResponse({}, safe=False)
                     else:
                         data = data[0]
+                        config = json.loads(data.config_options)
                         r = {}
                         r['id'] = data.id
                         r['user'] = data.user
-                        r['config_options'] = data.config_options
+                        r.update(config)
                         return JsonResponse(r, safe=False)
-                elif request_type == 'new':
+                elif request_type in ['new', 'in_progress', 'complete', 'failed']:
                     if user:
-                        data = UserRuns.objects.filter(status='new', user=user)
+                        data = UserRuns.objects.filter(status=request_type, user=user)
                     else:
-                        data = UserRuns.objects.filter(status='new')
-                elif request_type == 'in_progress':
-                    if user:
-                        data = UserRuns.objects.filter(status='in_progress', user=user)
-                    else:
-                        data = UserRuns.objects.filter(status='in_progress')
-                elif request_type == 'complete':
-                    if user:
-                        data = UserRuns.objects.filter(status='complete', user=user)
-                    else:
-                        data = UserRuns.objects.filter(status='complete')
-                elif request_type == 'failed':
-                    if user:
-                        data = UserRuns.objects.filter(status='failed', user=user)
-                    else:
-                        data = UserRuns.objects.filter(status='failed')
+                        data = UserRuns.objects.filter(status=request_type)
                 elif request_type == 'job':
                     job_id = request.GET.get('job_id')  # todo: write tests for this
                     if job_id and job_id.isdigit():
                         try:
                             data = UserRuns.objects.get(id=job_id)
+                            config = json.loads(data.config_options)
                             obj = {
                                 'id': data.id,
                                 'user': data.user,
                                 'status': data.status,
-                                'config_options': data.config_options
                             }
+                            obj.update(config)
                             return JsonResponse(obj, safe=False)
-                        except Exception as e:
-                            print e
-                            print 'job_id: ', job_id
-                            return HttpResponse(status=400)  # Currently throws 400 on bad id. Might want empty object instead
+                        except UserRuns.DoesNotExist:
+                            return JsonResponse({}, status=200)
                     else:
                         return HttpResponse(status=400)
                 else:
                     return HttpResponse(status=400)
+                if not data:
+                    return JsonResponse({}, status=200)
                 obj_list = []
-
                 for obj in data:
+                    config = json.loads(obj.config_options)
                     obj_dict = {}
                     obj_dict['id'] = obj.id
                     obj_dict['user'] = obj.user
                     obj_dict['status'] = obj.status
-                    obj_dict['config_options'] = obj.config_options
+                    obj_dict.update(config)
                     obj_list.append(obj_dict)
                 return JsonResponse(obj_list, safe=False)
             else:
@@ -114,15 +93,21 @@ def update(request):
                         return HttpResponse(status=200)
                 return HttpResponse(status=400)  # If request was 'all' and we get to here, the request was bad
             if request_type == 'new':
-                config_options = request.POST.get('config_options')
-                if 'user' and 'config_options':
+                if user:
+                    config = {}
+                    for key in request.POST:
+                        value = request.POST.get(key)
+                        config.update({key: value})
+                    del config['user']
+                    del config['request']
+                    config = json.dumps(config)
                     new_run = UserRuns.objects.create(
                         status='new',
-                        config_options=config_options,
+                        config_options=config,
                         user=user
                     )
                     new_run.save()
-                    return JsonResponse({'id': new_run.id})  # TODO: write tests for this
+                    return JsonResponse({'id': new_run.id})
                 else:
                     return HttpResponse(status=400)
             if request_type == 'delete':

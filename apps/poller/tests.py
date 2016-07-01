@@ -5,7 +5,7 @@ from django.test import LiveServerTestCase
 
 
 class Testresponses(LiveServerTestCase):
-    fixtures = ['testdata.json']
+    fixtures = ['testdata.yaml']
 
     def setUp(self):
         unittest.TestCase.setUp(self)
@@ -59,7 +59,7 @@ class Testresponses(LiveServerTestCase):
             self.assertTrue(record['user'] == 'acmetest')
 
     def test_post_new(self):
-        payload = {'request': 'new', 'user': 'test', 'config_options': json.dumps({'testdata': 'hello'})}
+        payload = {'request': 'new', 'user': 'test', 'testdata': 'hello', 'model': 'CMIP5'}
         r = requests.post(self.live_server_url + '/poller/update/', data=payload)
         self.assertTrue(r.status_code == requests.codes.ok)
         payload = {'request': 'all', 'user': 'test'}
