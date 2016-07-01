@@ -1,10 +1,7 @@
 import unittest
 import requests
-import os
 import json
-from poller.models import UserRuns
 from django.test import LiveServerTestCase
-import pdb
 
 
 class Testresponses(LiveServerTestCase):
@@ -18,7 +15,9 @@ class Testresponses(LiveServerTestCase):
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
         self.assertTrue(r.status_code == requests.codes.ok)
 # --------------------------------------------------------------------------------
+
 # Tests when request is 'all'
+
     def test_get_all_no_user(self):
         payload = {'request': 'all'}
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
@@ -43,9 +42,10 @@ class Testresponses(LiveServerTestCase):
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
         for job in r.json():
             self.assertNotEquals(job['status'], 'complete')
-
 # --------------------------------------------------------------------------------
+
 # Tests when request is 'new'
+
     def test_get_new_no_user(self):
         payload = {'request': 'new'}
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
@@ -68,7 +68,9 @@ class Testresponses(LiveServerTestCase):
         for job in r.json():
             self.assertEquals(job['status'], 'new')
 # --------------------------------------------------------------------------------
+
 # Tests when request is 'in_progress'
+
     def test_get_in_progress(self):
         payload = {'request': 'in_progress'}
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
@@ -83,8 +85,10 @@ class Testresponses(LiveServerTestCase):
         self.assertTrue(r.status_code == requests.codes.ok)
         data = json.loads(r.content)
         self.assertEquals(data['status'], 'in_progress')
-
 # --------------------------------------------------------------------------------
+
+# Tests when request is 'complete'
+
     def test_get_complete(self):
         payload = {'request': 'complete'}
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
@@ -100,6 +104,9 @@ class Testresponses(LiveServerTestCase):
         data = json.loads(r.content)
         self.assertEquals(data['status'], 'complete')
 # --------------------------------------------------------------------------------
+
+# Tests when request is 'in_progress'
+
     def test_get_failed(self):
         payload = {'request': 'failed'}
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
@@ -116,45 +123,43 @@ class Testresponses(LiveServerTestCase):
         self.assertEquals(data['status'], 'failed')
 # --------------------------------------------------------------------------------
 
+# Tests when request is 'delete'
+
+    def test_delete(self):
+        payload = {'request': 'delete', 'job_id': 1}
+        r = requests.post(self.live_server_url + '/poller/update/', data=payload)
+        self.assertTrue(r.status_code == 200)  # delete job successfully
+        payload = {'request': 'delete', 'job_id': 1}
+        r = requests.post(self.live_server_url + '/poller/update/', data=payload)
+        self.assertTrue(r.status_code == 400)  # Can't delete a job that doesnt exist
+# --------------------------------------------------------------------------------
+
+# Testing behavior
+
     def test_queueing(self):
         #
         # Test gets next run from queue, updates its status, and gets the next run after that.
         # The result should be a different id from the database
         #
         payload1 = {'request': 'next'}
-        r = requests.get(self.live_server_url + '/poller/update/', params=payload1)
-        self.assertTrue(r.status_code == requests.codes.ok)
-        # pdb.set_trace()
-        data = json.loads(r.content)  # converts from JSON to python object
-        if data == {}:
-            self.assertTrue(False)  # abort test if there are no items in queue
-        oldid = data['id']
-        # finished getting first user run 1
-        s = requests.Session()
-        r1 = s.get(self.live_server_url + '/poller/update/')
+        r1 = requests.get(self.live_server_url + '/poller/update/', params=payload1)
         self.assertTrue(r1.status_code == requests.codes.ok)
-        csrf_token = r1.cookies['csrftoken']
-        # finished getting csrf token
-        headers = {
-            'Content-type': 'application/json',
-            "X-CSRFToken": csrf_token,
-            'Referer': self.live_server_url + '/poller/update/'
-        }
-        # converts from python object to JSON string
-        payload2 = json.dumps({'id': data['id'], 'status': 'in_progress'})
-        r2 = s.patch(self.live_server_url + '/poller/update/', data=payload2, headers=headers)
+        oldid = json.loads(r1.content)['id']
+        # finished getting first user run
+        payload2 = {'request': 'complete', 'job_id': oldid}
+        r2 = requests.post(self.live_server_url + '/poller/update/', data=payload2)
         self.assertTrue(r2.status_code == requests.codes.ok)
-        # finished posting updated status for user run 1
+        # finished updated the run's status
         r3 = requests.get(self.live_server_url + '/poller/update/', params=payload1)
-        if r3.content:
-            data = json.loads(r3.content)
-            self.assertTrue(oldid != data['id'])
+        self.assertTrue(r3.status_code == requests.codes.ok)
+        # r3 run should be a different id
+        newid = json.loads(r3.content)['id']
+        self.assertNotEqual(oldid, newid)
 
     def test_next_repeat(self):
         payload = {'request': 'next'}
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
         datanew = json.loads(r.content)
-        dataold = ''
         for i in range(20):
             dataold = datanew
             r = requests.get(self.live_server_url + '/poller/update/', params=payload)
@@ -168,8 +173,15 @@ class Testresponses(LiveServerTestCase):
 
     def test_post_bad_request(self):
         payload = {'request': 'bad_parameter', 'job_id': 1, 'status': 'complete'}
-        r2 = requests.post(self.live_server_url + '/poller/update/', data=payload)
-        self.assertTrue(r2.status_code == 400)
+        r = requests.post(self.live_server_url + '/poller/update/', data=payload)
+        self.assertTrue(r.status_code == 400)
 
+    def test_get_empty(self):
+        payload = {'request': 'all', 'status': 'complete'}
+        r = requests.post(self.live_server_url + '/poller/update/', data=payload)
+        self.assertTrue(r.status_code == requests.codes.ok)
+        payload = {'request': 'next'}
+        r = requests.get(self.live_server_url + '/poller/update/', params=payload)
+        data = json.loads(r.content)
+        self.assertEquals(len(data.keys()), 0)
 
-# os.system('clear')

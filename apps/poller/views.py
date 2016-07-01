@@ -1,11 +1,8 @@
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
 from poller.models import UserRuns
-import json
-import pdb
 
 @csrf_exempt
 def update(request):
@@ -78,7 +75,6 @@ def update(request):
                     else:
                         return HttpResponse(status=400)
                 else:
-                    print "Invalid request recieved"
                     return HttpResponse(status=400)
                 obj_list = []
 
@@ -91,7 +87,7 @@ def update(request):
                     obj_list.append(obj_dict)
                 return JsonResponse(obj_list, safe=False)
             else:
-                return HttpResponse(render(request, "poller/token.html", {}))
+                return HttpResponse(status=400)
         except Exception as e:
             print e
             return HttpResponse(status=500)
@@ -129,7 +125,17 @@ def update(request):
                     return JsonResponse({'id': new_run.id})  # TODO: write tests for this
                 else:
                     return HttpResponse(status=400)
-            if request_type == 'in_progress' or 'complete' or 'failed':
+            if request_type == 'delete':
+                try:
+                    job_id = request.POST.get('job_id')
+                    if not job_id:
+                        raise KeyError
+                    else:
+                        UserRuns.objects.get(id=job_id).delete()
+                        return HttpResponse(status=200)
+                except (KeyError, AttributeError, UserRuns.DoesNotExist):
+                    return HttpResponse(status=400)
+            if request_type in ['in_progress', 'complete', 'failed']:
                 job_id = request.POST.get('job_id')
                 if job_id.isdigit():
                     try:
@@ -139,59 +145,8 @@ def update(request):
                         return HttpResponse(status=200)
                     except ObjectDoesNotExist:
                         return HttpResponse(status=400)
+            else:
+                return HttpResponse(status=400)  # Unrecognized request
         except Exception as e:
             print e
-            print 'here'
             return HttpResponse(status=500)
-
-    # if request.method == 'PATCH':
-    #     try:
-    #         data = json.loads(request.body)
-    #         if str(data['id']).isdigit() and data['status'] in ['new', 'in_progress', 'complete', 'failed']:
-    #             db_id = data['id']
-    #             newstatus = data['status']
-    #             try:
-    #                 entry = UserRuns.objects.get(id=db_id)
-    #                 entry.status = newstatus
-    #                 entry.save()
-    #             except Exception as e:
-    #                 print e
-    #                 return HttpResponse(status=500)
-    #             return HttpResponse(status=200)
-    #         else:
-    #             return HttpResponse(status=400)
-    #     except KeyError as e:
-    #         print e
-    #         return HttpResponse(status=400)
-    #     except Exception as e:
-    #         print e
-    #         return HttpResponse(status=500)
-    #
-    # if request.method == 'PUT':
-    #         try:
-    #             data = json.loads(request.body)
-    #             if 'user' and 'config_options' in data:
-    #                 new_run = UserRuns.objects.create(
-    #                     status='new',
-    #                     user=data['user'],
-    #                     config_options = data['config_options'],
-    #                 )
-    #                 new_run.save()
-    #                 # Success
-    #                 return HttpResponse(status=200)
-    #             else:
-    #                 return HttpResponse(status=400)
-    #         except Exception as e:
-    #             print e
-    #             return HttpResponse(status=500)
-
-    if request.method == 'DELETE':
-            try:
-                data = json.loads(request.body)
-                if 'id' in data:
-                    UserRuns.objects.get(id=data['id']).delete()
-                else:
-                    return HttpResponse(status=400)
-            except Exception as e:
-                print e
-                return HttpResponse(status=500)
