@@ -24,28 +24,47 @@ angular.module('esgf', [])
     $scope.get_node_list();
   }
 
+  $scope.arrFromMyObj = (obj) => {
+      Object.keys(obj).map(function(key) {
+        return obj[key];
+      });
+  };
+
   $scope.search = () => {
-    $scope.ready = false;
-    var params = {
-      'searchString': JSON.stringify($scope.searchTerms),
-      'nodes': JSON.stringify($scope.selected_nodes)
+    if(Object.keys($scope.searchTerms).length == 0){
+      $scope.$parent.showToast('Select at least one facet option');
+    } else {
+      $scope.ready = false;
+      $scope.spinner = true;
+      var spinner = $('.spinner_wrapper');
+      var parent = spinner.parents('.lm_content');
+      spinner.css({
+        top: (parent.offset().top + parent.height())/2 - spinner.height(),
+        left: (parent.offset().left + parent.width())/2 - spinner.width()
+      });
+      var params = {
+        'searchString': JSON.stringify($scope.searchTerms),
+        'nodes': JSON.stringify($scope.selected_nodes)
+      }
+      $http({
+        url: 'esgf/node_search',
+        method: 'GET',
+        params: params
+      }).then((res) => {
+        console.log('[+] Node search complete');
+        console.log(res.data);
+        $scope.ready = true;
+        $scope.step = 3;
+        $scope.datasets = res.data;
+        $scope.spinner = false;
+      }).catch((res) => {
+        console.log('[-] Error during node search');
+        console.log(res);
+        $scope.ready = true;
+        $scope.$parent.showToast('Error searching selected nodes');
+        $scope.spinner = false;
+      });
     }
-    $http({
-      url: 'esgf/node_search',
-      method: 'GET',
-      params: params
-    }).then((res) => {
-      console.log('[+] Node search complete');
-      console.log(res.data);
-      $scope.ready = true;
-      $scope.step = 3;
-      $scope.datasets = res.data;
-    }).catch((res) => {
-      console.log('[-] Error during node search');
-      console.log(res);
-      $scope.ready = true;
-      $scope.$parent.showToast('Error searching selected nodes');
-    })
   }
 
   $scope.select_nodes = (id) => {
@@ -58,11 +77,13 @@ angular.module('esgf', [])
     .done(() =>{
       if($scope.selected_nodes.length > 0){
         $scope.nodes_been_selected = true;
+        $scope.step = 2;
+        $scope.ready = false;
+        $scope.datasets = undefined;
+        $scope.get_facet_options();
       } else {
         $scope.$parent.showToast('Select at least one data node')
       }
-      $scope.ready = false;
-      $scope.get_facet_options();
     });
   };
 
@@ -77,7 +98,6 @@ angular.module('esgf', [])
     } else {
       $('#'+facet+'_arrow').text('play_arrow');
     }
-
   }
 
   $scope.get_node_list = () => {
@@ -94,8 +114,17 @@ angular.module('esgf', [])
     });
   }
 
+  $scope.remove_facet = (facet) => {
+    delete $scope.searchTerms[facet];
+  }
+
   $scope.get_facet_options = () => {
     $scope.spinner = true;
+    var spinner = $('.spinner_wrapper');
+    spinner.css({
+      top: (spinner.parents('.lm_content').offset().top + spinner.parent().height())/2 - spinner.height(),
+      left: (spinner.parents('.lm_content').offset().left + spinner.parent().width())/2 - spinner.width()
+    });
     $http({
       url: 'esgf/load_facets',
       method: 'GET',
@@ -106,6 +135,8 @@ angular.module('esgf', [])
       $scope.ready = true;
       $scope.spinner = false;
       $scope.facet_options = res.data;
+      $scope.datasets = undefined;
+      $scope.searchTerms = {};
       $('.collapsible').collapsible({
         accordion : false
       });
