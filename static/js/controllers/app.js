@@ -1,19 +1,39 @@
 (function(){
-  var dashboard = angular.module('dashboard', ['esgf', 'velo', 'cdat'])
-  .controller('DashboardControl', ['$scope', '$http', function($scope, $http){
+  var dashboard = angular.module('dashboard', ['esgf', 'velo', 'cdat', 'ngAnimate', 'ngMessages', 'ngMaterial'])
+  .controller('DashboardControl', ['$scope', '$http', '$mdToast', function($scope, $http, $mdToast) {
 
 
-    $scope.init = function(){
-
-    };
-
-    $scope.add_window = function(window_name){
-
+    $scope.init = () => {
+      console.log('[+] Initializing dashboard');
     }
 
 
+    $scope.addMenuItem = function( title, text ) {
+      var element = $( '<li>' + title + '</li>' );
+      $( '#menuContainer' ).append( element );
 
-    $scope.get_csrf = function() {
+      var newItemConfig = {
+          title: title,
+          type: 'component',
+          componentName: title,
+          componentState: { templateId: text }
+      };
+
+      layout.createDragSource( element, newItemConfig );
+    };
+
+
+    $scope.showToast = function(message) {
+      $mdToast.show(
+        $mdToast.simple()
+          .textContent(message)
+          .position('center')
+          .hideDelay(1200)
+      );
+    };
+
+
+    $scope.get_csrf = () => {
   		var nameEQ = "csrftoken=";
   		var ca = document.cookie.split(';');
   		for (var i = 0; i < ca.length; i++) {

@@ -168,6 +168,7 @@ def logon(request):
 # Inputs: { 'nodes': ['list', 'of', 'hostnames'] }
 # returns: facet information from the requested nodes
 def load_facets(request):
+    print request.GET.get('nodes')
     nodes = json.loads(request.GET.get('nodes'))
     print nodes
     # if 'nodes' not in nodes:
@@ -192,25 +193,37 @@ def load_facets(request):
 def node_search(request):
 
     searchString = json.loads(request.GET.get('searchString'))
-    print searchString
-    if 'nodes' not in searchString:
+    nodes = json.loads(request.GET.get('nodes'))
+    # searchString = request.GET.get('searchString')
+    # nodes = request.GET.get('nodes')
+
+    if len(nodes) == 0:
+        print "Invalid node selection"
         return HttpResponse(status=400)
+    else:
+        print nodes
+    if len(searchString) == 0:
+        print "Invalid search terms"
+        return HttpResponse(status=400)
+    else:
+        print searchString
 
     response = {}
-    for node in searchString['nodes']:
+    for node in nodes:
+        print node
         try:
-            print '[+] searching ' + node + ' for ' + str(searchString['terms'])
+            print '[+] searching ' + node + ' for ' + str(searchString)
             conn = SearchConnection(
                 'http://' + node + ESGF_SEARCH_SUFFIX, distrib=True)
-            print searchString['terms']
-            context = conn.new_context(**searchString['terms'])
+            print searchString
+            context = conn.new_context(**searchString)
             rs = context.search()
             response['hits'] = context.hit_count
             for i in range(len(rs)):
                 response[str(i)] = rs[i].json
 
         except Exception as e:
-            # print_debug(e)
+            print_debug(e)
             return HttpResponse(status=400)
 
     return HttpResponse(json.dumps(response))
