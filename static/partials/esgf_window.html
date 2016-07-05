@@ -86,7 +86,7 @@
         <a href="#!" class="waves-effect waves-light btn" ng-click="search()">Search</a>
       </div>
       <ul class="collapsible popout" data-collapsible="accordion">
-        <li ng-repeat="(facet,options) in facet_options ">
+        <li ng-repeat="(facet,options) in facet_options" class="facet_holder" id="[[facet]]">
           <div class="collapsible-header" ng-click="facet_option_typeahead(facet)">
             <i class="material-icons" id="[[facet]]_arrow">play_arrow</i>
             [[facet]]

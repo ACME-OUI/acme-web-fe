@@ -163,7 +163,7 @@ angular.module('esgf', ['ngAnimate'])
       });
       $('.typeahead').bind('typeahead:select', function(ev, suggestion) {
         console.log('Selection: ' + suggestion);
-        $scope.searchTerms[facet] = suggestion;
+        $scope.searchTerms[$(ev.target).parents('.facet_holder').attr('id')] = suggestion;
         $('input[id="' + suggestion + '"]').attr({'checked': true});
         $scope.$apply();
       });
