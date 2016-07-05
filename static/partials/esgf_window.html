@@ -1,112 +1,128 @@
-
-<div class="esgf_window" ng-controller="ESGFControl" ng-init="init()">
-  <a class="waves-effect waves-light btn teal dashboard-show-hide" ng-show="step != 1" ng-click="step = step - 1">
+<div class="">
+  <a class="waves-effect waves-light btn teal dashboard-show-hide" style="margin-bottom: 1em;" ng-show="step != 0" ng-click="step = step - 1">
     <i class="material-icons left">navigate_before</i>
   </a>
-  <a class="waves-effect waves-light btn teal dashboard-show-hide" style="float: right;" ng-show="step == 2 && datasets" ng-click="step = step + 1">
+  <a class="waves-effect waves-light btn teal dashboard-show-hide" style="float: right; margin-bottom: 1em;" ng-show="step == 2 && datasets" ng-click="step = step + 1">
     <i class="material-icons left">navigate_next</i>
   </a>
-  <!-- Spinner, would have liked this to be in an include, but nested includes arent allowed :( -->
-  <div class="spinner_wrapper dashboard-show-hide" style="position:absolute!important;" ng-show="spinner == true"><div class="spinner-container">
-    <div class="spinner-layer spinner-layer--blue">
-        <div class="spinner-clipper spinner-clipper--left">
-            <div class="spinner-circle"></div>
-        </div>
-        <div class="spinner--patch">
-          <div class="spinner-circle"></div>
-        </div>
-        <div class="spinner-clipper spinner-clipper--right">
-            <div class="spinner-circle"></div>
-        </div>
-    </div>
-
-    <div class="spinner-layer spinner-layer--red">
-        <div class="spinner-clipper spinner-clipper--left">
-            <div class="spinner-circle"></div>
-        </div>
-        <div class="spinner--patch">
-          <div class="spinner-circle"></div>
-        </div>
-        <div class="spinner-clipper spinner-clipper--right">
-            <div class="spinner-circle"></div>
-        </div>
-    </div>
-
-    <div class="spinner-layer spinner-layer--yellow">
-        <div class="spinner-clipper spinner-clipper--left">
-            <div class="spinner-circle"></div>
-        </div>
-        <div class="spinner--patch">
-          <div class="spinner-circle"></div>
-        </div>
-        <div class="spinner-clipper spinner-clipper--right">
-            <div class="spinner-circle"></div>
-        </div>
-    </div>
-
-    <div class="spinner-layer spinner-layer--green">
-        <div class="spinner-clipper spinner-clipper--left">
-            <div class="spinner-circle"></div>
-        </div>
-        <div class="spinner--patch">
-          <div class="spinner-circle"></div>
-        </div>
-        <div class="spinner-clipper spinner-clipper--right">
-            <div class="spinner-circle"></div>
-        </div>
-    </div>
-  </div></div>
-
-  <!-- TODO: Get this to work with a template, so that when new windows are created dynamicall they compile themselves -->
-  <!-- step 1:select node pane -->
-  <form class="dashboard-show-hide esgf_scope_[[$id]]" ng-show="step == 1 && ready == true">
-    <p ng-repeat="node in node_list">
-      <input type="checkbox" id="[[node + $id]]" value="[[node]]"/>
-      <label for="[[node + $id]]">[[node]]</label>
-    </p>
-    <a class="waves-effect waves-light btn" ng-click="select_nodes($id)"> select </a>
-  </form>
-  <!-- step 2: select facet -->
-  <div class="dashboard-show-hide" ng-show="step == 2 && ready == true">
-    <div class="card-panel teal">
-      <span class="white-text">Search Terms</span>
-      <div class="collection">
-        <a href="#!" class="collection-item waves-effect waves-dark" ng-repeat="(facet, option) in searchTerms" ng-animate="'animate'" ng-click="remove_facet(facet)">
-          [[facet]] : [[option]]
-        </a>
-      </div>
-      <a href="#!" class="waves-effect waves-light btn" ng-click="search()">Search</a>
-    </div>
-    <ul class="collapsible popout" data-collapsible="accordion">
-      <li ng-repeat="(facet,options) in facet_options ">
-        <div class="collapsible-header" ng-click="switch_arrow(facet)">
-          <i class="material-icons" id="[[facet]]_arrow">play_arrow</i>
-          [[facet]]
+  <!-- Datapath selection -->
+  <!-- Step 0 -->
+  <div class="dashboard-show-hide" ng-show="step == 0 && ready == true">
+    <h3>Select a data source</h3>
+    <ul class="collapsible popout" id="data-select-collapsible"data-collapsible="accordion">
+      <li>
+        <div class="collapsible-header">
+          <a class="waves-effect waves-light btn" href="#" ng-click="set_datapath('local')">
+            Local storage
+          </a>
+          <i class="material-icons">file_upload</i>
         </div>
         <div class="collapsible-body">
-          <p ng-repeat="(option, hits) in options" style="padding: 1em;">
-            <input name="[[facet]]" type="radio" ng-click="searchTerms[facet] = option" id="[[option]]" />
-            <label for="[[option]]">[[option]] : [[hits]]</label>
+          <div class="file-field input-field" style="padding: 1em;">
+            <div class="btn">
+              <span>File</span>
+              <input type="file">
+            </div>
+            <div class="file-path-wrapper">
+              <input class="file-path" type="text">
+            </div>
+          </div>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header">
+          <a class="waves-effect waves-light btn" href="#" ng-click="set_datapath('server')">
+            Remote Server
+          </a>
+          <i class="material-icons">dns</i>
+        </div>
+        <div class="collapsible-body">
+          <p class="card">
+            <input type="text" id="remote-server-url" placeholder="server url" value="">
+            <a href="#!" class="waves-effect waves-light btn">
+              import
+            </a>
+          </p>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header active">
+          <a class="waves-effect waves-light btn" href="#">
+            Earth System Grid Federation
+          </a>
+          <i class="material-icons">cloud</i>
+        </div>
+        <div class="collapsible-body">
+          <p>
+            <a href="#" class="waves-effect waves-light btn" ng-click="set_datapath('esgf')">ESGF</a>
           </p>
         </div>
       </li>
     </ul>
   </div>
-  <!-- step 3: select a dataset -->
-  <div class="dashboard-show-hide" ng-show="step == 3 && ready == true">
-    <ul class="collapsible popout" data-collapsible="accordion">
-      <li ng-repeat="key in datasets track by $index">
-        <div class="collapsible-header" ng-click="switch_arrow($index)">
-          <i class="material-icons" id="[[$index]]_arrow">play_arrow</i>
-          [[key.title]]
+
+
+  <!-- TODO: Get this to work with a template, so that when new windows are created dynamicall they compile themselves -->
+  <!-- step 1:select node pane -->
+  <div class="dashboard-show-hide" ng-show="datapath == 'esgf'">
+    <form class="dashboard-show-hide esgf_scope_[[$id]]" ng-show="step == 1 && ready == true">
+      <p ng-repeat="node in node_list">
+        <input type="checkbox" id="[[node + $id]]" value="[[node]]"/>
+        <label for="[[node + $id]]">[[node]]</label>
+      </p>
+      <a class="waves-effect waves-light btn" ng-click="select_nodes($id)"> select </a>
+    </form>
+
+
+    <!-- step 2: select facet -->
+    <div class="dashboard-show-hide" ng-show="step == 2 && ready == true">
+      <div class="card-panel teal">
+        <span class="white-text">Search Terms</span>
+        <div class="collection">
+          <a href="#!" class="collection-item waves-effect waves-dark"  ng-repeat="(facet, option) in searchTerms" ng-click="remove_facet(facet)">
+            [[facet]] : [[option]]
+          </a>
         </div>
-        <div class="collapsible-body">
-          <ul class="collection" ng-repeat="(k,v) in key" style="padding-left: 1em;">
-            <li>[[k]] : [[v]]</li>
-          </ul>
-        </div>
-      </li>
-    </ul>
+        <a href="#!" class="waves-effect waves-light btn" ng-click="search()">Search</a>
+      </div>
+      <ul class="collapsible popout" data-collapsible="accordion">
+        <li ng-repeat="(facet,options) in facet_options ">
+          <div class="collapsible-header" ng-click="facet_option_typeahead(facet)">
+            <i class="material-icons" id="[[facet]]_arrow">play_arrow</i>
+            [[facet]]
+          </div>
+          <div class="collapsible-body" id="[[facet]]_lookup">
+            <div class="input-field" style="padding: 1em;">
+              <input class="typeahead" type="text" id="[[facet]]_lookup_field" placeholder="lookup">
+            </div>
+
+            <p ng-repeat="(option, hits) in facet_cache[facet]" style="padding: 1em;">
+              <input name="[[facet]]" type="radio" ng-click="searchTerms[facet] = option" id="[[option]]" />
+              <label for="[[option]]">[[option]] : [[hits]]</label>
+            </p>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+
+
+    <!-- step 3: select a dataset -->
+    <div class="dashboard-show-hide" ng-show="step == 3 && ready == true">
+      <ul class="collapsible popout" data-collapsible="accordion">
+        <li ng-repeat="key in datasets track by $index">
+          <div class="collapsible-header" ng-click="switch_arrow($index)">
+            <i class="material-icons" id="[[$index]]_arrow">play_arrow</i>
+            [[key.title]]
+          </div>
+          <div class="collapsible-body">
+            <ul class="collection" ng-repeat="(k,v) in key" style="padding-left: 1em;">
+              <li>[[k]] : [[v]]</li>
+            </ul>
+          </div>
+        </li>
+      </ul>
+    </div>
   </div>
 
 </div>
