@@ -10,17 +10,18 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
 
   <!-- Golden-Layout -->
-  <script type="text/javascript" src="{% static "js/resources/goldenlayout.min.js"%}"></script>
+  <script src="{% static "js/resources/goldenlayout.min.js"%}"></script>
   <link type="text/css" rel="stylesheet" href="{% static "css/goldenlayout-base.css"%}"/>
 	<link type="text/css" rel="stylesheet" href="{% static "css/goldenlayout-dark-theme.css"%}"/>
   <link type="text/css" rel="stylesheet" href="{% static "css/goldenlayout-light-theme.css"%}"/>
 
   <!-- AngularJS -->
-  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-aria.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-animate.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular-aria.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular-animate.min.js"></script>
   <script src="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-messages.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular-messages.min.js"></script>
+
   <script src="{% static "js/controllers/app.js" %}"></script>
   <script src="{% static "js/controllers/cdat.js" %}"></script>
   <script src="{% static "js/controllers/esgf.js" %}"></script>
@@ -28,17 +29,21 @@
   <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
 
   <!-- AngularJS Tree -->
-  <script type="text/javascript" src="{% static "js/resources/angular-tree-control.js"%}"></script>
+  <script src="{% static "js/resources/angular-tree-control.js"%}"></script>
   <link rel="stylesheet" href="{% static "css/tree-control.css"%}">
 
+  <!-- Typehead and Bloodhound -->
+  <script src="{% static "js/resources/typeahead.bundle.js"%}"></script>
+  <link rel="stylesheet" href="{% static "css/typeahead.css"%}">
+
   <!-- Bootstrap -->
-  <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.js"></script>
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.js"></script>
 
   <!-- Font Awesome -->
   <!-- <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"> -->
 
   <!-- Slick Carousel -->
-  <script type="text/javascript" src="{% static "js/resources/slick.js" %}"></script>
+  <script src="{% static "js/resources/slick.js" %}"></script>
   <link rel="stylesheet" type="text/css" href="{% static "css/slick.css" %}"/>
   <link rel="stylesheet" href="{% static "css/slick-theme.css" %}">
 
@@ -111,14 +116,15 @@
       </div>
       <div class="">
         <template type="text/html" id="esgf_wrapper">
-          <ng-include src="'{% static 'partials/esgf_window.html' %}'"></ng-include>
+          <div class="esgf_window" ng-controller="ESGFControl" ng-init="init()">
+            <ng-include src="'{% static 'partials/spinner.html' %}'"></ng-include>
+            <ng-include src="'{% static 'partials/esgf_window.html' %}'"></ng-include>
+          <div>
         </template>
       </div>
       <div class="">
         <template type="text/html" id="velo_wrapper">
-          <div class="velo_window" ng-controller="VeloControl" ng-init="init()">
 
-          </div>
         </template>
       </div>
     </div>
