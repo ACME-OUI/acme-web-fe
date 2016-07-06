@@ -32,6 +32,26 @@
       );
     };
 
+    /**
+     * Slices the object. Note that returns a new spliced object,
+     * e.g. do not modifies original object. Also note that that sliced elements
+     * are sorted alphabetically by object property name.
+     * see: http://stackoverflow.com/a/20682709
+     */
+    $scope.slice = (obj, start, end) => {
+
+        var sliced = {};
+        var i = 0;
+        for (var k in obj) {
+            if (i >= start && i < end)
+                sliced[k] = obj[k];
+
+            i++;
+        }
+
+        return sliced;
+    }
+
 
     $scope.get_csrf = () => {
   		var nameEQ = "csrftoken=";

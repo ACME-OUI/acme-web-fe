@@ -84,22 +84,31 @@
           </a>
         </div>
         <a href="#!" class="waves-effect waves-light btn" ng-click="search()">Search</a>
+        <div class="input-field" style="padding: 1em;" id="facet_lookup_field">
+          <input class="typeahead" type="text" placeholder="lookup">
+        </div>
       </div>
       <ul class="collapsible popout" data-collapsible="accordion">
         <li ng-repeat="(facet,options) in facet_options" class="facet_holder" id="[[facet]]">
-          <div class="collapsible-header" ng-click="facet_option_typeahead(facet)">
+          <div class="collapsible-header" id="[[facet]]_collapsible" ng-click="facet_option_typeahead(facet)">
             <i class="material-icons" id="[[facet]]_arrow">play_arrow</i>
             [[facet]]
           </div>
           <div class="collapsible-body" id="[[facet]]_lookup">
-            <div class="input-field" style="padding: 1em;">
-              <input class="typeahead" type="text" id="[[facet]]_lookup_field" placeholder="lookup">
-            </div>
-
-            <p ng-repeat="(option, hits) in facet_cache[facet]" style="padding: 1em;">
-              <input name="[[facet]]" type="radio" ng-click="searchTerms[facet] = option" id="[[option]]" />
-              <label for="[[option]]">[[option]] : [[hits]]</label>
-            </p>
+            <ul class="collection">
+              <li class="collection-item">
+                <div class="input-field" style="padding: 1em;">
+                  <input class="typeahead" type="text" id="[[facet]]_lookup_field" placeholder="lookup">
+                </div>
+              </li>
+              <li class="collection-item" ng-repeat="(option, hits) in facet_cache[facet]" style="padding: 1em;">
+                <input name="[[facet]]" type="radio" ng-click="searchTerms[facet] = option" id="[[option]]" />
+                <label for="[[option]]">[[option]] : [[hits]]</label>
+              </li>
+              <li class="collection-item" ng-show="show_more_facet_options(facet)">
+                <a href="#" class="waves-effect waves-light btn" ng-click="next_facet_page(facet)">more</a>
+              </li>
+            </ul>
           </div>
         </li>
       </ul>

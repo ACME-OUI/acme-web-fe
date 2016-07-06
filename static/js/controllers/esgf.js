@@ -7,10 +7,10 @@ angular.module('esgf', ['ngAnimate'])
   */
   //$scope.newTransaction = tempService();
 
-  // window.layout.on( 'new_window', function(template, container){
-  //   console.log(template, container);
-  //   //$compile(container.contents())(scope);
-  // });
+  window.layout.on( 'new_window', function(template, container){
+    console.log(template, container);
+    $scope.$apply();
+  });
 
   $scope.init = () => {
     console.log('[+] Initializing ESGF window');
@@ -24,6 +24,7 @@ angular.module('esgf', ['ngAnimate'])
     $scope.spinner = false;
     $scope.current_facet = {};
     $scope.facet_cache = {};
+    $scope.facet_cache_page_count = {};
     $scope.get_node_list();
   }
 
@@ -50,11 +51,6 @@ angular.module('esgf', ['ngAnimate'])
     }
   }
 
-  $scope.arrFromMyObj = (obj) => {
-      Object.keys(obj).map(function(key) {
-        return obj[key];
-      });
-  };
 
   $scope.search = () => {
     if(Object.keys($scope.searchTerms).length == 0){
@@ -139,35 +135,46 @@ angular.module('esgf', ['ngAnimate'])
     delete $scope.searchTerms[facet];
   }
 
+  $scope.show_more_facet_options = (facet) => {
+    return Object.keys($scope.facet_options[facet]).length > ($scope.facet_cache_page_count[facet] * 10)
+  }
+
+  $scope.next_facet_page = (facet) => {
+    $scope.facet_cache_page_count[facet] = $scope.facet_cache_page_count[facet] + 1;
+    $scope.facet_cache[facet] = $scope.$parent.slice($scope.facet_options[facet], 0, $scope.facet_cache_page_count[facet] * 10);
+  }
+
   $scope.facet_option_typeahead = (facet) => {
     $scope.switch_arrow(facet);
     if (typeof $scope.facet_cache[facet] === 'undefined') {
-      $scope.facet_cache[facet] = $scope.facet_options[facet];
-      var array = Object.keys($scope.facet_options[facet]);
+      $scope.facet_cache_page_count[facet] = 1;
+      $scope.facet_cache[facet] = $scope.$parent.slice($scope.facet_options[facet], 0, 10);
+      $scope.setup_bloodhound(Object.keys($scope.facet_options[facet]), facet + '_lookup');
 
-      console.log(array);
-      var options = new Bloodhound({
-        datumTokenizer: Bloodhound.tokenizers.whitespace,
-        queryTokenizer: Bloodhound.tokenizers.whitespace,
-        local: array
-      });
-
-      $('#' + facet + '_lookup .typeahead').typeahead({
-        hint: true,
-        highlight: true,
-        minLength: 1
-      },
-      {
-        name: facet,
-        source: options
-      });
-      $('.typeahead').bind('typeahead:select', function(ev, suggestion) {
+      $('.input-field .typeahead').bind('typeahead:select', function(ev, suggestion) {
         console.log('Selection: ' + suggestion);
         $scope.searchTerms[$(ev.target).parents('.facet_holder').attr('id')] = suggestion;
         $('input[id="' + suggestion + '"]').attr({'checked': true});
         $scope.$apply();
       });
     }
+  }
+
+  $scope.setup_bloodhound = (array, id) => {
+    var hound = new Bloodhound({
+      datumTokenizer: Bloodhound.tokenizers.whitespace,
+      queryTokenizer: Bloodhound.tokenizers.whitespace,
+      local: array
+    });
+    $('#' + id + ' .typeahead').typeahead({
+      hint: true,
+      highlight: true,
+      minLength: 1
+    },
+    {
+      name: id,
+      source: hound
+    });
   }
 
   $scope.get_facet_options = () => {
@@ -181,19 +188,19 @@ angular.module('esgf', ['ngAnimate'])
       $scope.spinnerToggle(false);
       $scope.facet_options = {};
       $scope.facet_options = res.data;
-      // $scope.facet_options['realm'] = res.data.realm;
-      // $scope.facet_options['variable'] = res.data.variable;
-      // $scope.facet_options['experiment'] = res.data.experiment;
-      //console.log($scope.facet_options);
-
       $scope.datasets = undefined;
       $scope.searchTerms = {};
       $('.collapsible').collapsible({
         accordion : false
       });
+      $scope.setup_bloodhound(Object.keys($scope.facet_options), 'facet_lookup_field');
+      $('.typeahead').bind('typeahead:select', function(ev, suggestion) {
+        $('#' + suggestion + '_collapsible').trigger('click');
+      });
     }).catch((res) => {
       console.log('[-] Error retrieving facet options');
       console.log(res);
+      $scope.step = 1;
       $scope.spinnerToggle(false);
       $scope.$parent.showToast('Error retrieving facet options');
     });
