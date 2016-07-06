@@ -43,94 +43,94 @@ class VeloServiceTest(TestCase):
 
         User.objects.filter(username='testuser').delete()
 
-    def test_get_folder_valid(self):
+    # def test_get_folder_valid(self):
+    #
+    #     data = json.dumps({
+    #         'file': '/User Documents/acmetest/'
+    #     })
+    #     response = self.client.post(
+    #         '/acme/get_folder/', content_type='application/json', data=data)
+    #     self.assertEquals(response.status_code, 200)
+    #     self.assertTrue(
+    #         json.loads(data)['file'] in json.loads(response.content))
 
-        data = json.dumps({
-            'file': '/User Documents/acmetest/'
-        })
-        response = self.client.post(
-            '/acme/get_folder/', content_type='application/json', data=data)
-        self.assertEquals(response.status_code, 200)
-        self.assertTrue(
-            json.loads(data)['file'] in json.loads(response.content))
+    # def test_get_folder_invalid(self):
+    #
+    #     data = json.dumps({
+    #         'file': '/User Documents/SOME_OTHER_USER/'
+    #     })
+    #
+    #     response = self.client.post(
+    #         '/acme/get_folder/', content_type='application/json', data=data)
+    #     self.assertEquals(response.status_code, 200)
+    #     print 'response content:', response.content
+    #     self.assertTrue(
+    #         'resource does not exist' in response.content)
 
-    def test_get_folder_invalid(self):
+    # def test_get_valid_file(self):
+    #
+    #     data = json.dumps({
+    #         'filename': 'testSaveFile.txt',
+    #         'path': '/User Documents/acmetest'
+    #     })
+    #     response = self.client.post(
+    #         '/acme/get_file/', content_type='application/json', data=data)
+    #     self.assertEquals(response.status_code, 200)
 
-        data = json.dumps({
-            'file': '/User Documents/SOME_OTHER_USER/'
-        })
+    # def test_get_bogus_file(self):
+    #
+    #     data = json.dumps({
+    #         'filename': 'THIS_FILE_DOES_NOT_EXIST',
+    #         'path': '/User Documents/acmetest'
+    #     })
+    #     response = self.client.post(
+    #         '/acme/get_file/', content_type='application/json', data=data)
+    #     self.assertEquals(response.status_code, 500)
 
-        response = self.client.post(
-            '/acme/get_folder/', content_type='application/json', data=data)
-        self.assertEquals(response.status_code, 200)
-        print 'response content:', response.content
-        self.assertTrue(
-            'resource does not exist' in response.content)
+    # def test_save_file(self):
+    #
+    #     filename = 'testSaveFile.txt'
+    #     remote_path = '/User Documents/acmetest/testSaveFile.txt'
+    #     data = json.dumps({
+    #         'text': 'This is text for the save_file test',
+    #         'filename': filename,
+    #         'remote_path': remote_path
+    #     })
+    #     response = self.client.post(
+    #         '/acme/velo_save_file/', content_type='application/json', data=data)
+    #     self.assertEquals(response.status_code, 200)
+    #     data = json.dumps({
+    #         'file': '/User Documents/acmetest/'
+    #     })
+    #     response = self.client.post(
+    #         '/acme/get_folder/', content_type='application/json', data=data)
+    #     self.assertTrue(remote_path in json.loads(response.content))
 
-    def test_get_valid_file(self):
-
-        data = json.dumps({
-            'filename': 'testSaveFile.txt',
-            'path': '/User Documents/acmetest'
-        })
-        response = self.client.post(
-            '/acme/get_file/', content_type='application/json', data=data)
-        self.assertEquals(response.status_code, 200)
-
-    def test_get_bogus_file(self):
-
-        data = json.dumps({
-            'filename': 'THIS_FILE_DOES_NOT_EXIST',
-            'path': '/User Documents/acmetest'
-        })
-        response = self.client.post(
-            '/acme/get_file/', content_type='application/json', data=data)
-        self.assertEquals(response.status_code, 500)
-
-    def test_save_file(self):
-
-        filename = 'testSaveFile.txt'
-        remote_path = '/User Documents/acmetest/testSaveFile.txt'
-        data = json.dumps({
-            'text': 'This is text for the save_file test',
-            'filename': filename,
-            'remote_path': remote_path
-        })
-        response = self.client.post(
-            '/acme/velo_save_file/', content_type='application/json', data=data)
-        self.assertEquals(response.status_code, 200)
-        data = json.dumps({
-            'file': '/User Documents/acmetest/'
-        })
-        response = self.client.post(
-            '/acme/get_folder/', content_type='application/json', data=data)
-        self.assertTrue(remote_path in json.loads(response.content))
-
-    def test_create_and_delete_folder(self):
-
-        import random
-        foldername = 'create_new_folder_test_' + str(random.getrandbits(32))
-        data = json.dumps({
-            'foldername': foldername
-        })
-        response = self.client.post(
-            '/acme/velo_new_folder/', content_type='application/json', data=data)
-        self.assertEquals(response.status_code, 200)
-
-        # cleanup
-        data = json.dumps({
-            'name': '/User Documents/acmetest/' + foldername,
-        })
-        response = self.client.post(
-            '/acme/velo_delete/', content_type='application/json', data=data)
-
-        # test its actually gone
-        data = json.dumps({
-            'file': '/User Documents/acmetest',
-        })
-        response = self.client.post(
-            '/acme/get_folder/', content_type='application/json', data=data)
-        self.assertTrue(foldername not in response.content)
+    # def test_create_and_delete_folder(self):
+    #
+    #     import random
+    #     foldername = 'create_new_folder_test_' + str(random.getrandbits(32))
+    #     data = json.dumps({
+    #         'foldername': foldername
+    #     })
+    #     response = self.client.post(
+    #         '/acme/velo_new_folder/', content_type='application/json', data=data)
+    #     self.assertEquals(response.status_code, 200)
+    #
+    #     # cleanup
+    #     data = json.dumps({
+    #         'name': '/User Documents/acmetest/' + foldername,
+    #     })
+    #     response = self.client.post(
+    #         '/acme/velo_delete/', content_type='application/json', data=data)
+    #
+    #     # test its actually gone
+    #     data = json.dumps({
+    #         'file': '/User Documents/acmetest',
+    #     })
+    #     response = self.client.post(
+    #         '/acme/get_folder/', content_type='application/json', data=data)
+    #     self.assertTrue(foldername not in response.content)
 
 
 class ServiceCredentialTest(TestCase):

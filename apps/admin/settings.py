@@ -157,8 +157,9 @@ INSTALLED_APPS = (
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 NOSE_ARGS = [
-    "apps", "--with-coverage",
-    '--cover-package=poller',
+    '--with-coverage',
+    '--cover-package=esgf.views,velo.views,cdat.views,web_fe.views,poller.views',
+    '--verbosity=3'
 ]
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
