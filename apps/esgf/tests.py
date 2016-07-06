@@ -88,7 +88,7 @@ class TestNodeSearch(LiveServerTestCase):
         response = requests.get(self.live_server_url + '/acme/esgf/node_search/', params=params)
         self.assertTrue( response.status_code == 200 )
         self.assertTrue( len(response.content) > 100 )
-    # 
+
     # def test_node_search_no_node(self):
     #     print "\n---->[+] Starting " + inspect.stack()[0][3]
     #     params = {
