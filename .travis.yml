@@ -7,6 +7,7 @@ before_install:
 install:
     - pip install -r requirements.txt
     - pip install pep8
+    - pip install coveralls
 env:
     global:
         - build_on_travis=true
@@ -22,4 +23,5 @@ script:
     - "./manage.py test web_fe"
     - "./manage.py test velo"
     - "./manage.py test cdat"
-    - "coveralls"
+after_success:
+  - coveralls
