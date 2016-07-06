@@ -1,0 +1,34 @@
+
+- model: poller.userruns
+  pk: 1
+  fields:
+    status: new
+    created: 2016-03-14T22:57:04.957Z
+    user: test
+    config_options: '{"compiler": "intel", "runspec": "/User Documents/acmetest/asdf/testfile.txt", "mppwidth": 144, "mach": "titan", "casename": "F1850C5.ne30.6mos", "res": "ne30_g16", "destination": "", "project": "cli115", "stop_option": "ndays", "compset": "F1850C5", "walltime": "60, 60", "stop_n": "60, 60"}'
+
+
+- model: poller.userruns
+  pk: 2
+  fields:
+    status: new
+    created: 2016-03-14T22:57:04.957Z
+    user: test
+    config_options: '{"compiler": "intel", "runspec": "/User Documents/acmetest/asdf/testfile.txt", "mppwidth": 144, "mach": "titan", "casename": "F1850C5.ne30.6mos", "res": "ne30_g16", "destination": "", "project": "cli115", "stop_option": "ndays", "compset": "F1850C5", "walltime": "60, 60", "stop_n": "60, 60"}'
+
+
+- model: poller.userruns
+  pk: 3
+  fields:
+    status: new
+    created: 2016-03-14T22:57:04.957Z
+    user: acme
+    config_options: '{"compiler": "intel", "runspec": "/User Documents/acmetest/asdf/testfile.txt", "mppwidth": 144, "mach": "titan", "casename": "F1850C5.ne30.6mos", "res": "ne30_g16", "destination": "", "project": "cli115", "stop_option": "ndays", "compset": "F1850C5", "walltime": "60, 60", "stop_n": "60, 60"}'
+
+- model: poller.userruns
+  pk: 4
+  fields:
+    status: new
+    created: 2016-03-14T22:57:04.957Z
+    user: acme
+    config_options: '{"compiler": "intel", "runspec": "/User Documents/acmetest/asdf/testfile.txt", "mppwidth": 144, "mach": "titan", "casename": "F1850C5.ne30.6mos", "res": "ne30_g16", "destination": "", "project": "cli115", "stop_option": "ndays", "compset": "F1850C5", "walltime": "60, 60", "stop_n": "60, 60"}'
