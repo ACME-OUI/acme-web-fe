@@ -1,4 +1,4 @@
 [flake8]
-ignore = E501
+ignore = E501,E201,E202,E231,E401
 [pep8]
-ignore = E501
+ignore = E501,E201,E202,E231,E401
