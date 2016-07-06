@@ -205,7 +205,7 @@ $(function() {
 
 
 
-	// Remove extra stuff from the header which isnt going to be used from the dashboard 
+	// Remove extra stuff from the header which isnt going to be used from the dashboard
 	$('#footer').remove();
 	$('#dashboard-link').remove();
 	$('#uvcdat-link').remove();
@@ -544,7 +544,7 @@ $(function() {
 					filename: newFileName
 				}
 				//Saving new files since other actions will cause the tree to be refreshed.
-				//If they are not saved, refreshing the file tree will remove new files. 
+				//If they are not saved, refreshing the file tree will remove new files.
 				console.log(outgoing_request);
 				get_data('velo_save_file/', 'POST', outgoing_request, function() {
 					alert('file saved!');
@@ -720,7 +720,7 @@ $(function() {
       return node;
   }
 
-//WARNING COPY PASTED CODE. This function contains code that needs to be removed. 
+//WARNING COPY PASTED CODE. This function contains code that needs to be removed.
   $("body").ready(function() {
       //MATT
       $('#new_plot').click(function() {
@@ -876,7 +876,7 @@ $(function() {
 					// var windowId = 'image_viewer_' + imgInstance;
 					var contents = '<div id="velo-image"><img src="/acme/userdata/image/' + response.location + '"></div>'
 					// var new_tile = '<li id="' + windowId + '_window" class="tile" data-path="' + id + '">' + header1 + name + header2 + contents + header3 + '</li>';
-					// add_tile(new_tile, windowId + '_window', {ignore: 'true'});	
+					// add_tile(new_tile, windowId + '_window', {ignore: 'true'});
 					// imgInstance++;
 					$('#' + id + ' .content').append(contents);
 				}
@@ -930,7 +930,7 @@ $(function() {
 					'file': '/User Documents/'
 				}
 
-				get_data('get_folder/', 'POST', request, function(response) {
+				get_data('velo/get_folder/', 'POST', request, function(response) {
 					spinner.stop();
 					response.sort();
 					for (var i = 0; i < response.length; i++) {
@@ -971,9 +971,9 @@ $(function() {
 								var path = $(event.target).attr('data-path');
 								content = '<div class="content"></div>';
 								var new_tile = '<li id="' + id + '" class="tile" data-path="' + path + '" data-tileid="' + instance + '" > ' + header1 + path + header2 + content + header3 + '</li>';
-								add_tile(new_tile, id , { ignore: 'true'}, getFile(path, id)); 
+								add_tile(new_tile, id , { ignore: 'true'}, getFile(path, id));
 							}); //this is totally not doing what i thought it would, but it works. Pretty sure that getFile
-						}       //is getting called instead of being passed as a callback. 
+						}       //is getting called instead of being passed as a callback.
 					}
 
 					mtree('velo-mtree-container');
@@ -1081,7 +1081,7 @@ $(function() {
 		alert(file);
 	}
 
-	/* Checks with the server to see if the users has credentials for 
+	/* Checks with the server to see if the users has credentials for
 	 *  the requested service in the servers database
 	 *
 	 * service_name -> the name of the service to check credentials for
@@ -1253,7 +1253,7 @@ $(function() {
 
 	/**
 	 * Adds a given window to the sidebar.
-	 * Based off the add tile function, but with the tile system removed. 
+	 * Based off the add tile function, but with the tile system removed.
 	 **/
 
 	function add_sidebar_window(html, id) {
@@ -1585,7 +1585,7 @@ $(function() {
 					//base case, all windows have been resized
 					return;
 				} else {
-					//we need to keep resizeing 
+					//we need to keep resizeing
 					recursiveResize(moved, dir, diff, 'n', helperReturn.adj[0]);
 				}
 			} else {
@@ -1660,7 +1660,7 @@ $(function() {
 					//base case, all windows have been resized
 					return;
 				} else {
-					//we need to keep resizeing 
+					//we need to keep resizeing
 					recursiveResize(moved, dir, diff, 'n', helperReturn.adj[0]);
 				}
 			} else {
@@ -1696,7 +1696,7 @@ $(function() {
 					//base case, all windows have been resized
 					return;
 				} else {
-					//we need to keep resizeing 
+					//we need to keep resizeing
 					recursiveResize(moved, dir, diff, 'w', helperReturn.adj[0]);
 				}
 			} else if (side == 'w') {
@@ -1729,7 +1729,7 @@ $(function() {
 					//base case, all windows have been resized
 					return;
 				} else {
-					//we need to keep resizeing 
+					//we need to keep resizeing
 					recursiveResize(moved, dir, diff, 'e', helperReturn.adj[0]);
 				}
 			} else {
@@ -1765,7 +1765,7 @@ $(function() {
 					//base case, all windows have been resized
 					return;
 				} else {
-					//we need to keep resizeing 
+					//we need to keep resizeing
 					recursiveResize(moved, dir, diff, 'w', helperReturn.adj[0]);
 				}
 			} else if (side == 'w') {
@@ -1798,7 +1798,7 @@ $(function() {
 					//base case, all windows have been resized
 					return;
 				} else {
-					//we need to keep resizeing 
+					//we need to keep resizeing
 					recursiveResize(moved, dir, diff, 'e', helperReturn.adj[0]);
 				}
 			} else {
@@ -2004,7 +2004,7 @@ $(function() {
 				'sizex': layout[tiles.length - 1][i].sizex(maxCols),
 				'sizey': layout[tiles.length - 1][i].sizey(maxHeight)
 			});
-			var tile_offset = offset_from_location(parseInt(t.attr('row')), parseInt(t.attr('col'))); 
+			var tile_offset = offset_from_location(parseInt(t.attr('row')), parseInt(t.attr('col')));
 			t.css({
 				"top": tile_offset.top,
 				"left": tile_offset.left,
@@ -2572,16 +2572,7 @@ $(function() {
 		}
 	}
 
-	function get_csrf() {
-		var nameEQ = "csrftoken=";
-		var ca = document.cookie.split(';');
-		for (var i = 0; i < ca.length; i++) {
-			var c = ca[i];
-			while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-			if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-		}
-		return null;
-	}
+
 
 	function get_data(url, type, jsonObj, success_callback, fail_callback, async) {
 		var csrftoken = get_csrf();
@@ -2651,7 +2642,7 @@ $(function() {
 			}
 			$('.mtree').addClass(mtree_style);
 
-			// Set initial styles 
+			// Set initial styles
 			$('#' + id + ' .mtree ul').css({
 				'overflow': 'hidden',
 				'height': (collapsed) ? 0 : 'auto',
@@ -2686,7 +2677,7 @@ $(function() {
 				var el = $(this).parent().children('ul').first();
 				var isOpen = $(this).parent().hasClass('mtree-open');
 
-				// close other elements on same level if opening 
+				// close other elements on same level if opening
 				if ((close_same_level || $('.csl').hasClass('active')) && !isOpen) {
 					var close_items = $(this).closest('ul').children('.mtree-open').not($(this).parent()).children('ul');
 
@@ -2787,27 +2778,14 @@ $(function() {
 		*/
 	}
 
-	function new_plot(id, plotvars) {
-		console.log("making cdat window");
-		var content = cdat.make_plot_panel();
-		console.log(content);
-		console.log($('#'+id + " .plot-content"));
-		var elem = $('#'+id + " .plot-content");
-		elem.append(content);
-		console.log(plotvars);
-		if (plotvars) {
-			elem.find(".cdat-graphic-method").text(plotvars.method);
-			elem.find(".cdat-graphic-template").text(plotvars.template);
-		}
-	}
 
-$(document).on("mousedown", 'ul.qtree li.ui-draggable', function(event) { 
+$(document).on("mousedown", 'ul.qtree li.ui-draggable', function(event) {
     $(event.target).addClass('mousehold');
     //$(this).css({'cursor':'grabbing'});
 });
 
 //An awful fix for mouseup not removing class on a dragged element
-$(document).on("mouseup", function(event) { 
+$(document).on("mouseup", function(event) {
     $('.mousehold').removeClass('mousehold');
     //$(this).css({'cursor':'pointer'});
 

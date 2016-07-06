@@ -14,9 +14,12 @@ velo_patterns = [
 ]
 
 esgf_patterns = [
-    url(r'^node_info/$', esgf_views.node_info),
+    # url(r'^node_info/$', esgf_views.node_info),
     url(r'^node_search/$', esgf_views.node_search),
     url(r'^load_facets/$', esgf_views.load_facets),
+    url(r'^download/$', esgf_views.download),
+    url(r'^logon/$', esgf_views.logon),
+    url(r'^node_list/$', esgf_views.node_list),
 ]
 
 cdat_patterns = [
@@ -35,12 +38,9 @@ urlpatterns = patterns('',
                        url(r'^logout/?$', views.user_logout, name='logout'),
                        url(r'^register/?$', views.register, name='register'),
                        url(r'^dashboard/?$', views.dashboard, name='dashboard'),
-                       url(r'^credential_check_existance/',
-                           views.credential_check_existance),
-                       url(r'^save_layout/', views.save_layout,
-                           name='save_layout'),
-                       url(r'^load_layout/', views.load_layout,
-                           name='load_layout'),
+                       url(r'^credential_check_existance/', views.credential_check_existance),
+                       url(r'^save_layout/', views.save_layout, name='save_layout'),
+                       url(r'^load_layout/', views.load_layout, name='load_layout'),
                        url(r'^userdata/image/(?P<path>.*\.png)$', views.send_image),
                        url(r'^velo/', include(velo_patterns)),
                        url(r'^esgf/', include(esgf_patterns)),
