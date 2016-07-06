@@ -22,5 +22,4 @@ script:
     - "./manage.py test web_fe"
     - "./manage.py test velo"
     - "./manage.py test cdat"
-after_success:
-  - coveralls
+    - "coveralls"
