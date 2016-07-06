@@ -5,6 +5,7 @@ import requests
 from constants import NODE_HOSTNAMES
 import inspect
 
+
 class TestLogon(LiveServerTestCase):
 
     def setUp(self):
@@ -121,6 +122,7 @@ class TestNodeSearch(LiveServerTestCase):
         response = requests.get(self.live_server_url + '/acme/esgf/node_search/', params={'searchString':request})
         self.assertFalse( response.status_code == 200 )
         self.assertFalse( len(response.content) > 100 )
+
 
 class TestNodeList(LiveServerTestCase):
 

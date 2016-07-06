@@ -169,6 +169,7 @@ def load_facets(request):
             return HttpResponse(status=500)
     return HttpResponse(json.dumps(facets))
 
+
 # Searches a set of nodes for all datasets that match given criteria
 # Inputs: { 'nodes': ['list', 'of', 'hostnames'], 'terms': ['list', 'of', 'terms'] }
 # Returns: list of datasets matching given terms from given nodes
@@ -210,6 +211,7 @@ def node_search(request):
             return HttpResponse(status=400)
 
     return HttpResponse(json.dumps(response))
+
 
 # TODO: Once the node manager is running, this should call their API to get the current lise of nodes
 def node_list(request):
