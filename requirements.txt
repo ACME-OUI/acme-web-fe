@@ -4,6 +4,7 @@ coverage==3.7.1
 cryptography
 decorator==3.4.2
 Django==1.8
+django-nose==1.4.4
 django-recaptcha==1.0.3
 django-oauth2-provider==0.2.6.1
 django-sendfile==0.3.8
