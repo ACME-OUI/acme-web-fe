@@ -13,7 +13,6 @@ import os.path
 import shutil
 
 
-
 # From: https://github.com/apache/climate
 #
 # Licensed to the Apache Software Foundation (ASF) under one
@@ -76,6 +75,7 @@ from os.path import expanduser, join
 #     opener.close()
 #     print "... done"
 
+
 def download(request):
     credential = {
         'username': 'https://pcmdi.llnl.gov/esgf-idp/openid/acmetest',
@@ -99,7 +99,7 @@ def download(request):
             url = request.GET.get('url')
             # esgf_download(request.GET.get('url'))
             print "[+] Downloading " + url
-            #response = urllib2.urlopen(url)
+            # response = urllib2.urlopen(url)
             print "opening connection to server"
             response = requests.get(url, verify='/Users/sterling/.esg/credentials.pem',stream=True)
             response.raw.decode_content = True
