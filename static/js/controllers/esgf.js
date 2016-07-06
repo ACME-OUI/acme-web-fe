@@ -20,11 +20,12 @@ angular.module('esgf', ['ngAnimate'])
     $scope.datapath = false;
     $scope.facet_options = undefined;
     $scope.searchTerms = {};
-    $scope.datasets = undefined;
-    $scope.spinner = false;
+    $scope.datasets = {};
     $scope.current_facet = {};
     $scope.facet_cache = {};
+    $scope.dataset_cache = {};
     $scope.facet_cache_page_count = {};
+    $scope.dataset_cache_page_count = 0;
     $scope.get_node_list();
   }
 
@@ -35,32 +36,16 @@ angular.module('esgf', ['ngAnimate'])
     }
   }
 
-  $scope.spinnerToggle = function(on){
-    if(on){
-      $scope.ready = false;
-      $scope.spinner = true;
-      var spinner = $('.spinner_wrapper');
-      var parent = spinner.parents('.lm_content');
-      spinner.css({
-        top: (parent.offset().top + parent.height())/2 - spinner.height(),
-        left: (parent.offset().left + parent.width())/2 - spinner.width()
-      });
-    } else {
-      $scope.ready = true;
-      $scope.spinner = false;
-    }
-  }
-
 
   $scope.search = () => {
     if(Object.keys($scope.searchTerms).length == 0){
       $scope.$parent.showToast('Select at least one facet option');
     } else {
-      $scope.spinnerToggle(true);
       var params = {
         'searchString': JSON.stringify($scope.searchTerms),
         'nodes': JSON.stringify($scope.selected_nodes)
       }
+      $scope.ready = false;
       $http({
         url: 'esgf/node_search',
         method: 'GET',
@@ -69,15 +54,25 @@ angular.module('esgf', ['ngAnimate'])
         console.log('[+] Node search complete');
         console.log(res.data);
         $scope.step = 3;
+        $scope.ready = true;
         $scope.datasets = res.data;
-        $scope.spinnerToggle(false);
+        $scope.dataset_cache = $scope.$parent.slice($scope.datasets, 0, 10);
+        $scope.dataset_cache_page_count = 1;
       }).catch((res) => {
         console.log('[-] Error during node search');
         console.log(res);
         $scope.$parent.showToast('Error searching selected nodes');
-        $scope.spinnerToggle(false);
       });
     }
+  }
+
+  $scope.show_more_datesets = () => {
+    return Object.keys($scope.datasets).length > ($scope.dataset_cache_page_count * 10);
+  }
+
+  $scope.next_dataset_page = () => {
+    $scope.dataset_cache_page_count = $scope.dataset_cache_page_count + 1;
+    $scope.dataset_cache = $scope.$parent.slice($scope.datasets, 0, $scope.dataset_cache_page_count * 10);
   }
 
   $scope.select_nodes = (id) => {
@@ -91,8 +86,8 @@ angular.module('esgf', ['ngAnimate'])
       if($scope.selected_nodes.length > 0){
         $scope.nodes_been_selected = true;
         $scope.step = 2;
-        $scope.datasets = undefined;
-        $scope.spinnerToggle(true);
+        $scope.datasets = {};
+        $scope.ready = false;
         $scope.get_facet_options();
       } else {
         $scope.$parent.showToast('Select at least one data node')
@@ -185,10 +180,10 @@ angular.module('esgf', ['ngAnimate'])
     }).then((res) => {
       console.log('[+] Got a facet option list');
       console.log(res);
-      $scope.spinnerToggle(false);
+      $scope.ready = true;
       $scope.facet_options = {};
       $scope.facet_options = res.data;
-      $scope.datasets = undefined;
+      $scope.datasets = {};
       $scope.searchTerms = {};
       $('.collapsible').collapsible({
         accordion : false
@@ -201,7 +196,7 @@ angular.module('esgf', ['ngAnimate'])
       console.log('[-] Error retrieving facet options');
       console.log(res);
       $scope.step = 1;
-      $scope.spinnerToggle(false);
+      $scope.ready = true;
       $scope.$parent.showToast('Error retrieving facet options');
     });
   }

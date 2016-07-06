@@ -32,7 +32,7 @@ class TestLogon(LiveServerTestCase):
         response_code = requests.get(self.live_server_url + '/acme/esgf/logon/', params=credential).status_code
         self.assertFalse( response_code == 200)
 
-    def test_logon_fail_no_cred(self):
+    def test_logon_fail_no_user(self):
         print "\n---->[+] Starting " + inspect.stack()[0][3]
         print "--------------------------------------------"
         credential = {
@@ -40,7 +40,17 @@ class TestLogon(LiveServerTestCase):
             'fdsa': 'cadabra'
         }
         response_code = requests.get(self.live_server_url + '/acme/esgf/logon/', params=credential).status_code
-        self.assertTrue( response_code == 400)
+        self.assertTrue( response_code == 403)
+
+    def test_logon_fail_no_pass(self):
+        print "\n---->[+] Starting " + inspect.stack()[0][3]
+        print "--------------------------------------------"
+        credential = {
+            'username': 'http://abra',
+            'fdsa': 'cadabra'
+        }
+        response_code = requests.get(self.live_server_url + '/acme/esgf/logon/', params=credential).status_code
+        self.assertTrue( response_code == 403)
 
 
 class TestLoadFacet(LiveServerTestCase):
@@ -55,7 +65,7 @@ class TestLoadFacet(LiveServerTestCase):
         print "\n---->[+] Starting " + inspect.stack()[0][3]
         print "____ this should print a stack trace ________"
         print "--------------------------------------------"
-        data = json.dumps(['this', 'is', 'not', 'ahostname'])
+        data = json.dumps(['this', 'is', 'not', 'a', 'hostname'])
         response = requests.get(self.live_server_url + '/acme/esgf/load_facets/', params={'nodes': data})
         self.assertFalse( response.status_code == 200 )
 
@@ -70,21 +80,21 @@ class TestNodeSearch(LiveServerTestCase):
 
     def test_node_search_success(self):
         print "\n---->[+] Starting " + inspect.stack()[0][3]
-        request = json.dumps({
-            'nodes': self.valid_nodes,
-            'terms': self.valid_terms
-        })
-        response = requests.get(self.live_server_url + '/acme/esgf/node_search/', params={'searchString':request})
+        params = {
+            'searchString': json.dumps(self.valid_terms),
+            'nodes': json.dumps(self.valid_nodes)
+        }
+        response = requests.get(self.live_server_url + '/acme/esgf/node_search/', params=params)
         self.assertTrue( response.status_code == 200 )
         self.assertTrue( len(response.content) > 100 )
 
     def test_node_search_no_node(self):
         print "\n---->[+] Starting " + inspect.stack()[0][3]
-        request = json.dumps({
-            'asdf': self.valid_nodes,
-            'terms': self.valid_terms
-        })
-        response = requests.get(self.live_server_url + '/acme/esgf/node_search/', params={'searchString':request})
+        params = {
+            'searchString': json.dumps(self.valid_terms),
+            'asdf': json.dumps(self.valid_nodes)
+        }
+        response = requests.get(self.live_server_url + '/acme/esgf/node_search/', params=params)
         self.assertTrue( response.status_code == 400 )
         self.assertTrue( len(response.content) < 100 )
 
