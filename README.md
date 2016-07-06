@@ -1,6 +1,7 @@
 acme-site
 =========
 [![Build Status](https://travis-ci.org/ACME-OUI/acme-web-fe.svg?branch=master)](https://travis-ci.org/ACME-OUI/acme-web-fe)
+[![Coverage Status](https://coveralls.io/repos/github/sterlingbaldwin/acme-web-fe/badge.svg?branch=master)](https://coveralls.io/github/sterlingbaldwin/acme-web-fe?branch=master)
 ## Please Read the [Development Guidelines](https://github.com/ACME-OUI/acme-web-fe/wiki/Development-Guidelines)
 
 ###ACME Dashboard
