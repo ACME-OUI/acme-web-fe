@@ -17,4 +17,10 @@ before_script:
     - "python manage.py migrate"
     - "python ./apps/velo/velo_service.py &"
 script:
-    - "./manage.py test -v 2 apps/"
+    - "./manage.py test esgf"
+    - "./manage.py test poller"
+    - "./manage.py test web_fe"
+    - "./manage.py test velo"
+    - "./manage.py test cdat"
+after_success:
+  - coveralls
