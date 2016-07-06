@@ -144,7 +144,7 @@ class Testresponses(LiveServerTestCase):
         payload1 = {'request': 'next'}
         r1 = requests.get(self.live_server_url + '/poller/update/', params=payload1)
         self.assertTrue(r1.status_code == requests.codes.ok)
-        oldid = json.loads(r1.content)['id']
+        oldid = json.loads(r1.content)['job_id']
         # finished getting first user run
         payload2 = {'request': 'complete', 'job_id': oldid}
         r2 = requests.post(self.live_server_url + '/poller/update/', data=payload2)
@@ -153,7 +153,7 @@ class Testresponses(LiveServerTestCase):
         r3 = requests.get(self.live_server_url + '/poller/update/', params=payload1)
         self.assertTrue(r3.status_code == requests.codes.ok)
         # r3 run should be a different id
-        newid = json.loads(r3.content)['id']
+        newid = json.loads(r3.content)['job_id']
         self.assertNotEqual(oldid, newid)
 
     def test_next_repeat(self):
@@ -164,7 +164,7 @@ class Testresponses(LiveServerTestCase):
             dataold = datanew
             r = requests.get(self.live_server_url + '/poller/update/', params=payload)
             datanew = json.loads(r.content)
-            self.assertTrue(dataold['id'] == datanew['id'])
+            self.assertTrue(dataold['job_id'] == datanew['job_id'])
 
     def test_get_bad_request(self):
         payload = {'request': 'bad_parameter', 'job_id': 1, 'status': 'complete'}
