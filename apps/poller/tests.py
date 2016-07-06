@@ -184,4 +184,3 @@ class Testresponses(LiveServerTestCase):
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
         data = json.loads(r.content)
         self.assertEquals(len(data.keys()), 0)
-

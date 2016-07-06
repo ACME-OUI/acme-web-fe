@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from poller.models import UserRuns
 import json
 
+
 @csrf_exempt
 def update(request):
     if request.method == 'GET':
@@ -25,7 +26,7 @@ def update(request):
                         data = data[0]
                         config = json.loads(data.config_options)
                         r = {}
-                        r['id'] = data.id
+                        r['job_id'] = data.id
                         r['user'] = data.user
                         r.update(config)
                         return JsonResponse(r, safe=False)
@@ -41,7 +42,7 @@ def update(request):
                             data = UserRuns.objects.get(id=job_id)
                             config = json.loads(data.config_options)
                             obj = {
-                                'id': data.id,
+                                'job_id': data.id,
                                 'user': data.user,
                                 'status': data.status,
                             }
@@ -59,7 +60,7 @@ def update(request):
                 for obj in data:
                     config = json.loads(obj.config_options)
                     obj_dict = {}
-                    obj_dict['id'] = obj.id
+                    obj_dict['job_id'] = obj.id
                     obj_dict['user'] = obj.user
                     obj_dict['status'] = obj.status
                     obj_dict.update(config)
@@ -107,7 +108,7 @@ def update(request):
                         user=user
                     )
                     new_run.save()
-                    return JsonResponse({'id': new_run.id})
+                    return JsonResponse({'job_id': new_run.id})
                 else:
                     return HttpResponse(status=400)
             if request_type == 'delete':
@@ -122,7 +123,7 @@ def update(request):
                     return HttpResponse(status=400)
             if request_type in ['in_progress', 'complete', 'failed']:
                 job_id = request.POST.get('job_id')
-                if job_id.isdigit():
+                if job_id:
                     try:
                         job = UserRuns.objects.get(id=job_id)
                         job.status = request_type
