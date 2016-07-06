@@ -119,16 +119,21 @@
     <!-- step 3: select a dataset -->
     <div class="dashboard-show-hide" ng-show="step == 3 && ready == true">
       <ul class="collapsible popout" data-collapsible="accordion">
-        <li ng-repeat="key in datasets track by $index">
+        <li ng-repeat="key in dataset_cache track by $index">
           <div class="collapsible-header" ng-click="switch_arrow($index)">
             <i class="material-icons" id="[[$index]]_arrow">play_arrow</i>
             [[key.title]]
           </div>
           <div class="collapsible-body">
-            <ul class="collection" ng-repeat="(k,v) in key" style="padding-left: 1em;">
-              <li>[[k]] : [[v]]</li>
+            <ul class="collection popout" style="padding-left: 1em;">
+              <li class="collection-item" ng-repeat="(k,v) in key">
+                [[k]] : [[v]]
+              </li>
             </ul>
           </div>
+        </li>
+        <li ng-show="show_more_datesets()">
+          <a href="#" class="waves-effect waves-light btn" ng-click="next_dataset_page()">more</a>
         </li>
       </ul>
     </div>

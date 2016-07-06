@@ -158,8 +158,8 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 NOSE_ARGS = [
     '--with-coverage',
-    '--cover-package=esgf,velo,cdat,web_fe',
-    '--verbosity=2'
+    '--cover-package=esgf.views,velo.views,cdat.views,web_fe.views',
+    '--verbosity=3'
 ]
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'

@@ -124,8 +124,12 @@ def logon(request):
         'username': request.GET.get('username'),
         'password': request.GET.get('password')
     }
-    if len(credential['username']) == 0 or len(credential['password']) == 0:
-        return HttpResponse(status=400)
+    if not credential['username']:
+        print "[-] No username in logon request"
+        return HttpResponse(status=403)
+    elif not credential['password']:
+        print "[-] No password in logon request"
+        return HttpResponse(status=403)
 
     lm = LogonManager()
     bootstrap = False
@@ -140,29 +144,7 @@ def logon(request):
         return HttpResponse(status=200)
     else:
         return HttpResponse(status=403)
-# def logon(request):
-#     print request.GET.get('username')
-#     try:
-#         credential = json.loads(request.body)
-#     except ValueError as e:
-#         print request.body
-#         # print_debug(e)
-#         return HttpResponse(status=400)
-#
-#     if 'username' not in credential or 'password' not in credential:
-#         return HttpResponse(status=400)
-#     lm = LogonManager()
-#     try:
-#         bootstrap = False
-#         if not os.path.exists('~/.esf/certificats/'):
-#             bootstrap = True
-#         lm.logon_with_openid(credential['username'], credential['password'], bootstrap=bootstrap)
-#     except Exception as e:
-#         # print_debug(e)
-#     if lm.is_logged_on():
-#         return HttpResponse(status=200)
-#     else:
-#         return HttpResponse(status=403)
+
 
 # Queries a set of nodes for their facets
 # Inputs: { 'nodes': ['list', 'of', 'hostnames'] }
@@ -194,15 +176,16 @@ def node_search(request):
 
     searchString = json.loads(request.GET.get('searchString'))
     nodes = json.loads(request.GET.get('nodes'))
-    # searchString = request.GET.get('searchString')
-    # nodes = request.GET.get('nodes')
+    print searchString
+    print nodes
 
-    if len(nodes) == 0:
+    if not nodes:
         print "Invalid node selection"
         return HttpResponse(status=400)
     else:
         print nodes
-    if len(searchString) == 0:
+
+    if not searchString:
         print "Invalid search terms"
         return HttpResponse(status=400)
     else:
@@ -215,9 +198,9 @@ def node_search(request):
             print '[+] searching ' + node + ' for ' + str(searchString)
             conn = SearchConnection(
                 'http://' + node + ESGF_SEARCH_SUFFIX, distrib=True)
-            print searchString
             context = conn.new_context(**searchString)
             rs = context.search()
+            print '[+] got reply from search node'
             response['hits'] = context.hit_count
             for i in range(len(rs)):
                 response[str(i)] = rs[i].json
