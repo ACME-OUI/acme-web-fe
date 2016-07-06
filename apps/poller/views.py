@@ -1,173 +1,138 @@
-from django.shortcuts import render
-from django.core.context_processors import csrf
 from django.views.decorators.csrf import csrf_exempt
-from django.template import Template
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from django.http import JsonResponse
 from poller.models import UserRuns
-from django.conf import settings
 import json
-import pdb
 
 
-def index(request):
+@csrf_exempt
+def update(request):
     if request.method == 'GET':
         try:
-            status = request.GET.get('status')
+            request_type = request.GET.get('request')
             user = request.GET.get('user')
-            if status:
-                if status == 'all':
-                    data = UserRuns.objects.all()
-                elif status == 'next':
+            if request_type:
+                if request_type == 'all':
+                    if user:
+                        data = UserRuns.objects.filter(user=user)
+                    else:
+                        data = UserRuns.objects.all()
+                elif request_type == 'next':
                     data = UserRuns.objects.filter(status='new').order_by('created')
                     if not data:
                         return JsonResponse({}, safe=False)
                     else:
                         data = data[0]
+                        config = json.loads(data.config_options)
                         r = {}
-                        r['runspec'] = data.runspec
-                        r['id'] = data.id
+                        r['job_id'] = data.id
                         r['user'] = data.user
-                        r['destination'] = data.destination
-                        r['casename'] = data.casename
-                        r['mppwidth'] = data.mppwidth
-                        r['stop_option'] = data.stop_option
-                        r['stop_n'] = data.stop_n
-                        r['walltime'] = data.walltime
-                        r['mach'] = data.mach
-                        r['compset'] = data.compset
-                        r['res'] = data.res
-                        r['project'] = data.project
-                        r['compiler'] = data.compiler
+                        r.update(config)
                         return JsonResponse(r, safe=False)
-                elif status == 'new':
-                    data = UserRuns.objects.filter(status='new')
-                elif status == 'in_progress':
-                    data = UserRuns.objects.filter(status='in_progress')
-                elif status == 'complete':
-                    data = UserRuns.objects.filter(status='complete')
-                elif status == 'failed':
-                    data = UserRuns.objects.filter(status='failed')
+                elif request_type in ['new', 'in_progress', 'complete', 'failed']:
+                    if user:
+                        data = UserRuns.objects.filter(status=request_type, user=user)
+                    else:
+                        data = UserRuns.objects.filter(status=request_type)
+                elif request_type == 'job':
+                    job_id = request.GET.get('job_id')  # todo: write tests for this
+                    if job_id and job_id.isdigit():
+                        try:
+                            data = UserRuns.objects.get(id=job_id)
+                            config = json.loads(data.config_options)
+                            obj = {
+                                'job_id': data.id,
+                                'user': data.user,
+                                'status': data.status,
+                            }
+                            obj.update(config)
+                            return JsonResponse(obj, safe=False)
+                        except UserRuns.DoesNotExist:
+                            return JsonResponse({}, status=200)
+                    else:
+                        return HttpResponse(status=400)
                 else:
-                    print "Invalid status recieved"
-                    return HttpResponse(status=404)
+                    return HttpResponse(status=400)
+                if not data:
+                    return JsonResponse({}, status=200)
                 obj_list = []
-                # if data is empty:
                 for obj in data:
+                    config = json.loads(obj.config_options)
                     obj_dict = {}
-                    obj_dict['runspec'] = obj.runspec
-                    obj_dict['id'] = obj.id
+                    obj_dict['job_id'] = obj.id
                     obj_dict['user'] = obj.user
-                    obj_dict['destination'] = obj.destination
-                    obj_dict['casename'] = obj.casename
-                    obj_dict['mppwidth'] = obj.mppwidth
-                    obj_dict['stop_option'] = obj.stop_option
-                    obj_dict['stop_n'] = obj.stop_n
-                    obj_dict['walltime'] = obj.walltime
-                    obj_dict['mach'] = obj.mach
-                    obj_dict['compset'] = obj.compset
-                    obj_dict['res'] = obj.res
-                    obj_dict['project'] = obj.project
-                    obj_dict['compiler'] = obj.compiler
+                    obj_dict['status'] = obj.status
+                    obj_dict.update(config)
                     obj_list.append(obj_dict)
                 return JsonResponse(obj_list, safe=False)
             else:
-                return HttpResponse(render(request, "poller/token.html", {}))
+                return HttpResponse(status=400)
         except Exception as e:
             print e
             return HttpResponse(status=500)
 
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)
-            if 'user' and 'runspec' in data:
-                new_run = UserRuns.objects.create(
-                    status='new',
-                    user=data['user'],
-                    runspec=data['runspec'],
-                    destination=data['destination'],
-                    casename=data['casename'],
-                    mppwidth=data['mppwidth'],
-                    stop_option=data['stop_option'],
-                    stop_n=data['stop_n'],
-                    walltime=data['walltime'],
-                    mach=data['mach'],
-                    compset=data['compset'],
-                    res=data['res'],
-                    project=data['project'],
-                    compiler=data['compiler'])
-                new_run.save()
-                return HttpResponse("Successfully updated status")
-            else:
-                return HttpResponse(status=400)
-        except Exception as e:
-            print e
-            return HttpResponse(status=500)
-
-    if request.method == 'PATCH':
-        try:
-            data = json.loads(request.body)
-            if str(data['id']).isdigit() and data['status'] in ['new', 'in_progress', 'complete', 'failed']:
-                db_id = data['id']
-                newstatus = data['status']
-                try:
-                    entry = UserRuns.objects.get(id=db_id)
-                    entry.status = newstatus
-                    entry.save()
-                except Exception as e:
-                    print e
-                    return HttpResponse(status=500)
-                return HttpResponse(status=200)
-            else:
-                return HttpResponse(status=400)
-        except KeyError as e:
-            print e
-            return HttpResponse(status=400)
-        except Exception as e:
-            print e
-            return HttpResponse(status=500)
-
-    if request.method == 'PUT':
-        # if settings.DEBUG == True
-            try:
-                data = json.loads(request.body)
-                if 'user' and 'runspec' in data:
+            request_type = request.POST.get('request')
+            user = request.POST.get('user')
+            status = request.POST.get('status')
+            if request_type == 'all':
+                if user:
+                    if status in ['new', 'in_progress', 'complete', 'failed']:
+                        jobs = UserRuns.objects.filter(user=user)
+                        for job in jobs:
+                            job.status = status
+                            job.save()
+                        return HttpResponse(status=200)
+                else:
+                    if status in ['new', 'in_progress', 'complete', 'failed']:
+                        jobs = UserRuns.objects.all()
+                        for job in jobs:
+                            job.status = status
+                            job.save()
+                        return HttpResponse(status=200)
+                return HttpResponse(status=400)  # If request was 'all' and we get to here, the request was bad
+            if request_type == 'new':
+                if user:
+                    config = {}
+                    for key in request.POST:
+                        value = request.POST.get(key)
+                        config.update({key: value})
+                    del config['user']
+                    del config['request']
+                    config = json.dumps(config)
                     new_run = UserRuns.objects.create(
-                        status='new', user=data['user'],
-                        runspec=data['runspec'],
-                        destination=data['destination'],
-                        casename=data['casename'],
-                        mppwidth=data['mppwidth'],
-                        stop_option=data['stop_option'],
-                        stop_n=data['stop_n'],
-                        walltime=data['walltime'],
-                        mach=data['mach'],
-                        compset=data['compset'],
-                        res=data['res'],
-                        project=data['project'],
-                        compiler=data['compiler'])
+                        status='new',
+                        config_options=config,
+                        user=user
+                    )
                     new_run.save()
-                    # Success
-                    return HttpResponse(status=200)
-                else:
-                    # Request must have both user and runspec
-                    return HttpResponse(status=400)
-            except Exception as e:
-                print e
-                return HttpResponse(status=500)
-        # else:
-        #     JsonResponse(status=404)
-
-    if request.method == 'DELETE':
-        # if settings.DEBUG == True
-            try:
-                data = json.loads(request.body)
-                if 'id' in data:
-                    UserRuns.objects.get(id=data['id']).delete()
+                    return JsonResponse({'job_id': new_run.id})
                 else:
                     return HttpResponse(status=400)
-            except Exception as e:
-                print e
-                return HttpResponse(status=500)
-        # else:
-        #     JsonResponse(status=404)
+            if request_type == 'delete':
+                try:
+                    job_id = request.POST.get('job_id')
+                    if not job_id:
+                        raise KeyError
+                    else:
+                        UserRuns.objects.get(id=job_id).delete()
+                        return HttpResponse(status=200)
+                except (KeyError, AttributeError, UserRuns.DoesNotExist):
+                    return HttpResponse(status=400)
+            if request_type in ['in_progress', 'complete', 'failed']:
+                job_id = request.POST.get('job_id')
+                if job_id:
+                    try:
+                        job = UserRuns.objects.get(id=job_id)
+                        job.status = request_type
+                        job.save()
+                        return HttpResponse(status=200)
+                    except ObjectDoesNotExist:
+                        return HttpResponse(status=400)
+            else:
+                return HttpResponse(status=400)  # Unrecognized request
+        except Exception as e:
+            print e
+            return HttpResponse(status=500)

@@ -3,6 +3,7 @@
 *.pot
 *.pyc
 *.DS_Store
+*.idea/
 local
 
 jira_credentials.py
@@ -27,6 +28,7 @@ scripts/registration.xml
 apps/web_fe/migrations
 apps/poller/migrations
 update.py
+*migrations/
 
 *.sublime-project
 *.sublime-workspace

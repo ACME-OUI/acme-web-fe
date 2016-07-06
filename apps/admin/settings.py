@@ -150,13 +150,15 @@ INSTALLED_APPS = (
     'esgf',
     'cdat',
     'velo',
+    'django_nose',
 )
 
 # Use nose to run all tests
-# TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 NOSE_ARGS = [
-    "apps",
+    "apps", "--with-coverage",
+    '--cover-package=poller',
 ]
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
