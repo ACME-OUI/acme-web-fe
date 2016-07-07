@@ -1,16 +1,21 @@
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.conf.urls import patterns, include, url
 from web_fe import views
-from velo import views as velo_views
 from esgf import views as esgf_views
 from cdat import views as cdat_views
+from run_manager import views as run_views
 
-velo_patterns = [
-    url(r'^get_folder/$', velo_views.get_folder),
-    url(r'^get_file/$', velo_views.get_file),
-    url(r'^velo_save_file/$', velo_views.save_file),
-    url(r'^velo_new_folder/$', velo_views.new_folder),
-    url(r'^velo_delete/$', velo_views.delete),
+
+run_patterns = [
+    url(r'^create_run/$', run_views.create_run),
+    url(r'^view_runs/$', run_views.view_runs),
+    url(r'^delete_run/$', run_views.delete_run),
+    url(r'^create_script/$', run_views.create_script),
+    url(r'^update_script/$', run_views.update_script),
+    url(r'^read_script/$', run_views.read_script),
+    url(r'^delete_script/$', run_views.delete_script),
+    url(r'^get_templates/$', run_views.delete_script),
+
 ]
 
 esgf_patterns = [
@@ -42,7 +47,7 @@ urlpatterns = patterns('',
                        url(r'^save_layout/', views.save_layout, name='save_layout'),
                        url(r'^load_layout/', views.load_layout, name='load_layout'),
                        url(r'^userdata/image/(?P<path>.*\.png)$', views.send_image),
-                       url(r'^velo/', include(velo_patterns)),
+                       url(r'^run_manager/', include(run_patterns)),
                        url(r'^esgf/', include(esgf_patterns)),
                        url(r'^cdat/', include(cdat_patterns)),
                        )
