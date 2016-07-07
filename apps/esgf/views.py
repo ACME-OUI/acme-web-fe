@@ -101,9 +101,9 @@ def download(request):
             print "[+] Downloading " + url
             # response = urllib2.urlopen(url)
             print "opening connection to server"
-            response = requests.get(url, verify='/Users/sterling/.esg/credentials.pem',stream=True)
+            response = requests.get(url, verify=ESGF_CREDENTIALS, stream=True)
             response.raw.decode_content = True
-            with open("someClimateFile.nc", 'wb') as f:
+            with open("climateTestFile.nc", 'wb') as f:
                     shutil.copyfileobj(response.raw, f)
             print "...download success"
             return HttpResponse(status=200)

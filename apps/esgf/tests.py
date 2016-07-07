@@ -1,5 +1,4 @@
 from django.test import LiveServerTestCase
-import unittest
 import json
 import requests
 from constants import NODE_HOSTNAMES
@@ -9,7 +8,6 @@ import inspect
 class TestLogon(LiveServerTestCase):
 
     def setUp(self):
-        unittest.TestCase.setUp(self)
         self.username = 'https://pcmdi.llnl.gov/esgf-idp/openid/acmetest'
         self.password = 'ACM#t3st'
 
