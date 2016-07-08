@@ -30,7 +30,7 @@ class TestCreateRun(LiveServerTestCase):
         }
         r = self.c.post(self.url, request)
         print_message('status code given' + str(r.status_code), 'error')
-        self.assertTrue(r.status_code != 200)
+        self.assertTrue(r.status_code == 200)
 
     def test_create_run_with_valid_template(self):
         request = {
@@ -38,7 +38,7 @@ class TestCreateRun(LiveServerTestCase):
             'template': 'ACME_script.csh'
         }
         r = self.c.post(self.url, request)
-        print_message('status code given' + str(r.status_code), 'error')
+        print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 200)
         self.assertTrue('template saved' in r.content)
         template_path = '/Users/baldwin32/projects/acme-web-fe/apps/run_manager/resources//test/ACME_script.csh'
@@ -54,18 +54,45 @@ class TestCreateRun(LiveServerTestCase):
             'run_name': 'test_run'
         }
         r = self.c.post(self.live_server_url + '/acme/run_manager/create_run/', request)
-        print_message('status code given' + str(r.status_code), 'error')
+        print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 409)
 
 
-# class TestDeleteRun(LiveServerTestCase):
-#
-#     def test_delete_valid_run(self):
-#         self.assertTrue(False)
-#
-#     def test_delete_invalid_run(self):
-#         self.assertTrue(False)
-#
+class TestDeleteRun(LiveServerTestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(username='test')
+        self.user2 = User.objects.create(username='test2')
+        self.user.set_password('test')
+        self.user2.set_password('test')
+        self.user.save()
+        self.user2.save()
+        self.c = Client()
+        self.c2 = Client()
+
+        self.url = self.live_server_url + '/acme/run_manager/create_run/'
+        logged_in = self.c.login(username='test', password='test')
+        logged_in = self.c2.login(username='test2', password='test')
+
+        # setup the delete test by creating a new run
+        r = self.c.post(self.url, {'run_name': 'test_run'})
+
+
+    def test_delete_valid_run(self):
+        request = {
+            'run_name': 'test_run'
+        }
+        r = self.c.delete(self.live_server_url + '/acme/run_manager/delete_run/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+
+    def test_delete_run_invalid_user(self):
+        request = {
+            'run_name': 'test_run'
+        }
+        r = self.c2.delete(self.live_server_url + '/acme/run_manager/delete_run/', request)
+        self.assertTrue(r.status_code != 200)
+
 
 # class TestUpdateScript(LiveServerTestCase):
 #
