@@ -3,6 +3,7 @@ import json
 import requests
 from constants import NODE_HOSTNAMES
 import inspect
+from util.utilities import print_message
 
 
 class TestLogon(LiveServerTestCase):
@@ -18,7 +19,9 @@ class TestLogon(LiveServerTestCase):
             'password': self.password
         }
         response_code = requests.get(self.live_server_url + '/acme/esgf/logon/', params=credential).status_code
-        self.assertTrue( response_code == 200)
+        message = 'Status code: {}'.format(response_code)
+        print_message(message, 'error')
+        self.assertTrue(response_code == 200)
 
     def test_logon_fail(self):
         print "\n---->[+] Starting " + inspect.stack()[0][3]
