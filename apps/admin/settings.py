@@ -157,7 +157,7 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 NOSE_ARGS = [
     '--with-coverage',
-    '--cover-package=esgf.views,run_manager.views,cdat.views,web_fe.views,poller.views',
+    '--cover-package=esgf.views,run_manager.views,web_fe.views,poller.views,cdat.views',
     '--verbosity=3',
     '--cover-xml',
     '--cover-xml-file=coverage.xml'

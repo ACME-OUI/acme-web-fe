@@ -25,23 +25,6 @@ def print_debug(e):
     print '6', traceback.print_tb(tb)
 
 
-class VeloServiceTest(TestCase):
-
-    def setUp(self):
-
-        userSetup(self)
-        credentials = {}
-        credentials['velo'] = {}
-        credentials['velo']['username'] = 'acmetest'
-        credentials['velo']['password'] = 'acmetest'
-
-        data = json.dumps(credentials)
-        response = self.client.post(
-            '/acme/add_credentials/', content_type='application/json', data=data)
-
-    def tearDown(self):
-
-        User.objects.filter(username='testuser').delete()
 
     # def test_get_folder_valid(self):
     #
