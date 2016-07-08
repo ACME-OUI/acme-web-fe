@@ -5,6 +5,8 @@ from django.contrib.auth.models import User
 import json
 import requests
 import shutil
+import os
+from constants import RUN_SCRIPT_PATH
 
 class TestCreateRun(LiveServerTestCase):
 
@@ -16,7 +18,9 @@ class TestCreateRun(LiveServerTestCase):
         logged_in = self.c.login(username='test', password='test')
 
     def tearDown(self):
-        run_directory = '/Users/baldwin32/projects/acme-web-fe/run_manager/run_scripts/test/test_run'
+        # run_directory = '/Users/baldwin32/projects/acme-web-fe/run_manager/run_scripts/test/test_run'
+        path = os.path.abspath(os.path.dirname(__file__))
+        run_directory = path + RUN_SCRIPT_PATH
         shutil.rmtree(run_directory, ignore_errors=True)
 
     def test_valid_run(self):
@@ -24,6 +28,7 @@ class TestCreateRun(LiveServerTestCase):
             'run_name': 'test_run'
         }
         r = self.c.get(self.live_server_url + '/acme/run_manager/create_run/', request)
+        print r.status_code
         self.assertTrue(r.status_code == 200)
 
 
