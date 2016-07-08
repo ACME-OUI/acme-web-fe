@@ -7,6 +7,7 @@ import requests
 import shutil
 import os
 from constants import RUN_SCRIPT_PATH
+from util.utilities import print_message
 
 class TestCreateRun(LiveServerTestCase):
 
@@ -19,7 +20,6 @@ class TestCreateRun(LiveServerTestCase):
         logged_in = self.c.login(username='test', password='test')
 
     def tearDown(self):
-        # run_directory = '/Users/baldwin32/projects/acme-web-fe/run_manager/run_scripts/test/test_run'
         path = os.path.abspath(os.path.dirname(__file__))
         run_directory = path + RUN_SCRIPT_PATH
         shutil.rmtree(run_directory, ignore_errors=True)
@@ -29,8 +29,8 @@ class TestCreateRun(LiveServerTestCase):
             'run_name': 'test_run'
         }
         r = self.c.post(self.url, request)
-        print r.status_code
-        self.assertTrue(r.status_code == 200)
+        print_message('status code given' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code != 200)
 
     def test_create_run_with_valid_template(self):
         request = {
@@ -38,7 +38,7 @@ class TestCreateRun(LiveServerTestCase):
             'template': 'ACME_script.csh'
         }
         r = self.c.post(self.url, request)
-        print r.status_code
+        print_message('status code given' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 200)
         self.assertTrue('template saved' in r.content)
         template_path = '/Users/baldwin32/projects/acme-web-fe/apps/run_manager/resources//test/ACME_script.csh'
@@ -54,8 +54,7 @@ class TestCreateRun(LiveServerTestCase):
             'run_name': 'test_run'
         }
         r = self.c.post(self.live_server_url + '/acme/run_manager/create_run/', request)
-        if r.status_code != 409:
-            print r.status_code
+        print_message('status code given' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 409)
 
 
