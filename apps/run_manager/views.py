@@ -20,14 +20,15 @@ def create_run(request):
     user_directory = path + RUN_SCRIPT_PATH + str(request.user)
 
     # TODO: make this not hard coded
-    template_directory = path + RUN_SCRIPT_PATH + 'resources/'
+    template_directory = path + '/resources/'
     if not os.path.exists(user_directory):
         print "[+] Creating directory {}".format(user_directory)
         os.makedirs(user_directory)
 
 
-    new_run = request.GET.get('run_name')
+    new_run = request.POST.get('run_name')
     if not new_run:
+        print '[-] No new run_name specied'
         return HttpResponse(status=400)
 
     new_run_dir = os.path.join(user_directory, new_run)
@@ -51,27 +52,38 @@ def create_run(request):
 
     template = request.POST.get('template')
     if not template:
+        print "[+] No template request"
         return JsonResponse({'new_run_dir': new_run_dir})
     else:
+        print "[+] got template request: {}".format(template)
         found_template = False
         template_path = False
-        template_search_dirs = [request.user, 'global']
-        template_search_dirs = [os.path.join(template_directory,x) for x in template_search_dirs]
+        template_search_dirs = [str(request.user), 'global']
+        template_search_dirs = [ str(template_directory + x) for x in template_search_dirs]
+        print "template_search_dirs {}".format(template_search_dirs)
         for directory in template_search_dirs:
-            if os.path.exists(x):
-                if template in os.listdir(x):
+            print "[+] testing {}".format(directory)
+            if os.path.exists(directory):
+                print "[+] folder contents {}".format(os.listdir(directory))
+                if template in os.listdir(directory):
+                    print "[+] found tempalte at {}".format(directory)
                     found_template = True
-                    template_path = os.path.join(x)
+                    template_path = directory + '/' + template
+            else:
+                print "[+] creating new resource folder {}".format(directory)
+                os.mkdir(directory)
 
         if found_template:
             try:
-                shutil.copyfile(template_path, new_run_dir)
+                print "[+] Copying file from {} to {}".format(template_path, template_directory + '/' + str(request.user) + '/'+ template)
+                shutil.copyfile(template_path, template_directory + '/' + str(request.user) + '/'+ template)
             except Exception as e:
                 print_debug(e)
                 print "[-] Error saving template {} for user {}".format(template, request.user)
                 return JsonResponse({'new_run_dir': new_run_dir, 'error': 'template not saved'})
+            return JsonResponse({'new_run_dir': new_run_dir, 'template': 'template saved'})
         else:
-            return JsonResponse({'new_run_dir': new_run_dir, 'template_dir': template_path})
+            return JsonResponse({'new_run_dir': new_run_dir, 'error': 'template not found'})
 
 
 @login_required
