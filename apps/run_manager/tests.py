@@ -111,6 +111,33 @@ class TestDeleteRun(LiveServerTestCase):
 
 
 
+class TestGetRuns(LiveServerTestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(username='test')
+        self.user.set_password('test')
+        self.user.save()
+        self.c = Client()
+        logged_in = self.c.login(username='test', password='test')
+        self.url = self.live_server_url + '/acme/run_manager/view_runs/'
+
+    def test_get_runs_valid_user(self):
+        r = self.c.post(self.live_server_url + '/acme/run_manager/create_run/', {'run_name': 'test_run'})
+        print_message('status code given {}'.format(str(r.status_code)), 'error')
+        self.assertTrue(r.status_code == 200)
+        r = self.c.get(self.url)
+        print_message("request contents {}".format(r.content), 'error')
+        self.assertTrue(r.status_code == 200)
+        self.assertTrue('test_run' in r.content)
+
+    def test_get_runs_invalid_user(self):
+        c2 = Client()
+        r = c2.get(self.url)
+        self.assertTrue(r.status_code == 302)
+
+
+
+
 # class TestUpdateScript(LiveServerTestCase):
 #
 #     def test_update_valid_script(self):
@@ -120,15 +147,7 @@ class TestDeleteRun(LiveServerTestCase):
 #         self.assertTrue(False)
 #
 #
-# class TestGetRuns(LiveServerTestCase):
-#
-#     def test_get_runs_valid_user(self):
-#         self.assertTrue(False)
-#
-#     def test_get_runs_invalid_user(self):
-#         self.assertTrue(False)
-#
-#
+
 # class TestGetScripts(LiveServerTestCase):
 #
 #     def test_get_scripts_valid_run(self):
