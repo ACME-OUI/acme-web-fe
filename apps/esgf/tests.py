@@ -22,8 +22,6 @@ class TestLogon(LiveServerTestCase):
 
     def test_logon_fail(self):
         print "\n---->[+] Starting " + inspect.stack()[0][3]
-        print "____ this should print a stack trace ________"
-        print "--------------------------------------------"
         credential = {
             'username': 'http://abra',
             'password': 'cadabra'
