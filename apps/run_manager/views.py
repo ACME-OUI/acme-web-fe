@@ -93,10 +93,10 @@ def delete_run(request):
     run_directory = path + RUN_SCRIPT_PATH + str(request.user) + '/' + run_directory
 
     if not os.path.exists(run_directory):
-        print_message("Attempt to delete directory that doesnt exist", 'error')
-        return HttpResponse(status=400)
+        print_message("Attempt to delete directory that doesnt exist {}".format(run_directory), 'error')
+        return HttpResponse(status=401)
 
-    if request.user != run_directory.split('/')[-2]:
+    if str(request.user) != run_directory.split('/')[-2]:
         print_message("Attempt to delete someone elses run directory", 'error')
         return HttpResponse(status=403)
 

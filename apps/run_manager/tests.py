@@ -73,9 +73,6 @@ class TestDeleteRun(LiveServerTestCase):
         logged_in = self.c.login(username='test', password='test')
         logged_in = self.c2.login(username='test2', password='test')
 
-        # setup the delete test by creating a new run
-        # r = self.c.post(self.live_server_url + '/acme/run_manager/create_run/', {'run_name': 'test_run'})
-
 
     def test_delete_valid_run(self):
         request = {
@@ -90,8 +87,28 @@ class TestDeleteRun(LiveServerTestCase):
         request = {
             'run_name': 'test_run'
         }
+        r = self.c.post(self.live_server_url + '/acme/run_manager/create_run/', request)
         r = self.c2.post(self.live_server_url + '/acme/run_manager/delete_run/', request)
-        self.assertTrue(r.status_code != 200)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 401)
+
+
+    def test_delete_run_invalid_run_name(self):
+        request = {
+            'asdf': 'test_run'
+        }
+        r = self.c2.post(self.live_server_url + '/acme/run_manager/delete_run/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 400)
+
+    def test_delete_run_does_not_exist(self):
+        request = {
+            'run_name': 'this_does_not_exist'
+        }
+        r = self.c2.post(self.live_server_url + '/acme/run_manager/delete_run/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code != 400)
+
 
 
 # class TestUpdateScript(LiveServerTestCase):
