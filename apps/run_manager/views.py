@@ -112,12 +112,61 @@ def delete_run(request):
 
     return HttpResponse()
 
+#
+# View all of a users runs
+# input: user, the user requesting their runs
+@login_required
 def view_runs(request):
-    return JsonResponse({})
+    path = os.path.abspath(os.path.dirname(__file__))
+    run_directory = path + RUN_SCRIPT_PATH + str(request.user) + '/'
+    run_dirs = os.listdir(run_directory)
+    return HttpResponse(json.dumps(run_dirs))
 
 
+#
+# Create a new run script under a given run config folder
+# inputs: user, the user creating a new run script
+#         script_name, the name of the new script
+#         run_name, the name of the run folder
+#         contents, the contents of the new script
+@login_required
 def create_script(request):
-    return JsonResponse({})
+    script_name = request.POST.get('script_name')
+    run_name = request.POST.get('run_name')
+    contents = request.body.content['contents']
+    if not script_name:
+        print_message('No script name given', 'error')
+        return HttpResponse(status=400)
+
+    if not run_name:
+        print_message('No run name given', 'error')
+        return HttpResponse(status=400)
+
+    if not contents:
+        print_message('No contents given', 'error')
+        return HttpResponse(status=400)
+
+    path = os.path.abspath(os.path.dirname(__file__))
+    run_directory = path + RUN_SCRIPT_PATH + str(request.user) + '/' + run_name
+    if not os.path.exists(run_directory):
+        print_message('Run directory not found {}'.format(run_directory), 'error')
+        return HttpResponse(status=400)
+
+    script_path = run_directory + '/' + script_name
+    if os.path.exists(script_path):
+        print_message('Attempting to overwrite script {}'.format(script_path), 'error')
+        return HttpResponse(status=403)
+
+    try:
+        f = open( script_path, 'w+')
+        f.write(text)
+        f.close()
+    except Exception as e:
+        print_message('Error writing script to file {}'.format, 'error')
+        print_debug(e)
+        return HttpResponse(status=500)
+
+    return HttpResponse()
 
 
 def update_script(request):
