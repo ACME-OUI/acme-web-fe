@@ -21,7 +21,7 @@ class TestCreateRun(LiveServerTestCase):
 
     def tearDown(self):
         path = os.path.abspath(os.path.dirname(__file__))
-        run_directory = path + RUN_SCRIPT_PATH
+        run_directory = path + RUN_SCRIPT_PATH + 'test'
         shutil.rmtree(run_directory, ignore_errors=True)
 
     def test_valid_run(self):
@@ -83,14 +83,27 @@ class TestDeleteRun(LiveServerTestCase):
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 200)
 
+        path = os.path.abspath(os.path.dirname(__file__))
+        run_directory = path + RUN_SCRIPT_PATH +  'test/test_run'
+        print_message('run directory still exists {}'.format(run_directory), 'error')
+        self.assertFalse(os.path.exists(run_directory))
+
+
     def test_delete_run_invalid_user(self):
         request = {
             'run_name': 'test_run'
         }
         r = self.c.post(self.live_server_url + '/acme/run_manager/create_run/', request)
         r = self.c2.post(self.live_server_url + '/acme/run_manager/delete_run/', request)
-        print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 401)
+        path = os.path.abspath(os.path.dirname(__file__))
+        run_directory = path + RUN_SCRIPT_PATH +  'test/test_run'
+        print_message('run directory was removed {}'.format(run_directory), 'error')
+        self.assertTrue(os.path.exists(run_directory))
+        # c is cleaning up
+        r = self.c.post(self.live_server_url + '/acme/run_manager/delete_run/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
 
 
     def test_delete_run_invalid_run_name(self):
