@@ -133,7 +133,7 @@ def view_runs(request):
 def create_script(request):
     script_name = request.POST.get('script_name')
     run_name = request.POST.get('run_name')
-    contents = request.body['contents']
+    contents = request.POST.get('contents')
     if not script_name:
         print_message('No script name given', 'error')
         return HttpResponse(status=400)
@@ -159,7 +159,7 @@ def create_script(request):
 
     try:
         f = open( script_path, 'w+')
-        f.write(text)
+        f.write(contents)
         f.close()
     except Exception as e:
         print_message('Error writing script to file {}'.format, 'error')
