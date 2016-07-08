@@ -123,7 +123,7 @@ class TestDeleteRun(LiveServerTestCase):
         self.assertTrue(r.status_code != 400)
 
 
-class TestCreateSccript(LiveServerTestCase):
+class TestCreateScript(LiveServerTestCase):
 
     def setUp(self):
         self.user = User.objects.create(username='test')
@@ -137,15 +137,25 @@ class TestCreateSccript(LiveServerTestCase):
             'run_name': 'test_run_name'
         }
         r = self.c.post(self.live_server_url + '/acme/run_manager/create_run/', request)
-        print_message('status code given' + str(r.status_code), 'error')
+        print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 200)
+
         request = {
-            'script_name': 'test_name',
+            'script_name': 'script_test',
             'run_name': 'test_run_name',
             'contents': 'Hello World'
         }
         r = self.c.post(self.live_server_url + '/acme/run_manager/create_script/', request)
         print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+
+        request = {
+            'run_name': 'test_run_name'
+        }
+        r = self.c.post(self.live_server_url + '/acme/run_manager/delete_run/', request)
+        if r.status_code != 200:
+            print_message('failed to delete run {}'.format(request), 'error')
+            print_message('status_code: {}'.format(r.status_code), 'error')
         self.assertTrue(r.status_code == 200)
 
     def test_create_script_without_login(self):
@@ -214,9 +224,9 @@ class TestCreateSccript(LiveServerTestCase):
         }
         r = self.c.post(self.live_server_url + '/acme/run_manager/create_script/', request)
         print_message('status code given ' + str(r.status_code), 'error')
-        self.assertTrue(r.status_code == 200)
+        self.assertTrue(r.status_code == 400)
 
-    def test_create_script_with_no_run(self):
+    def test_create_script_with_invalid_run(self):
         request = {
             'script_name': 'test_name',
             'run_name': 'not_a_run_name',
@@ -224,7 +234,7 @@ class TestCreateSccript(LiveServerTestCase):
         }
         r = self.c.post(self.live_server_url + '/acme/run_manager/create_script/', request)
         print_message('status code given ' + str(r.status_code), 'error')
-        self.assertTrue(r.status_code == 200)
+        self.assertTrue(r.status_code == 400)
 
 
 
