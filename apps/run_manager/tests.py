@@ -15,6 +15,7 @@ class TestCreateRun(LiveServerTestCase):
         self.user.set_password('test')
         self.user.save()
         self.c = Client()
+        self.url = self.live_server_url + '/acme/run_manager/create_run/'
         logged_in = self.c.login(username='test', password='test')
 
     def tearDown(self):
@@ -27,20 +28,32 @@ class TestCreateRun(LiveServerTestCase):
         request = {
             'run_name': 'test_run'
         }
-        r = self.c.get(self.live_server_url + '/acme/run_manager/create_run/', request)
+        r = self.c.post(self.url, request)
         print r.status_code
         self.assertTrue(r.status_code == 200)
+
+    def test_create_run_with_valid_template(self):
+        request = {
+            'run_name': 'test_run_with_template',
+            'template': 'ACME_script.csh'
+        }
+        r = self.c.post(self.url, request)
+        print r.status_code
+        self.assertTrue(r.status_code == 200)
+        self.assertTrue('template saved' in r.content)
+        template_path = '/Users/baldwin32/projects/acme-web-fe/apps/run_manager/resources//test/ACME_script.csh'
+        shutil.rmtree(template_path, ignore_errors=True)
 
 
     def test_invalid_run(self):
         request = {
             'run_name': 'test_run'
         }
-        r = self.c.get(self.live_server_url + '/acme/run_manager/create_run/', request)
+        r = self.c.post(self.live_server_url + '/acme/run_manager/create_run/', request)
         request = {
             'run_name': 'test_run'
         }
-        r = self.c.get(self.live_server_url + '/acme/run_manager/create_run/', request)
+        r = self.c.post(self.live_server_url + '/acme/run_manager/create_run/', request)
         if r.status_code != 409:
             print r.status_code
         self.assertTrue(r.status_code == 409)
