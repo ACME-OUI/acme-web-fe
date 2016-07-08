@@ -138,7 +138,7 @@ def logon(request):
     try:
         lm.logon_with_openid(credential['username'], credential['password'], bootstrap=bootstrap)
     except Exception as e:
-        # print_debug(e)
+        print_debug(e)
         return HttpResponse(status=403)
     if lm.is_logged_on():
         return HttpResponse(status=200)

@@ -37,6 +37,8 @@ db
 /migrations
 
 .coverage
+coverage.xml
 cover
+
 
 /webroot
