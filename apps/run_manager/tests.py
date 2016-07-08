@@ -70,19 +70,19 @@ class TestDeleteRun(LiveServerTestCase):
         self.c = Client()
         self.c2 = Client()
 
-        self.url = self.live_server_url + '/acme/run_manager/create_run/'
         logged_in = self.c.login(username='test', password='test')
         logged_in = self.c2.login(username='test2', password='test')
 
         # setup the delete test by creating a new run
-        r = self.c.post(self.url, {'run_name': 'test_run'})
+        # r = self.c.post(self.live_server_url + '/acme/run_manager/create_run/', {'run_name': 'test_run'})
 
 
     def test_delete_valid_run(self):
         request = {
             'run_name': 'test_run'
         }
-        r = self.c.delete(self.live_server_url + '/acme/run_manager/delete_run/', request)
+        r = self.c.post(self.live_server_url + '/acme/run_manager/create_run/', {'run_name': 'test_run'})
+        r = self.c.post(self.live_server_url + '/acme/run_manager/delete_run/', request)
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 200)
 
@@ -90,7 +90,7 @@ class TestDeleteRun(LiveServerTestCase):
         request = {
             'run_name': 'test_run'
         }
-        r = self.c2.delete(self.live_server_url + '/acme/run_manager/delete_run/', request)
+        r = self.c2.post(self.live_server_url + '/acme/run_manager/delete_run/', request)
         self.assertTrue(r.status_code != 200)
 
 
