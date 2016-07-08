@@ -93,22 +93,21 @@ def delete_run(request):
     run_directory = path + RUN_SCRIPT_PATH + str(request.user) + '/' + run_directory
 
     if not os.path.exists(run_directory):
-        print "[-] Attempt to delete directory that doesnt exist"
-
+        print_message("Attempt to delete directory that doesnt exist", 'error')
         return HttpResponse(status=400)
 
     if request.user != run_directory.split('/')[-2]:
-        print "[-] Attempt to delete someone elses run directory"
+        print_message("Attempt to delete someone elses run directory", 'error')
         return HttpResponse(status=403)
 
     try:
         shutil.rmtree(run_directory, ignore_errors=True)
     except Exception as e:
-        print "[-] Error removing run directory"
+        print_message("Error removing run directory", 'error')
         return HttpResponse(status=500)
 
     if os.path.exists(run_directory):
-        print "[-] Failed to remove directory {}".format(run_directory)
+        print_message("Failed to remove directory {}".format(run_directory), 'error')
         return HttpResponse(status=500)
 
     return HttpResponse()
