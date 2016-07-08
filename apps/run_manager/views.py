@@ -133,7 +133,7 @@ def view_runs(request):
 def create_script(request):
     script_name = request.POST.get('script_name')
     run_name = request.POST.get('run_name')
-    contents = request.body.content['contents']
+    contents = request.body['contents']
     if not script_name:
         print_message('No script name given', 'error')
         return HttpResponse(status=400)
