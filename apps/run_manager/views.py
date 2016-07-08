@@ -14,7 +14,7 @@ import shutil
 # input: user, the user requesting a new run config folder
 #        run_name, the name of the new run config
 #        optional: template, the name of their predefined template
-# @login_required
+@login_required
 def create_run(request):
     path = os.path.abspath(os.path.dirname(__file__))
     user_directory = path + RUN_SCRIPT_PATH + str(request.user)
@@ -85,12 +85,17 @@ def create_run(request):
         else:
             return JsonResponse({'new_run_dir': new_run_dir, 'error': 'template not found'})
 
-
+#
+#
+#
 @login_required
 def delete_run(request):
     run_directory = request.DELETE.get('run_name')
-    run_directory = user_directory = os.path.join(str(os.getcwd()), RUN_SCRIPT_PATH, run_directory)
-    run_directory = '/Users/baldwin32/projects/acme-web-fe/run_manager/run_scripts/test/test_run'
+    if not run_directory:
+        return HttpResponse(status=400)
+
+    path = os.path.abspath(os.path.dirname(__file__))
+    run_directory = path + RUN_SCRIPT_PATH + str(request.user) + '/' + run_directory
 
     if not os.path.exists(run_directory):
         print "[-] Attempt to delete directory that doesnt exist"
@@ -100,7 +105,12 @@ def delete_run(request):
         print "[-] Attempt to delete someone elses run directory"
         return HttpResponse(status=403)
 
-    shutil.rmtree(run_directory, ignore_errors=True)
+    try:
+        shutil.rmtree(run_directory, ignore_errors=True)
+    except Exception as e:
+        print "[-] Error removing run directory"
+        return HttpResponse(status=500)
+
     if os.path.exists(run_directory):
         print "[-] Failed to remove directory {}".format(run_directory)
         return HttpResponse(status=500)
