@@ -110,6 +110,110 @@ class TestDeleteRun(LiveServerTestCase):
         self.assertTrue(r.status_code != 400)
 
 
+class TestCreateSccript(LiveServerTestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(username='test')
+        self.user.set_password('test')
+        self.user.save()
+        self.c = Client()
+        logged_in = self.c.login(username='test', password='test')
+
+    def test_create_script(self):
+        request = {
+            'run_name': 'test_run_name'
+        }
+        r = self.c.post(self.live_server_url + '/acme/run_manager/create_run/', request)
+        print_message('status code given' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+        request = {
+            'script_name': 'test_name',
+            'run_name': 'test_run_name',
+            'contents': 'Hello World'
+        }
+        r = self.c.post(self.live_server_url + '/acme/run_manager/create_script/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+
+    def test_create_script_without_login(self):
+        self.c2 = Client()
+        request = {
+            'script_name': 'test_name',
+            'run_name': 'test_run_name',
+            'contents': 'Hello World'
+        }
+        r = self.c2.post(self.live_server_url + '/acme/run_manager/create_script/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 302)
+
+    def test_create_script_missing_script_name(self):
+        request = {
+            'run_name': 'test_run_name',
+            'contents': 'Hello World'
+        }
+        r = self.c.post(self.live_server_url + '/acme/run_manager/create_script/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 400)
+
+    def test_create_script_without_run_name(self):
+        request = {
+            'script_name': 'test_name',
+            'contents': 'Hello World'
+        }
+        r = self.c.post(self.live_server_url + '/acme/run_manager/create_script/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 400)
+
+    def test_create_script_without_content(self):
+        request = {
+            'script_name': 'test_name',
+            'run_name': 'test_run_name',
+        }
+        r = self.c.post(self.live_server_url + '/acme/run_manager/create_script/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 400)
+
+    def test_create_script_with_blank_script_name(self):
+        request = {
+            'script_name': '',
+            'run_name': 'test_run_name',
+            'contents': 'Hello World'
+        }
+        r = self.c.post(self.live_server_url + '/acme/run_manager/create_script/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 400)
+
+    def test_create_script_with_blank_run_name(self):
+        request = {
+            'script_name': 'test_name',
+            'run_name': '',
+            'contents': 'Hello World'
+        }
+        r = self.c.post(self.live_server_url + '/acme/run_manager/create_script/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 400)
+
+    def test_create_script_with_blank_contents(self):
+        request = {
+            'script_name': 'test_name',
+            'run_name': 'test_run_name',
+            'contents': ''
+        }
+        r = self.c.post(self.live_server_url + '/acme/run_manager/create_script/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+
+    def test_create_script_with_no_run(self):
+        request = {
+            'script_name': 'test_name',
+            'run_name': 'not_a_run_name',
+            'contents': 'Hello World'
+        }
+        r = self.c.post(self.live_server_url + '/acme/run_manager/create_script/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+
+
 
 class TestGetRuns(LiveServerTestCase):
 
