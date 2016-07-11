@@ -274,10 +274,58 @@ def get_scripts(request):
         print_message('Request for config folder that doesnt exist {}'.format(run_name), 'error')
         return HttpResponse(status=403)
 
-    directory_contents = os.listdir(run_directory)
+    try:
+        script_list = []
+        directory_contents = os.listdir(run_directory)
+        for item in directory_contents:
+            if not os.path.isdir(item):
+                item = item.split('_')[0]
+                script_list.push(item)
+    except Exception as e:
+        print_message('Error retrieving directory items', 'error')
+        print_debug(e)
+        return HttpResponse(status=500)
+
+    return JsonResponse(script_list)
 
 
+#
+# Reads the contents of a script and sends it back to the user
+# inputs: user, the user making the request
+#         script_name, the name of the requested script
+#         run_name, the run config folder the script belongs to
+#         optional: version, the version of the script being requested, default is latest
+# returns: no script_name: status 400
+#          no run name: status 400
+#          no file with matching version number: status 404
+#          script does not exist: status 403
+#          file read error: status 500
 def read_script(request):
+    script_name = request.GET.get('script_name')
+    run_name = request.GET.get('run_name')
+    version_num = request.GET.get('version')
+    user = str(request.user)
+    if not script_name:
+        print_message('No script name given', 'error')
+        return HttpResponse(status=400)
+
+    if not run_name:
+        print_message('No run config folder given', 'error')
+        return HttpResponse(status=400)
+
+    if version_num:
+        script = RunScript.objects.filter(
+            user=user,
+            name=script_name,
+            run=run_name,
+            version=version_num )
+    else:
+        script = RunScript.objects.filter(
+            user=user,
+            name=script_name,
+            run=run_name).latest()
+
+    # TODO: finish up
     return JsonResponse({})
 
 
