@@ -263,7 +263,9 @@ class TestGetRuns(LiveServerTestCase):
         self.assertTrue(r.status_code == 302)
 
 
-
+# class TestGetScripts(LiveServerTestCase):
+#
+#     def test_get_scripts(self):
 
 # class TestUpdateScript(LiveServerTestCase):
 #
