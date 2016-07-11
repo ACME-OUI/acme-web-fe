@@ -5,8 +5,9 @@ import json
 import os
 from constants import RUN_SCRIPT_PATH
 from util.utilities import print_debug, print_message
-from models import ModelRun
+from models import ModelRun, RunScript
 import shutil
+import datetime
 
 
 #
@@ -129,6 +130,13 @@ def view_runs(request):
 #         script_name, the name of the new script
 #         run_name, the name of the run folder
 #         contents, the contents of the new script
+# returns: no script_name: status 400
+#          no run_name: status 400
+#          no contents: status 400
+#          run directory not found: status 400
+#          script already exists: status 403
+#          file write error: status 500
+#          model save error: status 500
 @login_required
 def create_script(request):
     script_name = request.POST.get('script_name')
@@ -158,6 +166,14 @@ def create_script(request):
         return HttpResponse(status=403)
 
     try:
+        newScript = RunScript(user=str(request.uesr), version=1, name=script_name, run=run_name)
+        newScript.save()
+    except Exception as e:
+        print_message('Error saving model for script {}'.format(script_name), 'error')
+        print_debug(e)
+        return HttpResponse(status=500)
+
+    try:
         f = open( script_path, 'w+')
         f.write(contents)
         f.close()
@@ -168,9 +184,73 @@ def create_script(request):
 
     return HttpResponse()
 
-
+#
+# Changes a script to a new version, updating the content while
+# maintaining a verson of the old script
+# input: user, the user changing the script
+#        script_name, the name of the script being changed
+#        run_name, the run configuration folder the script belongs to
+#        contents, the contents of the new version of the script
+# return: no user: status 302
+#         no script_name: status 400
+#         no contents: status 400
+#         run config folder doesnt exist: status 400
+#         script previously does not exist: status 403
+#         file write error: status 500
+#         db lookup error: status 500
+@login_required
 def update_script(request):
-    return JsonResponse({})
+    script_name = request.POST.get('script_name')
+    run_name = request.POST.get('run_name')
+    contents = request.POST.get('contents')
+    if not script_name:
+        print_message('No script name given', 'error')
+        return HttpResponse(status=400)
+
+    if not run_name:
+        print_message('No run name given', 'error')
+        return HttpResponse(status=400)
+
+    if not contents:
+        print_message('No contents given', 'error')
+        return HttpResponse(status=400)
+
+    path = os.path.abspath(os.path.dirname(__file__))
+    run_directory = path + RUN_SCRIPT_PATH + str(request.user) + '/' + run_name
+    if not os.path.exists(run_directory):
+        print_message('Run directory not found {}'.format(run_directory), 'error')
+        return HttpResponse(status=400)
+
+    script_path = run_directory + '/' + script_name
+    if not os.path.exists(script_path):
+        print_message('Run script {} cannont be updated as it doesnt exist', 'error')
+        return HttpResponse(status=403)
+
+    try:
+        run_scripts = RunScript.objects.filter(user=str(request.user), name=script_name, run=run_name)
+        latest = run_scripts.latest()
+        latest.version = latest.version + 1
+        latest.edited = latest.edited + json.dumps({
+            user: str(request.user),
+            edited_date: datetime.datetime.now()
+        })
+        latest.save()
+    except Exception as e:
+        print_message('Error finding latest script {}'.format(script_name), 'error')
+        print_debug(e)
+        return HttpResponse(status=500)
+
+    script_path = script_path + '_' + latest.version()
+    try:
+        f = open( script_path, 'w+')
+        f.write(contents)
+        f.close()
+    except Exception as e:
+        print_message('Error writing script to file {}'.format, 'error')
+        print_debug(e)
+        return HttpResponse(status=500)
+
+    return HttpResponse()
 
 
 def read_script(request):
