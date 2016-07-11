@@ -203,6 +203,7 @@ def update_script(request):
     script_name = request.POST.get('script_name')
     run_name = request.POST.get('run_name')
     contents = request.POST.get('contents')
+    user = str(request.user)
     if not script_name:
         print_message('No script name given', 'error')
         return HttpResponse(status=400)
@@ -216,7 +217,7 @@ def update_script(request):
         return HttpResponse(status=400)
 
     path = os.path.abspath(os.path.dirname(__file__))
-    run_directory = path + RUN_SCRIPT_PATH + str(request.user) + '/' + run_name
+    run_directory = path + RUN_SCRIPT_PATH + user + '/' + run_name
     if not os.path.exists(run_directory):
         print_message('Run directory not found {}'.format(run_directory), 'error')
         return HttpResponse(status=400)
@@ -227,11 +228,11 @@ def update_script(request):
         return HttpResponse(status=403)
 
     try:
-        run_scripts = RunScript.objects.filter(user=str(request.user), name=script_name, run=run_name)
+        run_scripts = RunScript.objects.filter(user=user, name=script_name, run=run_name)
         latest = run_scripts.latest()
         latest.version = latest.version + 1
         latest.edited = latest.edited + json.dumps({
-            user: str(request.user),
+            user: user,
             edited_date: datetime.datetime.now()
         })
         latest.save()
@@ -251,6 +252,29 @@ def update_script(request):
         return HttpResponse(status=500)
 
     return HttpResponse()
+
+
+#
+# Gets a list of all scripts stored in a run config folder
+# inputs: user, the user requeting the script list
+#         run_name, the name of the run config folder
+# returns: no user: status 302
+#          no run_name: status 400
+#          request for run folder that doesnt exist: status 403
+def get_scripts(request):
+    run_name = request.GET.get('run_name')
+    user = str(request.user)
+    if not run_name:
+        print_message('No run name specified in get scripts request', 'error')
+        return HttpResponse(status=400)
+
+    path = os.path.abspath(os.path.dirname(__file__))
+    run_directory = path + RUN_SCRIPT_PATH + user + '/' + run_name
+    if not os.path.exists(run_directory):
+        print_message('Request for config folder that doesnt exist {}'.format(run_name), 'error')
+        return HttpResponse(status=403)
+
+    directory_contents = os.listdir(run_directory)
 
 
 def read_script(request):
