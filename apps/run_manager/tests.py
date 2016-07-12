@@ -263,6 +263,290 @@ class TestGetRuns(LiveServerTestCase):
         self.assertTrue(r.status_code == 302)
 
 
+class TestUpdateScript(LiveServerTestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(username='test')
+        self.user.set_password('test')
+        self.user.save()
+        self.c = Client()
+        logged_in = self.c.login(username='test', password='test')
+        self.url = self.live_server_url + '/acme/run_manager/'
+
+    def test_update_script(self):
+        run_name = 'update_script_run'
+        script_name = 'update_script_name'
+        script_contents = 'update script contents'
+        request = {
+            'run_name': run_name
+        }
+        r = self.c.post(self.url + 'create_run/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+        request = {
+            'script_name': script_name,
+            'run_name': run_name,
+            'contents': script_contents
+        }
+        r = self.c.post(self.url + 'create_script/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+        request = {
+            'script_name': script_name,
+            'run_name': run_name,
+            'contents': script_contents + ' ver 2'
+        }
+        r = self.c.post(self.url + 'update_script/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+        request = {
+            'run_name': run_name
+        }
+        r = self.c.post(self.live_server_url + '/acme/run_manager/delete_run/', request)
+        if r.status_code != 200:
+            print_message('failed to delete run {}'.format(request), 'error')
+            print_message('status_code: {}'.format(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+
+    def test_update_script_without_script_name(self):
+        run_name = 'update_script_run'
+        script_name = 'update_script_name'
+        script_contents = 'update script contents'
+        request = {
+            'run_name': run_name
+        }
+        r = self.c.post(self.url + 'create_run/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+        request = {
+            'script_name': script_name,
+            'run_name': run_name,
+            'contents': script_contents
+        }
+        r = self.c.post(self.url + 'create_script/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+        request = {
+            'run_name': run_name,
+            'contents': script_contents + ' ver 2'
+        }
+        r = self.c.post(self.url + 'update_script/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 400)
+        request = {
+            'run_name': run_name
+        }
+        r = self.c.post(self.live_server_url + '/acme/run_manager/delete_run/', request)
+        if r.status_code != 200:
+            print_message('failed to delete run {}'.format(request), 'error')
+            print_message('status_code: {}'.format(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+
+    def test_update_script_without_run_name(self):
+        run_name = 'update_script_run'
+        script_name = 'update_script_name'
+        script_contents = 'update script contents'
+        request = {
+            'run_name': run_name
+        }
+        r = self.c.post(self.url + 'create_run/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+        request = {
+            'script_name': script_name,
+            'run_name': run_name,
+            'contents': script_contents
+        }
+        r = self.c.post(self.url + 'create_script/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+        request = {
+            'script_name': script_name,
+            'contents': script_contents + ' ver 2'
+        }
+        r = self.c.post(self.url + 'update_script/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 400)
+        # Any way to check the contents without relying on readscript?
+        request = {
+            'run_name': run_name
+        }
+        r = self.c.post(self.live_server_url + '/acme/run_manager/delete_run/', request)
+        if r.status_code != 200:
+            print_message('failed to delete run {}'.format(request), 'error')
+            print_message('status_code: {}'.format(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+
+    def test_update_script_without_contents(self):
+        run_name = 'update_script_run'
+        script_name = 'update_script_name'
+        script_contents = 'update script contents'
+        request = {
+            'run_name': run_name
+        }
+        r = self.c.post(self.url + 'create_run/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+        request = {
+            'script_name': script_name,
+            'run_name': run_name,
+            'contents': script_contents
+        }
+        r = self.c.post(self.url + 'create_script/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+        request = {
+            'script_name': script_name,
+            'run_name': run_name
+        }
+        r = self.c.post(self.url + 'update_script/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 400)
+        # Any way to check the contents without relying on readscript?
+        request = {
+            'run_name': run_name
+        }
+        r = self.c.post(self.live_server_url + '/acme/run_manager/delete_run/', request)
+        if r.status_code != 200:
+            print_message('failed to delete run {}'.format(request), 'error')
+            print_message('status_code: {}'.format(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+
+    def test_update_script_with_invalid_run_name(self):
+        run_name = 'test_run_name'
+        script_name = 'update_script_name'
+        script_contents = 'update script contents'
+        request = {
+            'run_name': run_name
+        }
+        r = self.c.post(self.url + 'create_run/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 400)
+        request = {
+            'script_name': script_name,
+            'run_name': run_name,
+            'contents': script_contents
+        }
+        r = self.c.post(self.url + 'create_script/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+        request = {
+            'script_name': script_name,
+            'run_name': '',
+            'contents': 'Should fail'
+        }
+        r = self.c.post(self.url + 'update_script/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 400)
+        # Any way to check the contents without relying on readscript?
+        request = {
+            'run_name': run_name
+        }
+        r = self.c.post(self.live_server_url + '/acme/run_manager/delete_run/', request)
+        if r.status_code != 200:
+            print_message('failed to delete run {}'.format(request), 'error')
+            print_message('status_code: {}'.format(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+
+class TestReadScript(LiveServerTestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(username='test')
+        self.user.set_password('test')
+        self.user.save()
+        self.c = Client()
+        logged_in = self.c.login(username='test', password='test')
+        self.url = self.live_server_url + '/acme/run_manager/'
+
+    def test_get_a_script(self):
+        run_name = 'read_script_run'
+        script_name = 'read_script_name'
+        script_contents = 'Hello World'
+        request = {
+            'run_name': run_name
+        }
+        r = self.c.post(self.url + 'create_run/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+        request = {
+            'script_name': script_name,
+            'run_name': run_name,
+            'contents': script_contents
+        }
+        r = self.c.post(self.url + 'create_script/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+        request = {
+            'script_name': script_name,
+            'run_name': run_name,
+        }
+        r = self.c.get(self.url + 'read_script/', request)
+        self.assertTrue(r.status_code == 200)
+        data = json.loads(r.content)
+        self.assertEquals(script_contents, data['script'])
+        request = {
+            'run_name': run_name
+        }
+        r = self.c.post(self.live_server_url + '/acme/run_manager/delete_run/', request)
+        if r.status_code != 200:
+            print_message('failed to delete run {}'.format(request), 'error')
+            print_message('status_code: {}'.format(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+
+    def test_read_script_with_version(self):
+        run_name = 'read_script_run'
+        script_name = 'read_script_name'
+        script_contents = 'Hello World'
+        new_script_contents = 'Hello World Version 2'
+        request = {
+            'run_name': run_name
+        }
+        r = self.c.post(self.url + 'create_run/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+        request = {
+            'script_name': script_name,
+            'run_name': run_name,
+            'contents': script_contents
+        }
+        r = self.c.post(self.url + 'create_script/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+        request = {
+            'script_name': script_name,
+            'run_name': run_name,
+        }
+        r = self.c.get(self.url + 'read_script/', request)
+        self.assertTrue(r.status_code == 200)
+        data = json.loads(r.content)
+        self.assertEquals(script_contents, data['script'])
+        request = {
+            'script_name': script_name,
+            'run_name': run_name,
+            'contents': new_script_contents
+        }
+        r = self.c.post(self.url + 'update_script/', request)
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+        request = {
+            'script_name': script_name,
+            'run_name': run_name,
+            'version': 2
+        }
+        r = self.c.get(self.url + 'read_script/', request)
+        self.assertTrue(r.status_code == 200)
+        data = json.loads(r.content)
+        self.assertEquals(new_script_contents, data['script'])
+        request = {
+            'run_name': run_name
+        }
+        r = self.c.post(self.url + 'delete_run/', request)
+        if r.status_code != 200:
+            print_message('failed to delete run {}'.format(request), 'error')
+            print_message('status_code: {}'.format(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+
+
 # class TestGetScripts(LiveServerTestCase):
 #
 #     def test_get_scripts(self):
