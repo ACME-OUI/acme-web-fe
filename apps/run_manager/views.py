@@ -314,7 +314,7 @@ def read_script(request):
         return HttpResponse(status=400)
 
     if version_num:
-        script = RunScript.objects.filter(
+        script = RunScript.objects.get(
             user=user,
             name=script_name,
             run=run_name,
@@ -325,8 +325,29 @@ def read_script(request):
             name=script_name,
             run=run_name).latest()
 
-    # TODO: finish up
-    return JsonResponse({})
+    path = os.path.abspath(os.path.dirname(__file__))
+    run_directory = path + RUN_SCRIPT_PATH + user + '/' + run_name
+    if not script_name in os.listdir(run_directory):
+        print_message('No matching script found in run folder {}'.format(script_name), 'error')
+        return HttpResponse(status=403)
+
+    script_path = run_directory + '/' + script_name + '_' + version_num
+    if not os.path.exists(script_path):
+        print_message('Could not find script {} with version {}'.format(script_name, version_num))
+        return HttpResponse(status=404)
+
+    try:
+        contents = ''
+        with open(script_path, 'r') as f:
+            for line in f:
+                contents += line
+    except Exception as e:
+        print_message('Error reading from file {}'.format(script_path), 'error')
+        print_debug(e)
+        return HttpResponse(status=500)
+
+
+    return JsonResponse({'script': contents})
 
 
 def delete_script(request):
