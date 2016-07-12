@@ -280,13 +280,13 @@ def get_scripts(request):
         for item in directory_contents:
             if not os.path.isdir(item):
                 item = item.split('_')[0]
-                script_list.push(item)
+                script_list.append(item)
     except Exception as e:
         print_message('Error retrieving directory items', 'error')
         print_debug(e)
         return HttpResponse(status=500)
 
-    return JsonResponse(script_list)
+    return HttpResponse(json.dumps(script_list))
 
 
 #
@@ -349,6 +349,47 @@ def read_script(request):
 
     return JsonResponse({'script': contents})
 
-
+#
+# Im going to leave this unimplemented for the time being.
+#
 def delete_script(request):
     return JsonResponse({})
+
+#
+# returns a list of the users tempaltes as well as all global templates
+# inputs: user, the user requsting the temlate list
+def get_templates(request):
+    user = str(request.user)
+    template_search_dirs = [user, 'global']
+    template_search_dirs = [ str(template_directory + x) for x in template_search_dirs]
+    print "template_search_dirs {}".format(template_search_dirs)
+    for directory in template_search_dirs:
+        if os.path.exists(directory):
+            if template in os.listdir(directory):
+                found_template = True
+                template_path = directory + '/' + template
+        else:
+            os.mkdir(directory)
+
+    if found_template:
+        try:
+            shutil.copyfile(template_path, template_directory + '/' + str(request.user) + '/'+ template)
+        except Exception as e:
+            print_debug(e)
+            print_message("Error saving template {} for user {}".format(template, request.user), 'error')
+            return JsonResponse({'new_run_dir': new_run_dir, 'error': 'template not saved'})
+        return JsonResponse({'new_run_dir': new_run_dir, 'template': 'template saved'})
+    else:
+        return JsonResponse({'new_run_dir': new_run_dir, 'error': 'template not found'})
+
+
+
+
+
+
+
+
+
+
+
+    return HttpResponse()

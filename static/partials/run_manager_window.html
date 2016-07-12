@@ -1,0 +1,60 @@
+<div class="">
+  <div id="run_options">
+    <ul class="collection">
+      <li class="collection-item">
+        <div class="" style="margin-left:auto;margin-right:auto;">
+          <a href="#" class="waves-effect waves-light btn">New run configuration</a>
+          <a href="#" class="waves-effect waves-light btn">start run</a>
+          <a href="#" class="waves-effect waves-light btn">stop run</a>
+          <a href="#" class="waves-effect waves-light btn">run status</a>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div class="run_list dashboard-show-hide" ng-show="ready == true">
+    <ul class="collapsible popout" id="run-list" data-collapsible="accordion">
+      <li ng-repeat="run in run_list">
+        <div class="collapsible-header" ng-click="get_run_data(run)">
+          <i class="material-icons" id="[[run]]_arrow">play_arrow</i>
+          <p>[[run]]</p>
+        </div>
+        <div class="collapsible-body">
+          <div class="" ng-show="empty_run == false">
+            <ul class="collection">
+              <li ng-repeat="script in script_list" class="collection-item">
+                <p>
+                  [[script]]
+                </p>
+              </li>
+            </ul>
+          </div>
+          <div class="" ng-show="empty_run == true">
+            <ul class="collection">
+              <li class="collection-item">
+                <div class="">
+                  <a href="#" class="waves-effect waves-light btn">New configuration</a>
+                  <a href="#" class="waves-effect waves-light btn" ng-click="modal_trigger('copy_template_modal')">Copy template</a>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+
+  <!-- Modals -->
+
+  <div class="modal" id="copy_template_modal">
+    <div class="modal-content">
+      <ul class="collection">
+        <li class="collection-item" ng-repeat="t in template_list">
+        </li>
+      </ul>
+    </div>
+  </div>
+
+
+
+</div>

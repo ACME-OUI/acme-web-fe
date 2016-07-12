@@ -1,5 +1,5 @@
 (function(){
-  var dashboard = angular.module('dashboard', ['esgf', 'velo', 'cdat', 'ngAnimate', 'ngMessages', 'ngMaterial'])
+  var dashboard = angular.module('dashboard', ['esgf', 'run_manager', 'cdat', 'ngAnimate', 'ngMessages', 'ngMaterial'])
   .controller('DashboardControl', ['$scope', '$http', '$mdToast', function($scope, $http, $mdToast) {
 
 
