@@ -15,7 +15,7 @@ run_patterns = [
     url(r'^update_script/$', run_views.update_script),
     url(r'^read_script/$', run_views.read_script),
     url(r'^delete_script/$', run_views.delete_script),
-    url(r'^get_templates/$', run_views.delete_script),
+    url(r'^get_templates/$', run_views.get_templates),
 ]
 
 esgf_patterns = [
