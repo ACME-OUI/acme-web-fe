@@ -166,7 +166,7 @@ def create_script(request):
         return HttpResponse(status=403)
 
     try:
-        newScript = RunScript(user=str(request.uesr), version=1, name=script_name, run=run_name)
+        newScript = RunScript(user=str(request.user), version=1, name=script_name, run=run_name)
         newScript.save()
     except Exception as e:
         print_message('Error saving model for script {}'.format(script_name), 'error')
@@ -224,26 +224,26 @@ def update_script(request):
 
     script_path = run_directory + '/' + script_name
     if not os.path.exists(script_path):
-        print_message('Run script {} cannont be updated as it doesnt exist', 'error')
+        print_message('Run script {} cannot be updated as it doesn\'t exist'.format(script_name), 'error')
         return HttpResponse(status=403)
 
     try:
         run_scripts = RunScript.objects.filter(user=user, name=script_name, run=run_name)
         latest = run_scripts.latest()
         latest.version = latest.version + 1
-        latest.edited = latest.edited + json.dumps({
-            user: user,
-            edited_date: datetime.datetime.now()
-        })
+        # latest.edited = latest.edited + json.dumps({
+        #    user: user,
+        #    edited_date: datetime.datetime.now()
+        # })
         latest.save()
     except Exception as e:
         print_message('Error finding latest script {}'.format(script_name), 'error')
         print_debug(e)
         return HttpResponse(status=500)
 
-    script_path = script_path + '_' + latest.version()
+    script_path = script_path + '_' + str(latest.version)
     try:
-        f = open( script_path, 'w+')
+        f = open(script_path, 'w+')
         f.write(contents)
         f.close()
     except Exception as e:
@@ -318,12 +318,13 @@ def read_script(request):
             user=user,
             name=script_name,
             run=run_name,
-            version=version_num )
+            version=version_num)
     else:
         script = RunScript.objects.filter(
             user=user,
             name=script_name,
             run=run_name).latest()
+        version_num = script.version
 
     path = os.path.abspath(os.path.dirname(__file__))
     run_directory = path + RUN_SCRIPT_PATH + user + '/' + run_name
@@ -331,9 +332,9 @@ def read_script(request):
         print_message('No matching script found in run folder {}'.format(script_name), 'error')
         return HttpResponse(status=403)
 
-    script_path = run_directory + '/' + script_name + '_' + version_num
+    script_path = run_directory + '/' + script_name + '_' + str(version_num)  # ?????
     if not os.path.exists(script_path):
-        print_message('Could not find script {} with version {}'.format(script_name, version_num))
+        print_message('Could not find script {} with version {}'.format(script_name, version_num), 'error')
         return HttpResponse(status=404)
 
     try:
@@ -346,18 +347,21 @@ def read_script(request):
         print_debug(e)
         return HttpResponse(status=500)
 
-
     return JsonResponse({'script': contents})
 
 #
 # Im going to leave this unimplemented for the time being.
 #
+
+
 def delete_script(request):
     return JsonResponse({})
 
 #
 # returns a list of the users tempaltes as well as all global templates
 # inputs: user, the user requsting the temlate list
+
+
 def get_templates(request):
     user = str(request.user)
     template_search_dirs = [user, 'global']
