@@ -52,6 +52,8 @@
 
 
   <!-- Modals -->
+
+  <!-- new model modal -->
   <div class="modal" id="new_run_modal">
     <div class="modal-content">
       <div class="input-field col s6">
@@ -69,12 +71,30 @@
         </li>
       </ul>
     </div>
+  </div>
 
+  <!-- copy template modal -->
   <div class="modal" id="copy_template_modal">
     <div class="modal-content">
-      <ul class="collection" id="template_collection">
+      <div class="input-field col s6">
+          <input id="new_template_name" type="text">
+          <label for="new_template_name">New template Name</label>
+      </div>
+      <a href="#"
+         class="waves-effect waves-light btn"
+         ng-click="from_existing_template = true"
+         style="margin-left: 0.5vw; margin-right: 0.5vw;">
+         Copy from existing template
+       </a>
+      <a href="#"
+         class="waves-effect waves-light btn"
+         ng-click="create_new_template_edit()"
+         style="margin-left: 0.5vw; margin-right: 0.5vw;">
+         create new template
+       </a>
+      <ul class="collection dashboard-show-hide" id="template_collection" ng-show="from_existing_template == true">
         <li class="collection-item" ng-repeat="template in template_list">
-          <a href="#" class="" style="color:#009688;" ng-clicl="select_template(template)">
+          <a href="#" class="" style="color:#009688;" ng-click="select_template(template)">
             <i class="material-icons" >insert_drive_file</i>
             [[template]]
           </a>
