@@ -21,13 +21,13 @@ def create_run(request):
     path = os.path.abspath(os.path.dirname(__file__))
     user_directory = path + RUN_SCRIPT_PATH + user
     template_directory = path + '/resources/'
-    print_message(request.POST, 'ok')
+    data = json.loads(request.body)
 
     if not os.path.exists(user_directory):
         print_message("Creating directory {}".format(user_directory), 'ok')
         os.makedirs(user_directory)
 
-    new_run = request.POST.get('run_name')
+    new_run = data.get('run_name')
     if not new_run:
         print_message('No new run_name specied', 'error')
         return HttpResponse(status=400)
@@ -52,10 +52,11 @@ def create_run(request):
         print_debug(e)
         return JsonResponse({'error': 'error saving run in database'})
 
-    if not 'template' in request.POST:
+    template = data.get('template')
+    if not template:
         return JsonResponse({'new_run_dir': new_run_dir})
 
-    template = request.POST.get('template')
+
 
     if user in template:
         template_search_dirs = [user]
@@ -91,7 +92,9 @@ def create_run(request):
 #        run_name, the name of the run to be deleted
 @login_required
 def delete_run(request):
-    run_directory = request.POST.get('run_name')
+    data = json.loads(request.body)
+    run_directory = data.get('run_name')
+    user = str(request.user)
     if not run_directory:
         return HttpResponse(status=400)
 
@@ -102,7 +105,7 @@ def delete_run(request):
         print_message("Attempt to delete directory that doesnt exist {}".format(run_directory), 'error')
         return HttpResponse(status=401)
 
-    if str(request.user) != run_directory.split('/')[-2]:
+    if user != run_directory.split('/')[-2]:
         print_message("Attempt to delete someone elses run directory", 'error')
         return HttpResponse(status=403)
 
@@ -123,13 +126,14 @@ def delete_run(request):
 # input: user, the user requesting their runs
 @login_required
 def view_runs(request):
+    user = str(request.user)
     path = os.path.abspath(os.path.dirname(__file__))
-    run_directory = path + RUN_SCRIPT_PATH + str(request.user) + '/'
+    run_directory = path + RUN_SCRIPT_PATH + user + '/'
     if not os.path.exists(run_directory):
         try:
             os.mkdir(run_directory)
         except Exception as e:
-            print_message('Error creating user directory for {}'.format(str(request.user)), 'error')
+            print_message('Error creating user directory for {}'.format(user), 'error')
             print_debug(e)
             return HttpResponse(status=500)
     run_dirs = os.listdir(run_directory)
@@ -151,9 +155,11 @@ def view_runs(request):
 #          model save error: status 500
 @login_required
 def create_script(request):
-    script_name = request.POST.get('script_name')
-    run_name = request.POST.get('run_name')
-    contents = request.POST.get('contents')
+    data = json.loads(request.body)
+    script_name = data.get('script_name')
+    run_name = data.get('run_name')
+    contents = data.get('contents')
+    user = str(request.user)
     if not script_name:
         print_message('No script name given', 'error')
         return HttpResponse(status=400)
@@ -167,7 +173,7 @@ def create_script(request):
         return HttpResponse(status=400)
 
     path = os.path.abspath(os.path.dirname(__file__))
-    run_directory = path + RUN_SCRIPT_PATH + str(request.user) + '/' + run_name
+    run_directory = path + RUN_SCRIPT_PATH + user + '/' + run_name
     if not os.path.exists(run_directory):
         print_message('Run directory not found {}'.format(run_directory), 'error')
         return HttpResponse(status=400)
@@ -178,7 +184,7 @@ def create_script(request):
         return HttpResponse(status=403)
 
     try:
-        newScript = RunScript(user=str(request.user), version=1, name=script_name, run=run_name)
+        newScript = RunScript(user=user, version=1, name=script_name, run=run_name)
         newScript.save()
     except Exception as e:
         print_message('Error saving model for script {}'.format(script_name), 'error')
@@ -212,9 +218,10 @@ def create_script(request):
 #         db lookup error: status 500
 @login_required
 def update_script(request):
-    script_name = request.POST.get('script_name')
-    run_name = request.POST.get('run_name')
-    contents = request.POST.get('contents')
+    data = json.loads(request.body)
+    script_name = data.get('script_name')
+    run_name = data.get('run_name')
+    contents = data.get('contents')
     user = str(request.user)
     if not script_name:
         print_message('No script name given', 'error')
@@ -339,9 +346,7 @@ def read_script(request):
                 name=script_name,
                 run=run_name)
             for i in var:
-                print i
-                print i.name
-                print i.version
+                print i, i.name, i.version
             print_message('Could not find script {} with version {}'.format(script_name, version_num), 'error')
             print_debug(e)
             return HttpResponse(status=404)
@@ -385,16 +390,68 @@ def read_script(request):
 #
 # Im going to leave this unimplemented for the time being.
 #
-
-
 def delete_script(request):
     return JsonResponse({})
+
+#
+# Creates a copy of a template, and adds it to the requesting users template folder
+# inputs: user, the user making the request
+#         template, the name of the template to be copied
+#         new_template, the name of the new template to be created
+# returns:
+#         no user: status 302
+#         no template: status 400
+#         no new_template: status 400
+#         file write error: status 500
+def copy_template(request):
+    data = json.loads(request.body)
+    user = str(request.user)
+    template = data.get('template')
+    new_template = data.get('new_template')
+    if not template:
+        print_message('No template name given', 'error')
+        return HttpResponse(status=400)
+    if not new_template:
+        print_message('No new template name given', 'error')
+        return HttpResponse(status=400)
+
+    if user in template:
+        template_search_dirs = [user]
+    else:
+        template_search_dirs = [user, 'global']
+
+    path = os.path.abspath(os.path.dirname(__file__))
+    template_directory = path + '/resources/'
+    template = template.split('/')[-1]
+    found_template = False
+    template_path = False
+    template_search_dirs = [ str(template_directory + x) for x in template_search_dirs]
+    for directory in template_search_dirs:
+        if os.path.exists(directory):
+            if template in os.listdir(directory):
+                found_template = True
+                template_path = directory + '/' + template
+        else:
+            os.mkdir(directory)
+
+    if found_template:
+        try:
+            print_message('copying {} to {}'.format(template_path, template_directory + user + '/' + template), 'ok')
+            shutil.copy(template_path, template_directory + user + '/' + new_template)
+        except Exception as e:
+            print_message("Error saving template {} for user {}".format(template, request.user), 'error')
+            print_debug(e)
+            return JsonResponse({'error': 'template not saved'})
+        return JsonResponse({'template': 'template saved'})
+    else:
+        return JsonResponse({'error': 'template not found'})
+
+    return HttpResponse()
 
 #
 # returns a list of the users tempaltes as well as all global templates
 # inputs: user, the user requsting the temlate list
 #
-
 def get_templates(request):
     path = os.path.abspath(os.path.dirname(__file__))
     template_list = []
