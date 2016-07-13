@@ -55,6 +55,12 @@
   });
   window.layout.init();
 
+  $(window).resize(function(event){
+    if(window.layout){
+      window.layout.updateSize();
+    }
+  });
+
   var addMenuItem = function( title, text ) {
     var element = $( '<li>' + title + '</li>' );
     $( '#menuContainer' ).append( element );

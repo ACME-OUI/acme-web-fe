@@ -3,10 +3,14 @@
     <ul class="collection">
       <li class="collection-item">
         <div class="" style="margin-left:auto;margin-right:auto;">
-          <a href="#" class="waves-effect waves-light btn">New run configuration</a>
-          <a href="#" class="waves-effect waves-light btn">start run</a>
-          <a href="#" class="waves-effect waves-light btn">stop run</a>
-          <a href="#" class="waves-effect waves-light btn">run status</a>
+          <a
+            href="#"
+            ng-repeat="option in run_options"
+            class="waves-effect waves-light btn"
+            ng-click="trigger_option(option)"
+            style="margin-left: 0.5vw; margin-right: 0.5vw;">
+            [[option]]
+          </a>
         </div>
       </li>
     </ul>
@@ -21,10 +25,13 @@
         <div class="collapsible-body">
           <div class="" ng-show="empty_run == false">
             <ul class="collection">
+              <li class="collection-item">
+                <a href="#" class="waves-effect waves-light btn">new script</a>
+              </li>
               <li ng-repeat="script in script_list" class="collection-item">
-                <p>
+                <a href="#" style="margin-left: 3vw;">
                   [[script]]
-                </p>
+                </a>
               </li>
             </ul>
           </div>
@@ -32,8 +39,8 @@
             <ul class="collection">
               <li class="collection-item">
                 <div class="">
-                  <a href="#" class="waves-effect waves-light btn">New configuration</a>
-                  <a href="#" class="waves-effect waves-light btn" ng-click="modal_trigger('copy_template_modal')">Copy template</a>
+                  <a href="#" class="waves-effect waves-light btn">new script</a>
+                  <a href="#" class="waves-effect waves-light btn" id="template_modal_trigger" ng-click="template_select_options()">Copy template</a>
                 </div>
               </li>
             </ul>
@@ -45,11 +52,32 @@
 
 
   <!-- Modals -->
+  <div class="modal" id="new_run_modal">
+    <div class="modal-content">
+      <div class="input-field col s6">
+          <input id="new_run_name" type="text">
+          <label for="new_run_name">New Run Name</label>
+      </div>
+      <a href="#" class="waves-effect waves-light btn" ng-click="new_run_from_template = true">create from template</a>
+      <a href="#" class="waves-effect waves-light btn" ng-click="create_run()">create empty run</a>
+      <ul class="collection dashboard-show-hide" id="template_collection" ng-show="new_run_from_template == true">
+        <li class="collection-item" ng-repeat="template in template_list">
+          <a href="#" class="" style="color:#009688;" ng-click="create_run(template)">
+            <i class="material-icons" >insert_drive_file</i>
+            [[template]]
+          </a>
+        </li>
+      </ul>
+    </div>
 
   <div class="modal" id="copy_template_modal">
     <div class="modal-content">
-      <ul class="collection">
-        <li class="collection-item" ng-repeat="t in template_list">
+      <ul class="collection" id="template_collection">
+        <li class="collection-item" ng-repeat="template in template_list">
+          <a href="#" class="" style="color:#009688;" ng-clicl="select_template(template)">
+            <i class="material-icons" >insert_drive_file</i>
+            [[template]]
+          </a>
         </li>
       </ul>
     </div>
