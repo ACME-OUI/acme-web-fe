@@ -1,6 +1,6 @@
-from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 import json
 import os
 from constants import RUN_SCRIPT_PATH
@@ -160,7 +160,7 @@ def create_script(request):
         print_message('Run directory not found {}'.format(run_directory), 'error')
         return HttpResponse(status=400)
 
-    script_path = run_directory + '/' + script_name
+    script_path = run_directory + '/' + script_name + '_1'
     if os.path.exists(script_path):
         print_message('Attempting to overwrite script {}'.format(script_path), 'error')
         return HttpResponse(status=403)
@@ -222,15 +222,12 @@ def update_script(request):
         print_message('Run directory not found {}'.format(run_directory), 'error')
         return HttpResponse(status=400)
 
-    script_path = run_directory + '/' + script_name
-    if not os.path.exists(script_path):
-        print_message('Run script {} cannot be updated as it doesn\'t exist'.format(script_name), 'error')
-        return HttpResponse(status=403)
-
     try:
         run_scripts = RunScript.objects.filter(user=user, name=script_name, run=run_name)
+        if not run_scripts:
+            return HttpResponse(status=404)
         latest = run_scripts.latest()
-        latest.version = latest.version + 1
+        latest.version += 1
         # latest.edited = latest.edited + json.dumps({
         #    user: user,
         #    edited_date: datetime.datetime.now()
@@ -241,6 +238,10 @@ def update_script(request):
         print_debug(e)
         return HttpResponse(status=500)
 
+    script_path = run_directory + '/' + script_name
+    if not os.path.exists(script_path + '_' + str(latest.version-1)):
+        print_message('Run script {} cannot be updated as it doesn\'t exist'.format(script_name), 'error')
+        return HttpResponse(status=403)
     script_path = script_path + '_' + str(latest.version)
     try:
         f = open(script_path, 'w+')
@@ -314,11 +315,24 @@ def read_script(request):
         return HttpResponse(status=400)
 
     if version_num:
-        script = RunScript.objects.get(
-            user=user,
-            name=script_name,
-            run=run_name,
-            version=version_num)
+        try:
+            script = RunScript.objects.get(
+                user=user,
+                name=script_name,
+                run=run_name,
+                version=version_num)
+        except ObjectDoesNotExist as e:
+            var = RunScript.objects.filter(
+                user=user,
+                name=script_name,
+                run=run_name)
+            for i in var:
+                print i
+                print i.name
+                print i.version
+            print_message('Could not find script {} with version {}'.format(script_name, version_num), 'error')
+            print_debug(e)
+            return HttpResponse(status=404)
     else:
         script = RunScript.objects.filter(
             user=user,
@@ -328,11 +342,18 @@ def read_script(request):
 
     path = os.path.abspath(os.path.dirname(__file__))
     run_directory = path + RUN_SCRIPT_PATH + user + '/' + run_name
-    if not script_name in os.listdir(run_directory):
+    script_name_exists = False
+    for i in os.listdir(run_directory):
+        if script_name in i:
+            script_name_exists = True
+            break
+    for i in os.listdir(run_directory):
+        if script_name in i:
+            print i
+    if not script_name_exists:
         print_message('No matching script found in run folder {}'.format(script_name), 'error')
         return HttpResponse(status=403)
-
-    script_path = run_directory + '/' + script_name + '_' + str(version_num)  # ?????
+    script_path = run_directory + '/' + script_name + '_' + str(version_num)
     if not os.path.exists(script_path):
         print_message('Could not find script {} with version {}'.format(script_name, version_num), 'error')
         return HttpResponse(status=404)
