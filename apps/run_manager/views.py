@@ -17,18 +17,17 @@ import datetime
 #        optional: template, the name of their predefined template
 @login_required
 def create_run(request):
-    data = json.loads(request.body)
     user = str(request.user)
     path = os.path.abspath(os.path.dirname(__file__))
     user_directory = path + RUN_SCRIPT_PATH + user
     template_directory = path + '/resources/'
-    print_message(data, 'ok')
+    print_message(request.POST, 'ok')
 
     if not os.path.exists(user_directory):
         print_message("Creating directory {}".format(user_directory), 'ok')
         os.makedirs(user_directory)
 
-    new_run = data['run_name']
+    new_run = request.POST.get('run_name')
     if not new_run:
         print_message('No new run_name specied', 'error')
         return HttpResponse(status=400)
@@ -53,10 +52,10 @@ def create_run(request):
         print_debug(e)
         return JsonResponse({'error': 'error saving run in database'})
 
-    if not 'template' in data:
+    if not 'template' in request.POST:
         return JsonResponse({'new_run_dir': new_run_dir})
 
-    template = data['template']
+    template = request.POST.get('template')
 
     if user in template:
         template_search_dirs = [user]
@@ -92,8 +91,7 @@ def create_run(request):
 #        run_name, the name of the run to be deleted
 @login_required
 def delete_run(request):
-    data = json.loads(request.body)
-    run_directory = data['run_name']
+    run_directory = request.POST.get('run_name')
     if not run_directory:
         return HttpResponse(status=400)
 
@@ -153,10 +151,9 @@ def view_runs(request):
 #          model save error: status 500
 @login_required
 def create_script(request):
-    data = json.loads(request.body)
-    script_name = data['script_name']
-    run_name = data['run_name']
-    contents = data['contents']
+    script_name = request.POST.get('script_name')
+    run_name = request.POST.get('run_name')
+    contents = request.POST.get('contents')
     if not script_name:
         print_message('No script name given', 'error')
         return HttpResponse(status=400)
@@ -215,10 +212,9 @@ def create_script(request):
 #         db lookup error: status 500
 @login_required
 def update_script(request):
-    data = json.loads(request.body)
-    script_name = data['script_name']
-    run_name = data['run_name']
-    contents = data['contents']
+    script_name = request.POST.get('script_name')
+    run_name = request.POST.get('run_name')
+    contents = request.POST.get('contents')
     user = str(request.user)
     if not script_name:
         print_message('No script name given', 'error')
