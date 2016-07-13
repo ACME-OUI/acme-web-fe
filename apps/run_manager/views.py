@@ -17,20 +17,23 @@ import datetime
 #        optional: template, the name of their predefined template
 @login_required
 def create_run(request):
+    print request.body
+    data = json.loads(request.body)
     user = str(request.user)
     path = os.path.abspath(os.path.dirname(__file__))
     user_directory = path + RUN_SCRIPT_PATH + user
     template_directory = path + '/resources/'
-    print_message(request.POST, 'ok')
+    print_message(data, 'ok')
 
     if not os.path.exists(user_directory):
         print_message("Creating directory {}".format(user_directory), 'ok')
         os.makedirs(user_directory)
 
-    new_run = request.POST.get('run_name')
-    if not new_run:
+    if 'run_name' not in data or data['run_name'] == '':
         print_message('No new run_name specied', 'error')
         return HttpResponse(status=400)
+    else:
+        new_run = data['run_name']
 
     new_run_dir = os.path.join(user_directory, new_run)
     if os.path.exists(new_run_dir):
@@ -52,10 +55,10 @@ def create_run(request):
         print_debug(e)
         return JsonResponse({'error': 'error saving run in database'})
 
-    if not 'template' in request.POST:
+    if 'template' not in data or data['template'] == '':
         return JsonResponse({'new_run_dir': new_run_dir})
 
-    template = request.POST.get('template')
+    template = data['template']
 
     if user in template:
         template_search_dirs = [user]
@@ -91,9 +94,12 @@ def create_run(request):
 #        run_name, the name of the run to be deleted
 @login_required
 def delete_run(request):
-    run_directory = request.POST.get('run_name')
-    if not run_directory:
+    data = json.loads(request.body)
+
+    if 'run_name' not in data or data['run_name'] == '':
         return HttpResponse(status=400)
+    else:
+        run_directory = data['run_name']
 
     path = os.path.abspath(os.path.dirname(__file__))
     run_directory = path + RUN_SCRIPT_PATH + str(request.user) + '/' + run_directory
@@ -151,21 +157,23 @@ def view_runs(request):
 #          model save error: status 500
 @login_required
 def create_script(request):
-    script_name = request.POST.get('script_name')
-    run_name = request.POST.get('run_name')
-    contents = request.POST.get('contents')
-    if not script_name:
+    data = json.loads(request.body)
+    if 'script_name' not in data or data['script_name'] == '':
         print_message('No script name given', 'error')
         return HttpResponse(status=400)
-
-    if not run_name:
+    else:
+        script_name = data['script_name']
+    if 'run_name' not in data or data['run_name'] == '':
         print_message('No run name given', 'error')
         return HttpResponse(status=400)
+    else:
+        run_name = data['run_name']
 
-    if not contents:
+    if 'contents' not in data or data['contents'] == '':
         print_message('No contents given', 'error')
         return HttpResponse(status=400)
-
+    else:
+        contents = data['contents']
     path = os.path.abspath(os.path.dirname(__file__))
     run_directory = path + RUN_SCRIPT_PATH + str(request.user) + '/' + run_name
     if not os.path.exists(run_directory):
@@ -212,22 +220,25 @@ def create_script(request):
 #         db lookup error: status 500
 @login_required
 def update_script(request):
-    script_name = request.POST.get('script_name')
-    run_name = request.POST.get('run_name')
-    contents = request.POST.get('contents')
+    data = json.loads(request.body)
     user = str(request.user)
-    if not script_name:
+    if 'script_name' not in data or data['script_name'] == '':
         print_message('No script name given', 'error')
         return HttpResponse(status=400)
+    else:
+        script_name = data['script_name']
 
-    if not run_name:
+    if 'run_name' not in data or data['script_name'] == '':
         print_message('No run name given', 'error')
         return HttpResponse(status=400)
+    else:
+        run_name = data['run_name']
 
-    if not contents:
+    if 'contents' not in data or data['script_name'] == '':
         print_message('No contents given', 'error')
         return HttpResponse(status=400)
-
+    else:
+        contents = data['contents']
     path = os.path.abspath(os.path.dirname(__file__))
     run_directory = path + RUN_SCRIPT_PATH + user + '/' + run_name
     if not os.path.exists(run_directory):
