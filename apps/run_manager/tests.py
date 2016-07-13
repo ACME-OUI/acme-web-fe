@@ -272,7 +272,7 @@ class TestUpdateScript(LiveServerTestCase):
         self.user.save()
         self.c = Client()
         logged_in = self.c.login(username='test', password='test')
-        self.url = self.live_server_url + 'run_manager/'
+        self.url = self.live_server_url + '/run_manager/'
 
     def test_update_script(self):
         run_name = 'update_script_run1'
