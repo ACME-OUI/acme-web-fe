@@ -15,7 +15,7 @@ class TestCreateRun(LiveServerTestCase):
         self.user.set_password('test')
         self.user.save()
         self.c = Client()
-        self.url = self.live_server_url + '/acme/run_manager/create_run/'
+        self.url = self.live_server_url + '/run_manager/create_run/'
         logged_in = self.c.login(username='test', password='test')
 
     def tearDown(self):
@@ -48,12 +48,12 @@ class TestCreateRun(LiveServerTestCase):
         request = {
             'run_name': 'test_run'
         }
-        r = self.c.post(self.live_server_url + '/acme/run_manager/create_run/', request)
+        r = self.c.post(self.live_server_url + '/run_manager/create_run/', request)
 
         request = {
             'run_name': 'test_run'
         }
-        r = self.c.post(self.live_server_url + '/acme/run_manager/create_run/', request)
+        r = self.c.post(self.live_server_url + '/run_manager/create_run/', request)
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 409)
 
@@ -78,8 +78,8 @@ class TestDeleteRun(LiveServerTestCase):
         request = {
             'run_name': 'test_run'
         }
-        r = self.c.post(self.live_server_url + '/acme/run_manager/create_run/', {'run_name': 'test_run'})
-        r = self.c.post(self.live_server_url + '/acme/run_manager/delete_run/', request)
+        r = self.c.post(self.live_server_url + '/run_manager/create_run/', {'run_name': 'test_run'})
+        r = self.c.post(self.live_server_url + '/run_manager/delete_run/', request)
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 200)
 
@@ -93,15 +93,15 @@ class TestDeleteRun(LiveServerTestCase):
         request = {
             'run_name': 'test_run'
         }
-        r = self.c.post(self.live_server_url + '/acme/run_manager/create_run/', request)
-        r = self.c2.post(self.live_server_url + '/acme/run_manager/delete_run/', request)
+        r = self.c.post(self.live_server_url + '/run_manager/create_run/', request)
+        r = self.c2.post(self.live_server_url + '/run_manager/delete_run/', request)
         self.assertTrue(r.status_code == 401)
         path = os.path.abspath(os.path.dirname(__file__))
         run_directory = path + RUN_SCRIPT_PATH +  'test/test_run'
         print_message('run directory was removed {}'.format(run_directory), 'error')
         self.assertTrue(os.path.exists(run_directory))
         # c is cleaning up
-        r = self.c.post(self.live_server_url + '/acme/run_manager/delete_run/', request)
+        r = self.c.post(self.live_server_url + '/run_manager/delete_run/', request)
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 200)
 
@@ -110,7 +110,7 @@ class TestDeleteRun(LiveServerTestCase):
         request = {
             'asdf': 'test_run'
         }
-        r = self.c2.post(self.live_server_url + '/acme/run_manager/delete_run/', request)
+        r = self.c2.post(self.live_server_url + '/run_manager/delete_run/', request)
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 400)
 
@@ -118,7 +118,7 @@ class TestDeleteRun(LiveServerTestCase):
         request = {
             'run_name': 'this_does_not_exist'
         }
-        r = self.c2.post(self.live_server_url + '/acme/run_manager/delete_run/', request)
+        r = self.c2.post(self.live_server_url + '/run_manager/delete_run/', request)
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code != 400)
 
@@ -136,7 +136,7 @@ class TestCreateScript(LiveServerTestCase):
         request = {
             'run_name': 'test_run_name'
         }
-        r = self.c.post(self.live_server_url + '/acme/run_manager/create_run/', request)
+        r = self.c.post(self.live_server_url + '/run_manager/create_run/', request)
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 200)
 
@@ -145,14 +145,14 @@ class TestCreateScript(LiveServerTestCase):
             'run_name': 'test_run_name',
             'contents': 'Hello World'
         }
-        r = self.c.post(self.live_server_url + '/acme/run_manager/create_script/', request)
+        r = self.c.post(self.live_server_url + '/run_manager/create_script/', request)
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 200)
 
         request = {
             'run_name': 'test_run_name'
         }
-        r = self.c.post(self.live_server_url + '/acme/run_manager/delete_run/', request)
+        r = self.c.post(self.live_server_url + '/run_manager/delete_run/', request)
         if r.status_code != 200:
             print_message('failed to delete run {}'.format(request), 'error')
             print_message('status_code: {}'.format(r.status_code), 'error')
@@ -166,7 +166,7 @@ class TestCreateScript(LiveServerTestCase):
             'run_name': 'test_run_name',
             'contents': 'Hello World'
         }
-        r = self.c2.post(self.live_server_url + '/acme/run_manager/create_script/', request)
+        r = self.c2.post(self.live_server_url + '/run_manager/create_script/', request)
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 302)
 
@@ -175,7 +175,7 @@ class TestCreateScript(LiveServerTestCase):
             'run_name': 'test_run_name',
             'contents': 'Hello World'
         }
-        r = self.c.post(self.live_server_url + '/acme/run_manager/create_script/', request)
+        r = self.c.post(self.live_server_url + '/run_manager/create_script/', request)
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 400)
 
@@ -184,7 +184,7 @@ class TestCreateScript(LiveServerTestCase):
             'script_name': 'test_name',
             'contents': 'Hello World'
         }
-        r = self.c.post(self.live_server_url + '/acme/run_manager/create_script/', request)
+        r = self.c.post(self.live_server_url + '/run_manager/create_script/', request)
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 400)
 
@@ -193,7 +193,7 @@ class TestCreateScript(LiveServerTestCase):
             'script_name': 'test_name',
             'run_name': 'test_run_name',
         }
-        r = self.c.post(self.live_server_url + '/acme/run_manager/create_script/', request)
+        r = self.c.post(self.live_server_url + '/run_manager/create_script/', request)
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 400)
 
@@ -203,7 +203,7 @@ class TestCreateScript(LiveServerTestCase):
             'run_name': 'test_run_name',
             'contents': 'Hello World'
         }
-        r = self.c.post(self.live_server_url + '/acme/run_manager/create_script/', request)
+        r = self.c.post(self.live_server_url + '/run_manager/create_script/', request)
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 400)
 
@@ -213,7 +213,7 @@ class TestCreateScript(LiveServerTestCase):
             'run_name': '',
             'contents': 'Hello World'
         }
-        r = self.c.post(self.live_server_url + '/acme/run_manager/create_script/', request)
+        r = self.c.post(self.live_server_url + '/run_manager/create_script/', request)
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 400)
 
@@ -223,7 +223,7 @@ class TestCreateScript(LiveServerTestCase):
             'run_name': 'test_run_name',
             'contents': ''
         }
-        r = self.c.post(self.live_server_url + '/acme/run_manager/create_script/', request)
+        r = self.c.post(self.live_server_url + '/run_manager/create_script/', request)
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 400)
 
@@ -233,7 +233,7 @@ class TestCreateScript(LiveServerTestCase):
             'run_name': 'not_a_run_name',
             'contents': 'Hello World'
         }
-        r = self.c.post(self.live_server_url + '/acme/run_manager/create_script/', request)
+        r = self.c.post(self.live_server_url + '/run_manager/create_script/', request)
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 400)
 
@@ -247,10 +247,10 @@ class TestGetRuns(LiveServerTestCase):
         self.user.save()
         self.c = Client()
         logged_in = self.c.login(username='test', password='test')
-        self.url = self.live_server_url + '/acme/run_manager/view_runs/'
+        self.url = self.live_server_url + '/run_manager/view_runs/'
 
     def test_get_runs_valid_user(self):
-        r = self.c.post(self.live_server_url + '/acme/run_manager/create_run/', {'run_name': 'test_run'})
+        r = self.c.post(self.live_server_url + '/run_manager/create_run/', {'run_name': 'test_run'})
         print_message('status code given {}'.format(str(r.status_code)), 'error')
         self.assertTrue(r.status_code == 200)
         r = self.c.get(self.url)
@@ -272,7 +272,7 @@ class TestUpdateScript(LiveServerTestCase):
         self.user.save()
         self.c = Client()
         logged_in = self.c.login(username='test', password='test')
-        self.url = self.live_server_url + '/acme/run_manager/'
+        self.url = self.live_server_url + 'run_manager/'
 
     def test_update_script(self):
         run_name = 'update_script_run1'
@@ -345,7 +345,7 @@ class TestUpdateScript(LiveServerTestCase):
         request = {
             'run_name': run_name
         }
-        r = self.c.post(self.live_server_url + '/acme/run_manager/delete_run/', request)
+        r = self.c.post(self.live_server_url + '/run_manager/delete_run/', request)
         if r.status_code != 200:
             print_message('failed to delete run {}'.format(request), 'error')
             print_message('status_code: {}'.format(r.status_code), 'error')
@@ -384,7 +384,7 @@ class TestUpdateScript(LiveServerTestCase):
         request = {
             'run_name': run_name
         }
-        r = self.c.post(self.live_server_url + '/acme/run_manager/delete_run/', request)
+        r = self.c.post(self.live_server_url + '/run_manager/delete_run/', request)
         if r.status_code != 200:
             print_message('failed to delete run {}'.format(request), 'error')
             print_message('status_code: {}'.format(r.status_code), 'error')
@@ -423,7 +423,7 @@ class TestUpdateScript(LiveServerTestCase):
         request = {
             'run_name': run_name
         }
-        r = self.c.post(self.live_server_url + '/acme/run_manager/delete_run/', request)
+        r = self.c.post(self.live_server_url + '/run_manager/delete_run/', request)
         if r.status_code != 200:
             print_message('failed to delete run {}'.format(request), 'error')
             print_message('status_code: {}'.format(r.status_code), 'error')
@@ -477,7 +477,7 @@ class TestReadScript(LiveServerTestCase):
         self.user.save()
         self.c = Client()
         logged_in = self.c.login(username='test', password='test')
-        self.url = self.live_server_url + '/acme/run_manager/'
+        self.url = self.live_server_url + '/run_manager/'
 
     def test_get_a_script(self):
         run_name = 'read_script_run1'
