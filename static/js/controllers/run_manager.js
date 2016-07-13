@@ -4,7 +4,7 @@ angular.module('run_manager', [])
 
   $scope.init = function(){
     console.log('[+] Initializing RunManager window');
-    $scope.run_options = ['New run configuration', 'start run', 'stop run', 'run status'];
+    $scope.run_options = ['New run configuration', 'start run', 'stop run', 'run status', 'new template'];
     $scope.ready = false;
     $scope.run_list = [];
     $scope.selected_run = undefined;
@@ -17,6 +17,10 @@ angular.module('run_manager', [])
     if(option == 'New run configuration'){
       $scope.get_templates();
       $scope.modal_trigger('new_run_modal');
+    } else if (option == 'start run') {
+      $scope.modal_trigger('copy_template_modal');
+    } else if (option == 'new template') {
+      $scope.template_select_options();
     }
   }
 
@@ -52,6 +56,7 @@ angular.module('run_manager', [])
       }
       $scope.run_list.push(run_name);
       $('#new_run_modal').closeModal();
+      $('#new_run_name').val('');
       //$scope.$apply();
     }).catch((res) => {
       console.log('Error creating new run');
@@ -81,7 +86,6 @@ angular.module('run_manager', [])
   $scope.template_select_options = () => {
     $scope.modal_trigger('copy_template_modal');
     $scope.get_templates();
-
   }
 
   $scope.get_templates = () => {
@@ -98,13 +102,40 @@ angular.module('run_manager', [])
     });
   }
 
+  $scope.create_new_template_edit = () => {
+
+  }
+
   $scope.modal_trigger = (id) => {
     $('#' + id).openModal();
     $('.modal').css({'bottom': 'inherit'});
   }
 
   $scope.select_template = (template) => {
-
+    var new_template_name = $('#new_template_name').val();
+    if(!new_template_name || new_template_name.length == 0){
+      $scope.$parent.showToast('Copy template requires a name');
+      return;
+    }
+    $http({
+      url: '/run_manager/copy_template/',
+      method: 'POST',
+      headers: {
+        'X-CSRFToken' : $scope.$parent.get_csrf()
+      },
+      data: {
+        template: template,
+        new_template: new_template_name
+      }
+    }).then((res) => {
+      console.log('successfully copied template');
+      $('copy_template_modal').closeModal();
+      $('#new_template_name').val('');
+      $scope.$parent.showToast('Successfully copied template');
+    }).catch((res) => {
+      console.log('Error copying template');
+      $scope.$parent.showToast('Error copying template');
+    });
   }
 
   $scope.get_run_data = (run) => {
