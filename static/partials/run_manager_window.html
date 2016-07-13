@@ -16,6 +16,7 @@
     </ul>
   </div>
   <div class="run_list dashboard-show-hide" ng-show="ready == true">
+    <p style="margin-left: 5vw;">Run List</p>
     <ul class="collapsible popout" id="run-list" data-collapsible="accordion">
       <li ng-repeat="run in run_list">
         <div class="collapsible-header" ng-click="get_run_data(run)">
@@ -47,6 +48,20 @@
           </div>
         </div>
       </li>
+      <p style="margin-left: 5vw; margin-top: 1vw;">Template List</p>
+      <li>
+        <div class="collapsible-header" ng-click="switch_arrow('template')">
+          <i class="material-icons" id="template_arrow">play_arrow</i>
+          <p>templates</p>
+        </div>
+        <div class="collapsible-body">
+          <ul class="collection" id="template-list">
+            <li ng-repeat="template in template_list" class="collection-item">
+              <a href="#" class="waves-effect waves-light btn">[[template]]</a>
+            </li>
+          </ul>
+        </div>
+      </li>
     </ul>
   </div>
 
@@ -55,6 +70,26 @@
 
   <!-- new model modal -->
   <div class="modal" id="new_run_modal">
+    <div class="modal-content">
+      <div class="input-field col s6">
+          <input id="new_run_name" type="text">
+          <label for="new_run_name">New Run Name</label>
+      </div>
+      <a href="#" class="waves-effect waves-light btn" ng-click="new_run_from_template = true">create from template</a>
+      <a href="#" class="waves-effect waves-light btn" ng-click="create_run()">create empty run</a>
+      <ul class="collection dashboard-show-hide" id="template_collection" ng-show="new_run_from_template == true">
+        <li class="collection-item" ng-repeat="template in template_list">
+          <a href="#" class="" style="color:#009688;" ng-click="create_run(template)">
+            <i class="material-icons" >insert_drive_file</i>
+            [[template]]
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- new model modal -->
+  <div class="modal" id="start_run_modal">
     <div class="modal-content">
       <div class="input-field col s6">
           <input id="new_run_name" type="text">

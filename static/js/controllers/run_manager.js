@@ -11,6 +11,7 @@ angular.module('run_manager', [])
     $scope.script_list = undefined;
     $scope.template_list = undefined;
     $scope.get_runs();
+    $scope.get_templates();
   }
 
   $scope.trigger_option = (option) => {
@@ -18,7 +19,11 @@ angular.module('run_manager', [])
       $scope.get_templates();
       $scope.modal_trigger('new_run_modal');
     } else if (option == 'start run') {
-      $scope.modal_trigger('copy_template_modal');
+      $scope.modal_trigger('start_run_modal');
+    }  else if (option == 'stop run') {
+      $scope.modal_trigger('stop_run_modal');
+    } else if (option == 'run status') {
+      $scope.modal_trigger('run_status_modal');
     } else if (option == 'new template') {
       $scope.template_select_options();
     }
@@ -163,12 +168,12 @@ angular.module('run_manager', [])
     }
   }
 
-  $scope.switch_arrow = (run) => {
-    var el = $('#'+run+'_arrow');
+  $scope.switch_arrow = (id) => {
+    var el = $('#'+ id +'_arrow');
     if(el.text() == 'play_arrow'){
-      $('#'+run+'_arrow').text('arrow_drop_down');
+      $('#'+ id +'_arrow').text('arrow_drop_down');
     } else {
-      $('#'+run+'_arrow').text('play_arrow');
+      $('#'+ id +'_arrow').text('play_arrow');
     }
   }
 
