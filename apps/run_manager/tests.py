@@ -572,7 +572,8 @@ class TestGetScripts(LiveServerTestCase):
         script_name2 = 'second_script_name'
         script_contents2 = 'Many scripts. Handle it'
         request = {
-            'run_name': run_name
+            'run_name': run_name,
+            'run_type': 'diagnostic'
         }
         r = self.c.post(self.url + 'create_run/', data=json.dumps(request), content_type='application/json')
         print_message('status code given ' + str(r.status_code), 'error')
@@ -614,7 +615,8 @@ class TestGetScripts(LiveServerTestCase):
         script_name2 = 'second_script_name'
         script_contents2 = 'Many scripts. Handle it'
         request = {
-            'run_name': run_name
+            'run_name': run_name,
+            'run_type': 'diagnostic'
         }
         r = self.c.post(self.url + 'create_run/', data=json.dumps(request), content_type='application/json')
         print_message('status code given ' + str(r.status_code), 'error')
@@ -650,7 +652,8 @@ class TestGetScripts(LiveServerTestCase):
         script_name2 = 'second_script_name'
         script_contents2 = 'Many scripts. Handle it'
         request = {
-            'run_name': run_name
+            'run_name': run_name,
+            'run_type': 'diagnostic'
         }
         r = self.c.post(self.url + 'create_run/', data=json.dumps(request), content_type='application/json')
         print_message('status code given ' + str(r.status_code), 'error')
@@ -680,11 +683,3 @@ class TestGetScripts(LiveServerTestCase):
         r = self.c.get(self.url + 'get_scripts/', request, content_type='application/json')
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 403)
-
-
-
-
-
-
-
-
