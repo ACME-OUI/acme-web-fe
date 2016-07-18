@@ -1,6 +1,5 @@
 {
-   "request" : "new",
-   "request_type": "diagnostic",
+   "run_type": "diagnostic",
    "request_attr":   {
        "diag_type": "AMWG",
        "dataset_name": "F1850C5.ne30.6mos",

@@ -4,10 +4,12 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from poller.models import UserRuns
 import json
+from util.utilities import print_debug, print_message
 
 
 @csrf_exempt
 def update(request):
+    print_message(request.body)
     if request.method == 'GET':
         try:
             request_type = request.GET.get('request')
@@ -69,14 +71,15 @@ def update(request):
             else:
                 return HttpResponse(status=400)
         except Exception as e:
-            print e
+            print_debug(e)
             return HttpResponse(status=500)
 
     if request.method == 'POST':
+        data = json.loads(request.body)
         try:
-            request_type = request.POST.get('request')
-            user = request.POST.get('user')
-            status = request.POST.get('status')
+            request_type = data.get('request')
+            user = data.get('user')
+            status = data.get('status')
             if request_type == 'all':
                 if user:
                     if status in ['new', 'in_progress', 'complete', 'failed']:
@@ -96,8 +99,9 @@ def update(request):
             if request_type == 'new':
                 if user:
                     config = {}
-                    for key in request.POST:
-                        value = request.POST.get(key)
+                    print_message(request.body)
+                    for key in data:
+                        value = data.get(key)
                         config.update({key: value})
                     del config['user']
                     del config['request']
@@ -113,7 +117,7 @@ def update(request):
                     return HttpResponse(status=400)
             if request_type == 'delete':
                 try:
-                    job_id = request.POST.get('job_id')
+                    job_id = data.get('job_id')
                     if not job_id:
                         raise KeyError
                     else:
@@ -122,7 +126,7 @@ def update(request):
                 except (KeyError, AttributeError, UserRuns.DoesNotExist):
                     return HttpResponse(status=400)
             if request_type in ['in_progress', 'complete', 'failed']:
-                job_id = request.POST.get('job_id')
+                job_id = data.get('job_id')
                 if job_id:
                     try:
                         job = UserRuns.objects.get(id=job_id)
@@ -134,5 +138,5 @@ def update(request):
             else:
                 return HttpResponse(status=400)  # Unrecognized request
         except Exception as e:
-            print e
+            print_debug(e)
             return HttpResponse(status=500)
