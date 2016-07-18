@@ -147,6 +147,7 @@ def start_run(request):
     for key in config_options:
         request[key] = config_options[key]
     try:
+        request = json.dumps(request)
         print_message(request)
         r = requests.post(POLLER_URL, request)
         if(r.status_code != 200):
