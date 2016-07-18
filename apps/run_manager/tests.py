@@ -683,3 +683,85 @@ class TestGetScripts(LiveServerTestCase):
         r = self.c.get(self.url + 'get_scripts/', request, content_type='application/json')
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 403)
+
+class TestGetTemplates(LiveServerTestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(username='test')
+        self.user.set_password('test')
+        self.user.save()
+        self.c = Client()
+        self.c2 = Client()
+        logged_in = self.c.login(username='test', password='test')
+        self.url = self.live_server_url + '/run_manager/'
+
+    def test_get_templates(self):
+        r = self.c.get(self.url + 'get_templates/', content_type='application/json')
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+        data = json.loads(r.content)
+        self.assertTrue('global/ACME_script.csh' in data)
+        # Todo: update this test with more checks when add templates is a thing
+
+    def test_get_templates_without_log_in(self):
+        r = self.c2.get(self.url + 'get_templates/', content_type='application/json')
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 302)
+
+
+class TestCopyTemplates(LiveServerTestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(username='test')
+        self.user.set_password('test')
+        self.user.save()
+        self.c = Client()
+        self.c2 = Client()
+        logged_in = self.c.login(username='test', password='test')
+        self.url = self.live_server_url + '/run_manager/'
+
+    def test_copy_a_template(self):
+        request = {
+            'template': 'ACME_script.csh',
+            'new_template': 'copy_template'
+        }
+        r = self.c.post(self.url + 'copy_template/', data=json.dumps(request), content_type='application/json')
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+        r = self.c.get(self.url + 'get_templates/', content_type='application/json')
+        data = json.loads(r.content)
+        print_message('templates found: ' + str(data), 'error')
+        self.assertTrue('global/ACME_script.csh' in data)
+        self.assertTrue('test/copy_template' in data)
+
+    def test_copy_template_without_old_template(self):
+        request = {
+            'new_template': 'copy_template'
+        }
+        r = self.c.post(self.url + 'copy_template/', data=json.dumps(request), content_type='application/json')
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 400)
+
+    def test_copy_template_without_new_template(self):
+        request = {
+            'new_template': 'ACME_script.csh'
+        }
+        r = self.c.post(self.url + 'copy_template/', data=json.dumps(request), content_type='application/json')
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 400)
+
+    def test_copy_template_with_invalid_old_template(self):
+        request = {
+            'template': 'this_doesnt_exist',
+            'new_template': 'invalid_copy_template'
+        }
+        r = self.c.post(self.url + 'copy_template/', data=json.dumps(request), content_type='application/json')
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+        data = json.loads(r.content)
+        self.assertTrue('error' in data and data['error'] == 'template not found')
+
+
+
+
+
