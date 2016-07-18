@@ -78,6 +78,11 @@ class TestDeleteRun(LiveServerTestCase):
         logged_in = self.c.login(username='test', password='test')
         logged_in = self.c2.login(username='test2', password='test')
 
+    def tearDown(self):
+        path = os.path.abspath(os.path.dirname(__file__))
+        run_directory = path + RUN_SCRIPT_PATH + 'test'
+        shutil.rmtree(run_directory, ignore_errors=True)
+
 
     def test_delete_valid_run(self):
         request = {
@@ -160,11 +165,7 @@ class TestCreateScript(LiveServerTestCase):
         request = {
             'run_name': 'test_run_name'
         }
-        r = self.c.post(self.live_server_url + '/run_manager/delete_run/', data=json.dumps(request), content_type='application/json')
-        if r.status_code != 200:
-            print_message('failed to delete run {}'.format(request), 'error')
-            print_message('status_code: {}'.format(r.status_code), 'error')
-        self.assertTrue(r.status_code == 200)
+
 
     def test_create_script_without_login(self):
         self.c2 = Client()
@@ -246,7 +247,6 @@ class TestCreateScript(LiveServerTestCase):
         self.assertTrue(r.status_code == 400)
 
 
-
 class TestGetRuns(LiveServerTestCase):
 
     def setUp(self):
@@ -256,6 +256,11 @@ class TestGetRuns(LiveServerTestCase):
         self.c = Client()
         logged_in = self.c.login(username='test', password='test')
         self.url = self.live_server_url + '/run_manager/view_runs/'
+
+    def tearDown(self):
+        path = os.path.abspath(os.path.dirname(__file__))
+        run_directory = path + RUN_SCRIPT_PATH + 'test'
+        shutil.rmtree(run_directory, ignore_errors=True)
 
     def test_get_runs_valid_user(self):
         request = json.dumps({
@@ -285,6 +290,11 @@ class TestUpdateScript(LiveServerTestCase):
         self.c = Client()
         logged_in = self.c.login(username='test', password='test')
         self.url = self.live_server_url + '/run_manager/'
+
+    def tearDown(self):
+        path = os.path.abspath(os.path.dirname(__file__))
+        run_directory = path + RUN_SCRIPT_PATH + 'test'
+        shutil.rmtree(run_directory, ignore_errors=True)
 
     def test_update_script(self):
         run_name = 'update_script_run1'
@@ -317,14 +327,6 @@ class TestUpdateScript(LiveServerTestCase):
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 200)
 
-        request = {
-            'run_name': run_name
-        }
-        r = self.c.post(self.url + 'delete_run/', data=json.dumps(request), content_type='application/json')
-        if r.status_code != 200:
-            print_message('failed to delete run {}'.format(request), 'error')
-            print_message('status_code: {}'.format(r.status_code), 'error')
-        self.assertTrue(r.status_code == 200)
 
     def test_update_script_without_script_name(self):
         run_name = 'update_script_run2'
@@ -356,14 +358,6 @@ class TestUpdateScript(LiveServerTestCase):
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 400)
 
-        request = {
-            'run_name': run_name
-        }
-        r = self.c.post(self.live_server_url + '/run_manager/delete_run/', data=json.dumps(request), content_type='application/json')
-        if r.status_code != 200:
-            print_message('failed to delete run {}'.format(request), 'error')
-            print_message('status_code: {}'.format(r.status_code), 'error')
-        self.assertTrue(r.status_code == 200)
 
     def test_update_script_without_run_name(self):
         run_name = 'update_script_run3'
@@ -396,15 +390,6 @@ class TestUpdateScript(LiveServerTestCase):
         self.assertTrue(r.status_code == 400)
         # Any way to check the contents without relying on readscript?
 
-        request = {
-            'run_name': run_name
-        }
-        r = self.c.post(self.live_server_url + '/run_manager/delete_run/', data=json.dumps(request), content_type='application/json')
-        if r.status_code != 200:
-            print_message('failed to delete run {}'.format(request), 'error')
-            print_message('status_code: {}'.format(r.status_code), 'error')
-        self.assertTrue(r.status_code == 200)
-
     def test_update_script_without_contents(self):
         run_name = 'update_script_run4'
         script_name = 'update_script_name'
@@ -435,15 +420,6 @@ class TestUpdateScript(LiveServerTestCase):
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 400)
         # Any way to check the contents without relying on readscript?
-
-        request = {
-            'run_name': run_name
-        }
-        r = self.c.post(self.live_server_url + '/run_manager/delete_run/', data=json.dumps(request), content_type='application/json')
-        if r.status_code != 200:
-            print_message('failed to delete run {}'.format(request), 'error')
-            print_message('status_code: {}'.format(r.status_code), 'error')
-        self.assertTrue(r.status_code == 200)
 
     def test_update_script_with_non_existent_run_name(self):
         run_name = 'test_run_name1'
@@ -476,15 +452,6 @@ class TestUpdateScript(LiveServerTestCase):
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 404)
 
-        request = {
-            'run_name': run_name
-        }
-        r = self.c.post(self.url + 'delete_run/', data=json.dumps(request), content_type='application/json')
-        if r.status_code != 200:
-            print_message('failed to delete run {}'.format(request), 'error')
-            print_message('status_code: {}'.format(r.status_code), 'error')
-        self.assertTrue(r.status_code == 200)
-
 
 class TestReadScript(LiveServerTestCase):
 
@@ -495,6 +462,11 @@ class TestReadScript(LiveServerTestCase):
         self.c = Client()
         logged_in = self.c.login(username='test', password='test')
         self.url = self.live_server_url + '/run_manager/'
+
+    def tearDown(self):
+        path = os.path.abspath(os.path.dirname(__file__))
+        run_directory = path + RUN_SCRIPT_PATH + 'test'
+        shutil.rmtree(run_directory, ignore_errors=True)
 
     def test_get_a_script(self):
         run_name = 'read_script_run1'
@@ -525,15 +497,6 @@ class TestReadScript(LiveServerTestCase):
         self.assertTrue(r.status_code == 200)
         data = json.loads(r.content)
         self.assertEquals(script_contents, data['script'])
-
-        request = {
-            'run_name': run_name
-        }
-        r = self.c.post(self.url + 'delete_run/', data=json.dumps(request), content_type='application/json')
-        if r.status_code != 200:
-            print_message('failed to delete run {}'.format(request), 'error')
-            print_message('status_code: {}'.format(r.status_code), 'error')
-        self.assertTrue(r.status_code == 200)
 
     def test_read_script_with_version(self):
         run_name = 'read_script_run2'
@@ -586,11 +549,142 @@ class TestReadScript(LiveServerTestCase):
         data = json.loads(r.content)
         self.assertEquals(new_script_contents, data['script'])
 
+
+class TestGetScripts(LiveServerTestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(username='test')
+        self.user.set_password('test')
+        self.user.save()
+        self.c = Client()
+        logged_in = self.c.login(username='test', password='test')
+        self.url = self.live_server_url + '/run_manager/'
+
+    def tearDown(self):
+        path = os.path.abspath(os.path.dirname(__file__))
+        run_directory = path + RUN_SCRIPT_PATH + 'test'
+        shutil.rmtree(run_directory, ignore_errors=True)
+
+    def test_get_scripts(self):
+        run_name = 'get_scripts_run'
+        script_name1 = 'first_script_name'
+        script_contents1 = 'Hello World'
+        script_name2 = 'second_script_name'
+        script_contents2 = 'Many scripts. Handle it'
         request = {
             'run_name': run_name
         }
-        r = self.c.post(self.url + 'delete_run/', data=json.dumps(request), content_type='application/json')
-        if r.status_code != 200:
-            print_message('failed to delete run {}'.format(request), 'error')
-            print_message('status_code: {}'.format(r.status_code), 'error')
+        r = self.c.post(self.url + 'create_run/', data=json.dumps(request), content_type='application/json')
+        print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 200)
+
+        request = {
+            'script_name': script_name1,
+            'run_name': run_name,
+            'contents': script_contents1
+        }
+        r = self.c.post(self.url + 'create_script/', data=json.dumps(request), content_type='application/json')
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+
+        request = {
+            'script_name': script_name2,
+            'run_name': run_name,
+            'contents': script_contents2
+        }
+        r = self.c.post(self.url + 'create_script/', data=json.dumps(request), content_type='application/json')
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+
+        request = {
+            'run_name': run_name,
+        }
+        r = self.c.get(self.url + 'get_scripts/', request, content_type='application/json')
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+
+        data = json.loads(r.content)
+        self.assertTrue(script_name1 in data)
+        self.assertTrue(script_name2 in data)
+
+    def test_get_scripts_without_run_name(self):
+        run_name = 'get_scripts_run'
+        script_name1 = 'first_script_name'
+        script_contents1 = 'Hello World'
+        script_name2 = 'second_script_name'
+        script_contents2 = 'Many scripts. Handle it'
+        request = {
+            'run_name': run_name
+        }
+        r = self.c.post(self.url + 'create_run/', data=json.dumps(request), content_type='application/json')
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+
+        request = {
+            'script_name': script_name1,
+            'run_name': run_name,
+            'contents': script_contents1
+        }
+        r = self.c.post(self.url + 'create_script/', data=json.dumps(request), content_type='application/json')
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+
+        request = {
+            'script_name': script_name2,
+            'run_name': run_name,
+            'contents': script_contents2
+        }
+        r = self.c.post(self.url + 'create_script/', data=json.dumps(request), content_type='application/json')
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+
+        request = {}
+        r = self.c.get(self.url + 'get_scripts/', request, content_type='application/json')
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 400)
+
+    def test_get_scripts_with_invalid_run_name(self):
+        run_name = 'valid_run'
+        script_name1 = 'first_script_name'
+        script_contents1 = 'Hello World'
+        script_name2 = 'second_script_name'
+        script_contents2 = 'Many scripts. Handle it'
+        request = {
+            'run_name': run_name
+        }
+        r = self.c.post(self.url + 'create_run/', data=json.dumps(request), content_type='application/json')
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+
+        request = {
+            'script_name': script_name1,
+            'run_name': run_name,
+            'contents': script_contents1
+        }
+        r = self.c.post(self.url + 'create_script/', data=json.dumps(request), content_type='application/json')
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+
+        request = {
+            'script_name': script_name2,
+            'run_name': run_name,
+            'contents': script_contents2
+        }
+        r = self.c.post(self.url + 'create_script/', data=json.dumps(request), content_type='application/json')
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+
+        request = {
+            'run_name': 'invalid_run'
+        }
+        r = self.c.get(self.url + 'get_scripts/', request, content_type='application/json')
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 403)
+
+
+
+
+
+
+
+
