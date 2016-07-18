@@ -295,7 +295,7 @@ def get_scripts(request):
         directory_contents = os.listdir(run_directory)
         for item in directory_contents:
             if not os.path.isdir(item):
-                item = item.split('_')[0]
+                item = item.rsplit('_', 1)[0]
                 script_list.append(item)
     except Exception as e:
         print_message('Error retrieving directory items', 'error')
