@@ -5,6 +5,7 @@ angular.module('run_manager', [])
   $scope.init = function(){
     console.log('[+] Initializing RunManager window');
     $scope.run_options = ['New run configuration', 'start run', 'stop run', 'run status', 'new template'];
+    $scope.run_types = ['diagnostic', 'model'];
     $scope.ready = false;
     $scope.run_list = [];
     $scope.selected_run = undefined;
@@ -30,20 +31,27 @@ angular.module('run_manager', [])
   }
 
   $scope.create_run = (template) => {
-    run_name = $('#new_run_name').val();
+    var run_name = $('#new_run_name').val();
     if(!run_name || run_name.length == 0){
       $scope.$parent.showToast('New run requires a name');
+      return;
+    }
+    var run_type = $('#run_type_radio_select input:checked').attr('data-run-type');
+    if(!run_type || run_type.length == 0){
+      $scope.$parent.showToast('New run requires a type');
       return;
     }
 
     if(template){
       params = {
         'run_name': run_name,
-        'template': template
+        'run_type': run_type,
+        'template': template,
       }
     } else {
       params = {
-        'run_name': run_name
+        'run_name': run_name,
+        'run_type': run_type,
       }
     }
     $http({
@@ -58,6 +66,7 @@ angular.module('run_manager', [])
       console.log(res.data);
       if('error' in res.data){
         $scope.$parent.showToast(res.data['error']);
+        return;
       }
       $scope.run_list.push(run_name);
       $('#new_run_modal').closeModal();
