@@ -3,10 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 import json
 import os
-from constants import RUN_SCRIPT_PATH, TEMPLATE_PATH, RUN_CONFIG_DEFAULT_PATH
+from constants import RUN_SCRIPT_PATH, TEMPLATE_PATH, RUN_CONFIG_DEFAULT_PATH, POLLER_URL
 from util.utilities import print_debug, print_message
 from models import ModelRun, RunScript
 import shutil
+import requests
 
 
 #
@@ -99,6 +100,70 @@ def create_run(request):
         return JsonResponse({'new_run_dir': new_run_dir, 'template': 'template saved'})
     else:
         return JsonResponse({'new_run_dir': new_run_dir, 'error': 'template not found'})
+
+
+
+#
+# Starts a run by passing it over to the poller
+# input: user, the user making the job request
+#        run_name, the name of the run they want to start
+# returns: no user: status 302,
+#          no run_name: status 400
+#          file read error: status 500
+#          poller request error: status 500
+@login_required
+def start_run(request):
+    user = str(request.user)
+    data = json.loads(request.body)
+    run_name = data.get('run_name')
+    if not run_name:
+        print_message('No run name given', 'error')
+        return HttpResponse(status=400)
+
+    path = os.path.abspath(os.path.dirname(__file__))
+    run_directory = path + RUN_SCRIPT_PATH + user + '/' + run_name + '/'
+    config_path = None
+    for f in os.listdir(run_directory):
+        if f.endswith('.json'):
+            config_path = f
+            break
+    if not config_path:
+        print_message('Unable to find config file in run directory {}'.format(run_directory))
+        return HttpResponse(status=500)
+    config_path = run_directory + config_path
+    try:
+        with open(config_path, 'r') as f:
+            config = f.read()
+            f.close()
+        config_options = json.loads(config)
+    except Exception as e:
+        print_message('Error reading file {}'.format(config_path))
+
+
+    request = {
+        'user': user,
+        'request': 'new'
+    }
+    for key in config_options:
+        request[key] = config_options[key]
+    try:
+        print_message(request)
+        r = requests.post(POLLER_URL, request)
+        if(r.status_code != 200):
+            print_message('Error communicating with poller')
+            return HttpResponse(status=500)
+    except Exception as e:
+        print_message('Error making request to poller')
+        print_debug(e)
+        return HttpResponse(status=500)
+
+    return HttpResponse()
+
+def stop_run(request):
+    return HttpResponse()
+
+def run_status(request):
+    return HttpResponse()
 
 #
 # Delete a model run

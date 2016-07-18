@@ -683,3 +683,36 @@ class TestGetScripts(LiveServerTestCase):
         r = self.c.get(self.url + 'get_scripts/', request, content_type='application/json')
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 403)
+
+
+class TestStartRun(LiveServerTestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(username='test')
+        self.user.set_password('test')
+        self.user.save()
+        self.username = 'test'
+        self.c = Client()
+        self.c.login(username='test', password='test')
+        self.url = self.live_server_url + '/run_manager/start_run/'
+        self.run_name = 'start_test_run'
+
+    def tearDown(self):
+        path = os.path.abspath(os.path.dirname(__file__))
+        run_directory = path + RUN_SCRIPT_PATH + self.username + '/' + self.run_name
+        shutil.rmtree(run_directory, ignore_errors=True)
+
+    def test_start_run(self):
+        request = {
+            'run_name': self.run_name,
+            'run_type': 'diagnostic'
+        }
+        r = self.c.post(self.live_server_url + '/run_manager/create_run/', data=json.dumps(request), content_type='application/json')
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+        request = json.dumps({
+            'run_name': self.run_name
+        })
+        r = self.c.post(self.url, data=request, content_type='application/json')
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
