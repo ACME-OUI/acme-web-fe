@@ -356,6 +356,7 @@ def update_script(request):
 # returns: no user: status 302
 #          no run_name: status 400
 #          request for run folder that doesnt exist: status 403
+@login_required
 def get_scripts(request):
     run_name = request.GET.get('run_name')
     user = str(request.user)
@@ -395,6 +396,7 @@ def get_scripts(request):
 #          no file with matching version number: status 404
 #          script does not exist: status 403
 #          file read error: status 500
+@login_required
 def read_script(request):
     script_name = request.GET.get('script_name')
     run_name = request.GET.get('run_name')
@@ -462,6 +464,7 @@ def read_script(request):
 #
 # Im going to leave this unimplemented for the time being.
 #
+@login_required
 def delete_script(request):
     return JsonResponse({})
 
@@ -475,6 +478,7 @@ def delete_script(request):
 #         no template: status 400
 #         no new_template: status 400
 #         file write error: status 500
+@login_required
 def copy_template(request):
     data = json.loads(request.body)
     user = str(request.user)
@@ -521,9 +525,11 @@ def copy_template(request):
     return HttpResponse()
 
 #
-# returns a list of the users tempaltes as well as all global templates
-# inputs: user, the user requsting the temlate list
+# returns a list of the users templates as well as all global templates
+# inputs: user, the user requesting the template list
 #
+
+@login_required
 def get_templates(request):
     path = os.path.abspath(os.path.dirname(__file__))
     template_list = []
