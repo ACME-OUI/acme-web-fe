@@ -139,7 +139,6 @@ def start_run(request):
     except Exception as e:
         print_message('Error reading file {}'.format(config_path))
 
-
     request = {
         'user': user,
         'request': 'new'
@@ -160,6 +159,14 @@ def start_run(request):
 
     return HttpResponse()
 
+
+#
+# Sends a stop run request to the poller
+# input: user, the user making the job request
+#        run_name, the name of the run they want to stop
+# returns: no user: status 302,
+#          no run_name: status 400
+#          poller request error: status 500
 def stop_run(request):
     return HttpResponse()
 

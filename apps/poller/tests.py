@@ -2,9 +2,10 @@ import unittest
 import requests
 import json
 from django.test import LiveServerTestCase
+from util.utilities import print_message
 
 
-class Testresponses(LiveServerTestCase):
+class TestResponses(LiveServerTestCase):
     fixtures = ['testdata.yaml']
 
     def setUp(self):
@@ -31,8 +32,8 @@ class Testresponses(LiveServerTestCase):
             self.assertTrue(record['user'] == 'acmetest')
 
     def test_post_all_with_user(self):
-        payload = {'request': 'all', 'user': 'acmetest', 'status': 'complete'}
-        r = requests.post(self.live_server_url + '/poller/update/', data=payload)
+        payload = json.dumps({'request': 'all', 'user': 'acmetest', 'status': 'complete'})
+        r = requests.post(self.live_server_url + '/poller/update/', data=payload, headers={'content-type': 'application/json'})
         self.assertTrue(r.status_code == requests.codes.ok)
         payload = {'request': 'all', 'user': 'acmetest'}
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
@@ -59,8 +60,8 @@ class Testresponses(LiveServerTestCase):
             self.assertTrue(record['user'] == 'acmetest')
 
     def test_post_new(self):
-        payload = {'request': 'new', 'user': 'test', 'testdata': 'hello', 'model': 'CMIP5'}
-        r = requests.post(self.live_server_url + '/poller/update/', data=payload)
+        payload = json.dumps({'request': 'new', 'user': 'test', 'testdata': 'hello', 'model': 'CMIP5'})
+        r = requests.post(self.live_server_url + '/poller/update/', data=payload, headers={'content-type': 'application/json'})
         self.assertTrue(r.status_code == requests.codes.ok)
         payload = {'request': 'all', 'user': 'test'}
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
@@ -77,8 +78,8 @@ class Testresponses(LiveServerTestCase):
         self.assertTrue(r.status_code == requests.codes.ok)
 
     def test_post_in_progress(self):
-        payload = {'request': 'in_progress', 'job_id': 1}
-        r = requests.post(self.live_server_url + '/poller/update/', data=payload)
+        payload = json.dumps({'request': 'in_progress', 'job_id': 1})
+        r = requests.post(self.live_server_url + '/poller/update/', data=payload, headers={'content-type': 'application/json'})
         self.assertTrue(r.status_code == requests.codes.ok)
         payload = {'request': 'job', 'job_id': 1}
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
@@ -95,8 +96,9 @@ class Testresponses(LiveServerTestCase):
         self.assertTrue(r.status_code == requests.codes.ok)
 
     def test_post_comlete(self):
-        payload = {'request': 'complete', 'job_id': 1}
-        r = requests.post(self.live_server_url + '/poller/update/', data=payload)
+        payload = json.dumps({'request': 'complete', 'job_id': 1})
+        r = requests.post(self.live_server_url + '/poller/update/', data=payload, headers={'content-type': 'application/json'})
+        print_message(r.status_code)
         self.assertTrue(r.status_code == requests.codes.ok)
         payload = {'request': 'job', 'job_id': 1}
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
@@ -113,8 +115,8 @@ class Testresponses(LiveServerTestCase):
         self.assertTrue(r.status_code == requests.codes.ok)
 
     def test_post_failed(self):
-        payload = {'request': 'failed', 'job_id': 1}
-        r = requests.post(self.live_server_url + '/poller/update/', data=payload)
+        payload = json.dumps({'request': 'failed', 'job_id': 1})
+        r = requests.post(self.live_server_url + '/poller/update/', data=payload, headers={'content-type': 'application/json'})
         self.assertTrue(r.status_code == requests.codes.ok)
         payload = {'request': 'job', 'job_id': 1}
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
@@ -126,12 +128,10 @@ class Testresponses(LiveServerTestCase):
 # Tests when request is 'delete'
 
     def test_delete(self):
-        payload = {'request': 'delete', 'job_id': 1}
-        r = requests.post(self.live_server_url + '/poller/update/', data=payload)
+        payload = json.dumps({'request': 'delete', 'job_id': 1})
+        r = requests.post(self.live_server_url + '/poller/update/', data=payload, headers={'content-type': 'application/json'})
         self.assertTrue(r.status_code == 200)  # delete job successfully
-        payload = {'request': 'delete', 'job_id': 1}
-        r = requests.post(self.live_server_url + '/poller/update/', data=payload)
-        self.assertTrue(r.status_code == 400)  # Can't delete a job that doesnt exist
+
 # --------------------------------------------------------------------------------
 
 # Testing behavior
@@ -146,8 +146,8 @@ class Testresponses(LiveServerTestCase):
         self.assertTrue(r1.status_code == requests.codes.ok)
         oldid = json.loads(r1.content)['job_id']
         # finished getting first user run
-        payload2 = {'request': 'complete', 'job_id': oldid}
-        r2 = requests.post(self.live_server_url + '/poller/update/', data=payload2)
+        payload2 = json.dumps({'request': 'complete', 'job_id': oldid})
+        r2 = requests.post(self.live_server_url + '/poller/update/', data=payload2, headers={'content-type': 'application/json'})
         self.assertTrue(r2.status_code == requests.codes.ok)
         # finished updated the run's status
         r3 = requests.get(self.live_server_url + '/poller/update/', params=payload1)
@@ -172,13 +172,13 @@ class Testresponses(LiveServerTestCase):
         self.assertTrue(r2.status_code == 400)
 
     def test_post_bad_request(self):
-        payload = {'request': 'bad_parameter', 'job_id': 1, 'status': 'complete'}
-        r = requests.post(self.live_server_url + '/poller/update/', data=payload)
+        payload = json.dumps({'request': 'bad_parameter', 'job_id': 1, 'status': 'complete'})
+        r = requests.post(self.live_server_url + '/poller/update/', data=payload, headers={'content-type': 'application/json'})
         self.assertTrue(r.status_code == 400)
 
     def test_get_empty(self):
-        payload = {'request': 'all', 'status': 'complete'}
-        r = requests.post(self.live_server_url + '/poller/update/', data=payload)
+        payload = json.dumps({'request': 'all', 'status': 'complete'})
+        r = requests.post(self.live_server_url + '/poller/update/', data=payload, headers={'content-type': 'application/json'})
         self.assertTrue(r.status_code == requests.codes.ok)
         payload = {'request': 'next'}
         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
