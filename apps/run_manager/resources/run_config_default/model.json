@@ -1,0 +1,14 @@
+{
+	"run_type": "model",
+	"request_attr": {
+		"run_name": "pre-alpha",
+		"job_name": "",
+		"compset": "A_B1850",
+		"resolution": "ne30_m120",
+		"machine": "titan",
+		"project": "cli112",
+		"fetch_code": true,
+		"acme_tag": "master",
+		"tag_name": "master_detached"
+	}
+}

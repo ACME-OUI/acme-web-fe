@@ -170,8 +170,19 @@ def start_run(request):
 def stop_run(request):
     return HttpResponse()
 
+#
+# Checks the status of all of a users running jobs
+# input: user, the user making the request
+# returns: a list of jobs with their statuses
+#          if poller error, returns status 500
 def run_status(request):
-    return HttpResponse()
+    user = str(request.user)
+    params = {'user': user, 'request': 'all'}
+    r = requests.get(POLLER_URL, params={'user': user, 'request': 'all'})
+    if(r.status_code != 200):
+        print_message('Poller error with params {}'.format(params))
+        return HttpResponse(status=500)
+    return HttpResponse(r.json())
 
 #
 # Delete a model run

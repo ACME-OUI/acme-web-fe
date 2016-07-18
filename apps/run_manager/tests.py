@@ -717,6 +717,21 @@ class TestStartRun(LiveServerTestCase):
         self.assertTrue(r.status_code == 200)
 
 
+class TestGetStatus(LiveServerTestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='test')
+        self.user.set_password('test')
+        self.user.save()
+        self.username = 'test'
+        self.c = Client()
+        self.c.login(username='test', password='test')
+        self.url = self.live_server_url + '/run_manager/start_run/'
+
+    def test_get_run_status(self):
+        r = self.c.get(self.live_server_url + '/run_manager/run_status/')
+        print_message(r.content)
+        self.assertTrue(r.status_code == 200)
+        self.assertTrue('user' in r.content)
 
 class TestGetTemplates(LiveServerTestCase):
 

@@ -21,7 +21,8 @@
       <li ng-repeat="run in run_list">
         <div class="collapsible-header" ng-click="get_run_data(run)">
           <i class="material-icons" id="[[run]]_arrow">play_arrow</i>
-          <p>[[run]]</p>
+          <span class="">[[run]]</span>
+          <span href="#" class="" style="float: right; margin-right: 2vw; color:grey;">idle</span>
         </div>
         <div class="collapsible-body">
           <div class="" ng-show="empty_run == false">
@@ -75,6 +76,12 @@
           <input id="new_run_name" type="text">
           <label for="new_run_name">New Run Name</label>
       </div>
+      <div class="" id="run_type_radio_select">
+        <p ng-repeat="type in run_types">
+          <input name="run_types" type="radio" id="[[type]]_radio" data-run-type="[[type]]"/>
+          <label for="[[type]]_radio">[[type]]</label>
+        </p>
+      </div>
       <a href="#" class="waves-effect waves-light btn" ng-click="new_run_from_template = true">create from template</a>
       <a href="#" class="waves-effect waves-light btn" ng-click="create_run()">create empty run</a>
       <ul class="collection dashboard-show-hide" id="template_collection" ng-show="new_run_from_template == true">
@@ -90,12 +97,11 @@
 
   <!-- start run modal -->
   <div class="modal" id="start_run_modal">
-    <div class="modal-content">
+    <div class="modal-content" style="padding: .5vh;">
       <ul class="collection dashboard-show-hide" id="run_collection">
         <li class="collection-item" ng-repeat="run in run_list">
           <i class="material-icons" >play_circle_outline</i>
           <a href="#" class="" style="color:#009688; padding-bottom: 5px;" ng-click="start_run(run)">
-
             [[run]]
           </a>
         </li>
@@ -104,8 +110,8 @@
   </div>
 
   <!-- stop run modal -->
-  <div class="modal" id="stop_run_modal">
-    <div class="modal-content">
+  <div class="modal" id="stop_run_modal" >
+    <div class="modal-content" style="padding: .5vh;">
       <ul class="collection dashboard-show-hide" id="run_collection">
         <li class="collection-item" ng-repeat="run in run_list">
           <i class="collection-icon material-icons">pause_circle_outline</i>
@@ -118,7 +124,7 @@
   </div>
 
   <!-- copy template modal -->
-  <div class="modal" id="copy_template_modal">
+  <div class="modal" id="copy_template_modal" style="padding: .5vh;">
     <div class="modal-content">
       <div class="input-field col s6">
           <input id="new_template_name" type="text">
