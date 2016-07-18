@@ -31,7 +31,7 @@ class colors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-def print_message(message, status):
+def print_message(message, status='error'):
     if status == 'error':
         print colors.FAIL + '[-] ' + colors.ENDC + colors.BOLD + str(message) + colors.ENDC
     elif status == 'ok':

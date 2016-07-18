@@ -1,5 +1,4 @@
 {
-   "user" : "test",
    "request" : "new",
    "request_type": "diagnostic",
    "request_attr":   {
