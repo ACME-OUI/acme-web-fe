@@ -20,7 +20,7 @@ angular.module('run_manager', [])
       $scope.modal_trigger('new_run_modal');
     } else if (option == 'start run') {
       $scope.modal_trigger('start_run_modal');
-    }  else if (option == 'stop run') {
+    } else if (option == 'stop run') {
       $scope.modal_trigger('stop_run_modal');
     } else if (option == 'run status') {
       $scope.modal_trigger('run_status_modal');
@@ -91,6 +91,10 @@ angular.module('run_manager', [])
   $scope.template_select_options = () => {
     $scope.modal_trigger('copy_template_modal');
     $scope.get_templates();
+  }
+
+  $scope.start_run = (run) => {
+    console.log(run);
   }
 
   $scope.get_templates = () => {

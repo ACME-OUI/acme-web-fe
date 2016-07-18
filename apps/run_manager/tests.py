@@ -26,7 +26,8 @@ class TestCreateRun(LiveServerTestCase):
 
     def test_valid_run(self):
         request = {
-            'run_name': 'test_run'
+            'run_name': 'test_run',
+            'run_type': 'diagnostic'
         }
         r = self.c.post(self.url, data=json.dumps(request), content_type='application/json')
         print_message('status code given' + str(r.status_code), 'error')
@@ -35,7 +36,8 @@ class TestCreateRun(LiveServerTestCase):
     def test_create_run_with_valid_template(self):
         request = {
             'run_name': 'test_run_with_template',
-            'template': 'ACME_script.csh'
+            'template': 'ACME_script.csh',
+            'run_type': 'diagnostic'
         }
         r = self.c.post(self.url, data=json.dumps(request), content_type='application/json')
         print_message('status code given ' + str(r.status_code), 'error')
@@ -47,12 +49,14 @@ class TestCreateRun(LiveServerTestCase):
 
     def test_invalid_run(self):
         request = {
-            'run_name': 'test_run'
+            'run_name': 'test_run',
+            'run_type': 'diagnostic'
         }
         r = self.c.post(self.live_server_url + '/run_manager/create_run/', data=json.dumps(request), content_type='application/json')
 
         request = {
-            'run_name': 'test_run'
+            'run_name': 'test_run',
+            'run_type': 'diagnostic'
         }
         r = self.c.post(self.live_server_url + '/run_manager/create_run/', data=json.dumps(request), content_type='application/json')
         print_message('status code given ' + str(r.status_code), 'error')
@@ -77,7 +81,8 @@ class TestDeleteRun(LiveServerTestCase):
 
     def test_delete_valid_run(self):
         request = {
-            'run_name': 'test_run'
+            'run_name': 'test_run',
+            'run_type': 'diagnostic'
         }
         r = self.c.post(self.live_server_url + '/run_manager/create_run/', data=json.dumps({'run_name': 'test_run'}), content_type='application/json')
         r = self.c.post(self.live_server_url + '/run_manager/delete_run/', data=json.dumps(request), content_type='application/json')
@@ -92,7 +97,8 @@ class TestDeleteRun(LiveServerTestCase):
 
     def test_delete_run_invalid_user(self):
         request = {
-            'run_name': 'test_run'
+            'run_name': 'test_run',
+            'run_type': 'diagnostic'
         }
         r = self.c.post(self.live_server_url + '/run_manager/create_run/', data=json.dumps(request), content_type='application/json')
         r = self.c2.post(self.live_server_url + '/run_manager/delete_run/', data=json.dumps(request), content_type='application/json')
@@ -135,7 +141,8 @@ class TestCreateScript(LiveServerTestCase):
 
     def test_create_script(self):
         request = {
-            'run_name': 'test_run_name'
+            'run_name': 'test_run_name',
+            'run_type': 'diagnostic'
         }
         r = self.c.post(self.live_server_url + '/run_manager/create_run/', data=json.dumps(request), content_type='application/json')
         print_message('status code given ' + str(r.status_code), 'error')
@@ -251,7 +258,11 @@ class TestGetRuns(LiveServerTestCase):
         self.url = self.live_server_url + '/run_manager/view_runs/'
 
     def test_get_runs_valid_user(self):
-        r = self.c.post(self.live_server_url + '/run_manager/create_run/', data=json.dumps({'run_name': 'test_run'}), content_type='application/json')
+        request = json.dumps({
+            'run_name': 'test_run',
+            'run_type': 'diagnostic'
+        })
+        r = self.c.post(self.live_server_url + '/run_manager/create_run/', data=request, content_type='application/json')
         print_message('status code given {}'.format(str(r.status_code)), 'error')
         self.assertTrue(r.status_code == 200)
         r = self.c.get(self.url)
@@ -281,7 +292,8 @@ class TestUpdateScript(LiveServerTestCase):
         script_contents = 'update script contents'
 
         request = {
-            'run_name': run_name
+            'run_name': run_name,
+            'run_type': 'diagnostic'
         }
         r = self.c.post(self.url + 'create_run/', data=json.dumps(request), content_type='application/json')
         print_message('status code given ' + str(r.status_code), 'error')
@@ -320,7 +332,8 @@ class TestUpdateScript(LiveServerTestCase):
         script_contents = 'update script contents'
 
         request = {
-            'run_name': run_name
+            'run_name': run_name,
+            'run_type': 'diagnostic'
         }
         r = self.c.post(self.url + 'create_run/', data=json.dumps(request), content_type='application/json')
         print_message('status code given ' + str(r.status_code), 'error')
@@ -358,7 +371,8 @@ class TestUpdateScript(LiveServerTestCase):
         script_contents = 'update script contents'
 
         request = {
-            'run_name': run_name
+            'run_name': run_name,
+            'run_type': 'diagnostic'
         }
         r = self.c.post(self.url + 'create_run/', data=json.dumps(request), content_type='application/json')
         print_message('status code given ' + str(r.status_code), 'error')
@@ -397,7 +411,8 @@ class TestUpdateScript(LiveServerTestCase):
         script_contents = 'update script contents'
 
         request = {
-            'run_name': run_name
+            'run_name': run_name,
+            'run_type': 'diagnostic'
         }
         r = self.c.post(self.url + 'create_run/', data=json.dumps(request), content_type='application/json')
         print_message('status code given ' + str(r.status_code), 'error')
@@ -436,7 +451,8 @@ class TestUpdateScript(LiveServerTestCase):
         script_contents = 'update script contents'
 
         request = {
-            'run_name': run_name
+            'run_name': run_name,
+            'run_type': 'diagnostic'
         }
         r = self.c.post(self.url + 'create_run/', data=json.dumps(request), content_type='application/json')
         print_message('status code given ' + str(r.status_code), 'error')
@@ -486,7 +502,8 @@ class TestReadScript(LiveServerTestCase):
         script_contents = 'Hello World'
 
         request = {
-            'run_name': run_name
+            'run_name': run_name,
+            'run_type': 'diagnostic'
         }
         r = self.c.post(self.url + 'create_run/', data=json.dumps(request), content_type='application/json')
         print_message('status code given ' + str(r.status_code), 'error')
@@ -525,7 +542,8 @@ class TestReadScript(LiveServerTestCase):
         new_script_contents = 'Hello World Version 2'
 
         request = {
-            'run_name': run_name
+            'run_name': run_name,
+            'run_type': 'diagnostic'
         }
         r = self.c.post(self.url + 'create_run/', data=json.dumps(request), content_type='application/json')
         print_message('status code given ' + str(r.status_code), 'error')

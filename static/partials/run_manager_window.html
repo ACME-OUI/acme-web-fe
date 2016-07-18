@@ -8,7 +8,7 @@
             ng-repeat="option in run_options"
             class="waves-effect waves-light btn"
             ng-click="trigger_option(option)"
-            style="margin-left: 0.5vw; margin-right: 0.5vw;">
+            style="margin-left: 0.5vw; margin-right: 0.5vw; margin-top: 1vh;">
             [[option]]
           </a>
         </div>
@@ -88,20 +88,29 @@
     </div>
   </div>
 
-  <!-- new model modal -->
+  <!-- start run modal -->
   <div class="modal" id="start_run_modal">
     <div class="modal-content">
-      <div class="input-field col s6">
-          <input id="new_run_name" type="text">
-          <label for="new_run_name">New Run Name</label>
-      </div>
-      <a href="#" class="waves-effect waves-light btn" ng-click="new_run_from_template = true">create from template</a>
-      <a href="#" class="waves-effect waves-light btn" ng-click="create_run()">create empty run</a>
-      <ul class="collection dashboard-show-hide" id="template_collection" ng-show="new_run_from_template == true">
-        <li class="collection-item" ng-repeat="template in template_list">
-          <a href="#" class="" style="color:#009688;" ng-click="create_run(template)">
-            <i class="material-icons" >insert_drive_file</i>
-            [[template]]
+      <ul class="collection dashboard-show-hide" id="run_collection">
+        <li class="collection-item" ng-repeat="run in run_list">
+          <i class="material-icons" >play_circle_outline</i>
+          <a href="#" class="" style="color:#009688; padding-bottom: 5px;" ng-click="start_run(run)">
+
+            [[run]]
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- stop run modal -->
+  <div class="modal" id="stop_run_modal">
+    <div class="modal-content">
+      <ul class="collection dashboard-show-hide" id="run_collection">
+        <li class="collection-item" ng-repeat="run in run_list">
+          <i class="collection-icon material-icons">pause_circle_outline</i>
+          <a href="#" class="collection-ancher" style="color:#009688;" ng-click="start_run(run)">
+            [[run]]
           </a>
         </li>
       </ul>
