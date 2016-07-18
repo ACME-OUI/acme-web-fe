@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 import json
 import os
-from constants import RUN_SCRIPT_PATH
+from constants import RUN_SCRIPT_PATH, TEMPLATE_PATH, RUN_CONFIG_DEFAULT_PATH
 from util.utilities import print_debug, print_message
 from models import ModelRun, RunScript
 import shutil
@@ -13,7 +13,8 @@ import shutil
 # Creates a new model run configuration
 # input: user, the user requesting a new run config folder
 #        run_name, the name of the new run config
-#        optional: template, the name of their predefined template
+#        run_type, the type of the run being created (model, diagnostic)
+#        optional, template, the name of their predefined template
 @login_required
 def create_run(request):
     print request.body
@@ -21,7 +22,8 @@ def create_run(request):
     user = str(request.user)
     path = os.path.abspath(os.path.dirname(__file__))
     user_directory = path + RUN_SCRIPT_PATH + user
-    template_directory = path + '/resources/'
+    template_directory = path + TEMPLATE_PATH
+    config_path = path + RUN_CONFIG_DEFAULT_PATH
 
     if not os.path.exists(user_directory):
         print_message("Creating directory {}".format(user_directory), 'ok')
@@ -31,8 +33,6 @@ def create_run(request):
     if not new_run:
         print_message('No new run_name specied', 'error')
         return HttpResponse(status=400)
-    else:
-        new_run = data['run_name']
 
     new_run_dir = os.path.join(user_directory, new_run)
     if os.path.exists(new_run_dir):
@@ -53,6 +53,20 @@ def create_run(request):
         shutil.rmtree(new_run_dir, ignore_errors=True)
         print_debug(e)
         return JsonResponse({'error': 'error saving run in database'})
+
+    run_type = data.get('run_type')
+    if not run_type:
+        print_message('No run_type specied', 'error')
+        return HttpResponse(status=400)
+
+    config_path += run_type + '.json'
+    try:
+        shutil.copyfile(config_path, new_run_dir + '/config.json')
+    except Exception as e:
+        print_debug(e)
+        print_message("Error saving config file {} for user {}".format(config_path, user), 'error')
+        return JsonResponse({'error': 'config not saved'})
+
 
     template = data.get('template')
     if not template:
