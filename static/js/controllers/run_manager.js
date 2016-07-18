@@ -4,7 +4,7 @@ angular.module('run_manager', [])
 
   $scope.init = function(){
     console.log('[+] Initializing RunManager window');
-    $scope.run_options = ['New run configuration', 'start run', 'stop run', 'run status', 'new template'];
+    $scope.run_options = ['New run configuration', 'start run', 'stop run', 'update status', 'new template'];
     $scope.run_types = ['diagnostic', 'model'];
     $scope.ready = false;
     $scope.run_list = [];
@@ -13,6 +13,7 @@ angular.module('run_manager', [])
     $scope.template_list = undefined;
     $scope.get_runs();
     $scope.get_templates();
+    $scope.get_run_status();
   }
 
   $scope.trigger_option = (option) => {
@@ -23,11 +24,22 @@ angular.module('run_manager', [])
       $scope.modal_trigger('start_run_modal');
     } else if (option == 'stop run') {
       $scope.modal_trigger('stop_run_modal');
-    } else if (option == 'run status') {
-      $scope.modal_trigger('run_status_modal');
+    } else if (option == 'update status') {
+      // $scope.modal_trigger('run_status_modal');
     } else if (option == 'new template') {
       $scope.template_select_options();
     }
+  }
+
+  $scope.get_run_status = () => {
+    $http({
+      url: '/run_manager/run_status/',
+      method: 'GET'
+    }).then((res) => {
+      console.log(res.data);
+    }).catch((res) => {
+
+    })
   }
 
   $scope.create_run = (template) => {
@@ -103,7 +115,23 @@ angular.module('run_manager', [])
   }
 
   $scope.start_run = (run) => {
-    console.log(run);
+    console.log('attempting to start run ' + run);
+    $http({
+      url: '/run_manager/start_run/',
+      method: 'POST',
+      data: {'run_name': run},
+      headers: {
+        'X-CSRFToken' : $scope.$parent.get_csrf()
+      }
+    }).then((res) => {
+      var run_status_el = $('#' + run + '_status');
+      run_status_el.css({
+        'color': '#4caf50'
+      });
+      run_status_el.text('running');
+    }).catch((res) => {
+      $scope.$parent.showToast('Failed to start run');
+    });
   }
 
   $scope.get_templates = () => {
