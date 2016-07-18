@@ -115,6 +115,7 @@ def create_run(request):
 def start_run(request):
     user = str(request.user)
     data = json.loads(request.body)
+    print_message(data)
     run_name = data.get('run_name')
     if not run_name:
         print_message('No run name given', 'error')
@@ -182,7 +183,7 @@ def run_status(request):
     if(r.status_code != 200):
         print_message('Poller error with params {}'.format(params))
         return HttpResponse(status=500)
-    return HttpResponse(r.json())
+    return HttpResponse(r.content)
 
 #
 # Delete a model run
