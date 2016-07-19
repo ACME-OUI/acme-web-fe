@@ -61,8 +61,17 @@ def create_run(request):
         return HttpResponse(status=400)
 
     config_path += run_type + '.json'
+    new_config_path = new_run_dir + '/config.json'
+    conf = {}
     try:
-        shutil.copyfile(config_path, new_run_dir + '/config.json')
+        with open(config_path, 'r') as config_file:
+            conf = json.loads(config_file.read())
+            conf['run_name'] = new_run
+            config_file.close()
+        with open(new_config_path, 'w') as new_config:
+            conf = json.dumps(conf)
+            new_config.write(conf)
+            new_config.close()
     except Exception as e:
         print_debug(e)
         print_message("Error saving config file {} for user {}".format(config_path, user), 'error')
