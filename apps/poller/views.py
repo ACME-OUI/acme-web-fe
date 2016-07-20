@@ -105,8 +105,8 @@ def update(request):
             if request_type == 'stop':
                 try:
                     job_id = data.get('job_id')
-                    job = UserRuns.objects.get(job_id=job_id)
-                    job.status = 'stop'
+                    job = UserRuns.objects.get(id=job_id)
+                    job.status = 'stopped'
                     job.save()
                 except Exception as e:
                     print_debug(e)

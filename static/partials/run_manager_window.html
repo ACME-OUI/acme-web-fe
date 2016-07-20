@@ -49,6 +49,23 @@
           </div>
         </div>
       </li>
+      <p style="margin-left: 5vw; margin-top: 1vw;"> Run queue </p>
+
+        <li ng-repeat="run in all_runs">
+          <div class="collapsible-header">
+            <span>[[run.run_name]]</span>
+            <span style="float: right; margin-right: 2vw; color:grey;" id="[[run.job_id]]_queue_status"></span>
+          </div>
+          <div class="collapsible-body">
+            <ul class="collection">
+              <li ng-repeat="(key,value) in run" style="padding: 1vh;">
+                <span>[[key]]: [[value]]</span>
+              </li>
+            </ul>
+          </div>
+
+        </li>
+
       <p style="margin-left: 5vw; margin-top: 1vw;">Template List</p>
       <li>
         <div class="collapsible-header" ng-click="switch_arrow('template')">
@@ -113,10 +130,10 @@
   <div class="modal" id="stop_run_modal" >
     <div class="modal-content" style="padding: .5vh;">
       <ul class="collection dashboard-show-hide" id="run_collection">
-        <li class="collection-item" ng-repeat="run in run_list">
+        <li class="collection-item" ng-repeat="run in all_runs" ng-show="run.status == 'in_progress'">
           <i class="collection-icon material-icons">pause_circle_outline</i>
-          <a href="#" class="collection-ancher" style="color:#009688;" ng-click="start_run(run)">
-            [[run]]
+          <a href="#" class="collection-ancher" style="color:#009688;" ng-click="stop_run(run)">
+            [[run.run_name]]: [[run.job_id]]
           </a>
         </li>
       </ul>

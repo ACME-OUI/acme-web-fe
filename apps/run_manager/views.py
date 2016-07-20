@@ -173,12 +173,25 @@ def start_run(request):
 #
 # Sends a stop run request to the poller
 # input: user, the user making the job request
-#        run_name, the name of the run they want to stop
+#        run_id, the id of the run they want to stop
 # returns: no user: status 302,
 #          no run_name: status 400
 #          poller request error: status 500
-def stop_run(request):
-    return HttpResponse()
+def stop_job(request):
+    data = json.loads(request.body)
+    job_id = data.get('job_id')
+    if not job_id:
+        print_message('No job_id given')
+        return HttpResponse(status=400)
+    request = json.dumps({
+        'job_id': job_id,
+        'request': 'stop'
+    })
+    r = requests.post(POLLER_URL, request)
+    if r.status_code == 200:
+        return HttpResponse()
+    else:
+        return HttpResponse(status=500)
 
 #
 # Checks the status of all of a users running jobs
