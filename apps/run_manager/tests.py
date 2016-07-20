@@ -9,6 +9,7 @@ import requests
 from constants import RUN_SCRIPT_PATH
 from util.utilities import print_message
 
+
 class TestCreateRun(LiveServerTestCase):
 
     def setUp(self):
@@ -327,7 +328,6 @@ class TestUpdateScript(LiveServerTestCase):
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 200)
 
-
     def test_update_script_without_script_name(self):
         run_name = 'update_script_run2'
         script_name = 'update_script_name'
@@ -357,7 +357,6 @@ class TestUpdateScript(LiveServerTestCase):
         r = self.c.post(self.url + 'update_script/', data=json.dumps(request), content_type='application/json')
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 400)
-
 
     def test_update_script_without_run_name(self):
         run_name = 'update_script_run3'
@@ -701,7 +700,6 @@ class TestStartRun(LiveServerTestCase):
         run_directory = path + RUN_SCRIPT_PATH + self.username + '/' + self.run_name
         shutil.rmtree(run_directory, ignore_errors=True)
 
-
     # THIS IS A MANUAL TEST, MAKE SURE THIS IS COMMETED BEFORE RUNNING ON TRAVIS
     # def test_start_run(self):
     #     request = {
@@ -734,6 +732,7 @@ class TestGetStatus(LiveServerTestCase):
         print_message(r.content)
         self.assertTrue(r.status_code == 200)
         self.assertTrue('user' in r.content)
+
 
 class TestGetTemplates(LiveServerTestCase):
 

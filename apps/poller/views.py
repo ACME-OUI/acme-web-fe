@@ -95,7 +95,7 @@ def update(request):
             if not request_type:
                 print_message('no request type given')
                 return HttpResponse(status=404)
-            if not request_type in ['new', 'in_progress', 'complete', 'failed', 'all', 'delete', 'stop']:
+            if request_type not in ['new', 'in_progress', 'complete', 'failed', 'all', 'delete', 'stop']:
                 print_message('Unrecognized request type')
                 return HttpResponse(status=400)
 

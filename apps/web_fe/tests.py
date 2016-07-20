@@ -24,8 +24,6 @@ def print_debug(e):
     ex_type, ex, tb = sys.exc_info()
     print '6', traceback.print_tb(tb)
 
-
-
     # def test_get_folder_valid(self):
     #
     #     data = json.dumps({

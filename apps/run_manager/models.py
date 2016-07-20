@@ -6,8 +6,9 @@ class ModelRun(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     edited = models.TextField()
 
+
 class RunScript(models.Model):
-    
+
     class Meta:
         get_latest_by = 'version'
 

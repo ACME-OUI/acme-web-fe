@@ -77,7 +77,6 @@ def create_run(request):
         print_message("Error saving config file {} for user {}".format(config_path, user), 'error')
         return JsonResponse({'error': 'config not saved'})
 
-
     template = data.get('template')
     if not template:
         return JsonResponse({'new_run_dir': new_run_dir})
@@ -109,7 +108,6 @@ def create_run(request):
         return JsonResponse({'new_run_dir': new_run_dir, 'template': 'template saved'})
     else:
         return JsonResponse({'new_run_dir': new_run_dir, 'error': 'template not found'})
-
 
 
 #
@@ -193,6 +191,7 @@ def stop_job(request):
     else:
         return HttpResponse(status=500)
 
+
 #
 # Checks the status of all of a users running jobs
 # input: user, the user making the request
@@ -206,6 +205,7 @@ def run_status(request):
         print_message('Poller error with params {}'.format(params))
         return HttpResponse(status=500)
     return HttpResponse(r.content)
+
 
 #
 # Delete a model run
@@ -241,6 +241,7 @@ def delete_run(request):
         return HttpResponse(status=500)
 
     return HttpResponse()
+
 
 #
 # View all of a users runs
@@ -321,6 +322,7 @@ def create_script(request):
 
     return HttpResponse()
 
+
 #
 # Changes a script to a new version, updating the content while
 # maintaining a verson of the old script
@@ -375,7 +377,7 @@ def update_script(request):
         return HttpResponse(status=500)
 
     script_path = run_directory + '/' + script_name
-    if not os.path.exists(script_path + '_' + str(latest.version-1)):
+    if not os.path.exists(script_path + '_' + str(latest.version - 1)):
         print_message('Run script {} cannot be updated as it doesn\'t exist'.format(script_name), 'error')
         return HttpResponse(status=403)
     script_path = script_path + '_' + str(latest.version)
@@ -503,12 +505,14 @@ def read_script(request):
 
     return JsonResponse({'script': contents})
 
+
 #
 # Im going to leave this unimplemented for the time being.
 #
 @login_required
 def delete_script(request):
     return JsonResponse({})
+
 
 #
 # Creates a copy of a template, and adds it to the requesting users template folder
@@ -566,11 +570,11 @@ def copy_template(request):
 
     return HttpResponse()
 
+
 #
 # returns a list of the users templates as well as all global templates
 # inputs: user, the user requesting the template list
 #
-
 @login_required
 def get_templates(request):
     path = os.path.abspath(os.path.dirname(__file__))

@@ -1,14 +1,5 @@
 {
 	"run_type": "model",
-	"run_name": "asdffdsa",
-	"on": {
-		"success": "341234",
-		"someattr": "43234",
-		"maxtime": {
-			"time": "541235123",
-			"action": "12413"
-		}
-	},
 		"request_attr": {
 		"run_name": "pre-alpha",
 		"job_name": "",

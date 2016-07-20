@@ -21,6 +21,7 @@ def print_debug(e):
     ex_type, ex, tb = sys.exc_info()
     print '6', traceback.print_tb(tb)
 
+
 class colors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -31,8 +32,9 @@ class colors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+
 def print_message(message, status='error'):
     if status == 'error':
         print colors.FAIL + '[-] ' + colors.ENDC + colors.BOLD + str(message) + colors.ENDC
     elif status == 'ok':
-        print colors.OKGREEN+ '[+] ' + colors.ENDC + str(message)
+        print colors.OKGREEN + '[+] ' + colors.ENDC + str(message)
