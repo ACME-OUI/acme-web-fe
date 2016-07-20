@@ -47,7 +47,6 @@ class TestCreateRun(LiveServerTestCase):
         template_path = '/Users/baldwin32/projects/acme-web-fe/apps/run_manager/resources//test/ACME_script.csh'
         shutil.rmtree(template_path, ignore_errors=True)
 
-
     def test_invalid_run(self):
         request = {
             'run_name': 'test_run',
@@ -84,7 +83,6 @@ class TestDeleteRun(LiveServerTestCase):
         run_directory = path + RUN_SCRIPT_PATH + 'test'
         shutil.rmtree(run_directory, ignore_errors=True)
 
-
     def test_delete_valid_run(self):
         request = {
             'run_name': 'test_run',
@@ -96,10 +94,9 @@ class TestDeleteRun(LiveServerTestCase):
         self.assertTrue(r.status_code == 200)
 
         path = os.path.abspath(os.path.dirname(__file__))
-        run_directory = path + RUN_SCRIPT_PATH +  'test/test_run'
+        run_directory = path + RUN_SCRIPT_PATH + 'test/test_run'
         print_message('run directory still exists {}'.format(run_directory), 'error')
         self.assertFalse(os.path.exists(run_directory))
-
 
     def test_delete_run_invalid_user(self):
         request = {
@@ -110,14 +107,13 @@ class TestDeleteRun(LiveServerTestCase):
         r = self.c2.post(self.live_server_url + '/run_manager/delete_run/', data=json.dumps(request), content_type='application/json')
         self.assertTrue(r.status_code == 401)
         path = os.path.abspath(os.path.dirname(__file__))
-        run_directory = path + RUN_SCRIPT_PATH +  'test/test_run'
+        run_directory = path + RUN_SCRIPT_PATH + 'test/test_run'
         print_message('run directory was removed {}'.format(run_directory), 'error')
         self.assertTrue(os.path.exists(run_directory))
         # c is cleaning up
         r = self.c.post(self.live_server_url + '/run_manager/delete_run/', data=json.dumps(request), content_type='application/json')
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 200)
-
 
     def test_delete_run_invalid_run_name(self):
         request = {
@@ -166,7 +162,6 @@ class TestCreateScript(LiveServerTestCase):
         request = {
             'run_name': 'test_run_name'
         }
-
 
     def test_create_script_without_login(self):
         self.c2 = Client()
