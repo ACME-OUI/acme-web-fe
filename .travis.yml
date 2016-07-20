@@ -20,7 +20,6 @@ script:
     - "./manage.py test esgf"
     - "./manage.py test poller"
     - "./manage.py test web_fe"
-    - "./manage.py test velo"
     - "./manage.py test cdat"
 after_success:
   - coveralls
