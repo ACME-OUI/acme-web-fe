@@ -17,9 +17,6 @@ before_script:
     - "python manage.py makemigrations"
     - "python manage.py migrate"
 script:
-    - "./manage.py test esgf"
-    - "./manage.py test poller"
-    - "./manage.py test web_fe"
-    - "./manage.py test cdat"
+    - "./manage.py test"
 after_success:
   - coveralls
