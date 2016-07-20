@@ -13,6 +13,11 @@ Pegasus will be refered to as the "run_user_id"
           requested_status: {pause, start, stop}
           no user -> change status of all jobs
           user      -> change status of all jobs for given user
+          
+    - Next
+      GET
+      - params: {"request": "next"}
+        responds with the next job on the queue and changes that jobs status to "in_progress"
 
     - New Jobs
       GET: 
@@ -26,7 +31,7 @@ Pegasus will be refered to as the "run_user_id"
         user_id: the user id
         -> creates new job for user with given config options
 
-    -“in_progress”
+    - In progress
       GET: 
       - params: {"request": “in_progress”, "user": user_id }
           no user -> respond with all in_progress jobs
@@ -35,7 +40,7 @@ Pegasus will be refered to as the "run_user_id"
       - params: {"request": “in_progress”, "user": user_id, "job_id": job_id }
           job_id  -> updates job status to “in_progress”
 
-    -“complete”
+    - Complete
       GET: 
       - params: {"request": “complete”, "user": user_id }
         no user -> respond with all complete jobs
@@ -45,12 +50,12 @@ Pegasus will be refered to as the "run_user_id"
       - params: {"request": “complete”, "user": user_id, "job_id": job_id }
         job_id  -> updates job status to “complete”
 
-    -“job”
+    - Job
       GET: 
       - params: {"request": “job”, "job_id": job_id }
         job_id  -> respond with current job status
       
-    -"run_user_id"
+    - Run_user_id
       POST:
       - params: {"request": “run_id”, "user": user_id, "run_user_id": run_user_id }
         run_user_id  -> The user id created by Pegasus
