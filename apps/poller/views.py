@@ -25,6 +25,8 @@ def update(request):
             elif request_type == 'next':
                 try:
                     data = UserRuns.objects.filter(status='new').latest()
+                    data.status = 'in_progress'
+                    data.save()
                 except Exception as e:
                     return JsonResponse({})
 
@@ -93,15 +95,27 @@ def update(request):
             if not request_type:
                 print_message('no request type given')
                 return HttpResponse(status=404)
-            if not request_type in ['new', 'in_progress', 'complete', 'failed', 'all', 'delete']:
+            if not request_type in ['new', 'in_progress', 'complete', 'failed', 'all', 'delete', 'stop']:
                 print_message('Unrecognized request type')
                 return HttpResponse(status=400)
 
             user = data.get('user')
             status = data.get('status')
+
+            if request_type == 'stop':
+                try:
+                    job_id = data.get('job_id')
+                    job = UserRuns.objects.get(job_id=job_id)
+                    job.status = 'stop'
+                    job.save()
+                except Exception as e:
+                    print_debug(e)
+                    return HttpResponse(status=500)
+                return HttpResponse()
+
             # request to update all of a users jobs to a given status
             if request_type == 'all':
-                if status not in ['new', 'in_progress', 'complete', 'failed']:
+                if status not in ['new', 'in_progress', 'complete', 'failed', 'stop']:
                     return HttpResponse(status=400)
                 if user:
                     jobs = UserRuns.objects.filter(user=user)
