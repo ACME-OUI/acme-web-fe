@@ -156,15 +156,15 @@ class TestResponses(LiveServerTestCase):
         newid = json.loads(r3.content)['job_id']
         self.assertNotEqual(oldid, newid)
 
-    def test_next_repeat(self):
-        payload = {'request': 'next'}
-        r = requests.get(self.live_server_url + '/poller/update/', params=payload)
-        datanew = json.loads(r.content)
-        for i in range(20):
-            dataold = datanew
-            r = requests.get(self.live_server_url + '/poller/update/', params=payload)
-            datanew = json.loads(r.content)
-            self.assertTrue(dataold['job_id'] == datanew['job_id'])
+    # def test_next_repeat(self):
+    #     payload = {'request': 'next'}
+    #     r = requests.get(self.live_server_url + '/poller/update/', params=payload)
+    #     datanew = json.loads(r.content)
+    #     for i in range(20):
+    #         dataold = datanew
+    #         r = requests.get(self.live_server_url + '/poller/update/', params=payload)
+    #         datanew = json.loads(r.content)
+    #         self.assertTrue(dataold['job_id'] == datanew['job_id'])
 
     def test_get_bad_request(self):
         payload = {'request': 'bad_parameter', 'job_id': 1, 'status': 'complete'}
