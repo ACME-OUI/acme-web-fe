@@ -53,7 +53,8 @@
     var state = JSON.stringify( window.layout.toConfig() );
     localStorage.setItem( 'savedState', state );
   });
-
+  window.layout.init();
+  
   $(window).resize(function(event){
     if(window.layout){
       window.layout.updateSize();

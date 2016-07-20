@@ -94,7 +94,7 @@ class TestNodeSearch(LiveServerTestCase):
     #         'searchString': json.dumps(self.valid_terms),
     #         'asdf': json.dumps(self.valid_nodes)
     #     }
-    #     response = requests.get(self.live_server_url + '/acme/esgf/node_search/', params=params)
+    #     response = requests.get(self.live_server_url + '/esgf/node_search/', params=params)
     #     self.assertTrue( response.status_code == 400 )
     #     self.assertTrue( len(response.content) < 100 )
 
@@ -153,5 +153,5 @@ class TestDownload(LiveServerTestCase):
     # TODO: make this work
     # def test_download_auth(self):
     #     print "\n---->[+] Starting " + inspect.stack()[0][3]
-    #     response = requests.get(self.live_server_url + '/acme/esgf/download', params={'url': self.auth_url})
+    #     response = requests.get(self.live_server_url + '/esgf/download', params={'url': self.auth_url})
     #     self.assertTrue( response.status_code == 200 )

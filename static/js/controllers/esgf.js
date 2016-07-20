@@ -110,7 +110,7 @@ angular.module('esgf', ['ngAnimate'])
 
   $scope.get_node_list = () => {
     $http({
-      url: 'esgf/node_list',
+      url: '/esgf/node_list',
       method: 'GET'
     }).then(function(res){
       $scope.node_list = res.data
