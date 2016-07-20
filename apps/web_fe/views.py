@@ -198,8 +198,8 @@ def register(request):
                 username=request.POST['username'], password=request.POST['password1'])
             if user:
                 login(request, user)
-                message = 'User: %s created an account and logged in' % request.POST['username']
-                messages.success(request, )
+                message = 'User: {} created an account and logged in'.format(request.POST['username'])
+                messages.success(request, message)
         else:
             print user_form.errors
     else:

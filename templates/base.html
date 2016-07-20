@@ -8,7 +8,7 @@
 
     <title> {% block title %} ACME {% endblock %}</title>
     <!-- Bootstrap core CSS -->
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet"> -->
     <!-- For the jsPanel -->
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <!-- <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script> -->
@@ -19,88 +19,40 @@
 
     {% block extra_headers %} {% endblock %}
 
-    <style type="text/css">
-      body {
-        padding-top: 50px;
-      }
-      .starter-template {
-        padding: 40px 15px;
-      }
-      label{
-        min-width: 90px;
-      }
-      .footer{
-        padding: 25px 25px 25px 25px;
-      }
-      .navbar-nav {
-        width: 100%;
-        text-align: center;
-      }
-      .navbar-nav > li {
-        float: none;
-        display: inline-block;
-      }
-      .navbar-nav > li.navbar-right {
-        float: right !important;
-      }
-      .navbar-nav > li.navbar-left {
-        float: left !important;
-      }
-      .theme-showcase {
-        margin-top:1em;
-      }
-    </style>
     <script src="{% static "js/resources/bootstrap.min.js" %}"></script>
   </head>
 
   <body role="document" class="day">
-    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            {% block nav_new_button %}
-
-            {% endblock %}
-          </button>
-        </div>
-        <div class="collapse navbar-collapse">
-          <ul class="nav navbar-nav">
-            <li id="acme-link"><a href="/acme">ACME</a></li>
-            <li id="dashboard-link"><a href="/acme/dashboard">Dashboard</a></li>
-            {% if user.is_authenticated %}
-            <li class="navbar-right"><a href="/acme/add_credentials">{{ user.username }}</a></li>
-            <li class="navbar-right"><a href="/acme/logout">Log Out</a></li>
-            {% else %}
-            <li class="navbar-right"><a href="/acme/login?next={% url 'index' %}">Welcome Guest</a></li>
-            <li class="navbar-right"><a href="/acme/login?next={% url 'index' %}">Log In</a></li>
-            {% endif %}
-          </ul>
-
-        </div><!--.nav-collapse -->
+    <nav>
+      <div class="nav-wrapper blue-grey darken-4">
+        <a href="#" style="margin-left: 2vw;" class="brand-logo">ACME</a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+          <li id="acme-link"><a style="color: #64b5f6" href="/acme">ACME</a></li>
+          <li id="dashboard-link"><a style="color: #64b5f6" href="/acme/dashboard">Dashboard</a></li>
+          {% if user.is_authenticated %}
+          <li class="navbar-right"><a style="color: #64b5f6" href="/acme/add_credentials">{{ user.username }}</a></li>
+          <li class="navbar-right"><a style="color: #64b5f6" href="/acme/logout">Log Out</a></li>
+          {% else %}
+          <li class="navbar-right"><a style="color: #64b5f6" href="/acme/login?next={% url 'index' %}">Welcome Guest</a></li>
+          <li class="navbar-right"><a style="color: #64b5f6" href="/acme/login?next={% url 'index' %}">Log In</a></li>
+          {% endif %}
+        </ul>
       </div>
-    </div>
+    </nav>
+
 
     <div class="container theme-showcase" role="main">
-      <!-- {% if messages %}
-          {% for message in messages %}
-          <div class="alert {% if message.tags %} {{ message.tags }} {% else %} alert-info {% endif %}" role="alert">{{ message }}</div>
-          {% endfor %}
-      {% endif %} -->
       {% block content %}
 
       {% endblock %}
     </div>
     {% block layout %}
     {% endblock %}
-    <div id="footer" class="footer">
-    <hr>
-      <a href="#">Privacy &amp; Legal Notice</a> &nbsp;
-      <a href="https://github.com/ACME-OUI/acme-web-fe/issues">Site Issues</a>
-    </div>
+
+    <footer class="page-footer blue-grey darken-4" style="padding-bottom: 1.5vh; padding-top: 2vh; margin-top: 0px;">
+      <a class="valign" style="color: #64b5f6; margin-left: 2vw;" href="#">Privacy &amp; Legal Notice</a> &nbsp;
+      <a style="color: #64b5f6; margin-left: 2vw;" href="https://github.com/ACME-OUI/acme-web-fe/issues">Site Issues</a>
+    </footer>
   </div><!-- /.container -->
 </body>
 </html>

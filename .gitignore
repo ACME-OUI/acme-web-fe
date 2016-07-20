@@ -17,19 +17,20 @@ local_settings.py
 /images/
 /js/
 /jspanel/
-/java/
 /django-sendfile/
 
 static/filetree/example.py
 static/systemtest/*
 static/http.py
 scripts/update.py
-scripts/registration.xml
 apps/web_fe/migrations
 apps/poller/migrations
+apps/run_manager/migrations
+apps/run_manager/run_scripts/*
 update.py
 *migrations/
-
+apps/run_manager/resource/test/*
+apps/run_manager/resource/test
 *.sublime-project
 *.sublime-workspace
 db
@@ -37,17 +38,8 @@ db
 /migrations
 
 .coverage
+coverage.xml
 cover
-
-log.html
-output.xml
-report.html
-selenium-screenshot-*.png
-selenium_server_log.txt
-userdata
+climateTestFile.nc
 
 /webroot
-/static/java
-!/static/java/.api_description
-!/static/java/.options
-!/static/java/VeloAPI.jar

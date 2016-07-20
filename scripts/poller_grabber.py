@@ -1,16 +1,16 @@
+import time
+import requests
+import json
 import sys
 import traceback
 
 
-def get_client_ip(request):
-    """see: http://stackoverflow.com/a/4581997"""
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        ip = x_forwarded_for
-    else:
-        ip = request.META.get('REMOTE_ADDR')
-    return ip
-
+def grab_job():
+    url = "http://localhost:8000/poller/update"
+    request = {
+        'request': 'next'
+    }
+    return requests.get(url, params=request).content
 
 def print_debug(e):
     print '1', e.__doc__
@@ -20,7 +20,6 @@ def print_debug(e):
     print '5', traceback.tb_lineno(sys.exc_info()[2])
     ex_type, ex, tb = sys.exc_info()
     print '6', traceback.print_tb(tb)
-
 
 class colors:
     HEADER = '\033[95m'
@@ -32,9 +31,21 @@ class colors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-
 def print_message(message, status='error'):
     if status == 'error':
         print colors.FAIL + '[-] ' + colors.ENDC + colors.BOLD + str(message) + colors.ENDC
     elif status == 'ok':
-        print colors.OKGREEN + '[+] ' + colors.ENDC + str(message)
+        print colors.OKGREEN+ '[+] ' + colors.ENDC + str(message)
+
+
+
+if __name__ == "__main__":
+    while True:
+        try:
+            print_message('Grabbing the next job', 'ok')
+            job = grab_job()
+            print_message('New job: {}'.format(job))
+        except Exception as e:
+            print_message('Error grabbing a job')
+            print_debug(e)
+        time.sleep(60)

@@ -1,0 +1,175 @@
+<div class="">
+  <div id="run_options">
+    <ul class="collection">
+      <li class="collection-item">
+        <div class="" style="margin-left:auto;margin-right:auto;">
+          <a
+            href="#"
+            ng-repeat="option in run_options"
+            class="waves-effect waves-light btn"
+            ng-click="trigger_option(option)"
+            style="margin-left: 0.5vw; margin-right: 0.5vw; margin-top: 1vh;">
+            [[option]]
+          </a>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div class="run_list dashboard-show-hide" ng-show="ready == true">
+    <p style="margin-left: 5vw;">Run List</p>
+    <ul class="collapsible popout" id="run-list" data-collapsible="accordion">
+      <li ng-repeat="run in run_list">
+        <div class="collapsible-header" ng-click="get_run_data(run)">
+          <i class="material-icons" id="[[run]]_arrow">play_arrow</i>
+          <span class="">[[run]]</span>
+          <span href="#" id="[[run]]_status" style="float: right; margin-right: 2vw; color:grey;">idle</span>
+        </div>
+        <div class="collapsible-body">
+          <div class="" ng-show="empty_run == false">
+            <ul class="collection">
+              <li class="collection-item">
+                <a href="#" class="waves-effect waves-light btn">new script</a>
+              </li>
+              <li ng-repeat="script in script_list" class="collection-item">
+                <a href="#" style="margin-left: 3vw;">
+                  [[script]]
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div class="" ng-show="empty_run == true">
+            <ul class="collection">
+              <li class="collection-item">
+                <div class="">
+                  <a href="#" class="waves-effect waves-light btn">new script</a>
+                  <a href="#" class="waves-effect waves-light btn" id="template_modal_trigger" ng-click="template_select_options()">Copy template</a>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </li>
+      <p style="margin-left: 5vw; margin-top: 1vw;"> Run queue </p>
+
+        <li ng-repeat="run in all_runs">
+          <div class="collapsible-header">
+            <span>[[run.run_name]]</span>
+            <span style="float: right; margin-right: 2vw; color:grey;" id="[[run.job_id]]_queue_status"></span>
+          </div>
+          <div class="collapsible-body">
+            <ul class="collection">
+              <li ng-repeat="(key,value) in run" style="padding: 1vh;">
+                <span>[[key]]: [[value]]</span>
+              </li>
+            </ul>
+          </div>
+
+        </li>
+
+      <p style="margin-left: 5vw; margin-top: 1vw;">Template List</p>
+      <li>
+        <div class="collapsible-header" ng-click="switch_arrow('template')">
+          <i class="material-icons" id="template_arrow">play_arrow</i>
+          <p>templates</p>
+        </div>
+        <div class="collapsible-body">
+          <ul class="collection" id="template-list">
+            <li ng-repeat="template in template_list" class="collection-item">
+              <a href="#" class="waves-effect waves-light btn">[[template]]</a>
+            </li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+
+  <!-- Modals -->
+
+  <!-- new model modal -->
+  <div class="modal" id="new_run_modal">
+    <div class="modal-content">
+      <div class="input-field col s6">
+          <input id="new_run_name" type="text">
+          <label for="new_run_name">New Run Name</label>
+      </div>
+      <div class="" id="run_type_radio_select">
+        <p ng-repeat="type in run_types">
+          <input name="run_types" type="radio" id="[[type]]_radio" data-run-type="[[type]]"/>
+          <label for="[[type]]_radio">[[type]]</label>
+        </p>
+      </div>
+      <a href="#" class="waves-effect waves-light btn" ng-click="new_run_from_template = true">create from template</a>
+      <a href="#" class="waves-effect waves-light btn" ng-click="create_run()">create empty run</a>
+      <ul class="collection dashboard-show-hide" id="template_collection" ng-show="new_run_from_template == true">
+        <li class="collection-item" ng-repeat="template in template_list">
+          <a href="#" class="" style="color:#009688;" ng-click="create_run(template)">
+            <i class="material-icons" >insert_drive_file</i>
+            [[template]]
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- start run modal -->
+  <div class="modal" id="start_run_modal">
+    <div class="modal-content" style="padding: .5vh;">
+      <ul class="collection dashboard-show-hide" id="run_collection">
+        <li class="collection-item" ng-repeat="run in run_list">
+          <i class="material-icons" >play_circle_outline</i>
+          <a href="#" class="" style="color:#009688; padding-bottom: 5px;" ng-click="start_run(run)">
+            [[run]]
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- stop run modal -->
+  <div class="modal" id="stop_run_modal" >
+    <div class="modal-content" style="padding: .5vh;">
+      <ul class="collection dashboard-show-hide" id="run_collection">
+        <li class="collection-item" ng-repeat="run in all_runs" ng-show="run.status == 'in_progress'">
+          <i class="collection-icon material-icons">pause_circle_outline</i>
+          <a href="#" class="collection-ancher" style="color:#009688;" ng-click="stop_run(run)">
+            [[run.run_name]]: [[run.job_id]]
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- copy template modal -->
+  <div class="modal" id="copy_template_modal" style="padding: .5vh;">
+    <div class="modal-content">
+      <div class="input-field col s6">
+          <input id="new_template_name" type="text">
+          <label for="new_template_name">New template Name</label>
+      </div>
+      <a href="#"
+         class="waves-effect waves-light btn"
+         ng-click="from_existing_template = true"
+         style="margin-left: 0.5vw; margin-right: 0.5vw;">
+         Copy from existing template
+       </a>
+      <a href="#"
+         class="waves-effect waves-light btn"
+         ng-click="create_new_template_edit()"
+         style="margin-left: 0.5vw; margin-right: 0.5vw;">
+         create new template
+       </a>
+      <ul class="collection dashboard-show-hide" id="template_collection" ng-show="from_existing_template == true">
+        <li class="collection-item" ng-repeat="template in template_list">
+          <a href="#" class="" style="color:#009688;" ng-click="select_template(template)">
+            <i class="material-icons" >insert_drive_file</i>
+            [[template]]
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+
+
+</div>

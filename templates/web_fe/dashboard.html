@@ -4,6 +4,8 @@
 
 {% load staticfiles %}
 
+{% csrf_token %}
+
   <!-- Materialize -->
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css">
   <link href="//fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -25,7 +27,7 @@
   <script src="{% static "js/controllers/app.js" %}"></script>
   <script src="{% static "js/controllers/cdat.js" %}"></script>
   <script src="{% static "js/controllers/esgf.js" %}"></script>
-  <script src="{% static "js/controllers/velo.js" %}"></script>
+  <script src="{% static "js/controllers/run_manager.js" %}"></script>
   <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
 
   <!-- AngularJS Tree -->
@@ -35,9 +37,6 @@
   <!-- Typehead and Bloodhound -->
   <script src="{% static "js/resources/typeahead.bundle.js"%}"></script>
   <link rel="stylesheet" href="{% static "css/typeahead.css"%}">
-
-  <!-- Bootstrap -->
-  <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.js"></script>
 
   <!-- Font Awesome -->
   <!-- <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"> -->
@@ -76,28 +75,6 @@
   <link rel="stylesheet" href="{% static "css/dashboard.css"%}">
 
 
-  <!--Dashboard main-->
-  <!-- <script type="text/javascript" src="{% static "js/dashboard.js" %}"></script> -->
-{% endblock %}
-
-
-
-{% block dropmenu %}
-
-  <!-- <nav class="menu" id="slide-menu-left" style="top: 50px; z-index:22;">
-    <ul id="side-menu">
-      <div id="velo_window"></div>
-      <div id="esgf_window"></div>
-      <div id="cdat_window"></div>
-      <li><button type="button" class="btn menu-btn" id="new-plot">New Plot</button></li>
-    </ul>
-    <br>
-    <button type="button" class="btn menu-btn" id="dark-mode-toggle">Dark mode is off</button>1
-    <button type="button" class="btn menu-btn" id="save-layout">Store Current Layout</button>
-    <button type="button" class="btn menu-btn" id="load-layout">Load Previous Layout</button>
-  </nav> -->
-  <!-- Nav left menu -->
-
 {% endblock %}
 
 {% block content %}
@@ -105,7 +82,7 @@
 {% endblock %}
 {% block layout %}
   <div class="wrapper" id="layout-wrapper">
-    <ul id="menuContainer"></ul>
+    <ul id="menuContainer" style="margin-top: 0px;"></ul>
     <div class="layoutContainer" id="layoutContainer" ng-controller="DashboardControl" ng-init="init()">
       <div class="">
         <template type="text/html" id="cdat_wrapper">
@@ -117,7 +94,6 @@
       <div class="">
         <template type="text/html" id="esgf_wrapper">
           <div class="esgf_window" ng-controller="ESGFControl" ng-init="init()">
-            <!-- <ng-include src="'{% static 'partials/spinner.html' %}'"></ng-include> -->
             <div class="progress" ng-show="ready == false">
               <div class="indeterminate"></div>
             </div>
@@ -126,8 +102,13 @@
         </template>
       </div>
       <div class="">
-        <template type="text/html" id="velo_wrapper">
-
+        <template type="text/html" id="run_manager_wrapper">
+          <div class="run_manager_window" ng-controller="RunManagerControl" ng-init="init()">
+            <div class="progress" ng-show="ready == false">
+              <div class="indeterminate"></div>
+            </div>
+            <ng-include src="'{% static 'partials/run_manager_window.html' %}'"></ng-include>
+          </div>
         </template>
       </div>
     </div>
