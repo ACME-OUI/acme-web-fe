@@ -1,6 +1,6 @@
 
 angular.module('run_manager', [])
-.controller('RunManagerControl', ['$scope', '$http', function($scope, $http) {
+.controller('RunManagerControl', ['$scope', '$http', '$timeout', function($scope, $http, $timeout) {
 
   $scope.init = function(){
     console.log('[+] Initializing RunManager window');
@@ -8,12 +8,20 @@ angular.module('run_manager', [])
     $scope.run_types = ['diagnostic', 'model'];
     $scope.ready = false;
     $scope.run_list = [];
+    $scope.all_runs = [];
     $scope.selected_run = undefined;
     $scope.script_list = undefined;
     $scope.template_list = undefined;
-    $scope.get_runs();
     $scope.get_templates();
-    $scope.get_run_status();
+    $scope.get_runs();
+    $timeout($scope.get_run_status, delay=500);
+  }
+
+  $scope.set_run_status = (data) => {
+    for(obj in data){
+      $scope.set_status_text(data[obj].status, data[obj].run_name);
+      $scope.set_status_text(data[obj].status, data[obj].job_id + "_queue");
+    }
   }
 
   $scope.trigger_option = (option) => {
@@ -25,21 +33,45 @@ angular.module('run_manager', [])
     } else if (option == 'stop run') {
       $scope.modal_trigger('stop_run_modal');
     } else if (option == 'update status') {
-      // $scope.modal_trigger('run_status_modal');
+      $scope.get_run_status($scope.set_run_status);
     } else if (option == 'new template') {
       $scope.template_select_options();
     }
   }
+
+  $scope.stop_run = (run) => {
+    $http({
+      url: '/run_manager/stop_job/',
+      method: 'POST',
+      data: {
+        "job_id": run.job_id,
+        "request": 'stop'
+      },
+      headers: {
+        'X-CSRFToken' : $scope.$parent.get_csrf()
+      }
+    }).then((res) => {
+      $scope.get_run_status();
+    }).catch((res) => {
+      $scope.$parent.showToast('Error stopping run ' + run.run_name);
+    })
+  }
+
 
   $scope.get_run_status = () => {
     $http({
       url: '/run_manager/run_status/',
       method: 'GET'
     }).then((res) => {
-      console.log(res.data);
+      var runs = res.data;
+      runs.sort(function(a, b){
+        return a.job_id - b.job_id
+      });
+      $scope.all_runs = runs;
+      $timeout($scope.set_run_status, delay=200, true, runs);
     }).catch((res) => {
-
-    })
+      $scope.$parent.showToast("error getting run status");
+    });
   }
 
   $scope.create_run = (template) => {
@@ -92,26 +124,59 @@ angular.module('run_manager', [])
   }
 
   $scope.get_runs = () => {
-    $http({
-      url: '/run_manager/view_runs'
-    }).then((res) => {
-      console.log('Got some runs bruh');
-      console.log(res.data);
-      $scope.run_list = res.data;
-      $('#run-list').collapsible({
-        accordion : false
+    return new Promise(function(resolve, reject){
+      $http({
+        url: '/run_manager/view_runs'
+      }).then((res) => {
+        console.log('Got some runs bruh');
+        console.log(res.data);
+        $scope.run_list = res.data;
+        $('#run-list').collapsible({
+          accordion : false
+        });
+        $scope.ready = true;
+        resolve(res.data);
+      }).catch((res) => {
+        $scope.ready = true;
+        console.log('Failed to get runs');
+        console.log(res);
+        reject(res.data);
       });
-      $scope.ready = true;
-    }).catch((res) => {
-      $scope.ready = true;
-      console.log('Failed to get runs');
-      console.log(res);
-    })
+    });
   }
 
   $scope.template_select_options = () => {
     $scope.modal_trigger('copy_template_modal');
     $scope.get_templates();
+  }
+
+  $scope.set_status_text = (status, run_name) => {
+    var el = $('#' + run_name + '_status');
+    switch(status){
+      case "new":
+        el.css({'color': '#009688'});
+        el.text('waiting in queue');
+        break;
+      case "in_progress":
+        el.css({'color': '#4caf50'});
+        el.text('running');
+        break;
+      case "complete":
+        el.css({'color': '#2196f3'});
+        el.text('complete');
+        break;
+      case "failed":
+        el.css({'color': '#d32f2f'});
+        el.text('error');
+        break;
+      case "stopped":
+        el.css({'color': '#ffd600'});
+        el.text('stopped');
+        break;
+      default:
+        el.css({'color': '#9e9e9e'});
+        el.text('idle');
+    }
   }
 
   $scope.start_run = (run) => {
@@ -124,11 +189,9 @@ angular.module('run_manager', [])
         'X-CSRFToken' : $scope.$parent.get_csrf()
       }
     }).then((res) => {
-      var run_status_el = $('#' + run + '_status');
-      run_status_el.css({
-        'color': '#4caf50'
-      });
-      run_status_el.text('running');
+      $scope.set_status_text('new', run);
+      $scope.$parent.showToast("Run added to the queue");
+      $scope.get_run_status($scope.set_run_status);
     }).catch((res) => {
       $scope.$parent.showToast('Failed to start run');
     });
