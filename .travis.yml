@@ -16,7 +16,6 @@ before_script:
     - "pep8 --exclude=migrations --config=.pep8 apps"
     - "python manage.py makemigrations"
     - "python manage.py migrate"
-    - "python ./apps/velo/velo_service.py &"
 script:
     - "./manage.py test esgf"
     - "./manage.py test poller"

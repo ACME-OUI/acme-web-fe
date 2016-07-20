@@ -11,7 +11,7 @@ acme-site
 **init**
 
     fork git@github.com:acme-oui/acme-web-fe.git
-    git clone git@github.com:username/acme-web-fe.git
+    git clone git@github.com:<your-user-name>/acme-web-fe.git
     cd acme-web-fe
     git remote add upstream http://github.com/acme-oui/acme-web-fe.git
     git fetch upstream
@@ -29,9 +29,10 @@ acme-site
     Simply: sudo apt-get install python-dev
 
     Additionally, if you're using a 64bit version of python, make sure you're also using a 64bit version of java.
-    If you get a wrong arch error on a mac, you might have both 32 and 64 bit versions of java installed. The simplest solution is to add the line
+    If you get a wrong arch error on a mac, you might have both 32 and 64 bit versions of java installed. The simplest solution is to add the line substituting your verion of java f
         export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.7.0_79.jdk/"
     to your .bashrc
+
 
     You will also need to install the django-sendfile module
     After creating your virtualenv and sourcing it,
@@ -51,8 +52,6 @@ acme-site
 
    python manage.py collectstatic
 
-**Selenium**
-    Follow the directions [here](https://code.google.com/p/robotframework-seleniumlibrary/wiki/InstallationInstructions) to install the Selenium library to work with the robotframework.
 
 **setup db**
 
