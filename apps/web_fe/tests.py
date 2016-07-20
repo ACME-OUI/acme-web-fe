@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from web_fe.views import *
 from util.utilities import print_debug
 
+
 def userSetup(current_test):
     # First create a new user
     current_test.test_user = User.objects.create_user(
