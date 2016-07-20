@@ -721,12 +721,12 @@ class TestGetStatus(LiveServerTestCase):
         self.c = Client()
         self.c.login(username='test', password='test')
         self.url = self.live_server_url + '/run_manager/start_run/'
-
-    def test_get_run_status(self):
-        r = self.c.get(self.live_server_url + '/run_manager/run_status/')
-        print_message(r.content)
-        self.assertTrue(r.status_code == 200)
-        self.assertTrue('user' in r.content)
+    # THIS IS A MANUAL TEST, MAKE SURE THIS IS COMMETED BEFORE RUNNING ON TRAVIS
+    # def test_get_run_status(self):
+    #     r = self.c.get(self.live_server_url + '/run_manager/run_status/')
+    #     print_message(r.content)
+    #     self.assertTrue(r.status_code == 200)
+    #     self.assertTrue('user' in r.content)
 
 
 class TestGetTemplates(LiveServerTestCase):
