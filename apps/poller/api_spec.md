@@ -18,6 +18,11 @@ Pegasus will be refered to as the "run_user_id"
       GET
       - params: {"request": "next"}
         responds with the next job on the queue and changes that jobs status to "in_progress"
+        
+    - Stop
+      POST
+      - params: {"request": "stop", "job_id": job_id}
+      Changes the status of the job to "stop"
 
     - New Jobs
       GET: 
