@@ -24,6 +24,11 @@
   <script src="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js"></script>
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular-messages.min.js"></script>
 
+  <script src="{% static "js/resources/ace.js"%}"></script>
+  <script src="{% static "js/resources/mode-scheme.js"%}"></script>
+  <script src="{% static "js/resources/mode-json.js"%}"></script>
+  <script src="{% static "js/resources/ui-ace.min.js"%}"></script>
+
   <script src="{% static "js/controllers/app.js" %}"></script>
   <script src="{% static "js/controllers/cdat.js" %}"></script>
   <script src="{% static "js/controllers/esgf.js" %}"></script>
@@ -45,10 +50,6 @@
   <script src="{% static "js/resources/slick.js" %}"></script>
   <link rel="stylesheet" type="text/css" href="{% static "css/slick.css" %}"/>
   <link rel="stylesheet" href="{% static "css/slick-theme.css" %}">
-
-  <!-- Trix editor -->
-  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/trix/0.9.2/trix.css">
-  <script src="//cdnjs.cloudflare.com/ajax/libs/trix/0.9.2/trix.js"></script>
 
   <!-- mTree -->
   <!-- <link rel="stylesheet" href="{% static "css/mtree.css" %}">
@@ -75,9 +76,6 @@
 
 {% endblock %}
 
-{% block content %}
-
-{% endblock %}
 {% block layout %}
   <div class="wrapper" id="layout-wrapper">
     <ul id="menuContainer" style="margin-top: 0px;"></ul>

@@ -1,11 +1,12 @@
 
-angular.module('run_manager', [])
+angular.module('run_manager', ['ui.ace'])
 .controller('RunManagerControl', ['$scope', '$http', '$timeout', function($scope, $http, $timeout) {
 
   $scope.init = function(){
     console.log('[+] Initializing RunManager window');
     $scope.run_options = ['New run configuration', 'start run', 'stop run', 'update status', 'new template'];
     $scope.run_types = ['diagnostic', 'model'];
+    $scope.aceModel = '';
     $scope.ready = false;
     $scope.run_list = [];
     $scope.all_runs = [];
@@ -15,7 +16,28 @@ angular.module('run_manager', [])
     $scope.get_templates();
     $scope.get_runs();
     $timeout($scope.get_run_status, delay=500);
+
   }
+
+  // The modes
+  $scope.modes = ['json'];
+  $scope.mode = $scope.modes[0];
+
+
+  // The ui-ace option
+  $scope.aceOption = {
+    mode: $scope.mode.toLowerCase(),
+    onLoad: function (_ace) {
+
+      $scope.modeChanged = function () {
+        _ace.getSession().setMode("ace/mode/" + $scope.mode.toLowerCase());
+      };
+
+    },
+    onChange: function(_ace){
+      $scope.aceModel = _ace[1].getValue();
+    }
+  };
 
   $scope.set_run_status = (data) => {
     for(obj in data){
@@ -37,6 +59,47 @@ angular.module('run_manager', [])
     } else if (option == 'new template') {
       $scope.template_select_options();
     }
+  }
+
+  $scope.open_text_edit = (run, script) => {
+    $('#text_edit_modal').openModal();
+    $scope.selected_script = script;
+    var data = {
+      'run_name': run,
+      'script_name': script
+    }
+    $http({
+      url: '/run_manager/read_script/',
+      method: 'GET',
+      params: data
+    }).then((res) => {
+      console.log(res);
+      var script = JSON.stringify(JSON.parse(res.data.script), null, 2);
+      $scope.aceModel = script;
+    }).catch((res) => {
+      console.log(res);
+    })
+  }
+
+  $scope.update_script = () => {
+    var data = {
+      'script_name': $scope.selected_script,
+      'run_name': $scope.selected_run,
+      'contents': $scope.aceModel
+    }
+    $http({
+      url: '/run_manager/update_script/',
+      method: 'POST',
+      data: data,
+      headers: {
+        'X-CSRFToken' : $scope.$parent.get_csrf()
+      }
+    }).then((res) => {
+      console.log(res);
+      $scope.$parent.showToast("File saved");
+    }).catch((res) => {
+      console.log(res);
+    })
   }
 
   $scope.stop_run = (run) => {
@@ -64,9 +127,11 @@ angular.module('run_manager', [])
       method: 'GET'
     }).then((res) => {
       var runs = res.data;
-      runs.sort(function(a, b){
-        return a.job_id - b.job_id
-      });
+      if(Object.keys(runs).length !== 0){
+        runs.sort(function(a, b){
+          return a.job_id - b.job_id
+        });
+      }
       $scope.all_runs = runs;
       $timeout($scope.set_run_status, delay=200, true, runs);
     }).catch((res) => {

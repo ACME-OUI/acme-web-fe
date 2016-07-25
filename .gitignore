@@ -26,7 +26,7 @@ scripts/update.py
 apps/web_fe/migrations
 apps/poller/migrations
 apps/run_manager/migrations
-apps/run_manager/run_scripts/*
+apps/run_manager/run_scripts/
 update.py
 *migrations/
 apps/run_manager/resource/test/*

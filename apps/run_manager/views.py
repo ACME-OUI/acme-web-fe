@@ -46,22 +46,13 @@ def create_run(request):
         print_debug(e)
         return HttpResponse(status=500)
 
-    try:
-        run = ModelRun(user=request.user)
-        run.save()
-    except Exception as e:
-        print_message("Error saving run {} in database for user {}".format(new_run_dir, request.user), 'error')
-        shutil.rmtree(new_run_dir, ignore_errors=True)
-        print_debug(e)
-        return JsonResponse({'error': 'error saving run in database'})
-
     run_type = data.get('run_type')
     if not run_type:
         print_message('No run_type specied', 'error')
         return HttpResponse(status=400)
 
     config_path += run_type + '.json'
-    new_config_path = new_run_dir + '/config.json'
+    new_config_path = new_run_dir + '/config.json_1'
     conf = {}
     try:
         with open(config_path, 'r') as config_file:
@@ -72,6 +63,12 @@ def create_run(request):
             conf = json.dumps(conf)
             new_config.write(conf)
             new_config.close()
+        new_script = RunScript(
+            user=user,
+            name='config.json',
+            run=new_run,
+            version=1)
+        new_script.save()
     except Exception as e:
         print_debug(e)
         print_message("Error saving config file {} for user {}".format(config_path, user), 'error')
@@ -100,11 +97,18 @@ def create_run(request):
 
     if found_template:
         try:
-            shutil.copyfile(template_path, new_run_dir + '/' + template)
+            shutil.copyfile(template_path, new_run_dir + '/' + template + '_1')
         except Exception as e:
             print_debug(e)
             print_message("Error saving template {} for user {}".format(template, request.user), 'error')
             return JsonResponse({'new_run_dir': new_run_dir, 'error': 'template not saved'})
+
+        new_script = RunScript(
+            user=user,
+            name=template,
+            run=new_run,
+            version=1)
+        new_script.save()
         return JsonResponse({'new_run_dir': new_run_dir, 'template': 'template saved'})
     else:
         return JsonResponse({'new_run_dir': new_run_dir, 'error': 'template not found'})
@@ -420,12 +424,14 @@ def get_scripts(request):
         for item in directory_contents:
             if not os.path.isdir(item):
                 item = item.rsplit('_', 1)[0]
-                script_list.append(item)
+                if item not in script_list:
+                    script_list.append(item)
     except Exception as e:
         print_message('Error retrieving directory items', 'error')
         print_debug(e)
         return HttpResponse(status=500)
 
+    print_message(script_list)
     return HttpResponse(json.dumps(script_list))
 
 
@@ -461,7 +467,8 @@ def read_script(request):
                 name=script_name,
                 run=run_name,
                 version=version_num)
-        except ObjectDoesNotExist as e:
+        except Exception as e:
+            print_debug(e)
             var = RunScript.objects.filter(
                 user=user,
                 name=script_name,

@@ -1,4 +1,10 @@
 <div class="">
+  <style media="screen">
+  .ace_editor  {
+    height : 70vh;
+  }
+
+  </style>
   <div id="run_options">
     <ul class="collection">
       <li class="collection-item">
@@ -31,7 +37,7 @@
                 <a href="#" class="waves-effect waves-light btn">new script</a>
               </li>
               <li ng-repeat="script in script_list" class="collection-item">
-                <a href="#" style="margin-left: 3vw;">
+                <a href="#" style="margin-left: 3vw;" ng-click="open_text_edit(run, script)">
                   [[script]]
                 </a>
               </li>
@@ -138,6 +144,14 @@
         </li>
       </ul>
     </div>
+  </div>
+
+  <!-- text edit modal -->
+  <div class="modal" id="text_edit_modal" >
+    <section>
+      <a href="#" class="waves-effect waves-light btn" style="margin: .5vh;" ng-click="update_script()">save</a>
+      <div ui-ace="aceOption" ng-model="aceModel"></div>
+    </section>
   </div>
 
   <!-- copy template modal -->

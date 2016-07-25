@@ -696,20 +696,20 @@ class TestStartRun(LiveServerTestCase):
         shutil.rmtree(run_directory, ignore_errors=True)
 
     # THIS IS A MANUAL TEST, MAKE SURE THIS IS COMMETED BEFORE RUNNING ON TRAVIS
-    # def test_start_run(self):
-    #     request = {
-    #         'run_name': self.run_name,
-    #         'run_type': 'diagnostic'
-    #     }
-    #     r = self.c.post(self.live_server_url + '/run_manager/create_run/', data=json.dumps(request), content_type='application/json')
-    #     print_message('status code given ' + str(r.status_code), 'error')
-    #     self.assertTrue(r.status_code == 200)
-    #     request = json.dumps({
-    #         'run_name': self.run_name
-    #     })
-    #     r = self.c.post(self.url, data=request, content_type='application/json')
-    #     print_message('status code given ' + str(r.status_code), 'error')
-    #     self.assertTrue(r.status_code == 200)
+    def test_start_run(self):
+        request = {
+            'run_name': self.run_name,
+            'run_type': 'diagnostic'
+        }
+        r = self.c.post(self.live_server_url + '/run_manager/create_run/', data=json.dumps(request), content_type='application/json')
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+        request = json.dumps({
+            'run_name': self.run_name
+        })
+        r = self.c.post(self.url, data=request, content_type='application/json')
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
 
 
 class TestGetStatus(LiveServerTestCase):
@@ -722,11 +722,11 @@ class TestGetStatus(LiveServerTestCase):
         self.c.login(username='test', password='test')
         self.url = self.live_server_url + '/run_manager/start_run/'
     # THIS IS A MANUAL TEST, MAKE SURE THIS IS COMMETED BEFORE RUNNING ON TRAVIS
-    # def test_get_run_status(self):
-    #     r = self.c.get(self.live_server_url + '/run_manager/run_status/')
-    #     print_message(r.content)
-    #     self.assertTrue(r.status_code == 200)
-    #     self.assertTrue('user' in r.content)
+    def test_get_run_status(self):
+        r = self.c.get(self.live_server_url + '/run_manager/run_status/')
+        print_message(r.content)
+        self.assertTrue(r.status_code == 200)
+        self.assertTrue('user' in r.content)
 
 
 class TestGetTemplates(LiveServerTestCase):
