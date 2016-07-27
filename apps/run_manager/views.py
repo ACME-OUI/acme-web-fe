@@ -126,7 +126,6 @@ def create_run(request):
 def start_run(request):
     user = str(request.user)
     data = json.loads(request.body)
-    print_message(data)
     run_name = data.get('run_name')
     if not run_name:
         print_message('No run name given', 'error')
@@ -135,18 +134,28 @@ def start_run(request):
     path = os.path.abspath(os.path.dirname(__file__))
     run_directory = path + RUN_SCRIPT_PATH + user + '/' + run_name + '/'
     config_path = None
+    try:
+        config_version = RunScript.objects.filter(
+            user=user,
+            run=run_name,
+            name='config.json'
+        ).latest().version
+    except Exception as e:
+        raise
     for f in os.listdir(run_directory):
+        f = f.split('_')[0]
         if f.endswith('.json'):
             config_path = f
             break
     if not config_path:
         print_message('Unable to find config file in run directory {}'.format(run_directory))
         return HttpResponse(status=500)
-    config_path = run_directory + config_path
+    config_path = run_directory + config_path + '_' + str(config_version)
     try:
         with open(config_path, 'r') as f:
             config = f.read()
             f.close()
+        print_message(config)
         config_options = json.loads(config)
     except Exception as e:
         print_message('Error reading file {}'.format(config_path))
@@ -159,7 +168,6 @@ def start_run(request):
         request[key] = config_options[key]
     try:
         request = json.dumps(request)
-        print_message(request)
         r = requests.post(POLLER_URL, request)
         if(r.status_code != 200):
             print_message('Error communicating with poller')

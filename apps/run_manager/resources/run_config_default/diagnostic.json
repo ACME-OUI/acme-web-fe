@@ -2,8 +2,9 @@
    "run_type": "diagnostic",
    "request_attr":   {
        "diag_type": "AMWG",
-       "dataset_name": "F1850C5.ne30.6mos",
-       "start_time": "1976",
-       "end_time": 2000
+       "model_path": "/metadiags_test_data",
+       "obs_path": "/obs",
+       "outputdir": "/diags_output",
+       "set": "5"
      }
  }

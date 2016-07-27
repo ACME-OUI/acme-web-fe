@@ -169,6 +169,9 @@ def update(request):
             try:
                 job = UserRuns.objects.get(id=job_id)
                 job.status = request_type
+                output = data.get('output')
+                if output:
+                    job.output = output
                 job.save()
                 return HttpResponse(status=200)
             except Exception as e:
