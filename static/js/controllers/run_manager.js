@@ -12,16 +12,23 @@ angular.module('run_manager', ['ui.ace'])
     $scope.all_runs = [];
     $scope.selected_run = undefined;
     $scope.script_list = undefined;
+    $scope.output_list = undefined;
+    $scope.output_cache = undefined;
+    $scope.output_cache_count = 0;
     $scope.template_list = undefined;
     $scope.get_templates();
     $scope.get_runs();
     $timeout($scope.get_run_status, delay=500);
-
   }
 
   // The modes
   $scope.modes = ['json'];
   $scope.mode = $scope.modes[0];
+
+  $scope.load_output_cache = () => {
+    $scope.output_cache_count += 1;
+    $scope.output_cache = $scope.output_list.slice(0, $scope.output_cache_count * 10);
+  }
 
 
   // The ui-ace option
@@ -324,7 +331,9 @@ angular.module('run_manager', ['ui.ace'])
       }).then((res) => {
         console.log('Got some script data');
         console.log(res.data);
-        $scope.script_list = res.data;
+        $scope.script_list = res.data.script_list;
+        $scope.output_list = res.data.dir_list.output;
+        $scope.load_output_cache();
         if($scope.script_list.length == 0){
           $scope.empty_run = true;
         } else {

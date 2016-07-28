@@ -41,6 +41,10 @@
                   [[script]]
                 </a>
               </li>
+              <li ng-show="output_list.length != 0" class="collection-item">
+                <p ng-repeat="png in output_cache" style="padding: 0.5rem; margin-left: 3vw; cursor: pointer; cursor: hand;">[[png]]</p>
+                <a href="#" class="waves-effect waves-light btn" ng-click="load_output_cache()">more</a>
+              </li>
             </ul>
           </div>
           <div class="" ng-show="empty_run == true">

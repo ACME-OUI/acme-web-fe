@@ -427,20 +427,32 @@ def get_scripts(request):
         return HttpResponse(status=403)
 
     try:
+        files = {}
         script_list = []
+        dir_list = {}
         directory_contents = os.listdir(run_directory)
         for item in directory_contents:
-            if not os.path.isdir(item):
+            if not os.path.isdir(run_directory + '/' + item):
+                # print_message('Got a normal item: ' + item)
                 item = item.rsplit('_', 1)[0]
                 if item not in script_list:
                     script_list.append(item)
+            else:
+                # print_message('Found a directory: {}'.format(item))
+                dir_list[item] = []
+                for dir_item in os.listdir(run_directory + '/' + item):
+                    if dir_item.endswith('-combined.png'):
+                        # print_message('Found a PNG: {}'.format(dir_item))
+                        dir_list[item].append(dir_item)
     except Exception as e:
         print_message('Error retrieving directory items', 'error')
         print_debug(e)
         return HttpResponse(status=500)
 
     print_message(script_list)
-    return HttpResponse(json.dumps(script_list))
+    files['script_list'] = script_list
+    files['dir_list'] = dir_list
+    return HttpResponse(json.dumps(files))
 
 
 #

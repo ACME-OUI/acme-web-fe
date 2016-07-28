@@ -163,7 +163,7 @@ def update(request):
             # request to change the status of an existant job
             if request_type not in ['in_progress', 'complete', 'failed']:
                 return HttpResponse(status=400)  # Unrecognized request
-            job_id = data.get('job_id')
+            job_id = data.get('id')
             if not job_id:
                 return HttpResponse(status=400)
             try:

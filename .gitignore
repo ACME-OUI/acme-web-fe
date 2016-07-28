@@ -18,6 +18,7 @@ local_settings.py
 /js/
 /jspanel/
 /django-sendfile/
+/userdata/
 
 static/filetree/example.py
 static/systemtest/*
