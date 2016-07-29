@@ -390,11 +390,14 @@ angular.module('run_manager', ['ui.ace'])
         $scope.script_list = res.data.script_list;
         $scope.output_list[$scope.selected_run] = [];
         $scope.output_list[$scope.selected_run] = res.data.output_list;
-        $scope.load_output_cache();
         if($scope.script_list.length == 0){
           $scope.empty_run = true;
         } else {
           $scope.empty_run = false;
+        }
+
+        if($scope.output_list[$scope.selected_run].length != 0){
+          $scope.load_output_cache();
         }
         // $timeout(() => {
         //   $('.'+ run + '_preview').each((index, el) => {
