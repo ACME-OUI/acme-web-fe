@@ -12,7 +12,7 @@ angular.module('run_manager', ['ui.ace'])
     $scope.all_runs = [];
     $scope.selected_run = undefined;
     $scope.script_list = undefined;
-    $scope.output_list = undefined;
+    $scope.output_list = [];
     $scope.output_cache = undefined;
     $scope.output_cache_count = 0;
     $scope.template_list = undefined;
@@ -47,10 +47,10 @@ angular.module('run_manager', ['ui.ace'])
   $scope.show_image_by_index = (index) => {
     //var image_el = $('#' + $scope.selected_run + '_' + $scope.output_list[index].slice(0,20));
     var prefix = '/acme/userdata/image/userdata/btest/';
-    var src = prefix + $scope.selected_run + '/output/' + $scope.output_list[index]
+    var src = prefix + $scope.selected_run + '/output/' + $scope.output_list[$scope.selected_run][index]
     var image_viewer = $('#image_view');
     var image_link = $('#image_link');
-    $('#image_title').text($scope.output_list[index]);
+    $('#image_title').text($scope.output_list[$scope.selected_run][index]);
     image_link.attr({
       'href': src
     })
@@ -61,7 +61,7 @@ angular.module('run_manager', ['ui.ace'])
 
   $scope.open_image = (run, image) => {
     $scope.show_image = true;
-    $scope.image_index = $scope.output_list.indexOf(image);
+    $scope.image_index = $scope.output_list[$scope.selected_run].indexOf(image);
     var image_el = $('#' + run + '_' + image.slice(0,20));
     var src = image_el.attr('data-img-location');
     var image_viewer = $('#image_view');
@@ -83,7 +83,7 @@ angular.module('run_manager', ['ui.ace'])
 
   $scope.load_output_cache = () => {
     $scope.output_cache_count += 1;
-    $scope.output_cache = $scope.output_list.slice(0, $scope.output_cache_count * 10);
+    $scope.output_cache = $scope.output_list[$scope.selected_run].slice(0, $scope.output_cache_count * 10);
   }
 
 
@@ -388,7 +388,8 @@ angular.module('run_manager', ['ui.ace'])
         console.log('Got some script data');
         console.log(res.data);
         $scope.script_list = res.data.script_list;
-        $scope.output_list = res.data.output_list;
+        $scope.output_list[$scope.selected_run] = [];
+        $scope.output_list[$scope.selected_run] = res.data.output_list;
         $scope.load_output_cache();
         if($scope.script_list.length == 0){
           $scope.empty_run = true;

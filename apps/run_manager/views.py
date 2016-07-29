@@ -443,10 +443,11 @@ def get_scripts(request):
                     script_list.append(item)
 
         outputdir = DIAG_OUTPUT_PREFIX + user + '/' + run_name + '/output/'
-        directory_contents = os.listdir(outputdir)
-        for item in directory_contents:
-            if item.endswith('-combined.png'):
-                output_list.append(item)
+        if os.path.exists(outputdir):
+            directory_contents = os.listdir(outputdir)
+            for item in directory_contents:
+                if item.endswith('-combined.png'):
+                    output_list.append(item)
 
     except Exception as e:
         print_message('Error retrieving directory items', 'error')
