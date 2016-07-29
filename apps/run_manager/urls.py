@@ -16,4 +16,5 @@ urlpatterns = patterns( '',
                         url(r'^delete_script/$', views.delete_script),
                         url(r'^get_templates/$', views.get_templates),
                         url(r'^copy_template/$', views.copy_template),
+                        url(r'^get_user/$', views.get_user),
                         )

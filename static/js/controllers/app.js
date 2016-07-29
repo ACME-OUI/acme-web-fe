@@ -29,6 +29,18 @@
       );
     };
 
+    $scope.get_user = () => {
+      $http({
+        url: '/run_manager/get_user',
+        method: 'GET'
+      }).then((res) => {
+        $scope.user = res.data
+      }).catch((res) => {
+        console.log('Error getting user');
+        console.log(res);
+      })
+    }
+
     /**
      * Slices the object. Note that returns a new spliced object,
      * e.g. do not modifies original object. Also note that that sliced elements

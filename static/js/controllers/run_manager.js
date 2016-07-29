@@ -21,7 +21,7 @@ angular.module('run_manager', ['ui.ace'])
     $scope.get_templates();
     $scope.get_runs();
     $timeout($scope.get_run_status, delay=500);
-
+    $scope.$parent.get_user();
     document.onkeydown = checkKey;
 
     function checkKey(e) {
@@ -46,7 +46,7 @@ angular.module('run_manager', ['ui.ace'])
 
   $scope.show_image_by_index = (index) => {
     //var image_el = $('#' + $scope.selected_run + '_' + $scope.output_list[index].slice(0,20));
-    var prefix = '/acme/userdata/image/userdata/btest/';
+    var prefix = '/acme/userdata/image/userdata/' + $scope.$parent.user + '/';
     var src = prefix + $scope.selected_run + '/output/' + $scope.output_list[$scope.selected_run][index]
     var image_viewer = $('#image_view');
     var image_link = $('#image_link');

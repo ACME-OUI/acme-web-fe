@@ -622,3 +622,9 @@ def get_templates(request):
                 template_list.append(directory.split('/')[-1] + '/' + template)
 
     return HttpResponse(json.dumps(template_list))
+
+
+@login_required
+def get_user(request):
+    user = str(request.user)
+    return HttpResponse(json.dumps(user))
