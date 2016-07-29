@@ -16,9 +16,65 @@ angular.module('run_manager', ['ui.ace'])
     $scope.output_cache = undefined;
     $scope.output_cache_count = 0;
     $scope.template_list = undefined;
+    $scope.show_image = false;
+    $scope.image_index = 0;
     $scope.get_templates();
     $scope.get_runs();
     $timeout($scope.get_run_status, delay=500);
+
+    document.onkeydown = checkKey;
+
+    function checkKey(e) {
+      if($scope.show_image){
+        e = e || window.event;
+
+        if (e.keyCode == '38') {
+          if($scope.image_index > 0){
+            $scope.image_index -= 1;
+            $scope.show_image_by_index($scope.image_index);
+          }
+        }
+        else if (e.keyCode == '40') {
+          if($scope.image_index < $scope.output_list.length){
+            $scope.image_index += 1;
+            $scope.show_image_by_index($scope.image_index);
+          }
+        }
+      }
+    }
+  }
+
+  $scope.show_image_by_index = (index) => {
+    //var image_el = $('#' + $scope.selected_run + '_' + $scope.output_list[index].slice(0,20));
+    var prefix = '/acme/userdata/image/userdata/btest/';
+    var src = prefix + $scope.selected_run + '/output/' + $scope.output_list[index]
+    var image_viewer = $('#image_view');
+    var image_link = $('#image_link');
+    $('#image_title').text($scope.output_list[index]);
+    image_link.attr({
+      'href': src
+    })
+    image_viewer.attr({
+      'src': src
+    });
+  }
+
+  $scope.open_image = (run, image) => {
+    $scope.show_image = true;
+    $scope.image_index = $scope.output_list.indexOf(image);
+    var image_el = $('#' + run + '_' + image.slice(0,20));
+    var src = image_el.attr('data-img-location');
+    var image_viewer = $('#image_view');
+    var image_link = $('#image_link');
+    $('#image_title').text(image);
+    image_link.attr({
+      'href': src
+    })
+    image_viewer.attr({
+      'src': src
+    });
+
+    $('#image_view_modal').openModal();
   }
 
   // The modes
@@ -332,13 +388,26 @@ angular.module('run_manager', ['ui.ace'])
         console.log('Got some script data');
         console.log(res.data);
         $scope.script_list = res.data.script_list;
-        $scope.output_list = res.data.dir_list.output;
+        $scope.output_list = res.data.output_list;
         $scope.load_output_cache();
         if($scope.script_list.length == 0){
           $scope.empty_run = true;
         } else {
           $scope.empty_run = false;
         }
+        // $timeout(() => {
+        //   $('.'+ run + '_preview').each((index, el) => {
+        //     var element = $(el);
+        //     var content = '<img src="' + element.attr('data-img-location') + '" />';
+        //     element.tooltip({
+        //       position:{
+        //         my:"right+10",
+        //         at:"center bottom"
+        //       },
+        //       content: content
+        //     });
+        //   });
+        // }, delay=200);
       }).catch((res) => {
         console.log('Error getting script list');
         console.log(res);

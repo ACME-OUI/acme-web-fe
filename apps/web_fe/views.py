@@ -366,8 +366,7 @@ def credential_check_existance(request):
 
 @login_required
 def send_image(request, path):
-    cred = Credential.objects.get(service='velo', site_user_name=request.user)
-    fullpath = os.path.join('userdata', cred.service_user_name, path)
+    fullpath = os.path.join(os.getcwd(), path)
 
     if os.path.isfile(fullpath):
         return sendfile(request, fullpath)

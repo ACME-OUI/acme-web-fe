@@ -3,7 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 import json
 import os
-from constants import RUN_SCRIPT_PATH, TEMPLATE_PATH, RUN_CONFIG_DEFAULT_PATH, POLLER_URL
+from constants import RUN_SCRIPT_PATH
+from constants import TEMPLATE_PATH
+from constants import RUN_CONFIG_DEFAULT_PATH
+from constants import POLLER_URL
+from constants import DIAG_OUTPUT_PREFIX
 from util.utilities import print_debug, print_message
 from models import ModelRun, RunScript
 import shutil
@@ -429,7 +433,7 @@ def get_scripts(request):
     try:
         files = {}
         script_list = []
-        dir_list = {}
+        output_list = []
         directory_contents = os.listdir(run_directory)
         for item in directory_contents:
             if not os.path.isdir(run_directory + '/' + item):
@@ -437,13 +441,13 @@ def get_scripts(request):
                 item = item.rsplit('_', 1)[0]
                 if item not in script_list:
                     script_list.append(item)
-            else:
-                # print_message('Found a directory: {}'.format(item))
-                dir_list[item] = []
-                for dir_item in os.listdir(run_directory + '/' + item):
-                    if dir_item.endswith('-combined.png'):
-                        # print_message('Found a PNG: {}'.format(dir_item))
-                        dir_list[item].append(dir_item)
+
+        outputdir = DIAG_OUTPUT_PREFIX + user + '/' + run_name + '/output/'
+        directory_contents = os.listdir(outputdir)
+        for item in directory_contents:
+            if item.endswith('-combined.png'):
+                output_list.append(item)
+
     except Exception as e:
         print_message('Error retrieving directory items', 'error')
         print_debug(e)
@@ -451,7 +455,7 @@ def get_scripts(request):
 
     print_message(script_list)
     files['script_list'] = script_list
-    files['dir_list'] = dir_list
+    files['output_list'] = output_list
     return HttpResponse(json.dumps(files))
 
 
