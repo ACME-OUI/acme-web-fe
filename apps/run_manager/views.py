@@ -442,7 +442,16 @@ def get_scripts(request):
                 if item not in script_list:
                     script_list.append(item)
 
-        outputdir = DIAG_OUTPUT_PREFIX + user + '/' + run_name + '/output/'
+        outputdir = ''
+        config_script = RunScript.objects.filter(user=user, run=run_name, name='config.json').latest()
+        print_message(run_directory + 'config.json_' + str(config_script.version))
+        with open(run_directory + '/config.json_' + str(config_script.version)) as config_file:
+            config = json.loads(config_file.read())
+            config = config.get('request_attr')
+            outdir = config.get('outputdir')
+            diag_type = config.get('diag_type')
+            outputdir = DIAG_OUTPUT_PREFIX + user + '/' + run_name + '/' + outdir + '/' + diag_type
+            print_message('outputdir: {}'.format(outputdir))
         if os.path.exists(outputdir):
             directory_contents = os.listdir(outputdir)
             for item in directory_contents:
@@ -627,4 +636,4 @@ def get_templates(request):
 @login_required
 def get_user(request):
     user = str(request.user)
-    return HttpResponse(json.dumps(user))
+    return HttpResponse(user)

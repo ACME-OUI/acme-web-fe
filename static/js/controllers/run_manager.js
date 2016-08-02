@@ -18,6 +18,7 @@ angular.module('run_manager', ['ui.ace'])
     $scope.template_list = undefined;
     $scope.show_image = false;
     $scope.image_index = 0;
+    $scope.selected_run_params = {};
     $scope.get_templates();
     $scope.get_runs();
     $timeout($scope.get_run_status, delay=500);
@@ -35,7 +36,7 @@ angular.module('run_manager', ['ui.ace'])
           }
         }
         else if (e.keyCode == '40') {
-          if($scope.image_index < $scope.output_list.length){
+          if($scope.image_index < $scope.output_list[$scope.selected_run].length){
             $scope.image_index += 1;
             $scope.show_image_by_index($scope.image_index);
           }
@@ -47,7 +48,7 @@ angular.module('run_manager', ['ui.ace'])
   $scope.show_image_by_index = (index) => {
     //var image_el = $('#' + $scope.selected_run + '_' + $scope.output_list[index].slice(0,20));
     var prefix = '/acme/userdata/image/userdata/' + $scope.$parent.user + '/';
-    var src = prefix + $scope.selected_run + '/output/' + $scope.output_list[$scope.selected_run][index]
+    var src = prefix + $scope.selected_run + '/diags_output/amwg/' + $scope.output_list[$scope.selected_run][index]
     var image_viewer = $('#image_view');
     var image_link = $('#image_link');
     $('#image_title').text($scope.output_list[$scope.selected_run][index]);
@@ -399,19 +400,6 @@ angular.module('run_manager', ['ui.ace'])
         if($scope.output_list[$scope.selected_run].length != 0){
           $scope.load_output_cache();
         }
-        // $timeout(() => {
-        //   $('.'+ run + '_preview').each((index, el) => {
-        //     var element = $(el);
-        //     var content = '<img src="' + element.attr('data-img-location') + '" />';
-        //     element.tooltip({
-        //       position:{
-        //         my:"right+10",
-        //         at:"center bottom"
-        //       },
-        //       content: content
-        //     });
-        //   });
-        // }, delay=200);
       }).catch((res) => {
         console.log('Error getting script list');
         console.log(res);
