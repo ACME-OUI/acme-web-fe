@@ -13,8 +13,8 @@ angular.module('run_manager', ['ui.ace'])
     $scope.selected_run = undefined;
     $scope.script_list = undefined;
     $scope.output_list = [];
-    $scope.output_cache = undefined;
-    $scope.output_cache_count = 0;
+    $scope.output_cache = {};
+    $scope.output_cache_count = {};
     $scope.template_list = undefined;
     $scope.show_image = false;
     $scope.image_index = 0;
@@ -30,13 +30,13 @@ angular.module('run_manager', ['ui.ace'])
       if($scope.show_image){
         e = e || window.event;
 
-        if (e.keyCode == '38') {
+        if (e.keyCode == '37') {
           if($scope.image_index > 0){
             $scope.image_index -= 1;
             $scope.show_image_by_index($scope.image_index);
           }
         }
-        else if (e.keyCode == '40') {
+        else if (e.keyCode == '39') {
           if($scope.image_index < $scope.output_list[$scope.selected_run].length){
             $scope.image_index += 1;
             $scope.show_image_by_index($scope.image_index);
@@ -90,8 +90,8 @@ angular.module('run_manager', ['ui.ace'])
   $scope.mode = $scope.modes[0];
 
   $scope.load_output_cache = () => {
-    $scope.output_cache_count += 1;
-    $scope.output_cache = $scope.output_list[$scope.selected_run].slice(0, $scope.output_cache_count * 10);
+    $scope.output_cache_count[$scope.selected_run] += 1;
+    $scope.output_cache[$scope.selected_run] = $scope.output_list[$scope.selected_run].slice(0, $scope.output_cache_count[$scope.selected_run] * 10);
   }
 
 
@@ -405,20 +405,26 @@ angular.module('run_manager', ['ui.ace'])
           'run_name' : run
         }
       }).then((res) => {
-        console.log('Got some script data');
-        console.log(res.data);
-        $scope.script_list = res.data.script_list;
-        $scope.output_list[$scope.selected_run] = [];
-        $scope.output_list[$scope.selected_run] = res.data.output_list;
-        if($scope.script_list.length == 0){
-          $scope.empty_run = true;
-        } else {
-          $scope.empty_run = false;
-        }
+        $timeout(() => {
+          console.log('Got some script data');
+          console.log(res.data);
+          $scope.script_list = res.data.script_list;
+          $scope.output_list[$scope.selected_run] = [];
+          $scope.output_list[$scope.selected_run] = res.data.output_list;
+          if($scope.script_list.length == 0){
+            $scope.empty_run = true;
+          } else {
+            $scope.empty_run = false;
+          }
 
-        if($scope.output_list[$scope.selected_run].length != 0){
-          $scope.load_output_cache();
-        }
+          if($scope.output_list[$scope.selected_run].length != 0){
+            $scope.output_cache_count[$scope.selected_run] = 0;
+            $scope.load_output_cache();
+          }
+          $('.collapsible').collapsible({
+            accordion : false
+          });
+        }, delay=200);
       }).catch((res) => {
         console.log('Error getting script list');
         console.log(res);
