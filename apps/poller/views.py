@@ -9,6 +9,7 @@ import os
 from util.utilities import print_debug, print_message
 from run_manager.constants import DIAG_OUTPUT_PREFIX
 
+
 @csrf_exempt
 def update(request):
     if request.method == 'GET':
