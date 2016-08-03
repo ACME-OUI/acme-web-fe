@@ -9,7 +9,7 @@ angular.module('run_manager', ['ui.ace'])
     $scope.aceModel = '';
     $scope.ready = false;
     $scope.run_list = [];
-    $scope.all_runs = [];
+    $scope.all_runs = undefined;
     $scope.selected_run = undefined;
     $scope.script_list = undefined;
     $scope.output_list = [];
@@ -21,8 +21,9 @@ angular.module('run_manager', ['ui.ace'])
     $scope.selected_run_params = {};
     $scope.get_templates();
     $scope.get_runs();
-    $timeout($scope.get_run_status, delay=500);
+    //$timeout($scope.get_run_status, delay=500);
     $scope.$parent.get_user();
+    $scope.tick();
     document.onkeydown = checkKey;
 
     function checkKey(e) {
@@ -43,6 +44,12 @@ angular.module('run_manager', ['ui.ace'])
         }
       }
     }
+  }
+
+  $scope.tick = () => {
+    $scope.get_run_status(() => {
+      $timeout($scope.tick, 5000);
+    });
   }
 
   $scope.show_image_by_index = (index) => {
@@ -185,7 +192,7 @@ angular.module('run_manager', ['ui.ace'])
   }
 
 
-  $scope.get_run_status = () => {
+  $scope.get_run_status = (callback) => {
     $http({
       url: '/run_manager/run_status/',
       method: 'GET'
@@ -196,10 +203,22 @@ angular.module('run_manager', ['ui.ace'])
           return a.job_id - b.job_id
         });
       }
-      $scope.all_runs = runs;
+      if($scope.all_runs){
+        for(r in runs){
+          if($scope.all_runs[r] && $scope.all_runs[r].job_id == runs[r].job_id){
+            $scope.all_runs[r].status = runs[r].status;
+          } else {
+            $scope.all_runs.push(runs[r]);
+          }
+        }
+      } else {
+        $scope.all_runs = runs;
+      }
       $timeout($scope.set_run_status, delay=200, true, runs);
+      callback();
     }).catch((res) => {
       $scope.$parent.showToast("error getting run status");
+      callback();
     });
   }
 
