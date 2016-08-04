@@ -1,18 +1,20 @@
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
-import json
-import os
 from constants import RUN_SCRIPT_PATH
 from constants import TEMPLATE_PATH
 from constants import RUN_CONFIG_DEFAULT_PATH
 from constants import POLLER_URL
 from constants import DIAG_OUTPUT_PREFIX
+from sendfile import sendfile
 from util.utilities import print_debug, print_message
 from models import ModelRun, RunScript
+
 import shutil
 import requests
-
+import datetime
+import json
+import os
 
 #
 # Creates a new model run configuration
@@ -454,9 +456,12 @@ def get_scripts(request):
             print_message('outputdir: {}'.format(outputdir))
         if os.path.exists(outputdir):
             directory_contents = os.listdir(outputdir)
-            for item in directory_contents:
-                if item.endswith('-combined.png'):
-                    output_list.append(item)
+            for root, dirs, file_list in os.walk(outputdir):
+                for file in file_list:
+                    if file.endswith('-combined.png'):
+                        output_list.append(file)
+                    if file.endswith('.txt'):
+                        output_list.insert(0, file)
 
     except Exception as e:
         print_message('Error retrieving directory items', 'error')
@@ -468,6 +473,49 @@ def get_scripts(request):
     files['output_list'] = output_list
     return HttpResponse(json.dumps(files))
 
+
+#
+# Reads a specified text file from the runs output folder
+#
+@login_required
+def read_output_script(request):
+    script_name = request.GET.get('script_name')
+    run_name = request.GET.get('run_name')
+    user = str(request.user)
+    if not script_name:
+        print_message('No script name given', 'error')
+        return HttpResponse(status=400)
+
+    if not run_name:
+        print_message('No run config folder given', 'error')
+        return HttpResponse(status=400)
+
+    output_directory = DIAG_OUTPUT_PREFIX + user + '/' + run_name
+    print_message('looking for script in {}'.format(output_directory))
+    script_name_exists = False
+    script_path = ''
+    for (dirpath, dirnames, filenames) in os.walk(output_directory):
+        for file in filenames:
+            if file == script_name:
+                script_name_exists = True
+                script_path = os.path.join(dirpath, file)
+                print_message('Found output file at {}'.format(script_path), 'ok')
+    if not script_name_exists:
+        print_message("unable to find script {}".format(script_name))
+        return HttpResponse(status=400)
+
+    try:
+        contents = ''
+        with open(script_path, 'r') as f:
+            for line in f:
+                contents += line
+    except Exception as e:
+        print_message('Error reading from file {}'.format(script_path), 'error')
+        print_debug(e)
+        return HttpResponse(status=500)
+
+    return JsonResponse({'script': contents})
+    return HttpResponse()
 
 #
 # Reads the contents of a script and sends it back to the user
@@ -553,6 +601,46 @@ def read_script(request):
 @login_required
 def delete_script(request):
     return JsonResponse({})
+
+
+#
+# Zips the output from a given job run and returns the zip to the user
+#
+# input: user, the user making the request
+#        run_name, the name of the requested run Zips
+#        run_type, the type of the run, either diagnostic or model
+# TODO: make this work with model output as well
+@login_required
+def get_output_zip(request):
+    user = str(request.user)
+    run_name = request.GET.get('run_name')
+    run_type = request.GET.get('run_type')
+
+    if not run_name:
+        print_message('No run name given')
+        return HttpResponse(status=400)
+
+    if not run_type:
+        print_message('No run type given')
+        return HttpResponse(status=400)
+
+    if run_type == 'diagnostic':
+        run_directory = DIAG_OUTPUT_PREFIX + user + '/' + run_name
+    elif run_type == 'model':
+        run_directory = ''
+    else:
+        print_message('Unrecognized run_type {}'.format(run_type))
+        return HttpResponse(status=403)
+
+    output_filename = user + '_' + run_name + '_' + datetime.datetime.now()
+
+    try:
+        shutil.make_archive(output_filename, 'zip', dir_name)
+    except Exception as e:
+        print_message('Failed to create zip archive')
+        print_debug(e)
+
+    return sendfile(request, output_filename)
 
 
 #

@@ -21,7 +21,6 @@ angular.module('run_manager', ['ui.ace'])
     $scope.selected_run_params = {};
     $scope.get_templates();
     $scope.get_runs();
-    //$timeout($scope.get_run_status, delay=500);
     $scope.$parent.get_user();
     $scope.tick();
     document.onkeydown = checkKey;
@@ -99,7 +98,7 @@ angular.module('run_manager', ['ui.ace'])
   $scope.aceOption = {
     mode: $scope.mode.toLowerCase(),
     onLoad: function (_ace) {
-
+      $scope.ace = _ace;
       $scope.modeChanged = function () {
         _ace.getSession().setMode("ace/mode/" + $scope.mode.toLowerCase());
       };
@@ -147,6 +146,8 @@ angular.module('run_manager', ['ui.ace'])
       console.log(res);
       var script = JSON.stringify(JSON.parse(res.data.script), null, 2);
       $scope.aceModel = script;
+      $scope.ace.setReadOnly(false);
+      $('#text_edit_save_btn').removeClass('disabled');
     }).catch((res) => {
       console.log(res);
     })
@@ -429,6 +430,33 @@ angular.module('run_manager', ['ui.ace'])
         console.log('Error getting script list');
         console.log(res);
       })
+    }
+  }
+
+  $scope.open_output = (run, item) => {
+    if(item.endsWith('.png')){
+      open_image(run.run_name, item);
+    }
+    else if (item.endsWith('.txt')) {
+        $('#text_edit_modal').openModal();
+        $scope.selected_script = item;
+        var data = {
+          'run_name': run,
+          'script_name': item
+        }
+        $http({
+          url: '/run_manager/read_output_script/',
+          method: 'GET',
+          params: data
+        }).then((res) => {
+          console.log(res);
+          var script = res.data.script;
+          $scope.aceModel = script;
+          $scope.ace.setReadOnly(true);
+          $('#text_edit_save_btn').addClass('disabled');
+        }).catch((res) => {
+          console.log(res);
+        });
     }
   }
 
