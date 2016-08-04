@@ -632,15 +632,18 @@ def get_output_zip(request):
         print_message('Unrecognized run_type {}'.format(run_type))
         return HttpResponse(status=403)
 
-    output_filename = user + '_' + run_name + '_' + datetime.datetime.now()
+    output_filename = user + '_' + run_name + '_' + str(datetime.datetime.now())
 
     try:
-        shutil.make_archive(output_filename, 'zip', dir_name)
+        shutil.make_archive(output_filename, 'zip', run_directory)
     except Exception as e:
         print_message('Failed to create zip archive')
         print_debug(e)
 
-    return sendfile(request, output_filename)
+    # response = HttpResponse(output_filename, content_type= "application/x-zip-compressed")
+    # response['Content-Disposition'] = 'attachment; filename=%s' % output_filename
+    # return response
+    return sendfile(request, output_filename + '.zip')
 
 
 #

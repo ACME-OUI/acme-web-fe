@@ -98,7 +98,17 @@
                       <div class="" style="float: right;" ng-show="show_image">
                         <img style="position: relative;" id="[[run]]_image_view" src="" />
                       </div>
-                      <a href="#" class="waves-effect waves-light btn" style="margin-top: 1vh;" ng-click="load_output_cache()">more</a>
+                      <a href="#"
+                         class="waves-effect waves-light btn"
+                         style="margin-top: 1vh;"
+                         ng-click="load_output_cache()">
+                         more
+                      </a>
+                      <a href="/run_manager/get_output_zip?run_name=[[run.run_name]]&run_type=diagnostic"
+                         style="margin-top: 1vh;"
+                         class="waves-effect waves-light btn">
+                         download zip
+                      </a>
                     </li>
                   </ul>
                 </div>
