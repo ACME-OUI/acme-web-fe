@@ -79,5 +79,5 @@ then from your browser you can view the site at
 
 **poller**
 
-To get the job cycle working, download the llnl-poller from (here)[https://github.com/sterlingbaldwin/llnl-poller]
+To get the job cycle working, download the llnl-poller from [here](https://github.com/sterlingbaldwin/llnl-poller)
 follow its install steps and run it before submitting jobs from the dashboard.
