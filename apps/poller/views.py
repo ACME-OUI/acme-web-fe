@@ -165,9 +165,11 @@ def update(request):
 
             # request to change the status of an existant job
             if request_type not in ['in_progress', 'complete', 'failed']:
+                print_message("Unrecognized request type {}".format(request_type))
                 return HttpResponse(status=400)  # Unrecognized request
-            job_id = data.get('id')
+            job_id = data.get('job_id')
             if not job_id:
+                print_message("no job id")
                 return HttpResponse(status=400)
             try:
                 job = UserRuns.objects.get(id=job_id)

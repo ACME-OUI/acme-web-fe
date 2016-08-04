@@ -599,8 +599,9 @@ class TestGetScripts(LiveServerTestCase):
         self.assertTrue(r.status_code == 200)
 
         data = json.loads(r.content)
-        self.assertTrue(script_name1 in data)
-        self.assertTrue(script_name2 in data)
+        print_message(data)
+        self.assertTrue(script_name1 in data.get('script_list'))
+        self.assertTrue(script_name2 in data.get('script_list'))
 
     def test_get_scripts_without_run_name(self):
         run_name = 'get_scripts_run'
