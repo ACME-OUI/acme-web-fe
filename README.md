@@ -76,3 +76,8 @@ then from your browser you can view the site at
 * admin front end (**not implemented yet**)
   * *boxname.domain*:8000/admin
   * 127.0.0.1:8000/admin
+
+** poller **
+
+To get the job cycle working, download the llnl-poller from (here)[https://github.com/sterlingbaldwin/llnl-poller]
+follow its install steps and run it before submitting jobs from the dashboard.
