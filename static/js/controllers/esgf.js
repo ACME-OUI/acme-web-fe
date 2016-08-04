@@ -47,7 +47,7 @@ angular.module('esgf', ['ngAnimate'])
       }
       $scope.ready = false;
       $http({
-        url: 'esgf/node_search',
+        url: '/esgf/node_search',
         method: 'GET',
         params: params
       }).then((res) => {
@@ -174,7 +174,7 @@ angular.module('esgf', ['ngAnimate'])
 
   $scope.get_facet_options = () => {
     $http({
-      url: 'esgf/load_facets',
+      url: '/esgf/load_facets',
       method: 'GET',
       params: {'nodes': JSON.stringify($scope.selected_nodes)}
     }).then((res) => {

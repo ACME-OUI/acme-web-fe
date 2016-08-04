@@ -131,24 +131,26 @@ class TestNodeList(LiveServerTestCase):
         self.assertTrue( response.status_code == 200 )
         self.assertTrue( 'pcmdi.llnl.gov' in json.loads(response.content) )
 
-
-class TestDownload(LiveServerTestCase):
-
-    def setUp(self):
-        self.auth_url = 'http://aims3.llnl.gov/thredds/fileServer/cmip5_css01_data/cmip5/output1/LASG-CESS/FGOALS-g2/midHolocene/day/seaIce/day/r1i1p1/v1/usi/usi_day_FGOALS-g2_midHolocene_r1i1p1_05320101-05321231.nc'
-        self.unauth_url = 'http://airsl2.gesdisc.eosdis.nasa.gov/thredds/fileServer/cmac/taNobs_AIRS_L3_RetStd-v6_201502.nc'
-        self.bad_url = 'http://not.a.site.llnl.gov/not_a_file.nc'
-
-    def test_download_unauth(self):
-        print "\n---->[+] Starting " + inspect.stack()[0][3]
-        response = requests.get(self.live_server_url + '/esgf/download', params={'url': self.unauth_url})
-        self.assertTrue( response.status_code == 200 )
-
-    def test_download_bad_url(self):
-        print "\n---->[+] Starting " + inspect.stack()[0][3]
-        response = requests.get(self.live_server_url + '/esgf/download', params={'url': self.bad_url})
-        print_message(response.status_code)
-        self.assertTrue( response.status_code == 400 )
+#
+# These URLs are old and dont work anymore
+#
+# class TestDownload(LiveServerTestCase):
+#
+#     def setUp(self):
+#         self.auth_url = 'http://aims3.llnl.gov/thredds/fileServer/cmip5_css01_data/cmip5/output1/LASG-CESS/FGOALS-g2/midHolocene/day/seaIce/day/r1i1p1/v1/usi/usi_day_FGOALS-g2_midHolocene_r1i1p1_05320101-05321231.nc'
+#         self.unauth_url = 'http://airsl2.gesdisc.eosdis.nasa.gov/thredds/fileServer/cmac/taNobs_AIRS_L3_RetStd-v6_201502.nc'
+#         self.bad_url = 'http://not.a.site.llnl.gov/not_a_file.nc'
+#
+#     def test_download_unauth(self):
+#         print "\n---->[+] Starting " + inspect.stack()[0][3]
+#         response = requests.get(self.live_server_url + '/esgf/download', params={'url': self.unauth_url})
+#         self.assertTrue( response.status_code == 200 )
+#
+#     def test_download_bad_url(self):
+#         print "\n---->[+] Starting " + inspect.stack()[0][3]
+#         response = requests.get(self.live_server_url + '/esgf/download', params={'url': self.bad_url})
+#         print_message(response.status_code)
+#         self.assertTrue( response.status_code == 400 )
 
     # TODO: make this work
     # def test_download_auth(self):

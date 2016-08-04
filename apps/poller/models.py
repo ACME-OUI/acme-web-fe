@@ -9,3 +9,4 @@ class UserRuns(models.Model):
     config_options = models.TextField()
     status = models.CharField(max_length=15)
     created = models.DateTimeField(auto_now_add=True)
+    output = models.TextField()

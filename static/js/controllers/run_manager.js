@@ -1,21 +1,114 @@
 
-angular.module('run_manager', [])
+angular.module('run_manager', ['ui.ace'])
 .controller('RunManagerControl', ['$scope', '$http', '$timeout', function($scope, $http, $timeout) {
 
   $scope.init = function(){
     console.log('[+] Initializing RunManager window');
     $scope.run_options = ['New run configuration', 'start run', 'stop run', 'update status', 'new template'];
     $scope.run_types = ['diagnostic', 'model'];
+    $scope.aceModel = '';
     $scope.ready = false;
     $scope.run_list = [];
-    $scope.all_runs = [];
+    $scope.all_runs = undefined;
     $scope.selected_run = undefined;
     $scope.script_list = undefined;
+    $scope.output_list = [];
+    $scope.output_cache = {};
+    $scope.output_cache_count = {};
     $scope.template_list = undefined;
+    $scope.show_image = false;
+    $scope.image_index = 0;
+    $scope.selected_run_params = {};
     $scope.get_templates();
     $scope.get_runs();
-    $timeout($scope.get_run_status, delay=500);
+    //$timeout($scope.get_run_status, delay=500);
+    $scope.$parent.get_user();
+    $scope.tick();
+    document.onkeydown = checkKey;
+
+    function checkKey(e) {
+      if($scope.show_image){
+        e = e || window.event;
+
+        if (e.keyCode == '37') {
+          if($scope.image_index > 0){
+            $scope.image_index -= 1;
+            $scope.show_image_by_index($scope.image_index);
+          }
+        }
+        else if (e.keyCode == '39') {
+          if($scope.image_index < $scope.output_list[$scope.selected_run].length){
+            $scope.image_index += 1;
+            $scope.show_image_by_index($scope.image_index);
+          }
+        }
+      }
+    }
   }
+
+  $scope.tick = () => {
+    $scope.get_run_status(() => {
+      $timeout($scope.tick, 5000);
+    });
+  }
+
+  $scope.show_image_by_index = (index) => {
+    //var image_el = $('#' + $scope.selected_run + '_' + $scope.output_list[index].slice(0,20));
+    var prefix = '/acme/userdata/image/userdata/' + $scope.$parent.user + '/';
+    var src = prefix + $scope.selected_run + '/diags_output/amwg/' + $scope.output_list[$scope.selected_run][index]
+    var image_viewer = $('#image_view');
+    var image_link = $('#image_link');
+    $('#image_title').text($scope.output_list[$scope.selected_run][index]);
+    image_link.attr({
+      'href': src
+    })
+    image_viewer.attr({
+      'src': src
+    });
+  }
+
+  $scope.open_image = (run, image) => {
+    $scope.show_image = true;
+    $scope.image_index = $scope.output_list[$scope.selected_run].indexOf(image);
+    var image_el = $('#' + run + '_' + image.slice(0,20));
+    var src = image_el.attr('data-img-location');
+    var image_viewer = $('#image_view');
+    var image_link = $('#image_link');
+    $('#image_title').text(image);
+    image_link.attr({
+      'href': src
+    })
+    image_viewer.attr({
+      'src': src
+    });
+
+    $('#image_view_modal').openModal();
+  }
+
+  // The modes
+  $scope.modes = ['json'];
+  $scope.mode = $scope.modes[0];
+
+  $scope.load_output_cache = () => {
+    $scope.output_cache_count[$scope.selected_run] += 1;
+    $scope.output_cache[$scope.selected_run] = $scope.output_list[$scope.selected_run].slice(0, $scope.output_cache_count[$scope.selected_run] * 10);
+  }
+
+
+  // The ui-ace option
+  $scope.aceOption = {
+    mode: $scope.mode.toLowerCase(),
+    onLoad: function (_ace) {
+
+      $scope.modeChanged = function () {
+        _ace.getSession().setMode("ace/mode/" + $scope.mode.toLowerCase());
+      };
+
+    },
+    onChange: function(_ace){
+      $scope.aceModel = _ace[1].getValue();
+    }
+  };
 
   $scope.set_run_status = (data) => {
     for(obj in data){
@@ -39,6 +132,47 @@ angular.module('run_manager', [])
     }
   }
 
+  $scope.open_text_edit = (run, script) => {
+    $('#text_edit_modal').openModal();
+    $scope.selected_script = script;
+    var data = {
+      'run_name': run,
+      'script_name': script
+    }
+    $http({
+      url: '/run_manager/read_script/',
+      method: 'GET',
+      params: data
+    }).then((res) => {
+      console.log(res);
+      var script = JSON.stringify(JSON.parse(res.data.script), null, 2);
+      $scope.aceModel = script;
+    }).catch((res) => {
+      console.log(res);
+    })
+  }
+
+  $scope.update_script = () => {
+    var data = {
+      'script_name': $scope.selected_script,
+      'run_name': $scope.selected_run,
+      'contents': $scope.aceModel
+    }
+    $http({
+      url: '/run_manager/update_script/',
+      method: 'POST',
+      data: data,
+      headers: {
+        'X-CSRFToken' : $scope.$parent.get_csrf()
+      }
+    }).then((res) => {
+      console.log(res);
+      $scope.$parent.showToast("File saved");
+    }).catch((res) => {
+      console.log(res);
+    })
+  }
+
   $scope.stop_run = (run) => {
     $http({
       url: '/run_manager/stop_job/',
@@ -58,19 +192,33 @@ angular.module('run_manager', [])
   }
 
 
-  $scope.get_run_status = () => {
+  $scope.get_run_status = (callback) => {
     $http({
       url: '/run_manager/run_status/',
       method: 'GET'
     }).then((res) => {
       var runs = res.data;
-      runs.sort(function(a, b){
-        return a.job_id - b.job_id
-      });
-      $scope.all_runs = runs;
+      if(Object.keys(runs).length !== 0){
+        runs.sort(function(a, b){
+          return a.job_id - b.job_id
+        });
+      }
+      if($scope.all_runs){
+        for(r in runs){
+          if($scope.all_runs[r] && $scope.all_runs[r].job_id == runs[r].job_id){
+            $scope.all_runs[r].status = runs[r].status;
+          } else {
+            $scope.all_runs.push(runs[r]);
+          }
+        }
+      } else {
+        $scope.all_runs = runs;
+      }
       $timeout($scope.set_run_status, delay=200, true, runs);
+      callback();
     }).catch((res) => {
       $scope.$parent.showToast("error getting run status");
+      callback();
     });
   }
 
@@ -257,14 +405,26 @@ angular.module('run_manager', [])
           'run_name' : run
         }
       }).then((res) => {
-        console.log('Got some script data');
-        console.log(res.data);
-        $scope.script_list = res.data;
-        if($scope.script_list.length == 0){
-          $scope.empty_run = true;
-        } else {
-          $scope.empty_run = false;
-        }
+        $timeout(() => {
+          console.log('Got some script data');
+          console.log(res.data);
+          $scope.script_list = res.data.script_list;
+          $scope.output_list[$scope.selected_run] = [];
+          $scope.output_list[$scope.selected_run] = res.data.output_list;
+          if($scope.script_list.length == 0){
+            $scope.empty_run = true;
+          } else {
+            $scope.empty_run = false;
+          }
+
+          if($scope.output_list[$scope.selected_run].length != 0){
+            $scope.output_cache_count[$scope.selected_run] = 0;
+            $scope.load_output_cache();
+          }
+          $('.collapsible').collapsible({
+            accordion : false
+          });
+        }, delay=200);
       }).catch((res) => {
         console.log('Error getting script list');
         console.log(res);

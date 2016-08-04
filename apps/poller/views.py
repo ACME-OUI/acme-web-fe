@@ -4,7 +4,10 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from poller.models import UserRuns
 import json
+import os
+
 from util.utilities import print_debug, print_message
+from run_manager.constants import DIAG_OUTPUT_PREFIX
 
 
 @csrf_exempt
@@ -162,13 +165,33 @@ def update(request):
 
             # request to change the status of an existant job
             if request_type not in ['in_progress', 'complete', 'failed']:
+                print_message("Unrecognized request type {}".format(request_type))
                 return HttpResponse(status=400)  # Unrecognized request
             job_id = data.get('job_id')
             if not job_id:
+                print_message("no job id")
                 return HttpResponse(status=400)
             try:
                 job = UserRuns.objects.get(id=job_id)
                 job.status = request_type
+                output = data.get('output')
+                # Check if the job finished and has output
+                # if it does, write it to the db and an output file
+                if output:
+                    from pprint import pprint
+                    job.output = output
+                    options = json.loads(job.config_options)
+                    request_attr = options.get('request_attr')
+                    outputdir = DIAG_OUTPUT_PREFIX + job.user \
+                        + '/' + options.get('run_name') \
+                        + request_attr.get('outputdir') \
+                        + '/' + request_attr.get('diag_type').lower()
+                    print_message('output dir: {}'.format(outputdir))
+                    if not os.path.exists(outputdir):
+                        os.makedirs(outputdir)
+                    with open(outputdir + '/console_output.txt', 'w+') as output_file:
+                        output_file.write(' '.join(output))
+                        output_file.close()
                 job.save()
                 return HttpResponse(status=200)
             except Exception as e:

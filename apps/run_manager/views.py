@@ -3,7 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 import json
 import os
-from constants import RUN_SCRIPT_PATH, TEMPLATE_PATH, RUN_CONFIG_DEFAULT_PATH, POLLER_URL
+from constants import RUN_SCRIPT_PATH
+from constants import TEMPLATE_PATH
+from constants import RUN_CONFIG_DEFAULT_PATH
+from constants import POLLER_URL
+from constants import DIAG_OUTPUT_PREFIX
 from util.utilities import print_debug, print_message
 from models import ModelRun, RunScript
 import shutil
@@ -46,22 +50,13 @@ def create_run(request):
         print_debug(e)
         return HttpResponse(status=500)
 
-    try:
-        run = ModelRun(user=request.user)
-        run.save()
-    except Exception as e:
-        print_message("Error saving run {} in database for user {}".format(new_run_dir, request.user), 'error')
-        shutil.rmtree(new_run_dir, ignore_errors=True)
-        print_debug(e)
-        return JsonResponse({'error': 'error saving run in database'})
-
     run_type = data.get('run_type')
     if not run_type:
         print_message('No run_type specied', 'error')
         return HttpResponse(status=400)
 
     config_path += run_type + '.json'
-    new_config_path = new_run_dir + '/config.json'
+    new_config_path = new_run_dir + '/config.json_1'
     conf = {}
     try:
         with open(config_path, 'r') as config_file:
@@ -72,6 +67,12 @@ def create_run(request):
             conf = json.dumps(conf)
             new_config.write(conf)
             new_config.close()
+        new_script = RunScript(
+            user=user,
+            name='config.json',
+            run=new_run,
+            version=1)
+        new_script.save()
     except Exception as e:
         print_debug(e)
         print_message("Error saving config file {} for user {}".format(config_path, user), 'error')
@@ -100,11 +101,18 @@ def create_run(request):
 
     if found_template:
         try:
-            shutil.copyfile(template_path, new_run_dir + '/' + template)
+            shutil.copyfile(template_path, new_run_dir + '/' + template + '_1')
         except Exception as e:
             print_debug(e)
             print_message("Error saving template {} for user {}".format(template, request.user), 'error')
             return JsonResponse({'new_run_dir': new_run_dir, 'error': 'template not saved'})
+
+        new_script = RunScript(
+            user=user,
+            name=template,
+            run=new_run,
+            version=1)
+        new_script.save()
         return JsonResponse({'new_run_dir': new_run_dir, 'template': 'template saved'})
     else:
         return JsonResponse({'new_run_dir': new_run_dir, 'error': 'template not found'})
@@ -122,7 +130,6 @@ def create_run(request):
 def start_run(request):
     user = str(request.user)
     data = json.loads(request.body)
-    print_message(data)
     run_name = data.get('run_name')
     if not run_name:
         print_message('No run name given', 'error')
@@ -131,18 +138,28 @@ def start_run(request):
     path = os.path.abspath(os.path.dirname(__file__))
     run_directory = path + RUN_SCRIPT_PATH + user + '/' + run_name + '/'
     config_path = None
+    try:
+        config_version = RunScript.objects.filter(
+            user=user,
+            run=run_name,
+            name='config.json'
+        ).latest().version
+    except Exception as e:
+        raise
     for f in os.listdir(run_directory):
+        f = f.split('_')[0]
         if f.endswith('.json'):
             config_path = f
             break
     if not config_path:
         print_message('Unable to find config file in run directory {}'.format(run_directory))
         return HttpResponse(status=500)
-    config_path = run_directory + config_path
+    config_path = run_directory + config_path + '_' + str(config_version)
     try:
         with open(config_path, 'r') as f:
             config = f.read()
             f.close()
+        print_message(config)
         config_options = json.loads(config)
     except Exception as e:
         print_message('Error reading file {}'.format(config_path))
@@ -155,7 +172,6 @@ def start_run(request):
         request[key] = config_options[key]
     try:
         request = json.dumps(request)
-        print_message(request)
         r = requests.post(POLLER_URL, request)
         if(r.status_code != 200):
             print_message('Error communicating with poller')
@@ -415,18 +431,42 @@ def get_scripts(request):
         return HttpResponse(status=403)
 
     try:
+        files = {}
         script_list = []
+        output_list = []
         directory_contents = os.listdir(run_directory)
         for item in directory_contents:
-            if not os.path.isdir(item):
+            if not os.path.isdir(run_directory + '/' + item):
+                # print_message('Got a normal item: ' + item)
                 item = item.rsplit('_', 1)[0]
-                script_list.append(item)
+                if item not in script_list:
+                    script_list.append(item)
+
+        outputdir = ''
+        config_script = RunScript.objects.filter(user=user, run=run_name, name='config.json').latest()
+        print_message(run_directory + 'config.json_' + str(config_script.version))
+        with open(run_directory + '/config.json_' + str(config_script.version)) as config_file:
+            config = json.loads(config_file.read())
+            config = config.get('request_attr')
+            outdir = config.get('outputdir')
+            diag_type = config.get('diag_type')
+            outputdir = DIAG_OUTPUT_PREFIX + user + '/' + run_name + '/' + outdir + '/' + diag_type
+            print_message('outputdir: {}'.format(outputdir))
+        if os.path.exists(outputdir):
+            directory_contents = os.listdir(outputdir)
+            for item in directory_contents:
+                if item.endswith('-combined.png'):
+                    output_list.append(item)
+
     except Exception as e:
         print_message('Error retrieving directory items', 'error')
         print_debug(e)
         return HttpResponse(status=500)
 
-    return HttpResponse(json.dumps(script_list))
+    print_message(script_list)
+    files['script_list'] = script_list
+    files['output_list'] = output_list
+    return HttpResponse(json.dumps(files))
 
 
 #
@@ -461,7 +501,8 @@ def read_script(request):
                 name=script_name,
                 run=run_name,
                 version=version_num)
-        except ObjectDoesNotExist as e:
+        except Exception as e:
+            print_debug(e)
             var = RunScript.objects.filter(
                 user=user,
                 name=script_name,
@@ -590,3 +631,9 @@ def get_templates(request):
                 template_list.append(directory.split('/')[-1] + '/' + template)
 
     return HttpResponse(json.dumps(template_list))
+
+
+@login_required
+def get_user(request):
+    user = str(request.user)
+    return HttpResponse(user)

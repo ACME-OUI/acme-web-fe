@@ -599,8 +599,9 @@ class TestGetScripts(LiveServerTestCase):
         self.assertTrue(r.status_code == 200)
 
         data = json.loads(r.content)
-        self.assertTrue(script_name1 in data)
-        self.assertTrue(script_name2 in data)
+        print_message(data)
+        self.assertTrue(script_name1 in data.get('script_list'))
+        self.assertTrue(script_name2 in data.get('script_list'))
 
     def test_get_scripts_without_run_name(self):
         run_name = 'get_scripts_run'
@@ -694,7 +695,6 @@ class TestStartRun(LiveServerTestCase):
         path = os.path.abspath(os.path.dirname(__file__))
         run_directory = path + RUN_SCRIPT_PATH + self.username + '/' + self.run_name
         shutil.rmtree(run_directory, ignore_errors=True)
-
     # THIS IS A MANUAL TEST, MAKE SURE THIS IS COMMETED BEFORE RUNNING ON TRAVIS
     # def test_start_run(self):
     #     request = {
