@@ -603,11 +603,6 @@ def delete_script(request):
     return JsonResponse({})
 
 
-@login_required
-def get_output_image(request):
-    image_path = request.GET.get('image_path')
-    return sendfile(request, image_path)
-
 #
 # Zips the output from a given job run and returns the zip to the user
 #
@@ -636,8 +631,6 @@ def get_output_zip(request):
     else:
         print_message('Unrecognized run_type {}'.format(run_type))
         return HttpResponse(status=403)
-
-
 
     output_filename = DIAG_OUTPUT_PREFIX \
         + user + '/' \
