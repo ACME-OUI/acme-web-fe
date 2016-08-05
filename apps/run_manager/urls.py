@@ -19,4 +19,5 @@ urlpatterns = patterns( '',
                         url(r'^copy_template/$', views.copy_template),
                         url(r'^get_user/$', views.get_user),
                         url(r'^get_output_zip/$', views.get_output_zip),
+                        url(r'^get_output_image/$', views.get_output_image),
                         )

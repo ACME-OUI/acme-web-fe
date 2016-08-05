@@ -458,7 +458,7 @@ def get_scripts(request):
             directory_contents = os.listdir(outputdir)
             for root, dirs, file_list in os.walk(outputdir):
                 for file in file_list:
-                    if file.endswith('-combined.png'):
+                    if file.endswith('.png'):
                         output_list.append(file)
                     if file.endswith('.txt'):
                         output_list.insert(0, file)
@@ -603,6 +603,11 @@ def delete_script(request):
     return JsonResponse({})
 
 
+@login_required
+def get_output_image(request):
+    image_path = request.GET.get('image_path')
+    return sendfile(request, image_path)
+
 #
 # Zips the output from a given job run and returns the zip to the user
 #
@@ -632,17 +637,23 @@ def get_output_zip(request):
         print_message('Unrecognized run_type {}'.format(run_type))
         return HttpResponse(status=403)
 
-    output_filename = user + '_' + run_name + '_' + str(datetime.datetime.now())
 
-    try:
-        shutil.make_archive(output_filename, 'zip', run_directory)
-    except Exception as e:
-        print_message('Failed to create zip archive')
-        print_debug(e)
 
-    # response = HttpResponse(output_filename, content_type= "application/x-zip-compressed")
-    # response['Content-Disposition'] = 'attachment; filename=%s' % output_filename
-    # return response
+    output_filename = DIAG_OUTPUT_PREFIX \
+        + user + '/' \
+        + 'run_archives/' \
+        + run_name + '/' \
+        + 'output_archive'
+
+    if not os.path.exists(output_filename + '.zip'):
+
+        try:
+            print_message('creating output archive {}'.format(output_filename))
+            shutil.make_archive(output_filename, 'zip', run_directory)
+        except Exception as e:
+            print_message('Failed to create zip archive {}'.format(output_filename))
+            print_debug(e)
+
     return sendfile(request, output_filename + '.zip')
 
 

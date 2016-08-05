@@ -232,14 +232,29 @@
   <div class="modal" id="image_view_modal" style="width: fit-content; overflow: hidden; max-height: 80%;">
     <p id="image_title" style="text-align: center;"></p>
     <img id="image_view" style="margin: 1vw;" class="" src="" />
-    <a href="#"
-       target="_blank"
-       ng-click="$('#image_view_modal').closeModal()"
-       style="display: block; padding-right: 2vw;"
-       class="waves-effect waves-light btn"
-       id="image_link">
-       open in new window
-     </a>
+    <div class="" style="text-align: justify;
+    -ms-text-justify: distribute-all-lines;
+    text-justify: distribute-all-lines;">
+      <a href="#"
+         target="_blank"
+         ng-click="$('#image_view_modal').closeModal()"
+         style="margin: 1vw; display: inline-block;
+    *display: inline; width: 30%"
+         class="waves-effect waves-light btn"
+         id="image_link">
+         new window
+       </a>
+       <a href="#"
+          style="display: inline-block;
+    *display: inline;width: 30%;margin: 1vw;"
+          class="waves-effect waves-light btn"
+          id="image_download_link"
+          download>
+          download
+       </a>
+       <span class="stretch"></span>
+    </div>
+
   </div>
 
 

@@ -60,7 +60,10 @@ angular.module('run_manager', ['ui.ace'])
     $('#image_title').text($scope.output_list[$scope.selected_run][index]);
     image_link.attr({
       'href': src
-    })
+    });
+    $('#image_download_link').attr({
+      'href': src
+    });
     image_viewer.attr({
       'src': src
     });
@@ -76,7 +79,11 @@ angular.module('run_manager', ['ui.ace'])
     $('#image_title').text(image);
     image_link.attr({
       'href': src
-    })
+    });
+    $('#image_download_link').attr({
+      'href': src,
+      'download': image
+    });
     image_viewer.attr({
       'src': src
     });
@@ -435,7 +442,7 @@ angular.module('run_manager', ['ui.ace'])
 
   $scope.open_output = (run, item) => {
     if(item.endsWith('.png')){
-      open_image(run.run_name, item);
+      $scope.open_image(run, item);
     }
     else if (item.endsWith('.txt')) {
         $('#text_edit_modal').openModal();
