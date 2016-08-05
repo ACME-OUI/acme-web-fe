@@ -16,6 +16,7 @@ import datetime
 import json
 import os
 
+
 #
 # Creates a new model run configuration
 # input: user, the user requesting a new run config folder
@@ -516,6 +517,7 @@ def read_output_script(request):
 
     return JsonResponse({'script': contents})
     return HttpResponse()
+
 
 #
 # Reads the contents of a script and sends it back to the user
