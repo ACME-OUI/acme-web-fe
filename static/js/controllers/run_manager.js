@@ -32,13 +32,18 @@ angular.module('run_manager', ['ui.ace'])
         if (e.keyCode == '37') {
           if($scope.image_index > 0){
             $scope.image_index -= 1;
-            $scope.show_image_by_index($scope.image_index);
+            if($scope.show_image_by_index($scope.image_index)){
+              $scope.image_index += 1;
+            }
+
           }
         }
         else if (e.keyCode == '39') {
           if($scope.image_index < $scope.output_list[$scope.selected_run].length){
             $scope.image_index += 1;
-            $scope.show_image_by_index($scope.image_index);
+            if($scope.show_image_by_index($scope.image_index)){
+              $scope.image_index -= 1;
+            }
           }
         }
       }
@@ -52,7 +57,9 @@ angular.module('run_manager', ['ui.ace'])
   }
 
   $scope.show_image_by_index = (index) => {
-    //var image_el = $('#' + $scope.selected_run + '_' + $scope.output_list[index].slice(0,20));
+    if(!$scope.output_list[$scope.selected_run][index].endsWith('.png')){
+      return true;
+    }
     var prefix = '/acme/userdata/image/userdata/' + $scope.$parent.user + '/';
     var src = prefix + $scope.selected_run + '/diags_output/amwg/' + $scope.output_list[$scope.selected_run][index]
     var image_viewer = $('#image_view');
