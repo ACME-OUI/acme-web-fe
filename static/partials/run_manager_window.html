@@ -83,22 +83,32 @@
                 <div class="collapsible-body">
                   <ul class="collection">
                     <li ng-show="output_list[run].length != 0" class="collection-item">
-                      <div class="" ng-repeat="png in output_cache[run.run_name]">
+                      <div class="" ng-repeat="item in output_cache[run.run_name]">
                         <a href="#"
                            class="[[run.run_name]]_preview"
-                           id="[[run.run_name]]_[[png.slice(0,20)]]"
-                           title="[[png]]"
+                           id="[[run.run_name]]_[[item.slice(0,20)]]"
+                           title="[[item]]"
                            style="padding: 0.5rem; margin-left: 3vw; cursor: pointer; cursor: hand;"
-                           data-img-location="/acme/userdata/image/userdata/btest/[[run.run_name]]/diags_output/amwg/[[png]]"
-                           ng-click="open_image(run.run_name, png)">
-                           [[png]]
+                           data-img-location="/acme/userdata/image/userdata/btest/[[run.run_name]]/diags_output/amwg/[[item]]"
+                           ng-click="open_output(run.run_name, item)">
+                           [[item]]
                         </a>
                         <br>
                       </div>
                       <div class="" style="float: right;" ng-show="show_image">
                         <img style="position: relative;" id="[[run]]_image_view" src="" />
                       </div>
-                      <a href="#" class="waves-effect waves-light btn" ng-click="load_output_cache()">more</a>
+                      <a href="#"
+                         class="waves-effect waves-light btn"
+                         style="margin-top: 1vh;"
+                         ng-click="load_output_cache()">
+                         more
+                      </a>
+                      <a href="/run_manager/get_output_zip?run_name=[[run.run_name]]&run_type=diagnostic"
+                         style="margin-top: 1vh;"
+                         class="waves-effect waves-light btn">
+                         download zip
+                      </a>
                     </li>
                   </ul>
                 </div>
@@ -184,7 +194,7 @@
   <!-- text edit modal -->
   <div class="modal" id="text_edit_modal" >
     <section>
-      <a href="#" class="waves-effect waves-light btn" style="margin: .5vh;" ng-click="update_script()">save</a>
+      <a href="#" id="text_edit_save_btn" class="waves-effect waves-light btn" style="margin: .5vh;" ng-click="update_script()">save</a>
       <div ui-ace="aceOption" ng-model="aceModel"></div>
     </section>
   </div>
@@ -222,14 +232,29 @@
   <div class="modal" id="image_view_modal" style="width: fit-content; overflow: hidden; max-height: 80%;">
     <p id="image_title" style="text-align: center;"></p>
     <img id="image_view" style="margin: 1vw;" class="" src="" />
-    <a href="#"
-       target="_blank"
-       ng-click="$('#image_view_modal').closeModal()"
-       style="display: block; padding-right: 2vw;"
-       class="waves-effect waves-light btn"
-       id="image_link">
-       open in new window
-     </a>
+    <div class="" style="text-align: justify;
+    -ms-text-justify: distribute-all-lines;
+    text-justify: distribute-all-lines;">
+      <a href="#"
+         target="_blank"
+         ng-click="$('#image_view_modal').closeModal()"
+         style="margin: 1vw; display: inline-block;
+    *display: inline; width: 30%"
+         class="waves-effect waves-light btn"
+         id="image_link">
+         new window
+       </a>
+       <a href="#"
+          style="display: inline-block;
+    *display: inline;width: 30%;margin: 1vw;"
+          class="waves-effect waves-light btn"
+          id="image_download_link"
+          download>
+          download
+       </a>
+       <span class="stretch"></span>
+    </div>
+
   </div>
 
 

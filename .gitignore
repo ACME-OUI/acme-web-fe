@@ -34,6 +34,7 @@ apps/run_manager/resource/test/*
 apps/run_manager/resource/test
 *.sublime-project
 *.sublime-workspace
+*.zip
 db
 
 /migrations
