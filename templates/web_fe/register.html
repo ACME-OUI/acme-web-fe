@@ -1,18 +1,19 @@
 {% extends "base.html" %}
 {% block title %} register {% endblock %}
+
 {% block content %}
   <link href="/acme/static/css/form.css" rel="stylesheet">
-  {% load addattributes %}  
- 
-  {% if registered%}
+  {% load addattributes %}
+
+  {% if registered %}
     <h2>Thank You For Registering</h2>
     <script type="text/javascript">
       window.location.href = "/acme"
-     </script>
-  
-     {% else %}
+    </script>
+
+  {% else %}
     <form id="user_form" action="" method="post" class="form-signin">
-    <h2>Create An Account</h2>
+      <h2>Create An Account</h2>
       {% csrf_token %}
         {% for field in user_form %}
           {% with attr="form-control" %}
@@ -25,13 +26,12 @@
           {% endwith %}
         {% endfor %}
         <br/>
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Create Account</button>
+        <button class="btn" type="submit">Create Account</button>
     </form>
-  
+
     {% endif %}
 
     <script>
 
     </script>
 {% endblock %}
-

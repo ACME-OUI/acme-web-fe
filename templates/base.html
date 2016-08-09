@@ -7,6 +7,10 @@
     <!-- for recaptcha -->
 
     <title> {% block title %} ACME {% endblock %}</title>
+    <!-- Materialize -->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css">
+    <link href="//fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
     <!-- Bootstrap core CSS -->
     <!-- <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet"> -->
     <!-- For the jsPanel -->
@@ -49,10 +53,10 @@
     {% block layout %}
     {% endblock %}
 
-    <footer class="page-footer blue-grey darken-4" style="padding-bottom: 1.5vh; padding-top: 2vh; margin-top: 0px;">
-      <a class="valign" style="color: #64b5f6; margin-left: 2vw;" href="#">Privacy &amp; Legal Notice</a> &nbsp;
-      <a style="color: #64b5f6; margin-left: 2vw;" href="https://github.com/ACME-OUI/acme-web-fe/issues">Site Issues</a>
-    </footer>
-  </div><!-- /.container -->
-</body>
+
+  </body>
+  <footer class="page-footer blue-grey darken-4" style="padding-bottom: 1.5vh; padding-top: 2vh; margin-top: 0px; bottom: 0px; position: fixed; width: 100%;">
+    <a class="valign" style="color: #64b5f6; margin-left: 2vw;" href="#">Privacy &amp; Legal Notice</a> &nbsp;
+    <a style="color: #64b5f6; margin-left: 2vw;" href="https://github.com/ACME-OUI/acme-web-fe/issues">Site Issues</a>
+  </footer>
 </html>
