@@ -1,24 +1,11 @@
 (function(){
-  var dashboard = angular.module('dashboard', ['esgf', 'run_manager', 'cdat', 'ngAnimate', 'ngMessages', 'ngMaterial'])
-  .controller('DashboardControl', ['$scope', '$http', '$mdToast', function($scope, $http, $mdToast) {
+  var dashboard = angular.module('dashboard', ['ngAnimate', 'ngMessages', 'ngMaterial', 'ngRoute'])
+  .controller('DashboardControl', ['$scope', '$http', '$mdToast', function($scope, $http, $mdToast, $compile, $route) {
 
     $scope.init = () => {
       console.log('[+] Initializing dashboard');
+
     }
-
-    $scope.addMenuItem = function( title, text ) {
-      var element = $( '<li>' + title + '</li>' );
-      $( '#menuContainer' ).append( element );
-
-      var newItemConfig = {
-          title: title,
-          type: 'component',
-          componentName: title,
-          componentState: { templateId: text }
-      };
-
-      layout.createDragSource( element, newItemConfig );
-    };
 
     $scope.showToast = function(message) {
       $mdToast.show(
