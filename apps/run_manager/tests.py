@@ -54,7 +54,6 @@ class TestCreateRun(LiveServerTestCase):
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 409)
 
-
     def test_create_run_with_valid_template(self):
         request = {
             'run_name': 'test_run_with_template',
@@ -99,7 +98,6 @@ class TestCreateRun(LiveServerTestCase):
 
     def test_THSISATEST(self):
         self.assertTrue(True)
-
 
     # All these tests should be run from their own test class, but django
     # doesnt want to run them, so instead im putting them here. If I fix this bug
@@ -149,7 +147,6 @@ class TestCreateRun(LiveServerTestCase):
             }
             r = self.c.post(self.live_server_url + '/run_manager/stop_run/', data=json.dumps(request), content_type='application/json')
         self.assertTrue(r.status_code == 200)
-
 
     def test_no_run_name(self):
         reqeust = {

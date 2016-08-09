@@ -19,6 +19,7 @@ import os
 
 from poller.views import update as poller_update
 
+
 # An empty dict subclass, to allow me to call poller views directly
 # without needing to make an http request
 class mydict(dict):
@@ -242,6 +243,7 @@ def stop_run(request):
         print_debug(e)
 
     return HttpResponse(status=500)
+
 
 #
 # Checks the status of all of a users running jobs
