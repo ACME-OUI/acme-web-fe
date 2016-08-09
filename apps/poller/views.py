@@ -149,7 +149,13 @@ def update(request):
                     user=user
                 )
                 new_run.save()
-                return JsonResponse({'job_id': new_run.id})
+                print_message('returning job_id: {}'.format(new_run.id))
+                response = json.dumps({
+                    'job_id': new_run.id,
+                })
+                print_message('returning new job response {}'.format(response))
+                res = HttpResponse(response, content_type='application/json')
+                return res
             # request to delete a job
             if request_type == 'delete':
                 try:

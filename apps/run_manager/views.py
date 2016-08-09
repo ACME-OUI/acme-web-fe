@@ -4,7 +4,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from constants import RUN_SCRIPT_PATH
 from constants import TEMPLATE_PATH
 from constants import RUN_CONFIG_DEFAULT_PATH
-from constants import POLLER_URL
+from constants import POLLER_HOST
+from constants import POLLER_SUFFIX
 from constants import DIAG_OUTPUT_PREFIX
 from sendfile import sendfile
 from util.utilities import print_debug, print_message
@@ -15,6 +16,14 @@ import requests
 import datetime
 import json
 import os
+
+from poller.views import update as poller_update
+
+
+# An empty dict subclass, to allow me to call poller views directly
+# without needing to make an http request
+class mydict(dict):
+    pass
 
 
 #
@@ -86,15 +95,17 @@ def create_run(request):
         return JsonResponse({'new_run_dir': new_run_dir})
 
     if user in template:
-        template_search_dirs = [user]
-    else:
         template_search_dirs = [user, 'global']
+    else:
+        template_search_dirs = ['global']
 
     template = template.split('/')[-1]
+    print_message('looking for template {}'.format(template))
     found_template = False
     template_path = False
     template_search_dirs = [ str(template_directory + x) for x in template_search_dirs]
     for directory in template_search_dirs:
+        print_message('searching in dir {}'.format(directory))
         if os.path.exists(directory):
             if template in os.listdir(directory):
                 found_template = True
@@ -167,18 +178,29 @@ def start_run(request):
     except Exception as e:
         print_message('Error reading file {}'.format(config_path))
 
-    request = {
+    # request = {
+    #     'user': user,
+    #     'request': 'new'
+    # }
+    request = mydict()
+    request.body = {
         'user': user,
         'request': 'new'
     }
-    for key in config_options:
-        request[key] = config_options[key]
+    request.method = 'POST'
+    # for key in config_options:
+    #     request.body[key] = config_options[key]
+    request.body.update(config_options)
+    request.body = json.dumps(request.body)
     try:
-        request = json.dumps(request)
-        r = requests.post(POLLER_URL, request)
+        # request = json.dumps(request)
+        # url = ''.join([POLLER_HOST, ':', request.META['SERVER_PORT'], POLLER_SUFFIX])
+        # r = requests.post(url, request)
+        r = poller_update(request)
         if(r.status_code != 200):
             print_message('Error communicating with poller')
             return HttpResponse(status=500)
+        return HttpResponse(r.content)
     except Exception as e:
         print_message('Error making request to poller')
         print_debug(e)
@@ -194,21 +216,33 @@ def start_run(request):
 # returns: no user: status 302,
 #          no run_name: status 400
 #          poller request error: status 500
-def stop_job(request):
+def stop_run(request):
     data = json.loads(request.body)
     job_id = data.get('job_id')
     if not job_id:
         print_message('No job_id given')
         return HttpResponse(status=400)
-    request = json.dumps({
+
+    request = mydict()
+    request.body = json.dumps({
         'job_id': job_id,
         'request': 'stop'
     })
-    r = requests.post(POLLER_URL, request)
-    if r.status_code == 200:
-        return HttpResponse()
-    else:
-        return HttpResponse(status=500)
+    request.method = 'POST'
+    # url = ''.join([POLLER_HOST, ':', request.META['SERVER_PORT'], POLLER_SUFFIX])
+    try:
+        # r = requests.post(url, request)
+        r = poller_update(request)
+        if r.status_code == 200:
+            return HttpResponse()
+        else:
+            return HttpResponse(status=500)
+
+    except Exception as e:
+        print_message("Failed to stop job")
+        print_debug(e)
+
+    return HttpResponse(status=500)
 
 
 #
@@ -218,12 +252,24 @@ def stop_job(request):
 #          if poller error, returns status 500
 def run_status(request):
     user = str(request.user)
-    params = {'user': user, 'request': 'all'}
-    r = requests.get(POLLER_URL, params={'user': user, 'request': 'all'})
-    if(r.status_code != 200):
-        print_message('Poller error with params {}'.format(params))
-        return HttpResponse(status=500)
-    return HttpResponse(r.content)
+    params = {'user': user, 'request': 'all', 'method': 'GET'}
+
+    params = mydict()
+    params.GET = {'user': user, 'request': 'all'}
+    params.method = 'GET'
+
+    try:
+        r = poller_update(params)
+        # r = requests.get(url, params={'user': user, 'request': 'all'})
+        if(r.status_code != 200):
+            print_message('Poller error with params {}'.format(params))
+            return HttpResponse(status=500)
+        return HttpResponse(r.content)
+    except Exception as e:
+        print_message("Error getting run status with url: {}".format(url))
+        print_debug(e)
+
+    return HttpResponse(status=500)
 
 
 #

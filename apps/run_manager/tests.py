@@ -34,6 +34,26 @@ class TestCreateRun(LiveServerTestCase):
         print_message('status code given' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 200)
 
+    def test_no_run_name(self):
+        request = {
+            'this_is_not_a_valid_key': 'not_a_valid_value'
+        }
+        r = self.c.post(self.url, data=json.dumps(request), content_type='application/json')
+        self.assertTrue(r.status_code == 400)
+
+    def test_folder_exists(self):
+        request = {
+            'run_name': 'test_run',
+            'run_type': 'diagnostic'
+        }
+        r = self.c.post(self.url, data=json.dumps(request), content_type='application/json')
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+
+        r = self.c.post(self.url, data=json.dumps(request), content_type='application/json')
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 409)
+
     def test_create_run_with_valid_template(self):
         request = {
             'run_name': 'test_run_with_template',
@@ -43,6 +63,20 @@ class TestCreateRun(LiveServerTestCase):
         r = self.c.post(self.url, data=json.dumps(request), content_type='application/json')
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 200)
+        self.assertTrue('template saved' in r.content)
+        template_path = '/Users/baldwin32/projects/acme-web-fe/apps/run_manager/resources//test/ACME_script.csh'
+        shutil.rmtree(template_path, ignore_errors=True)
+
+    def test_create_run_with_valid_user_template(self):
+        request = {
+            'run_name': 'test_run_with_template',
+            'template': 'test/copy_template',
+            'run_type': 'diagnostic'
+        }
+        r = self.c.post(self.url, data=json.dumps(request), content_type='application/json')
+        print_message('status code given ' + str(r.status_code), 'error')
+        self.assertTrue(r.status_code == 200)
+        print_message(r.content)
         self.assertTrue('template saved' in r.content)
         template_path = '/Users/baldwin32/projects/acme-web-fe/apps/run_manager/resources//test/ACME_script.csh'
         shutil.rmtree(template_path, ignore_errors=True)
@@ -61,6 +95,134 @@ class TestCreateRun(LiveServerTestCase):
         r = self.c.post(self.live_server_url + '/run_manager/create_run/', data=json.dumps(request), content_type='application/json')
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 409)
+
+    def test_THSISATEST(self):
+        self.assertTrue(True)
+
+    # All these tests should be run from their own test class, but django
+    # doesnt want to run them, so instead im putting them here. If I fix this bug
+    # they will all be removed
+    def test_start_valid_run(self):
+        # First create a valid run
+        request = {
+            'run_name': 'test_run',
+            'run_type': 'diagnostic'
+        }
+        r = self.c.post(self.live_server_url + '/run_manager/create_run/', data=json.dumps(request), content_type='application/json')
+
+        # Now start the run
+        request = {
+            'run_name': 'test_run',
+        }
+        r = self.c.post(self.live_server_url + '/run_manager/start_run/', data=json.dumps(request), content_type='application/json')
+        self.assertTrue(r.status_code == 200)
+
+    def test_stop_valid_run(self):
+        # First create a valid run
+        request = {
+            'run_name': 'test_run',
+            'run_type': 'diagnostic'
+        }
+        r = self.c.post(self.live_server_url + '/run_manager/create_run/', data=json.dumps(request), content_type='application/json')
+
+        # Now start the run
+        request = {
+            'run_name': 'test_run',
+        }
+        r = self.c.post(self.live_server_url + '/run_manager/start_run/', data=json.dumps(request), content_type='application/json')
+        self.assertTrue(r.status_code == 200)
+
+        # Now we can stop it
+        request = {
+            'run_name': 'test_run',
+            'request': 'stop_run',
+            'job_id': 7
+        }
+        r = self.c.post(self.live_server_url + '/run_manager/stop_run/', data=json.dumps(request), content_type='application/json')
+        if r.status_code != 200:
+            request = {
+                'run_name': 'test_run',
+                'request': 'stop_run',
+                'job_id': 2
+            }
+            r = self.c.post(self.live_server_url + '/run_manager/stop_run/', data=json.dumps(request), content_type='application/json')
+        self.assertTrue(r.status_code == 200)
+
+    def test_no_run_name(self):
+        reqeust = {
+            'not_a_name': 'no_run'
+        }
+        r = self.c.post(self.live_server_url + '/run_manager/start_run/', data=json.dumps(reqeust), content_type='application/json')
+        self.assertTrue(r.status_code == 400)
+
+    def test_get_new_run_status(self):
+        # First create a valid run
+        request = {
+            'run_name': 'test_run',
+            'run_type': 'diagnostic'
+        }
+        r = self.c.post(self.live_server_url + '/run_manager/create_run/', data=json.dumps(request), content_type='application/json')
+        print_message("server url: {}".format(self.live_server_url))
+        r = self.c.get(self.live_server_url + '/run_manager/run_status/')
+        self.assertTrue(r.status_code == 200)
+
+
+class TestStartRun(LiveServerTestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(username='test')
+        self.user.set_password('test')
+        self.user.save()
+        self.c = Client()
+        self.url = self.live_server_url + '/run_manager/start_run/'
+        logged_in = self.c.login(username='test', password='test')
+
+    def test_start_valid_run(self):
+        # First create a valid run
+        request = {
+            'run_name': 'test_run',
+            'run_type': 'diagnostic'
+        }
+        r = self.c.post(self.live_server_url + '/run_manager/create_run/', data=json.dumps(request), content_type='application/json')
+
+        # Now start the run
+        request = {
+            'run_name': 'test_run',
+        }
+        r = self.c.post(self.url, data=json.dumps(request), content_type='application/json')
+        self.assertTrue(r.status_code == 200)
+
+    def test_no_run_name(self):
+        reqeust = {
+            'not_a_name': 'no_run'
+        }
+        r = self.c.post(self.url, data=json.dumps(request), content_type='application/json')
+        self.assertTrue(r.status_code == 400)
+
+
+class TestRunStatus(LiveServerTestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(username='test')
+        self.user.set_password('test')
+        self.user.save()
+        self.c = Client()
+        self.url = self.live_server_url + '/run_manager/run_status/'
+        logged_in = self.c.login(username='test', password='test')
+
+    def tearDown(self):
+        return
+
+    def test_get_new_run_status(self):
+        # First create a valid run
+        request = {
+            'run_name': 'test_run',
+            'run_type': 'diagnostic'
+        }
+        r = self.c.post(self.live_server_url + '/run_manager/create_run/', data=json.dumps(request), content_type='application/json')
+        print_message("server url: {}".format(self.live_server_url))
+        r = self.c.get(self.url)
+        self.assertTrue(r.status_code == 200)
 
 
 class TestDeleteRun(LiveServerTestCase):
