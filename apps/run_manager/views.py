@@ -499,7 +499,7 @@ def get_scripts(request):
             config = config.get('request_attr')
             outdir = config.get('outputdir')
             diag_type = config.get('diag_type')
-            outputdir = DIAG_OUTPUT_PREFIX + user + '/' + run_name + '/' + outdir + '/' + diag_type
+            outputdir = DIAG_OUTPUT_PREFIX + user + '/' + run_name + outdir + '/' + diag_type
             print_message('outputdir: {}'.format(outputdir))
         if os.path.exists(outputdir):
             directory_contents = os.listdir(outputdir)

@@ -1,6 +1,6 @@
 (function(){
-  angular.module('run_manager', ['ui.ace'])
-  .controller('RunManagerControl', ['$scope', '$http', '$timeout', function($scope, $http, $timeout) {
+  angular.module('run_manager', ['ui.ace', 'ngMaterial'])
+  .controller('RunManagerControl', ['$scope', '$http', '$timeout', function($scope, $http, $timeout, $mdToast) {
 
     /**
      * Slices the object. Note that returns a new spliced object,
@@ -454,7 +454,9 @@
 
     $scope.get_run_data = (run) => {
       $scope.switch_arrow(run);
-      if($scope.selected_run != run){
+      if($scope.selected_run == run){
+        return;
+      } else {
         $scope.selected_run = run;
         $http({
           url: '/run_manager/get_scripts',
