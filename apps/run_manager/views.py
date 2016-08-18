@@ -431,10 +431,6 @@ def update_script(request):
             return HttpResponse(status=404)
         latest = run_scripts.latest()
         latest.version += 1
-        # latest.edited = latest.edited + json.dumps({
-        #    user: user,
-        #    edited_date: datetime.datetime.now()
-        # })
         latest.save()
     except Exception as e:
         print_message('Error finding latest script {}'.format(script_name), 'error')

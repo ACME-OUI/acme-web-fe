@@ -1,10 +1,11 @@
 (function(){
   var dashboard = angular.module('dashboard', ['ngAnimate', 'ngMessages', 'ngMaterial', 'ngRoute'])
-  .controller('DashboardControl', ['$scope', '$http', '$mdToast', function($scope, $http, $mdToast, $compile, $route) {
+  .controller('DashboardControl', ['$scope', '$http', '$mdToast', function($scope, $http, $mdToast) {
 
     $scope.init = () => {
       console.log('[+] Initializing dashboard');
-
+      var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+      var chat_socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat" + window.location.pathname);
     }
 
     $scope.showToast = function(message) {

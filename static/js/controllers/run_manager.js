@@ -1,6 +1,6 @@
 (function(){
   angular.module('run_manager', ['ui.ace', 'ngMaterial'])
-  .controller('RunManagerControl', ['$scope', '$http', '$timeout', function($scope, $http, $timeout, $mdToast) {
+  .controller('RunManagerControl', ['$scope', '$http', '$timeout', '$mdToast', function($scope, $http, $timeout, $mdToast) {
 
     /**
      * Slices the object. Note that returns a new spliced object,
@@ -41,11 +41,54 @@
     }
 
     $scope.get_csrf = () => {
-  		return $('input[name="csrfmiddlewaretoken"]').attr('value');
+      var cookieValue = null;
+      var name = 'csrftoken';
+      if (document.cookie && document.cookie !== '') {
+          var cookies = document.cookie.split(';');
+          for (var i = 0; i < cookies.length; i++) {
+              var cookie = jQuery.trim(cookies[i]);
+              // Does this cookie string begin with the name we want?
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
   	}
+
+    $scope.setup_socket = () => {
+      var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+      if(!window.socket){
+        window.socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + window.location.pathname);
+      }
+      window.socket.onopen = function() {
+        message = JSON.stringify({
+          'target_app': 'run_manager',
+          'destination': 'init',
+          'content': 'hello world!'
+        })
+        socket.send(message);
+      }
+      window.socket.onmessage = (message) => {
+        var data = JSON.parse(message.data);
+        if(data.user != $scope.user){
+          return;
+        }
+        switch (data.destination) {
+          case 'set_run_status':
+            console.log('got a status update');
+            $scope.set_status_text(data.status, data.job_id + "_queue");
+            break;
+          default:
+
+        }
+      }
+    }
 
     $scope.init = function(){
       console.log('[+] Initializing RunManager window');
+      $scope.setup_socket();
       $scope.run_options = ['New run configuration', 'start run', 'stop run', 'update status', 'new template'];
       $scope.run_types = ['diagnostic', 'model'];
       $scope.aceModel = '';
@@ -64,7 +107,7 @@
       $scope.get_templates();
       $scope.get_runs();
       $scope.get_user();
-      $scope.tick();
+      $scope.get_run_status();
       document.onkeydown = checkKey;
 
       function checkKey(e) {
@@ -90,12 +133,6 @@
           }
         }
       }
-    }
-
-    $scope.tick = () => {
-      $scope.get_run_status(() => {
-        $timeout($scope.tick, 5000);
-      });
     }
 
     $scope.show_image_by_index = (index) => {
@@ -167,7 +204,7 @@
 
     $scope.set_run_status = (data) => {
       for(obj in data){
-        $scope.set_status_text(data[obj].status, data[obj].run_name);
+        //$scope.set_status_text(data[obj].status, data[obj].run_name);
         $scope.set_status_text(data[obj].status, data[obj].job_id + "_queue");
       }
     }
@@ -272,10 +309,14 @@
           $scope.all_runs = runs;
         }
         $timeout($scope.set_run_status, delay=200, true, runs);
-        callback();
+        if(callback){
+          callback();
+        }
       }).catch((res) => {
         $scope.showToast("error getting run status");
-        callback();
+        if(callback){
+          callback();
+        }
       });
     }
 
@@ -452,12 +493,12 @@
       });
     }
 
-    $scope.get_run_data = (run) => {
+    $scope.get_run_data = (run, job_id) => {
       $scope.switch_arrow(run);
-      if($scope.selected_run == run){
+      if($scope.selected_run == run + '_' + job_id){
         return;
       } else {
-        $scope.selected_run = run;
+        $scope.selected_run = run + '_' + job_id;
         $http({
           url: '/run_manager/get_scripts',
           params: {

@@ -1,6 +1,5 @@
 from django.db import models
 from django.utils import timezone
-import datetime
 import xml.etree.ElementTree as ET
 from jsonfield import JSONField
 import requests
@@ -8,7 +7,7 @@ import requests
 
 class ESGFNode(models.Model):
     short_name = models.CharField(max_length=100, default='default_node')
-    last_seen = models.DateTimeField(default=datetime.datetime.now())
+    last_seen = models.DateTimeField(default=timezone.now())
     available = models.BooleanField(default=False)
     host = models.CharField(max_length=100, default='unknown host')
     node_data = JSONField()
@@ -28,7 +27,7 @@ class ESGFNode(models.Model):
             self.save()
         else:
             self.available = True
-            self.last_seen = datetime.datetime.now()
+            self.last_seen = timezone.now()
             node_xml = r.content
             tree = ET.parse(StringIO(node_xml))
             self.node_data = self.xml_to_json(tree.getroot())

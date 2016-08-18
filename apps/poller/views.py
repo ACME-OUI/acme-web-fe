@@ -8,7 +8,7 @@ import os
 
 from util.utilities import print_debug, print_message
 from run_manager.constants import DIAG_OUTPUT_PREFIX
-from channels import Group
+from run_manager.dispatcher import group_job_update
 
 @csrf_exempt
 def update(request):
@@ -86,7 +86,6 @@ def update(request):
 
             return post_update(job_id, data, request_type)
 
-
         except Exception as e:
             print_debug(e)
             return HttpResponse(status=500)
@@ -117,6 +116,7 @@ def post_update(job_id, data, request_type):
                 output_file.write(' '.join(output))
                 output_file.close()
         job.save()
+        group_job_update(job_id, job.user, request_type)
         return HttpResponse(status=200)
     except Exception as e:
         print_debug(e)
@@ -126,7 +126,9 @@ def post_delete(job_id):
     if not job_id:
         return HttpResponse(status=404)
     try:
-        UserRuns.objects.get(id=job_id).delete()
+        job = UserRuns.objects.get(id=job_id)
+        group_job_update(job_id, job.user, 'deleted')
+        job.delete()
         return HttpResponse(status=200)
     except Exception as e:
         print_debug(e)
@@ -136,6 +138,7 @@ def post_delete(job_id):
 def post_new(user, data):
     if not user:
         return HttpResponse(status=400)
+
     config = {}
     for key in data:
         value = data.get(key)
@@ -155,6 +158,7 @@ def post_new(user, data):
     })
     print_message('returning new job response {}'.format(response))
     res = HttpResponse(response, content_type='application/json')
+    group_job_update(new_run.id, new_run.user, 'new')
     return res
 
 def post_all(user, status):
@@ -181,6 +185,7 @@ def post_stop(job_id):
     except Exception as e:
         print_debug(e)
         return HttpResponse(status=500)
+    group_job_update(job_id, job.user, 'stopped')
     return HttpResponse()
 
 def send_data(data):
@@ -233,7 +238,10 @@ def get_all(user=None):
 
 def get_next():
     try:
-        data = UserRuns.objects.filter(status='new').latest()
+        runs = UserRuns.objects.filter(status='new')
+        if len(runs) == 0:
+            return {}
+        data = runs.latest()
         data.status = 'in_progress'
         data.save()
     except Exception as e:
@@ -248,12 +256,5 @@ def get_next():
     r['job_id'] = data.id
     r['user'] = data.user
     r.update(config)
+    group_job_update(data.id, data.user, 'in_progress')
     return r
-
-def group_job_update(job_id, user, status):
-    message = {
-        'job_id': job_id,
-        'user': user,
-        'status': status
-    }
-    Group('active').send(message)

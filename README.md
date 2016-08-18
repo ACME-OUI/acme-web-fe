@@ -32,6 +32,11 @@ acme-site
     cd django-sendfile
     python setup.py install
 
+
+    next [install redis](http://redis.io/topics/quickstart) for handling websockets
+    once redis is setup, run redis-server
+
+
 **local settings**
 
     cp local_settings.py.example local_settings.py

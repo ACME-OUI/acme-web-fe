@@ -4,7 +4,6 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext, loader
 from django.forms.models import model_to_dict
 from django.forms.utils import ErrorList
-from django.core.context_processors import csrf
 from django.core.files import File
 from forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
@@ -24,6 +23,7 @@ import time
 import requests
 from sendfile import sendfile
 from util.utilities import print_debug
+from django.views.decorators.csrf import csrf_exempt
 
 
 def render_template(request, template, context):
@@ -38,6 +38,7 @@ def index(request):
 
 
 # Login
+@csrf_exempt
 def user_login(request):
     context = RequestContext(request)
 
@@ -49,7 +50,7 @@ def user_login(request):
                 login(request, user)
                 messages.success(
                     request, 'User: ' + request.POST['username'] + ' successfully loged in')
-                return HttpResponseRedirect(request.POST.get('next'))
+                return HttpResponseRedirect('/acme')
             else:
                 messages.error(
                     request, 'User: ' + request.POST['username'] + ' is a disactivated account')

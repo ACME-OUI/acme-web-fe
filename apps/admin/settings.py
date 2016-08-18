@@ -26,8 +26,6 @@ if os.getenv('build_on_travis', None):
         'static',
     )
 
-    VELO_PATH = 'static/java/Velo.jar'
-
     GITHUB_KEY = ''
     JIRA_USER = ''
     JIRA_PASSWORD = ''
@@ -58,9 +56,31 @@ MANAGERS = ADMINS
 # - RECAPTCHA_PRIVATE_KEY = ''
 ##########################################################
 
-TEMPLATE_DIRS = (
-    os.path.join(os.path.abspath("."), 'templates'),
-)
+# TEMPLATE_DIRS = (
+#     os.path.join(os.path.abspath("."), 'templates'),
+# )
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(os.path.abspath("."), 'templates')],
+        'APP_DIRS': False,
+        'OPTIONS': {
+            'context_processors': [
+                # Insert your TEMPLATE_CONTEXT_PROCESSORS here or use this
+                # list if you haven't customized them:
+                'django.contrib.auth.context_processors.auth',
+                'django.core.context_processors.csrf',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
@@ -130,6 +150,8 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
+USE_TZ = True
+
 ROOT_URLCONF = 'admin.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
@@ -150,6 +172,7 @@ INSTALLED_APPS = (
     'esgf',
     'cdat',
     'run_manager',
+    'channels',
 )
 
 # Use nose to run all tests
@@ -202,6 +225,16 @@ MESSAGE_TAGS = {message_constants.DEBUG: 'debug',
                 }
 
 LOGIN_URL = "/acme/login"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "asgi_redis.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("localhost", 6379)],
+        },
+        "ROUTING": "admin.routing.channel_routing",
+    },
+}
 
 # DEFAULT_GROUPS = {
 #     "Default": ["add_issue"],  # Magic name that will be applied to all users
