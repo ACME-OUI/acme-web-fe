@@ -6,10 +6,12 @@ from util.utilities import print_message
 from channels import Group
 import json
 
+
 # An empty dict subclass, to allow me to call poller views directly
 # without needing to make an http request
 class mydict(dict):
     pass
+
 
 def dispatch(message, data, user):
     destination = data.get('destination')
@@ -42,8 +44,10 @@ def init(message, data, user):
 #         print_message("Error getting run status with url: {}".format(url))
 #         print_debug(e)
 
+
 def send_to_group(data, group):
     Group(group).send(data)
+
 
 def group_job_update(job_id, user, status):
     message = {

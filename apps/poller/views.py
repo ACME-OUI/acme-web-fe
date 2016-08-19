@@ -10,6 +10,7 @@ from util.utilities import print_debug, print_message
 from run_manager.constants import DIAG_OUTPUT_PREFIX
 from run_manager.dispatcher import group_job_update
 
+
 @csrf_exempt
 def update(request):
     if request.method == 'GET':
@@ -122,6 +123,7 @@ def post_update(job_id, data, request_type):
         print_debug(e)
         return HttpResponse(status=500)
 
+
 def post_delete(job_id):
     if not job_id:
         return HttpResponse(status=404)
@@ -161,6 +163,7 @@ def post_new(user, data):
     group_job_update(new_run.id, new_run.user, 'new')
     return res
 
+
 def post_all(user, status):
     if status not in ['new', 'in_progress', 'complete', 'failed', 'stop']:
         return HttpResponse(status=400)
@@ -177,6 +180,7 @@ def post_all(user, status):
             job.save()
         return HttpResponse(status=200)
 
+
 def post_stop(job_id):
     try:
         job = UserRuns.objects.get(id=job_id)
@@ -187,6 +191,7 @@ def post_stop(job_id):
         return HttpResponse(status=500)
     group_job_update(job_id, job.user, 'stopped')
     return HttpResponse()
+
 
 def send_data(data):
     if not data:
@@ -221,6 +226,7 @@ def get_job(job_id):
         print_debug(e)
         return JsonResponse({}, status=500)
 
+
 def get_job_with_status(request_type, user):
     if user:
         data = UserRuns.objects.filter(status=request_type, user=user)
@@ -235,6 +241,7 @@ def get_all(user=None):
     else:
         data = UserRuns.objects.all()
     return data
+
 
 def get_next():
     try:

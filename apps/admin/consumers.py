@@ -8,6 +8,7 @@ import json
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
 
+
 @channel_session
 @channel_session_user_from_http
 def ws_connect(message):
@@ -16,6 +17,7 @@ def ws_connect(message):
     Group(user).add(message.reply_channel)
     Group('active').add(message.reply_channel)
     message.channel_session['room'] = 'run_manager'
+
 
 @channel_session
 @channel_session_user_from_http
@@ -39,6 +41,7 @@ def ws_receive(message):
     else:
         print_message('unrecognized target_app {}'.format(target_app))
         return
+
 
 @channel_session
 @channel_session_user_from_http
