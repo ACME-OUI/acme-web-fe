@@ -1,18 +1,19 @@
 {% extends "base.html" %}
 {% block title %} publication home{% endblock %}
+{% block extra_headers %}
+
+{% endblock %}
+
 
 {% block content %}
-
 <div class="jumbotron">
   <h1>ACME</h1>
   <p class="lead">
-    The ACME Dashboard is currently under development. Please report any issues via the "site issues" link below.  
+    The ACME Dashboard is currently under development. Please report any issues via the "site issues" link below.
   </p>
-  {% if user.is_authenticated %}
-    <p></p>
-  {% else %}  
-    <p><a class="btn btn-lg btn-success" href="login?next={% url 'index' %}" role="button">Log in</a></p>
-  {% endif %}  
+
+  <p><a class="btn wave-effect" href="/acme/dashboard" role="button">dashboard</a></p>
+
 </div>
 
 {% endblock %}

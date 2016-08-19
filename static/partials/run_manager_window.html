@@ -28,7 +28,7 @@
         <div class="collapsible-header" ng-click="get_run_data(run)">
           <i class="material-icons" id="[[run]]_arrow">play_arrow</i>
           <span class="">[[run]]</span>
-          <span href="#" id="[[run]]_status" style="float: right; margin-right: 2vw; color:grey;">idle</span>
+          <!-- <span href="#" id="[[run]]_status" style="float: right; margin-right: 2vw; color:grey;">idle</span> -->
         </div>
         <div class="collapsible-body">
           <div class="" ng-show="empty_run == false">
@@ -57,9 +57,9 @@
       </li>
       <p style="margin-left: 5vw; margin-top: 1vw;"> Run queue </p>
 
-        <li ng-repeat="run in all_runs">
-          <div class="collapsible-header" ng-click="get_run_data(run.run_name)">
-            <span>[[run.run_name]]</span>
+        <li ng-repeat="run in all_runs | orderBy: 'job_id' : true">
+          <div class="collapsible-header" ng-click="get_run_data(run.run_name, run.job_id)">
+            <span>[[run.run_name]]_[[run.job_id]]</span>
             <span style="float: right; margin-right: 2vw; color:grey;" id="[[run.job_id]]_queue_status"></span>
           </div>
           <div class="collapsible-body">
@@ -82,15 +82,15 @@
                 </div>
                 <div class="collapsible-body">
                   <ul class="collection">
-                    <li ng-show="output_list[run].length != 0" class="collection-item">
-                      <div class="" ng-repeat="item in output_cache[run.run_name]">
+                    <li ng-show="output_list[run.run_name + '_' + run.job_id].length != 0" class="collection-item">
+                      <div class="" ng-repeat="item in output_cache[run.run_name + '_' + run.job_id]">
                         <a href="#"
                            class="[[run.run_name]]_preview"
                            id="[[run.run_name]]_[[item.slice(0,20)]]"
                            title="[[item]]"
                            style="padding: 0.5rem; margin-left: 3vw; cursor: pointer; cursor: hand;"
                            data-img-location="/acme/userdata/image/userdata/btest/[[run.run_name]]/diags_output/amwg/[[item]]"
-                           ng-click="open_output(run.run_name, item)">
+                           ng-click="open_output(run.run_name, item, run.job_id)">
                            [[item]]
                         </a>
                         <br>

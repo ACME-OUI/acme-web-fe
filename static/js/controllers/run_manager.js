@@ -1,6 +1,6 @@
 (function(){
-  angular.module('run_manager', ['ui.ace'])
-  .controller('RunManagerControl', ['$scope', '$http', '$timeout', function($scope, $http, $timeout) {
+  angular.module('run_manager', ['ui.ace', 'ngMaterial'])
+  .controller('RunManagerControl', ['$scope', '$http', '$timeout', '$mdToast', function($scope, $http, $timeout, $mdToast) {
 
     /**
      * Slices the object. Note that returns a new spliced object,
@@ -41,11 +41,54 @@
     }
 
     $scope.get_csrf = () => {
-  		return $('input[name="csrfmiddlewaretoken"]').attr('value');
+      var cookieValue = null;
+      var name = 'csrftoken';
+      if (document.cookie && document.cookie !== '') {
+          var cookies = document.cookie.split(';');
+          for (var i = 0; i < cookies.length; i++) {
+              var cookie = jQuery.trim(cookies[i]);
+              // Does this cookie string begin with the name we want?
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
   	}
+
+    $scope.setup_socket = () => {
+      var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+      if(!window.socket){
+        window.socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + window.location.pathname);
+      }
+      window.socket.onopen = function() {
+        message = JSON.stringify({
+          'target_app': 'run_manager',
+          'destination': 'init',
+          'content': 'hello world!'
+        })
+        socket.send(message);
+      }
+      window.socket.onmessage = (message) => {
+        var data = JSON.parse(message.data);
+        if(data.user != $scope.user){
+          return;
+        }
+        switch (data.destination) {
+          case 'set_run_status':
+            console.log('got a status update');
+            $scope.set_status_text(data.status, data.job_id + "_queue");
+            break;
+          default:
+
+        }
+      }
+    }
 
     $scope.init = function(){
       console.log('[+] Initializing RunManager window');
+      $scope.setup_socket();
       $scope.run_options = ['New run configuration', 'start run', 'stop run', 'update status', 'new template'];
       $scope.run_types = ['diagnostic', 'model'];
       $scope.aceModel = '';
@@ -64,7 +107,7 @@
       $scope.get_templates();
       $scope.get_runs();
       $scope.get_user();
-      $scope.tick();
+      $scope.get_run_status();
       document.onkeydown = checkKey;
 
       function checkKey(e) {
@@ -92,12 +135,6 @@
       }
     }
 
-    $scope.tick = () => {
-      $scope.get_run_status(() => {
-        $timeout($scope.tick, 5000);
-      });
-    }
-
     $scope.show_image_by_index = (index) => {
       if(!$scope.output_list[$scope.selected_run][index].endsWith('.png')){
         return true;
@@ -122,7 +159,9 @@
       $scope.show_image = true;
       $scope.image_index = $scope.output_list[$scope.selected_run].indexOf(image);
       var image_el = $('#' + run + '_' + image.slice(0,20));
-      var src = image_el.attr('data-img-location');
+      //var src = image_el.attr('data-img-location');
+      var prefix = '/acme/userdata/image/userdata/' + $scope.user + '/';
+      var src = prefix + $scope.selected_run + '/diags_output/amwg/' + $scope.output_list[$scope.selected_run][$scope.image_index]
       var image_viewer = $('#image_view');
       var image_link = $('#image_link');
       $('#image_title').text(image);
@@ -167,7 +206,7 @@
 
     $scope.set_run_status = (data) => {
       for(obj in data){
-        $scope.set_status_text(data[obj].status, data[obj].run_name);
+        //$scope.set_status_text(data[obj].status, data[obj].run_name);
         $scope.set_status_text(data[obj].status, data[obj].job_id + "_queue");
       }
     }
@@ -201,7 +240,8 @@
       }).then((res) => {
         console.log(res);
         var script = JSON.stringify(JSON.parse(res.data.script), null, 2);
-        $scope.aceModel = script;
+        //$scope.aceModel = script;
+        $scope.ace.setValue(script);
         $scope.ace.setReadOnly(false);
         $('#text_edit_save_btn').removeClass('disabled');
       }).catch((res) => {
@@ -225,6 +265,7 @@
       }).then((res) => {
         console.log(res);
         $scope.showToast("File saved");
+        $('#text_edit_modal').closeModal();
       }).catch((res) => {
         console.log(res);
       })
@@ -272,10 +313,14 @@
           $scope.all_runs = runs;
         }
         $timeout($scope.set_run_status, delay=200, true, runs);
-        callback();
+        if(callback){
+          callback();
+        }
       }).catch((res) => {
         $scope.showToast("error getting run status");
-        callback();
+        if(callback){
+          callback();
+        }
       });
     }
 
@@ -394,9 +439,10 @@
           'X-CSRFToken' : $scope.get_csrf()
         }
       }).then((res) => {
+        $scope.get_run_status();
         $scope.set_status_text('new', run);
         $scope.showToast("Run added to the queue");
-        $scope.get_run_status($scope.set_run_status);
+        //$scope.get_run_status($scope.set_run_status);
       }).catch((res) => {
         $scope.showToast('Failed to start run');
       });
@@ -452,14 +498,23 @@
       });
     }
 
-    $scope.get_run_data = (run) => {
+    $scope.get_run_data = (run, job_id) => {
       $scope.switch_arrow(run);
-      if($scope.selected_run != run){
-        $scope.selected_run = run;
+      var run_name = '';
+      if(job_id){
+        run_name = run + '_' + job_id
+      } else {
+        run_name = run
+      }
+      if($scope.selected_run == run_name){
+        return;
+      } else {
+        $scope.selected_run = run_name;
         $http({
           url: '/run_manager/get_scripts',
           params: {
-            'run_name' : run
+            'run_name' : run,
+            'job_id': job_id
           }
         }).then((res) => {
           $timeout(() => {
@@ -489,7 +544,7 @@
       }
     }
 
-    $scope.open_output = (run, item) => {
+    $scope.open_output = (run, item, job_id) => {
       if(item.endsWith('.png')){
         $scope.open_image(run, item);
       }
@@ -498,7 +553,8 @@
           $scope.selected_script = item;
           var data = {
             'run_name': run,
-            'script_name': item
+            'script_name': item,
+            'job_id': job_id
           }
           $http({
             url: '/run_manager/read_output_script/',
@@ -508,6 +564,7 @@
             console.log(res);
             var script = res.data.script;
             $scope.aceModel = script;
+            $scope.ace.setValue(script);
             $scope.ace.setReadOnly(true);
             $('#text_edit_save_btn').addClass('disabled');
           }).catch((res) => {

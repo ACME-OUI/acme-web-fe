@@ -1,5 +1,8 @@
 import sys
 import traceback
+import pprint
+
+pp = pprint.PrettyPrinter(indent=4)
 
 
 def get_client_ip(request):
@@ -35,6 +38,6 @@ class colors:
 
 def print_message(message, status='error'):
     if status == 'error':
-        print colors.FAIL + '[-] ' + colors.ENDC + colors.BOLD + str(message) + colors.ENDC
+        print(colors.FAIL + '[-] ' + colors.ENDC + colors.BOLD + str(message) + colors.ENDC)
     elif status == 'ok':
-        print colors.OKGREEN + '[+] ' + colors.ENDC + str(message)
+        print(colors.OKGREEN + '[+] ' + colors.ENDC + str(message))

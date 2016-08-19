@@ -15,43 +15,6 @@ def userSetup(current_test):
     current_test.client.login(username='testuser', password='testpass')
 
 
-class ServiceCredentialTest(TestCase):
-
-    def setUp(self):
-        userSetup(self)
-
-    def tearDown(self):
-        User.objects.filter(username='testuser').delete()
-
-    def test_save_credentials(self):
-        credentials = {}
-        credentials['esgf'] = {}
-        credentials['esgf']['username'] = 'testuser'
-        credentials['esgf']['password'] = 'testpass'
-        try:
-            data = json.dumps(credentials)
-        except:
-            self.assertTrue(False)
-        response = self.client.post(
-            '/acme/add_credentials/', content_type='application/json', data=data)
-
-        # Check the page came back normally
-        self.assertEquals(response.status_code, 200)
-
-        # Check the credential actually got saved
-        self.assertEquals(response.context['added'], 'true')
-
-    def test_empty_credentials(self):
-        response = self.client.post(
-            '/acme/add_credentials/', content_type='application/json', data={})
-
-        # Check the page came back normally
-        self.assertEquals(response.status_code, 200)
-
-        # Check that nothing was added
-        self.assertEquals(response.context['added'], 'false')
-
-
 class UserLoginTest(TestCase):
 
     def setUp(self):

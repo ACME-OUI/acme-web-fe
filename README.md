@@ -32,6 +32,11 @@ acme-site
     cd django-sendfile
     python setup.py install
 
+
+    next [install redis](http://redis.io/topics/quickstart) for handling websockets
+    once redis is setup, run redis-server
+
+
 **local settings**
 
     cp local_settings.py.example local_settings.py
@@ -81,3 +86,6 @@ then from your browser you can view the site at
 
 To get the job cycle working, download the llnl-poller from [here](https://github.com/sterlingbaldwin/llnl-poller)
 follow its install steps and run it before submitting jobs from the dashboard.
+
+**constants**
+There is a hard coded file path in apps/run_manager/constants.py, it should be set to the location of your systems diagnostic and model output folder.

@@ -178,24 +178,15 @@ def start_run(request):
     except Exception as e:
         print_message('Error reading file {}'.format(config_path))
 
-    # request = {
-    #     'user': user,
-    #     'request': 'new'
-    # }
     request = mydict()
     request.body = {
         'user': user,
         'request': 'new'
     }
     request.method = 'POST'
-    # for key in config_options:
-    #     request.body[key] = config_options[key]
     request.body.update(config_options)
     request.body = json.dumps(request.body)
     try:
-        # request = json.dumps(request)
-        # url = ''.join([POLLER_HOST, ':', request.META['SERVER_PORT'], POLLER_SUFFIX])
-        # r = requests.post(url, request)
         r = poller_update(request)
         if(r.status_code != 200):
             print_message('Error communicating with poller')
@@ -431,10 +422,6 @@ def update_script(request):
             return HttpResponse(status=404)
         latest = run_scripts.latest()
         latest.version += 1
-        # latest.edited = latest.edited + json.dumps({
-        #    user: user,
-        #    edited_date: datetime.datetime.now()
-        # })
         latest.save()
     except Exception as e:
         print_message('Error finding latest script {}'.format(script_name), 'error')
@@ -469,6 +456,7 @@ def update_script(request):
 def get_scripts(request):
     run_name = request.GET.get('run_name')
     user = str(request.user)
+    job_id = str(request.GET.get('job_id'))
     if not run_name:
         print_message('No run name specified in get scripts request', 'error')
         return HttpResponse(status=400)
@@ -499,7 +487,8 @@ def get_scripts(request):
             config = config.get('request_attr')
             outdir = config.get('outputdir')
             diag_type = config.get('diag_type')
-            outputdir = DIAG_OUTPUT_PREFIX + user + '/' + run_name + '/' + outdir + '/' + diag_type
+            outputdir = DIAG_OUTPUT_PREFIX + user + '/' + run_name + '_' + job_id + outdir + '/' + diag_type
+            outputdir = outputdir.lower()
             print_message('outputdir: {}'.format(outputdir))
         if os.path.exists(outputdir):
             directory_contents = os.listdir(outputdir)
@@ -509,6 +498,8 @@ def get_scripts(request):
                         output_list.append(file)
                     if file.endswith('.txt'):
                         output_list.insert(0, file)
+        else:
+            print_message('no output directory found')
 
     except Exception as e:
         print_message('Error retrieving directory items', 'error')
@@ -516,6 +507,7 @@ def get_scripts(request):
         return HttpResponse(status=500)
 
     print_message(script_list)
+    print_message(output_list)
     files['script_list'] = script_list
     files['output_list'] = output_list
     return HttpResponse(json.dumps(files))
@@ -529,6 +521,7 @@ def read_output_script(request):
     script_name = request.GET.get('script_name')
     run_name = request.GET.get('run_name')
     user = str(request.user)
+    job_id = str(request.GET.get('job_id'))
     if not script_name:
         print_message('No script name given', 'error')
         return HttpResponse(status=400)
@@ -537,7 +530,11 @@ def read_output_script(request):
         print_message('No run config folder given', 'error')
         return HttpResponse(status=400)
 
-    output_directory = DIAG_OUTPUT_PREFIX + user + '/' + run_name
+    if not job_id:
+        print_message('No job id given', 'error')
+        return HttpResponse(status=400)
+
+    output_directory = DIAG_OUTPUT_PREFIX + user + '/' + run_name + '_' + job_id
     print_message('looking for script in {}'.format(output_directory))
     script_name_exists = False
     script_path = ''
@@ -614,6 +611,7 @@ def read_script(request):
             name=script_name,
             run=run_name).latest()
         version_num = script.version
+        print_message('found script with version: {}'.format(version_num))
 
     path = os.path.abspath(os.path.dirname(__file__))
     run_directory = path + RUN_SCRIPT_PATH + user + '/' + run_name
@@ -675,6 +673,7 @@ def get_output_zip(request):
     if run_type == 'diagnostic':
         run_directory = DIAG_OUTPUT_PREFIX + user + '/' + run_name
     elif run_type == 'model':
+        # TODO: setup this so it works with models
         run_directory = ''
     else:
         print_message('Unrecognized run_type {}'.format(run_type))
