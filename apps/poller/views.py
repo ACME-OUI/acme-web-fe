@@ -106,7 +106,7 @@ def post_update(job_id, data, request_type):
             options = json.loads(job.config_options)
             request_attr = options.get('request_attr')
             outputdir = DIAG_OUTPUT_PREFIX + job.user \
-                + '/' + options.get('run_name') \
+                + '/' + options.get('run_name') + '_' + str(job_id) \
                 + request_attr.get('outputdir') \
                 + '/' + request_attr.get('diag_type').lower()
             print_message('output dir: {}'.format(outputdir))

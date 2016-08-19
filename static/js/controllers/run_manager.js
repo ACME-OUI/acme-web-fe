@@ -238,7 +238,8 @@
       }).then((res) => {
         console.log(res);
         var script = JSON.stringify(JSON.parse(res.data.script), null, 2);
-        $scope.aceModel = script;
+        //$scope.aceModel = script;
+        $scope.ace.setValue(script);
         $scope.ace.setReadOnly(false);
         $('#text_edit_save_btn').removeClass('disabled');
       }).catch((res) => {
@@ -262,6 +263,7 @@
       }).then((res) => {
         console.log(res);
         $scope.showToast("File saved");
+        $('#text_edit_modal').closeModal();
       }).catch((res) => {
         console.log(res);
       })
@@ -435,9 +437,10 @@
           'X-CSRFToken' : $scope.get_csrf()
         }
       }).then((res) => {
+        $scope.get_run_status();
         $scope.set_status_text('new', run);
         $scope.showToast("Run added to the queue");
-        $scope.get_run_status($scope.set_run_status);
+        //$scope.get_run_status($scope.set_run_status);
       }).catch((res) => {
         $scope.showToast('Failed to start run');
       });
@@ -495,14 +498,21 @@
 
     $scope.get_run_data = (run, job_id) => {
       $scope.switch_arrow(run);
-      if($scope.selected_run == run + '_' + job_id){
+      var run_name = '';
+      if(job_id){
+        run_name = run + '_' + job_id
+      } else {
+        run_name = run
+      }
+      if($scope.selected_run == run_name){
         return;
       } else {
-        $scope.selected_run = run + '_' + job_id;
+        $scope.selected_run = run_name;
         $http({
           url: '/run_manager/get_scripts',
           params: {
-            'run_name' : run
+            'run_name' : run,
+            'job_id': job_id
           }
         }).then((res) => {
           $timeout(() => {
@@ -532,7 +542,7 @@
       }
     }
 
-    $scope.open_output = (run, item) => {
+    $scope.open_output = (run, item, job_id) => {
       if(item.endsWith('.png')){
         $scope.open_image(run, item);
       }
@@ -541,7 +551,8 @@
           $scope.selected_script = item;
           var data = {
             'run_name': run,
-            'script_name': item
+            'script_name': item,
+            'job_id': job_id
           }
           $http({
             url: '/run_manager/read_output_script/',
