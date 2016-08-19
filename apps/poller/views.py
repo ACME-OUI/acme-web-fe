@@ -241,7 +241,7 @@ def get_next():
         runs = UserRuns.objects.filter(status='new')
         if len(runs) == 0:
             return {}
-        data = runs.latest()
+        data = runs.earliest()
         data.status = 'in_progress'
         data.save()
     except Exception as e:
