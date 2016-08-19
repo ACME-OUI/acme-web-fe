@@ -159,7 +159,9 @@
       $scope.show_image = true;
       $scope.image_index = $scope.output_list[$scope.selected_run].indexOf(image);
       var image_el = $('#' + run + '_' + image.slice(0,20));
-      var src = image_el.attr('data-img-location');
+      //var src = image_el.attr('data-img-location');
+      var prefix = '/acme/userdata/image/userdata/' + $scope.user + '/';
+      var src = prefix + $scope.selected_run + '/diags_output/amwg/' + $scope.output_list[$scope.selected_run][$scope.image_index]
       var image_viewer = $('#image_view');
       var image_link = $('#image_link');
       $('#image_title').text(image);
@@ -562,6 +564,7 @@
             console.log(res);
             var script = res.data.script;
             $scope.aceModel = script;
+            $scope.ace.setValue(script);
             $scope.ace.setReadOnly(true);
             $('#text_edit_save_btn').addClass('disabled');
           }).catch((res) => {
