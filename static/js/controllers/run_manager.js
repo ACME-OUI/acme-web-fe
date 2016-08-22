@@ -37,7 +37,7 @@
       }).catch((res) => {
         console.log('Error getting user');
         console.log(res);
-      })
+      });
     }
 
     $scope.get_csrf = () => {

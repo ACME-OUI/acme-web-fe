@@ -34,39 +34,18 @@
 
   <script src="{% static "js/controllers/app.js" %}"></script>
   <script src="{% static "js/controllers/cdat.js" %}"></script>
-  <script src="{% static "js/controllers/esgf.js" %}"></script>
+  <script src="{% static "js/controllers/data_manager.js" %}"></script>
   <script src="{% static "js/controllers/run_manager.js" %}"></script>
 
 
   <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
 
-  <!-- AngularJS Tree -->
-  <script src="{% static "js/resources/angular-tree-control.js"%}"></script>
-  <link rel="stylesheet" href="{% static "css/tree-control.css"%}">
-
   <!-- Typehead and Bloodhound -->
   <script src="{% static "js/resources/typeahead.bundle.js"%}"></script>
   <link rel="stylesheet" href="{% static "css/typeahead.css"%}">
 
-  <!-- Font Awesome -->
-  <!-- <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"> -->
-
-  <!-- Slick Carousel -->
-  <script src="{% static "js/resources/slick.js" %}"></script>
-  <link rel="stylesheet" type="text/css" href="{% static "css/slick.css" %}"/>
-  <link rel="stylesheet" href="{% static "css/slick-theme.css" %}">
-
-  <!-- mTree -->
-  <!-- <link rel="stylesheet" href="{% static "css/mtree.css" %}">
-  <script src='http://cdnjs.cloudflare.com/ajax/libs/velocity/0.2.1/jquery.velocity.min.js'></script> -->
-
-  <!-- Quick tree for cdatweb (change over to m-tree later?)-->
-  <script type="text/javascript" src="{% static "js/resources/quicktree.js" %}"></script>
   <!-- CDAT Web css-->
   <link rel="stylesheet" href="{% static "css/cdat.css" %}">
-
-  <!-- Material Spinner see:http://jsfiddle.net/augburto/ejxj7tfb/-->
-  <link rel="stylesheet" href="{% static "css/spinner.css"%}">
 
   <!-- vtkweb -->
   <!-- <script type="text/javascript" src="{% static "vtkweb/js/autobahn.min.js" %}"></script>
@@ -93,12 +72,12 @@
         </template>
       </div>
       <div class="">
-        <template type="text/html" id="esgf_wrapper">
-          <div class="esgf_window" ng-controller="ESGFControl" ng-init="init()">
+        <template type="text/html" id="data_manager_wrapper">
+          <div class="data_manager_window" ng-controller="DataManagerControl" ng-init="init()">
             <div class="progress" ng-show="ready == false">
               <div class="indeterminate"></div>
             </div>
-            <ng-include src="'{% static 'partials/esgf_window.html' %}'"></ng-include>
+            <ng-include src="'{% static 'partials/data_manager_window.html' %}'"></ng-include>
           <div>
         </template>
       </div>

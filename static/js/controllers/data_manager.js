@@ -1,6 +1,6 @@
 (function(){
-  angular.module('esgf', ['ngAnimate', 'ngMaterial'])
-  .controller('ESGFControl', ['$scope', '$http', function($scope, $http, $mdToast) {
+  angular.module('data_manager', ['ngAnimate', 'ngMaterial'])
+  .controller('DataManagerControl', ['$scope', '$http', '$timeout', '$mdToast', function($scope, $http, $timeout, $mdToast) {
 
     /**
      * Slices the object. Note that returns a new spliced object,
@@ -28,10 +28,15 @@
       );
     };
 
+    $scope.set_step = (step) => {
+      $scope.step = step;
+      console.log(step);
+    }
+
     $scope.init = () => {
       //alert('running init')
-      console.log('[+] Initializing ESGF window');
-      $scope.step = 0;
+      console.log('[+] Initializing Data Manager window');
+      $scope.step = -1;
       $scope.selected_nodes = undefined;
       $scope.ready = false;
       $scope.datapath = false;
@@ -44,6 +49,12 @@
       $scope.facet_cache_page_count = {};
       $scope.dataset_cache_page_count = 0;
       $scope.get_node_list();
+      $timeout(() => {
+        $('.collapsible').collapsible({
+          accordion : false
+        });
+      }, 200);
+
     }
 
     $scope.set_datapath = (path) => {
