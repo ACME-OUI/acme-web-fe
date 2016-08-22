@@ -1,15 +1,55 @@
 <div class="">
-  <a class="waves-effect waves-light btn teal dashboard-show-hide" style="margin-bottom: 1em;" ng-show="step != 0" ng-click="step = step - 1">
+  <a class="waves-effect waves-light btn teal dashboard-show-hide" style="margin-bottom: 1em;" ng-show="step >= 0" ng-click="set_step(step - 1)">
     <i class="material-icons left">navigate_before</i>
   </a>
-  <a class="waves-effect waves-light btn teal dashboard-show-hide" style="float: right; margin-bottom: 1em;" ng-show="step == 2 && datasets" ng-click="step = step + 1">
+  <a class="waves-effect waves-light btn teal dashboard-show-hide" style="float: right; margin-bottom: 1em;" ng-show="step > 0 && datasets" ng-click="set_step(step + 1)">
     <i class="material-icons left">navigate_next</i>
   </a>
+
+  <div class="dashboard-show-hide" ng-show="step == -1">
+    <ul class="collapsible popout" data-collapsible="accordion">
+      <li>
+        <div class="collapsible-header">
+          Diagnostic Output
+        </div>
+        <div class="collapsible-body">
+          some output
+          <ul>
+            <li ng-repeat="diag in diags"></li>
+          </ul>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header">
+          Model Output
+        </div>
+        <div class="collapsible-body">
+          some output
+          <ul>
+            <li ng-repeat="model in model_output"></li>
+          </ul>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header">
+          Observations
+        </div>
+        <div class="collapsible-body">
+          some obs
+          <ul>
+            <li ng-repeat="obs in obs_list"></li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+    <a class="waves-effect waves-light btn" href="#" ng-click="set_step(0)" style="margin: 24px;">import data</a>
+  </div>
+
   <!-- Datapath selection -->
   <!-- Step 0 -->
   <div class="dashboard-show-hide" ng-show="step == 0 && ready == true">
-    <h3>Select a data source</h3>
-    <ul class="collapsible popout" id="data-select-collapsible"data-collapsible="accordion">
+    <h2 style="text-align: center">Select a data source</h2>
+    <ul class="collapsible popout" id="data-select-collapsible" data-collapsible="accordion">
       <li>
         <div class="collapsible-header">
           <a class="waves-effect waves-light btn" href="#" ng-click="set_datapath('local')">
