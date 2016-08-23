@@ -30,11 +30,9 @@
 
     $scope.set_step = (step) => {
       $scope.step = step;
-      console.log(step);
     }
 
     $scope.init = () => {
-      //alert('running init')
       console.log('[+] Initializing Data Manager window');
       $scope.step = -1;
       $scope.selected_nodes = undefined;
@@ -48,13 +46,51 @@
       $scope.dataset_cache = {};
       $scope.facet_cache_page_count = {};
       $scope.dataset_cache_page_count = 0;
+      $scope.userdata = {};
+      $scope.get_user();
       $scope.get_node_list();
       $timeout(() => {
         $('.collapsible').collapsible({
           accordion : false
         });
       }, 200);
+    }
 
+    $scope.download_modal = () => {
+      $('#download_dataset_modal').openModal();
+    }
+
+    $scope.download_dataset = () => {
+      var params = {
+        'data_type': $('#download_type_radio_select input:checked').attr('data-download-type'),
+        'data_name': $('#download_name').val(),
+        'openid_username': $('#openid_username').val(),
+        'openid_password': $('#openid_password').val(),
+        'search_string': JSON.stringify($scope.searchTerms),
+        'nodes': $scope.selected_nodes,
+      };
+      $http({
+        url: '/esgf/download',
+        method: 'GET',
+        params: params
+      }).then((res) => {
+        console.log(res.data)
+      }).catch((res) => {
+        console.log(res.data)
+      });
+    }
+
+    $scope.get_user = () => {
+      $http({
+        url: '/run_manager/get_user',
+        method: 'GET'
+      }).then((res) => {
+        $scope.user = res.data
+        $scope.get_user_data();
+      }).catch((res) => {
+        console.log('Error getting user');
+        console.log(res);
+      });
     }
 
     $scope.set_datapath = (path) => {
@@ -62,6 +98,20 @@
       if(path == 'esgf'){
         $scope.step = 1;
       }
+    }
+
+    $scope.get_user_data = () => {
+      $http({
+        url: '/esgf/get_user_data'
+      }).then((res) => {
+        console.log(res.data);
+        $scope.all_userdata = res.data[$scope.user]
+        $scope.userdata['model_output'] = Object.keys($scope.all_userdata.model_output);
+        $scope.userdata['diagnostic_output'] = Object.keys($scope.all_userdata.diagnostic_output);
+        $scope.userdata['observations'] = Object.keys($scope.all_userdata.observations);
+      }).catch((res) => {
+        console.log(res.data);
+      })
     }
 
     $scope.search = () => {
@@ -150,6 +200,10 @@
         console.log(res);
         $scope.showToast('Error retrieving node list');
       });
+    }
+
+    $scope.get_keys = (obj) => {
+      return Object.keys(obj)
     }
 
     $scope.remove_facet = (facet) => {

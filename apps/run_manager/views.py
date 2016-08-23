@@ -487,7 +487,12 @@ def get_scripts(request):
             config = config.get('request_attr')
             outdir = config.get('outputdir')
             diag_type = config.get('diag_type')
-            outputdir = DIAG_OUTPUT_PREFIX + user + '/' + run_name + '_' + job_id + outdir + '/' + diag_type
+            outputdir = DIAG_OUTPUT_PREFIX \
+                + user \
+                + '/diagnostic_output/' \
+                + run_name + '_' + job_id \
+                + outdir + '/' \
+                + diag_type
             outputdir = outputdir.lower()
             print_message('outputdir: {}'.format(outputdir))
         if os.path.exists(outputdir):
@@ -671,7 +676,10 @@ def get_output_zip(request):
         return HttpResponse(status=400)
 
     if run_type == 'diagnostic':
-        run_directory = DIAG_OUTPUT_PREFIX + user + '/' + run_name
+        run_directory = DIAG_OUTPUT_PREFIX \
+            + user \
+            + '/diagnostic_output/' \
+            + run_name
     elif run_type == 'model':
         # TODO: setup this so it works with models
         run_directory = ''

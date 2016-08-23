@@ -17,4 +17,5 @@ POLLER_URL = 'http://localhost:8000/poller/update/'
 POLLER_HOST = 'http://localhost'
 POLLER_SUFFIX = '/poller/update/'
 # location to look for run output
-DIAG_OUTPUT_PREFIX = '/Users/baldwin32/projects/acme-web-fe/userdata/'
+DIAG_OUTPUT_PREFIX = '/export/baldwin32/projects/acme-web-fe/userdata/'
+USER_DATA_PREFIX = '/export/baldwin32/projects/acme-web-fe/userdata/'

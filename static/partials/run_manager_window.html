@@ -89,7 +89,6 @@
                            id="[[run.run_name]]_[[item.slice(0,20)]]"
                            title="[[item]]"
                            style="padding: 0.5rem; margin-left: 3vw; cursor: pointer; cursor: hand;"
-                           data-img-location="/acme/userdata/image/userdata/btest/[[run.run_name]]/diags_output/amwg/[[item]]"
                            ng-click="open_output(run.run_name, item, run.job_id)">
                            [[item]]
                         </a>
@@ -104,7 +103,7 @@
                          ng-click="load_output_cache()">
                          more
                       </a>
-                      <a href="/run_manager/get_output_zip?run_name=[[run.run_name]]&run_type=diagnostic"
+                      <a href="/run_manager/get_output_zip?run_name=[[run.run_name]]_[[run.job_id]]&run_type=diagnostic"
                          style="margin-top: 1vh;"
                          class="waves-effect waves-light btn">
                          download zip
@@ -254,6 +253,6 @@
        </a>
        <span class="stretch"></span>
     </div>
-
   </div>
+  
 </div>

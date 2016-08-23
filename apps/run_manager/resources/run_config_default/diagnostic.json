@@ -2,9 +2,9 @@
    "run_type": "diagnostic",
    "request_attr":   {
        "diag_type": "AMWG",
-       "model_path": "/metadiags_test_data",
-       "obs_path": "/obs",
-       "outputdir": "/diags_output",
+       "model_path": "/model_output/",
+       "obs_path": "/observations/",
+       "outputdir": "/diagnostic_output",
        "set": "5"
      }
  }

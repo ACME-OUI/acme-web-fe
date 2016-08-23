@@ -10,34 +10,70 @@
     <ul class="collapsible popout" data-collapsible="accordion">
       <li>
         <div class="collapsible-header">
-          Diagnostic Output
+          <span>Diagnostic Output</span>
         </div>
         <div class="collapsible-body">
-          some output
-          <ul>
-            <li ng-repeat="diag in diags"></li>
+          <ul class="collapsible">
+            <li ng-repeat="diag_folder in userdata.diagnostic_output">
+              <div class="collapsible-header">
+                <span>[[ diag_folder ]]</span> 
+              </div>
+              <div class="collapsible-body">
+                <ul class="collection">
+                  <li>
+                    <a href="/run_manager/get_output_zip?run_name=[[ diag_folder ]]&run_type=diagnostic" 
+                       style="padding: 0.5rem; margin-left: 3vw;">
+                       download zip
+                    </a>
+                  </li>
+                  <li ng-repeat="diag in get_keys(all_userdata.diagnostic_output[diag_folder]['diagnostic_output']['amwg'])">
+                    <span style="padding: 0.5rem; margin-left: 3vw;">[[ diag ]]</span>
+                  </li>
+                </ul>
+              </div>
+            </li>
           </ul>
         </div>
       </li>
       <li>
         <div class="collapsible-header">
-          Model Output
+          <span>Model Output</span>
         </div>
         <div class="collapsible-body">
-          some output
-          <ul>
-            <li ng-repeat="model in model_output"></li>
+          <ul class="collapsible">
+            <li ng-repeat="model_folder in userdata.model_output">
+              <div class="collapsible-header">
+                <span>[[ model_folder ]]</span>
+              </div>
+              <div class="collapsible-body">
+                <ul class="collection">
+                  <li ng-repeat="m in get_keys(all_userdata.model_output[model_folder])">
+                    <span style="padding: 0.5rem; margin-left: 3vw;">[[ m ]]</span>
+                  </li>
+                </ul>
+              </div>
+            </li>
           </ul>
         </div>
       </li>
       <li>
         <div class="collapsible-header">
-          Observations
+          <span>Observations</span>
         </div>
         <div class="collapsible-body">
-          some obs
-          <ul>
-            <li ng-repeat="obs in obs_list"></li>
+          <ul class="collapsible">
+            <li ng-repeat="obs_folder in userdata.observations">
+              <div class="collapsible-header">
+                <span>[[ obs_folder ]]</span>
+              </div>
+              <div class="collapsible-body">
+                <ul class="collection">
+                  <li ng-repeat="obs in get_keys(all_userdata.observations[obs_folder])">
+                    <span style="padding: 0.5rem; margin-left: 3vw;">[[ obs ]]</span>
+                  </li>
+                </ul>
+              </div>
+            </li>
           </ul>
         </div>
       </li>
@@ -166,6 +202,9 @@
           </div>
           <div class="collapsible-body">
             <ul class="collection popout" style="padding-left: 1em;">
+              <li>
+                <a href="" class="waves-effect waves-light btn" ng-click="download_modal()">download</a>
+              </li>
               <li class="collection-item" ng-repeat="(k,v) in key">
                 [[k]] : [[v]]
               </li>
@@ -177,6 +216,28 @@
         </li>
       </ul>
     </div>
+  </div>
+
+  <div class="modal" id="download_dataset_modal" style="overflow: hidden; max-height: 80%;">
+    <div class="" id="download_type_radio_select">
+      <p ng-repeat="type in ['model output', 'observation']">
+        <input name="download_type" type="radio" id="[[type]]_radio" data-download-type="[[type]]"/>
+        <label for="[[type]]_radio">[[type]]</label>
+      </p>
+    </div>
+    <div class="input-field col s6">
+        <input id="download_name" type="text">
+        <label for="download_name">Dataset name</label>
+    </div>
+    <div class="input-field col s6">
+        <input id="openid_username" type="text">
+        <label for="openid_username">OpenID username</label>
+    </div>
+    <div class="input-field col s6">
+        <input id="openid_password" type="password">
+        <label for="openid_password">OpenID password</label>
+    </div>
+    <a href="" class="waves-effect waves-light btn" ng-click="download_dataset()">download</a>
   </div>
 
 </div>
