@@ -26,7 +26,7 @@
           .position('center')
           .hideDelay(1200)
       );
-    };
+    };  
 
     $scope.set_step = (step) => {
       $scope.step = step;
@@ -34,9 +34,10 @@
 
     $scope.init = () => {
       console.log('[+] Initializing Data Manager window');
+      $scope.setup_socket();
       $scope.step = -1;
       $scope.selected_nodes = undefined;
-      $scope.ready = false;
+      $scope.ready = false; 
       $scope.datapath = false;
       $scope.facet_options = undefined;
       $scope.searchTerms = {};
@@ -59,6 +60,34 @@
     $scope.download_modal = () => {
       $('#download_dataset_modal').openModal();
     }
+    $scope.setup_socket = () => {
+      var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+      if(!window.ACMEDashboard.socket){
+        window.ACMEDashboard.socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + window.location.pathname);
+      }
+      window.ACMEDashboard.socket.onopen = function() {
+        message = JSON.stringify({
+          'target_app': 'run_manager',
+          'destination': 'init',
+          'content': 'hello world!'
+        })
+        window.ACMEDashboard.socket.send(message);
+      }
+      window.ACMEDashboard.socket.onmessage = (message) => {
+        var data = JSON.parse(message.data);
+        if(data.user != $scope.user){
+          return;
+        }
+        switch (data.destination) {
+          case 'esgf_download_status':
+            console.log('got a status update');
+            console.log(data)
+            break;
+          default:
+
+        }
+      }
+    }
 
     $scope.download_dataset = () => {
       var params = {
@@ -66,18 +95,17 @@
         'data_name': $('#download_name').val(),
         'openid_username': $('#openid_username').val(),
         'openid_password': $('#openid_password').val(),
-        'search_string': JSON.stringify($scope.searchTerms),
+        'search_string': $scope.searchTerms,
         'nodes': $scope.selected_nodes,
       };
-      $http({
-        url: '/esgf/download',
-        method: 'GET',
-        params: params
-      }).then((res) => {
-        console.log(res.data)
-      }).catch((res) => {
-        console.log(res.data)
-      });
+      request = JSON.stringify({
+        'target_app': 'esgf',
+        'destination': 'dataset_download',
+        'params': params,
+        'user': $scope.user
+      })
+      window.ACMEDashboard.socket.send(request);
+      $('#download_modal').closeModal();
     }
 
     $scope.get_user = () => {
@@ -109,9 +137,25 @@
         $scope.userdata['model_output'] = Object.keys($scope.all_userdata.model_output);
         $scope.userdata['diagnostic_output'] = Object.keys($scope.all_userdata.diagnostic_output);
         $scope.userdata['observations'] = Object.keys($scope.all_userdata.observations);
+        $scope.obs_cache = undefined;
+        $scope.diag_cache = undefined;
+        $scope.model_cache = undefined;
       }).catch((res) => {
         console.log(res.data);
       })
+    }
+
+    $scope.load_obs_cache = () => {
+      if($scope.obs_cache) return;
+      $scope.obs_cache = $scope.all_userdata['observations'];
+    }
+    $scope.load_model_cache = () => {
+      if($scope.model_cache) return;
+      $scope.model_cache = $scope.all_userdata['model_output'];
+    }
+    $scope.load_diag_cache = () => {
+      if($scope.diag_cache) return;
+      $scope.diag_cache = $scope.all_userdata['diagnostic_output'];
     }
 
     $scope.search = () => {

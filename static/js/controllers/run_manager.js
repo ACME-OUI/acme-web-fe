@@ -57,35 +57,6 @@
       return cookieValue;
   	}
 
-    $scope.setup_socket = () => {
-      var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-      if(!window.socket){
-        window.socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + window.location.pathname);
-      }
-      window.socket.onopen = function() {
-        message = JSON.stringify({
-          'target_app': 'run_manager',
-          'destination': 'init',
-          'content': 'hello world!'
-        })
-        socket.send(message);
-      }
-      window.socket.onmessage = (message) => {
-        var data = JSON.parse(message.data);
-        if(data.user != $scope.user){
-          return;
-        }
-        switch (data.destination) {
-          case 'set_run_status':
-            console.log('got a status update');
-            $scope.set_status_text(data.status, data.job_id + "_queue");
-            break;
-          default:
-
-        }
-      }
-    }
-
     $scope.init = function(){
       console.log('[+] Initializing RunManager window');
       $scope.setup_socket();
@@ -131,6 +102,35 @@
               }
             }
           }
+        }
+      }
+    }
+
+    $scope.setup_socket = () => {
+      var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+      if(!window.ACMEDashboard.socket){
+        window.ACMEDashboard.socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + window.location.pathname);
+      }
+      window.ACMEDashboard.socket.onopen = function() {
+        message = JSON.stringify({
+          'target_app': 'run_manager',
+          'destination': 'init',
+          'content': 'hello world!'
+        })
+        window.ACMEDashboard.socket.send(message);
+      }
+      window.ACMEDashboard.socket.onmessage = (message) => {
+        var data = JSON.parse(message.data);
+        if(data.user != $scope.user){
+          return;
+        }
+        switch (data.destination) {
+          case 'set_run_status':
+            console.log('got a status update');
+            $scope.set_status_text(data.status, data.job_id + "_queue");
+            break;
+          default:
+
         }
       }
     }

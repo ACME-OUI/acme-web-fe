@@ -4,8 +4,7 @@
 
     $scope.init = () => {
       console.log('[+] Initializing dashboard');
-      var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-      var chat_socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/chat" + window.location.pathname);
+      $scope.setup_socket();
     }
 
     $scope.showToast = function(message) {
@@ -27,6 +26,35 @@
         console.log('Error getting user');
         console.log(res);
       })
+    }
+
+    $scope.setup_socket = () => {
+      var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+      if(!window.ACMEDashboard.socket){
+        window.ACMEDashboard.socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + window.location.pathname);
+      }
+      window.ACMEDashboard.socket.onopen = function() {
+        message = JSON.stringify({
+          'target_app': 'run_manager',
+          'destination': 'init',
+          'content': 'hello world!'
+        })
+        window.ACMEDashboard.socket.send(message);
+      }
+      window.ACMEDashboard.socket.onmessage = (message) => {
+        var data = JSON.parse(message.data);
+        if(data.user != $scope.user){
+          return;
+        }
+        switch (data.destination) {
+          case 'set_run_status':
+            console.log('got a status update');
+            $scope.set_status_text(data.status, data.job_id + "_queue");
+            break;
+          default:
+
+        }
+      }
     }
 
     /**

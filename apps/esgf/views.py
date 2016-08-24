@@ -11,7 +11,7 @@ import json
 import requests
 import os.path
 import shutil
-from subprocess import call
+import subprocess
 
 from util.utilities import print_debug, print_message
 
@@ -92,7 +92,7 @@ def download(request):
     username = request.GET.get('openid_username')
     password = request.GET.get('openid_password')
     search_string = json.loads(request.GET.get('search_string'))
-    nodes = request.GET.get('nodes')
+    nodes = json.loads(request.GET.get('nodes'))
     data_type = request.GET.get('data_type')
     data_name = request.GET.get('data_name')
     if not username:
@@ -128,15 +128,37 @@ def download(request):
             print_message('got reply from {node}'.format(node=node))
             if len(rs) == 0:
                 continue
-            url = rs[0].url
-            directory = USER_DATA_PREFIX + user
-            if data_type == 'obs':
-                directory += '/observations'
-            elif data_type == 'model':
-                directory += '/model_output'
+            #
+            # lets try with the get_download_script method
+            #
+            # url = rs[0].json.get('url')[0]
+            # directory = USER_DATA_PREFIX + user
+            # if data_type == 'obs':
+            #     directory += '/observations/'
+            # elif data_type == 'model':
+            #     directory += '/model_output/'
+            # directory += data_name
+            # print_message('Downloading {url} to {dir}'.format(url=url, dir=directory))
+            # esgf_download(url, directory)
 
-            print_message('Downloading {url} to {dir}'.format(url=url, dir=directory))
-            esgf_download(url, directory)
+            script_text = context.get_download_script()
+            script_name = '{name}_download_script.sh'.format(name=data_name)
+            try:
+                with open(script_name, 'w') as script:
+                    script.write(script_text)
+                    script.close()
+            except Exception, e:
+                print_debug(e)
+
+            try:
+                print subprocess.call(['chmod', '+x', script_name])
+                p = subprocess.Popen(['./{name}'.format(name=script_name)], stdout=subprocess.PIPE, shell=True)
+                for line in p.stdout:
+                    print line
+                out, err = p.communicate()
+                print out, err
+            except Exception, e:
+                print_debug(e)
 
         except Exception as e:
             print_debug(e)

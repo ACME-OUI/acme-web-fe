@@ -16,37 +16,29 @@ class mydict(dict):
 def dispatch(message, data, user):
     destination = data.get('destination')
     if destination == 'init':
-        init(message, data, user)
+        return init(message, data, user)
         # group_job_update(9999, 'testest', 'rockin it')
     elif destination == 'status_update':
-        status_update(message, data, user)
+        return status_update(message, data, user)
     elif destination == 'send_to_group':
-        send_to_group(data, user)
+        return send_to_group(data, user)
     else:
         print_message('unrecognized destination function {}'.format(destination))
+        return -1
 
 
 def init(message, data, user):
     message.reply_channel.send({'text': 'connection initialized to run manager'})
+    return 0
 
-# def status_update(message, data, user):
-#     params = mydict()
-#     params.GET = {'user': user, 'request': 'all'}
-#     params.method = 'GET'
-#
-#     try:
-#         r = poller_update(params)
-#         # r = requests.get(url, params={'user': user, 'request': 'all'})
-#         if(r.status_code != 200):
-#             print_message('Poller error with params {}'.format(params))
-#         message.reply_channel.send(r.content)
-#     except Exception as e:
-#         print_message("Error getting run status with url: {}".format(url))
-#         print_debug(e)
+
+def status_update(message, data, user):
+    return -1
 
 
 def send_to_group(data, group):
     Group(group).send(data)
+    return 0
 
 
 def group_job_update(job_id, user, status):

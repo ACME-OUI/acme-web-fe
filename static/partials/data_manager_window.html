@@ -15,7 +15,7 @@
         <div class="collapsible-body">
           <ul class="collapsible">
             <li ng-repeat="diag_folder in userdata.diagnostic_output">
-              <div class="collapsible-header">
+              <div class="collapsible-header" ng-click="load_diag_cache()">
                 <span>[[ diag_folder ]]</span> 
               </div>
               <div class="collapsible-body">
@@ -26,7 +26,7 @@
                        download zip
                     </a>
                   </li>
-                  <li ng-repeat="diag in get_keys(all_userdata.diagnostic_output[diag_folder]['diagnostic_output']['amwg'])">
+                  <li ng-repeat="diag in get_keys(diag_cache['amwg'])">
                     <span style="padding: 0.5rem; margin-left: 3vw;">[[ diag ]]</span>
                   </li>
                 </ul>
@@ -42,12 +42,12 @@
         <div class="collapsible-body">
           <ul class="collapsible">
             <li ng-repeat="model_folder in userdata.model_output">
-              <div class="collapsible-header">
+              <div class="collapsible-header" ng-click="load_model_cache()">
                 <span>[[ model_folder ]]</span>
               </div>
               <div class="collapsible-body">
                 <ul class="collection">
-                  <li ng-repeat="m in get_keys(all_userdata.model_output[model_folder])">
+                  <li ng-repeat="m in get_keys(model_cache[model_folder])">
                     <span style="padding: 0.5rem; margin-left: 3vw;">[[ m ]]</span>
                   </li>
                 </ul>
@@ -63,12 +63,12 @@
         <div class="collapsible-body">
           <ul class="collapsible">
             <li ng-repeat="obs_folder in userdata.observations">
-              <div class="collapsible-header">
+              <div class="collapsible-header" ng-click="load_obs_cache()">
                 <span>[[ obs_folder ]]</span>
               </div>
               <div class="collapsible-body">
                 <ul class="collection">
-                  <li ng-repeat="obs in get_keys(all_userdata.observations[obs_folder])">
+                  <li ng-repeat="obs in get_keys(obs_cache[obs_folder])">
                     <span style="padding: 0.5rem; margin-left: 3vw;">[[ obs ]]</span>
                   </li>
                 </ul>
@@ -220,7 +220,7 @@
 
   <div class="modal" id="download_dataset_modal" style="overflow: hidden; max-height: 80%;">
     <div class="" id="download_type_radio_select">
-      <p ng-repeat="type in ['model output', 'observation']">
+      <p ng-repeat="type in ['model', 'observation']">
         <input name="download_type" type="radio" id="[[type]]_radio" data-download-type="[[type]]"/>
         <label for="[[type]]_radio">[[type]]</label>
       </p>
