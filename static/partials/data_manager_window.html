@@ -78,6 +78,14 @@
         </div>
       </li>
     </ul>
+    <ul class="collection" ng-show="downloads">
+      <li ng-repeat="download in downloads" 
+          class="collection-item" 
+          styles="margin: 0 24px; box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12)">
+        <span>[[ download.data_name ]]</span>
+        <span>[[ download.percent_complete ]]%</span>
+      </li>
+    </ul>
     <a class="waves-effect waves-light btn" href="#" ng-click="set_step(0)" style="margin: 24px;">import data</a>
   </div>
 
@@ -142,7 +150,7 @@
   <!-- step 1:select node pane -->
   <div class="dashboard-show-hide" ng-show="datapath == 'esgf'">
     <form class="dashboard-show-hide esgf_scope_[[$id]]" ng-show="step == 1 && ready == true">
-      <p ng-repeat="node in node_list">
+      <p ng-repeat="node in node_list | orderBy: 'node'">
         <input type="checkbox" id="[[node + $id]]" value="[[node]]"/>
         <label for="[[node + $id]]">[[node]]</label>
       </p>
@@ -165,7 +173,7 @@
         </div>
       </div>
       <ul class="collapsible popout" data-collapsible="accordion">
-        <li ng-repeat="(facet,options) in facet_options" class="facet_holder" id="[[facet]]">
+        <li ng-repeat="(facet,options) in facet_options | orderBy: 'facet'" class="facet_holder" id="[[facet]]">
           <div class="collapsible-header" id="[[facet]]_collapsible" ng-click="facet_option_typeahead(facet)">
             <i class="material-icons" id="[[facet]]_arrow">play_arrow</i>
             [[facet]]
@@ -177,7 +185,7 @@
                   <input class="typeahead" type="text" id="[[facet]]_lookup_field" placeholder="lookup">
                 </div>
               </li>
-              <li class="collection-item" ng-repeat="(option, hits) in facet_cache[facet]" style="padding: 1em;">
+              <li class="collection-item" ng-repeat="(option, hits) in facet_cache[facet] | orderBy: 'option'" style="padding: 1em;">
                 <input name="[[facet]]" type="radio" ng-click="searchTerms[facet] = option" id="[[option]]" />
                 <label for="[[option]]">[[option]] : [[hits]]</label>
               </li>

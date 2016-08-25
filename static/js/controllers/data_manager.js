@@ -81,7 +81,12 @@
         switch (data.destination) {
           case 'esgf_download_status':
             console.log('got a status update');
-            console.log(data)
+            console.log(data);
+            $scope.downloads = $scope.downloads || {};
+            $scope.downloads[data.data_name] = $scope.downloads[data.data_name] || {}; 
+            $scope.downloads[data.data_name]['percent_complete'] = data.percent_complete.foFixed(2);
+            $scope.downloads[data.data_name]['data_name'] = data.data_name;
+            $scope.$apply();
             break;
           default:
 
@@ -105,6 +110,10 @@
         'user': $scope.user
       })
       window.ACMEDashboard.socket.send(request);
+      $scope.downloads = $scope.downloads || {};
+      $scope.downloads[params.data_name] = {
+        'percent_complete': 0
+      };      
       $('#download_modal').closeModal();
     }
 
