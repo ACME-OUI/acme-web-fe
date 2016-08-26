@@ -136,8 +136,9 @@
             console.log(data);
             $scope.downloads = $scope.downloads || {};
             $scope.downloads[data.data_name] = $scope.downloads[data.data_name] || {}; 
-            $scope.downloads[data.data_name]['percent_complete'] = data.percent_complete.foFixed(2);
+            $scope.downloads[data.data_name]['percent_complete'] = data.percent_complete.toFixed(2);
             $scope.downloads[data.data_name]['data_name'] = data.data_name;
+            $scope.downloads[data.data_name]['message'] = data.message;
             $scope.$apply();
             break;
           default:

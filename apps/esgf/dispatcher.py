@@ -7,6 +7,7 @@ from pyesgf.search import SearchConnection
 from constants import ESGF_SEARCH_SUFFIX, ESGF_CREDENTIALS, NODE_HOSTNAMES
 from util.utilities import print_debug, print_message
 import os
+import signal
 from sh import tail
 
 
@@ -92,23 +93,38 @@ def dataset_download(message, data, user):
 
             try:
                 subprocess.call(['chmod', '+x', script_name])
-                p = subprocess.Popen('{name} > output_status.txt 2>&1'.format(name=script_name),
+                p = subprocess.Popen('exec {name} > output_status.txt 2>&1'.format(name=script_name),
                                      shell=True,
-                                     cwd=script_path)
+                                     cwd=script_path,
+                                     preexec_fn=os.setsid)
+                should_break = False
                 for line in tail('-f', '{path}/output_status.txt'.format(path=script_path), _iter=True):
-                    if 'saved' in line or 'Saving to' in line:
-                        number_complete += 1
-                        percent_complete = number_complete / number_of_downloads * 100
-                        # print_message('percent complete: {}%'.format(percent_complete), 'ok')
+                    update_message = None
+                    if 'ERROR' in line:
+                        os.killpg(os.getpgid(p.pid), signal.SIGTERM)
+                        print_message('error downloading file')
                         update_message = {
                             'text': json.dumps({
                                 'user': user,
                                 'data_name': data_name,
                                 'percent_complete': percent_complete,
+                                'message': line,
                                 'destination': 'esgf_download_status'
                             })
                         }
-                        Group('active').send(update_message)
+                    if 'saved' in line or 'Saving to' in line:
+                        number_complete += 1
+                        percent_complete = number_complete / number_of_downloads * 100
+                        print_message('percent complete: {}%'.format(percent_complete), 'ok')
+                        update_message = {
+                            'text': json.dumps({
+                                'user': user,
+                                'data_name': data_name,
+                                'percent_complete': percent_complete,
+                                'message': 'downloading',
+                                'destination': 'esgf_download_status'
+                            })
+                        }
                     if percent_complete > 99:
                         print_message('Download complete', 'ok')
                         update_message = {
@@ -116,10 +132,14 @@ def dataset_download(message, data, user):
                                 'user': user,
                                 'data_name': data_name,
                                 'percent_complete': 100.0,
+                                'message': 'complete',
                                 'destination': 'esgf_download_status'
                             })
                         }
+                        should_break = True
+                    if update_message:
                         Group('active').send(update_message)
+                    if should_break:
                         break
                 out, err = p.communicate()
                 print out, err

@@ -83,7 +83,8 @@
           class="collection-item" 
           styles="margin: 0 24px; box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12)">
         <span>[[ download.data_name ]]</span>
-        <span>[[ download.percent_complete ]]%</span>
+        <span>[[ download.message ]]</span>
+        <span>percent complete: [[ download.percent_complete ]]%</span>
       </li>
     </ul>
     <a class="waves-effect waves-light btn" href="#" ng-click="set_step(0)" style="margin: 24px;">import data</a>
