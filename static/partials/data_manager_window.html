@@ -15,7 +15,7 @@
         <div class="collapsible-body">
           <ul class="collapsible">
             <li ng-repeat="diag_folder in userdata.diagnostic_output">
-              <div class="collapsible-header" ng-click="load_diag_cache()">
+              <div class="collapsible-header" ng-click="load_diag_cache(diag_folder)">
                 <span>[[ diag_folder ]]</span> 
               </div>
               <div class="collapsible-body">
@@ -26,7 +26,7 @@
                        download zip
                     </a>
                   </li>
-                  <li ng-repeat="diag in get_keys(diag_cache['amwg'])">
+                  <li ng-repeat="diag in diag_cache[diag_folder]">
                     <span style="padding: 0.5rem; margin-left: 3vw;">[[ diag ]]</span>
                   </li>
                 </ul>
@@ -42,12 +42,12 @@
         <div class="collapsible-body">
           <ul class="collapsible">
             <li ng-repeat="model_folder in userdata.model_output">
-              <div class="collapsible-header" ng-click="load_model_cache()">
+              <div class="collapsible-header" ng-click="load_model_cache(model_folder)">
                 <span>[[ model_folder ]]</span>
               </div>
               <div class="collapsible-body">
                 <ul class="collection">
-                  <li ng-repeat="m in get_keys(model_cache[model_folder])">
+                  <li ng-repeat="m in model_cache[model_folder]">
                     <span style="padding: 0.5rem; margin-left: 3vw;">[[ m ]]</span>
                   </li>
                 </ul>
@@ -63,12 +63,12 @@
         <div class="collapsible-body">
           <ul class="collapsible">
             <li ng-repeat="obs_folder in userdata.observations">
-              <div class="collapsible-header" ng-click="load_obs_cache()">
+              <div class="collapsible-header" ng-click="load_obs_cache(obs_folder)">
                 <span>[[ obs_folder ]]</span>
               </div>
               <div class="collapsible-body">
                 <ul class="collection">
-                  <li ng-repeat="obs in get_keys(obs_cache[obs_folder])">
+                  <li ng-repeat="obs in obs_cache[obs_folder]">
                     <span style="padding: 0.5rem; margin-left: 3vw;">[[ obs ]]</span>
                   </li>
                 </ul>
@@ -102,15 +102,9 @@
           <i class="material-icons">file_upload</i>
         </div>
         <div class="collapsible-body">
-          <div class="file-field input-field" style="padding: 1em;">
-            <div class="btn">
-              <span>File</span>
-              <input type="file">
-            </div>
-            <div class="file-path-wrapper">
-              <input class="file-path" type="text">
-            </div>
-          </div>
+          <p class="card">
+            <a href="" class="wave-effect waves-light btn" ng-click="upload_modal()">upload</a>
+          </p>
         </div>
       </li>
       <li>
@@ -229,8 +223,8 @@
   <div class="modal" id="download_dataset_modal" style="overflow: hidden; max-height: 80%;">
     <div class="" id="download_type_radio_select">
       <p ng-repeat="type in ['model', 'observation']">
-        <input name="download_type" type="radio" id="[[type]]_radio" data-download-type="[[type]]"/>
-        <label for="[[type]]_radio">[[type]]</label>
+        <input name="download_type" type="radio" id="download_[[type]]_radio" data-download-type="[[type]]"/>
+        <label for="download_[[type]]_radio">[[type]]</label>
       </p>
     </div>
     <div class="input-field col s6">
@@ -246,6 +240,24 @@
         <label for="openid_password">OpenID password</label>
     </div>
     <a href="" class="waves-effect waves-light btn" ng-click="download_dataset()">download</a>
+  </div>
+
+  <div class="modal" id="file_upload_modal" style="overflow: hidden; max-height: 80%;">
+    <form action="/esgf/file_upload/" method="POST" onsubmit="return false;">
+      <div id="upload_type_radio_select">
+        <p ng-repeat="type in ['model', 'observation']">
+        <input name="upload_type_radio_select" type="radio" id="upload_[[type]]_radio" data-upload-type="[[type]]"/>
+        <label for="upload_[[type]]_radio">[[type]]</label>
+      </p>
+      </div>
+      <div class="input-field col s6" style="margin: 1em;">
+        <input id="upload_name" type="text">
+        <label for="upload_name">Upload name</label>
+      </div>
+      <input type="file" id="file-upload-picker" name="" multiple>
+      <a href="#" class="wave-effect wave-light btn" style="margin: 1em;" ng-click="upload_file()">upload</a>
+
+    </form>
   </div>
 
 </div>

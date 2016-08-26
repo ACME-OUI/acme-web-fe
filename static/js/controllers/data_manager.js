@@ -51,14 +51,66 @@
       $scope.get_user();
       $scope.get_node_list();
       $timeout(() => {
+        $scope.get_user_data();
         $('.collapsible').collapsible({
           accordion : false
         });
       }, 200);
     }
 
+    $scope.get_csrf = () => {
+      var cookieValue = null;
+      var name = 'csrftoken';
+      if (document.cookie && document.cookie !== '') {
+          var cookies = document.cookie.split(';');
+          for (var i = 0; i < cookies.length; i++) {
+              var cookie = jQuery.trim(cookies[i]);
+              // Does this cookie string begin with the name we want?
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+    }
+
     $scope.download_modal = () => {
       $('#download_dataset_modal').openModal();
+    }
+    $scope.upload_modal = () => {
+      $('#file_upload_modal').openModal();
+    }
+    $scope.upload_file = () => {
+      var name = $('#upload_name').val();
+      var type = $('#upload_type_radio_select input:checked').attr('data-upload-type');
+      var file = new FormData();
+      $.each(document.getElementById('file-upload-picker').files, (i, obj) => {
+        file.append(name, obj);
+      })
+      file.append('type', type);
+      $http({
+        url: '/esgf/file_upload/',
+        method: 'POST',
+        data: file,
+        processData: false,
+        contentType: false,
+        dataType: 'json',
+        transformRequest: angular.identity,
+        headers: {
+          'X-CSRFToken' : $scope.get_csrf(),
+          'Content-Type': undefined
+        }
+      }).then((res) =>{
+        console.log('successfully uploaded file');
+        $scope.showToast('successfully uploaded file');
+        $('#file_upload_modal').closeModal();
+        $scope.get_user_data();
+      }).catch((res) => {
+        $scope.showToast('File upload error');
+        $('#file_upload_modal').closeModal();
+        console.log('file upload failure');
+      });
     }
     $scope.setup_socket = () => {
       var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
@@ -154,17 +206,17 @@
       })
     }
 
-    $scope.load_obs_cache = () => {
-      if($scope.obs_cache) return;
-      $scope.obs_cache = $scope.all_userdata['observations'];
+    $scope.load_obs_cache = (obs_folder) => {
+      $scope.obs_cache = $scope.obs_cache || {};
+      $scope.obs_cache[obs_folder] = Object.keys($scope.all_userdata['observations'][obs_folder]);
     }
-    $scope.load_model_cache = () => {
-      if($scope.model_cache) return;
-      $scope.model_cache = $scope.all_userdata['model_output'];
+    $scope.load_model_cache = (model_folder) => {
+      $scope.model_cache = $scope.model_cache || {};
+      $scope.model_cache[model_folder] = Object.keys($scope.all_userdata['model_output'][model_folder]);
     }
-    $scope.load_diag_cache = () => {
-      if($scope.diag_cache) return;
-      $scope.diag_cache = $scope.all_userdata['diagnostic_output'];
+    $scope.load_diag_cache = (diag_folder) => {
+      $scope.diag_cache = $scope.diag_cache || {};
+      $scope.diag_cache[diag_folder] = Object.keys($scope.all_userdata['diagnostic_output'][diag_folder]['diagnostic_output']['amwg']);
     }
 
     $scope.search = () => {
@@ -256,7 +308,10 @@
     }
 
     $scope.get_keys = (obj) => {
-      return Object.keys(obj)
+      if(obj){
+        return Object.keys(obj);  
+      }
+      return false;
     }
 
     $scope.remove_facet = (facet) => {

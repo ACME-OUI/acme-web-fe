@@ -139,8 +139,7 @@
       if(!$scope.output_list[$scope.selected_run][index].endsWith('.png')){
         return true;
       }
-      var prefix = '/acme/userdata/image/userdata/' + $scope.user + '/diagnostic_output/';
-      var src = prefix + $scope.selected_run + '/diagnostic_output/amwg/' + $scope.output_list[$scope.selected_run][index]
+      var src = $scope.get_src(index);
       var image_viewer = $('#image_view');
       var image_link = $('#image_link');
       $('#image_title').text($scope.output_list[$scope.selected_run][index]);
@@ -155,13 +154,18 @@
       });
     }
 
+    $scope.get_src = (index) => {
+      var prefix = '/acme/userdata/image/userdata/' + $scope.user + '/diagnostic_output/';
+      var src = prefix + $scope.selected_run + '/diagnostic_output/amwg/' + $scope.output_list[$scope.selected_run][index];
+      return src;
+    }
+
     $scope.open_image = (run, image) => {
       $scope.show_image = true;
       $scope.image_index = $scope.output_list[$scope.selected_run].indexOf(image);
       var image_el = $('#' + run + '_' + image.slice(0,20));
       //var src = image_el.attr('data-img-location');
-      var prefix = '/acme/userdata/image/userdata/' + $scope.user + '/diagnostic_output/';
-      var src = prefix + $scope.selected_run + '/diagnostic_output/amwg/' + $scope.output_list[$scope.selected_run][$scope.image_index]
+      var src = $scope.get_src($scope.image_index);
       var image_viewer = $('#image_view');
       var image_link = $('#image_link');
       $('#image_title').text(image);
@@ -442,9 +446,11 @@
         $scope.get_run_status();
         $scope.set_status_text('new', run);
         $scope.showToast("Run added to the queue");
+        $('#start_run_modal').closeModal();
         //$scope.get_run_status($scope.set_run_status);
       }).catch((res) => {
         $scope.showToast('Failed to start run');
+        $('#start_run_modal').closeModal();
       });
     }
 

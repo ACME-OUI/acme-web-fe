@@ -8,4 +8,5 @@ urlpatterns = [
     url(r'^logon/$', views.logon),
     url(r'^node_list/$', views.node_list),
     url(r'^get_user_data$', views.get_user_data),
+    url(r'^file_upload/$', views.file_upload),
 ]

@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
+from django.views.decorators.csrf import csrf_exempt
 from util.utilities import get_client_ip, print_debug
 from django.contrib.auth.decorators import login_required
 from models import ESGFNode
@@ -12,8 +13,8 @@ import requests
 import os.path
 import shutil
 import subprocess
-
-from util.utilities import print_debug, print_message
+import os
+from util.utilities import print_debug, print_message, get_directory_structure
 
 
 # From: https://github.com/apache/climate
@@ -274,6 +275,7 @@ def node_list(request):
 # reads the contents of the users data directory, returning a list
 # of their obs, model, and diagnostic data
 #
+@login_required
 def get_user_data(request):
     user = str(request.user)
     path = os.path.abspath(os.path.dirname(__file__)) + '/../../userdata/' + user
@@ -281,20 +283,39 @@ def get_user_data(request):
     return HttpResponse(json.dumps(userdata))
 
 
-# see: http://code.activestate.com/recipes/577879-create-a-nested-dictionary-from-oswalk/
-def get_directory_structure(rootdir):
-    """
-    Creates a nested dictionary that represents the folder structure of rootdir
-    """
-    dir = {}
-    rootdir = rootdir.rstrip(os.sep)
-    start = rootdir.rfind(os.sep) + 1
-    for path, dirs, files in os.walk(rootdir):
-        folders = path[start:].split(os.sep)
-        subdir = dict.fromkeys(files)
-        parent = reduce(dict.get, folders[:-1], dir)
-        parent[folders[-1]] = subdir
-    return dir
+@login_required
+def file_upload(request):
+    if request.method == 'POST':
+        print_message('files: {}'.format(request.FILES))
+        folder = request.FILES.keys()[0]
+        print_message(request.FILES.get(folder))
+        print_message('folder: {}'.format(folder))
+        print_message('folder contents: {}'.format(request.FILES.getlist(folder)))
+        type = request.POST.get('type')
+        user = str(request.user)
+        path = USER_DATA_PREFIX + user
+        if type == 'observation':
+            path += '/observations/'
+        elif type == 'model':
+            path += '/model_output/'
+        else:
+            print_message('unrecognised type {}'.format(type))
+            return HttpResponse(status=400)
+        path += folder
+        if os.path.exists(path):
+            print_message('Folder {} already exists'.format(path))
+            return HttpResponse(status=400)
+        os.makedirs(path)
+        for item in request.FILES.getlist(folder):
+            print item
+            print 'writing to {}/{}'.format(path, item)
+            with open('{}/{}'.format(path,item), 'wb') as target:
+                for chunk in item.chunks():
+                    target.write(chunk)
+                target.close()
+    return HttpResponse()
+
+
 # Im not sure if we're still going to need this. Will update once I have a better idea
 #
 # @login_required
