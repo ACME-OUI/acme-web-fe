@@ -47,6 +47,9 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+NOCAPTCHA = True
+RECAPTCHA_USE_SSL = False
+
 ##########################################################
 # define in local_settings.py
 # - STATICFILES_DIRS = ()

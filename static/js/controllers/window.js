@@ -8,9 +8,9 @@
              type: 'row',
              content: [{
                  type: 'component',
-                 componentName: 'ESGF',
+                 componentName: 'DataManager',
                  componentState: {
-                    templateId: 'esgf_wrapper'
+                    templateId: 'data_manager_wrapper'
                  }
              },{
                  type: 'component',
@@ -35,10 +35,10 @@
          window.layout = new window.GoldenLayout( GoldenLayoutConfig, '#layoutContainer' );
      }
 
-     window.layout.registerComponent( 'ESGF', function( container, state ){
+     window.layout.registerComponent( 'DataManager', function( container, state ){
         var templateHtml = $( '#' + state.templateId ).html();
         var element = container.getElement();
-        state.module = 'esgf';
+        state.module = 'data_manager';
         element.html( templateHtml );
         angular
           .module( state.module )
@@ -105,7 +105,7 @@
      window.layout.createDragSource( element, newItemConfig );
    };
 
-   addMenuItem('ESGF', 'esgf_wrapper');
+   addMenuItem('DataManager', 'data_manager_wrapper');
    addMenuItem('CDAT', 'cdat_wrapper');
    addMenuItem('RunManager', 'run_manager_wrapper');
 

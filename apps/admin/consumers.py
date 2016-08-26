@@ -3,6 +3,7 @@ from channels.sessions import channel_session
 from channels.auth import channel_session_user_from_http
 from util.utilities import print_message
 from apps.run_manager import dispatcher as rm_dispatch
+from apps.esgf import dispatcher as esgf_dispatch
 import json
 
 import pprint
@@ -22,25 +23,30 @@ def ws_connect(message):
 @channel_session
 @channel_session_user_from_http
 def ws_receive(message):
-    # print_message("got message: {}".format(message['text']))
-    # {   u'content': u'hello world!',
-    #     u'destination': u'init',
-    #     u'target_app': u'run_manager'}
-
-    # Group('run_manager').send({'text': message['text']})
-    # message.reply_channel.send({'text': message['text']})
-
     data = json.loads(message['text'])
-    # pp.pprint(data)
+    user = data.get('user')
+    if user is None:
+        user = message.user.username
+
+    print_message('Got a request with data {data} from {user}'.format(data=data, user=user))
     target_app = data.get('target_app')
+    return_code = 0
     if not target_app:
         print_message("No target_app given")
-        return
+        return_code = -1
     if target_app == 'run_manager':
-        rm_dispatch.dispatch(message, data, message.user.username)
+        return_code = rm_dispatch.dispatch(message, data, user)
+    elif target_app == 'esgf':
+        return_code = esgf_dispatch.dispatch(message, data, user)
     else:
         print_message('unrecognized target_app {}'.format(target_app))
-        return
+        return_code = -1
+    return_val = {
+        'text': json.dumps({
+            'return_code': return_code
+        })
+    }
+    Group('active').send(return_val)
 
 
 @channel_session

@@ -178,12 +178,32 @@ def user_logout(request):
     return HttpResponse(render_template(request, "web_fe/home.html", {'logout': 'success    '}))
 
 
+#
+# A utility function to setup a users output directories
+#
+def setup_output_directories(user):
+    path = os.path.abspath(os.path.dirname(__file__))
+    diag_path = path + '/../../userdata/' + user + '/diagnostic_output'
+    obs_path = path + '/../../userdata/' + user + '/observations'
+    model_path = path + '/../../userdata/' + user + '/model_output'
+
+    paths = [diag_path, obs_path, model_path]
+    for p in paths:
+        print "checking {} exists".format(p)
+        if not os.path.exists(p):
+            print "... creating {}".format(p)
+            os.makedirs(p)
+    return
+
+
 # Register new user
+@csrf_exempt
 def register(request):
     context = RequestContext(request)
     registered = False
     if request.method == 'POST':
         user_form = UserCreationForm(data=request.POST)
+        username = request.POST['username']
         if user_form.is_valid():
             user = user_form.save()
             try:
@@ -199,8 +219,9 @@ def register(request):
                 username=request.POST['username'], password=request.POST['password1'])
             if user:
                 login(request, user)
-                message = 'User: {} created an account and logged in'.format(request.POST['username'])
+                message = 'User: {} created an account and logged in'.format(username)
                 messages.success(request, message)
+                setup_output_directories(username)
         else:
             print user_form.errors
     else:

@@ -45,3 +45,4 @@ cover
 climateTestFile.nc
 
 /webroot
+sftp-config.json

@@ -37,7 +37,7 @@
       }).catch((res) => {
         console.log('Error getting user');
         console.log(res);
-      })
+      });
     }
 
     $scope.get_csrf = () => {
@@ -56,35 +56,6 @@
       }
       return cookieValue;
   	}
-
-    $scope.setup_socket = () => {
-      var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-      if(!window.socket){
-        window.socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + window.location.pathname);
-      }
-      window.socket.onopen = function() {
-        message = JSON.stringify({
-          'target_app': 'run_manager',
-          'destination': 'init',
-          'content': 'hello world!'
-        })
-        socket.send(message);
-      }
-      window.socket.onmessage = (message) => {
-        var data = JSON.parse(message.data);
-        if(data.user != $scope.user){
-          return;
-        }
-        switch (data.destination) {
-          case 'set_run_status':
-            console.log('got a status update');
-            $scope.set_status_text(data.status, data.job_id + "_queue");
-            break;
-          default:
-
-        }
-      }
-    }
 
     $scope.init = function(){
       console.log('[+] Initializing RunManager window');
@@ -135,12 +106,40 @@
       }
     }
 
+    $scope.setup_socket = () => {
+      var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+      if(!window.ACMEDashboard.socket){
+        window.ACMEDashboard.socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + window.location.pathname);
+      }
+      window.ACMEDashboard.socket.onopen = function() {
+        message = JSON.stringify({
+          'target_app': 'run_manager',
+          'destination': 'init',
+          'content': 'hello world!'
+        })
+        window.ACMEDashboard.socket.send(message);
+      }
+      window.ACMEDashboard.socket.onmessage = (message) => {
+        var data = JSON.parse(message.data);
+        if(data.user != $scope.user){
+          return;
+        }
+        switch (data.destination) {
+          case 'set_run_status':
+            console.log('got a status update');
+            $scope.set_status_text(data.status, data.job_id + "_queue");
+            break;
+          default:
+
+        }
+      }
+    }
+
     $scope.show_image_by_index = (index) => {
       if(!$scope.output_list[$scope.selected_run][index].endsWith('.png')){
         return true;
       }
-      var prefix = '/acme/userdata/image/userdata/' + $scope.user + '/';
-      var src = prefix + $scope.selected_run + '/diags_output/amwg/' + $scope.output_list[$scope.selected_run][index]
+      var src = $scope.get_src(index);
       var image_viewer = $('#image_view');
       var image_link = $('#image_link');
       $('#image_title').text($scope.output_list[$scope.selected_run][index]);
@@ -155,13 +154,18 @@
       });
     }
 
+    $scope.get_src = (index) => {
+      var prefix = '/acme/userdata/image/userdata/' + $scope.user + '/diagnostic_output/';
+      var src = prefix + $scope.selected_run + '/diagnostic_output/amwg/' + $scope.output_list[$scope.selected_run][index];
+      return src;
+    }
+
     $scope.open_image = (run, image) => {
       $scope.show_image = true;
       $scope.image_index = $scope.output_list[$scope.selected_run].indexOf(image);
       var image_el = $('#' + run + '_' + image.slice(0,20));
       //var src = image_el.attr('data-img-location');
-      var prefix = '/acme/userdata/image/userdata/' + $scope.user + '/';
-      var src = prefix + $scope.selected_run + '/diags_output/amwg/' + $scope.output_list[$scope.selected_run][$scope.image_index]
+      var src = $scope.get_src($scope.image_index);
       var image_viewer = $('#image_view');
       var image_link = $('#image_link');
       $('#image_title').text(image);
@@ -442,9 +446,11 @@
         $scope.get_run_status();
         $scope.set_status_text('new', run);
         $scope.showToast("Run added to the queue");
+        $('#start_run_modal').closeModal();
         //$scope.get_run_status($scope.set_run_status);
       }).catch((res) => {
         $scope.showToast('Failed to start run');
+        $('#start_run_modal').closeModal();
       });
     }
 

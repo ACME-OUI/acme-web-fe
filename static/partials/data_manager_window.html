@@ -1,0 +1,264 @@
+<div class="">
+  <a class="waves-effect waves-light btn teal dashboard-show-hide" style="margin-bottom: 1em;" ng-show="step >= 0" ng-click="set_step(step - 1)">
+    <i class="material-icons left">navigate_before</i>
+  </a>
+  <a class="waves-effect waves-light btn teal dashboard-show-hide" style="float: right; margin-bottom: 1em;" ng-show="step > 0 && datasets" ng-click="set_step(step + 1)">
+    <i class="material-icons left">navigate_next</i>
+  </a>
+
+  <div class="dashboard-show-hide" ng-show="step == -1">
+    <ul class="collapsible popout" data-collapsible="accordion">
+      <li>
+        <div class="collapsible-header">
+          <span>Diagnostic Output</span>
+        </div>
+        <div class="collapsible-body">
+          <ul class="collapsible">
+            <li ng-repeat="diag_folder in userdata.diagnostic_output">
+              <div class="collapsible-header" ng-click="load_diag_cache(diag_folder)">
+                <span>[[ diag_folder ]]</span> 
+              </div>
+              <div class="collapsible-body">
+                <ul class="collection">
+                  <li>
+                    <a href="/run_manager/get_output_zip?run_name=[[ diag_folder ]]&run_type=diagnostic" 
+                       style="padding: 0.5rem; margin-left: 3vw;">
+                       download zip
+                    </a>
+                  </li>
+                  <li ng-repeat="diag in diag_cache[diag_folder]">
+                    <span style="padding: 0.5rem; margin-left: 3vw;">[[ diag ]]</span>
+                  </li>
+                </ul>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header">
+          <span>Model Output</span>
+        </div>
+        <div class="collapsible-body">
+          <ul class="collapsible">
+            <li ng-repeat="model_folder in userdata.model_output">
+              <div class="collapsible-header" ng-click="load_model_cache(model_folder)">
+                <span>[[ model_folder ]]</span>
+              </div>
+              <div class="collapsible-body">
+                <ul class="collection">
+                  <li ng-repeat="m in model_cache[model_folder]">
+                    <span style="padding: 0.5rem; margin-left: 3vw;">[[ m ]]</span>
+                  </li>
+                </ul>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header">
+          <span>Observations</span>
+        </div>
+        <div class="collapsible-body">
+          <ul class="collapsible">
+            <li ng-repeat="obs_folder in userdata.observations">
+              <div class="collapsible-header" ng-click="load_obs_cache(obs_folder)">
+                <span>[[ obs_folder ]]</span>
+              </div>
+              <div class="collapsible-body">
+                <ul class="collection">
+                  <li ng-repeat="obs in obs_cache[obs_folder]">
+                    <span style="padding: 0.5rem; margin-left: 3vw;">[[ obs ]]</span>
+                  </li>
+                </ul>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+    <ul class="collection" ng-show="downloads">
+      <li ng-repeat="download in downloads" 
+          class="collection-item" 
+          styles="margin: 0 24px; box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12)">
+        <span>[[ download.data_name ]]</span>
+        <span>[[ download.message ]]</span>
+        <span>percent complete: [[ download.percent_complete ]]%</span>
+      </li>
+    </ul>
+    <a class="waves-effect waves-light btn" href="#" ng-click="set_step(0)" style="margin: 24px;">import data</a>
+  </div>
+
+  <!-- Datapath selection -->
+  <!-- Step 0 -->
+  <div class="dashboard-show-hide" ng-show="step == 0 && ready == true">
+    <h2 style="text-align: center">Select a data source</h2>
+    <ul class="collapsible popout" id="data-select-collapsible" data-collapsible="accordion">
+      <li>
+        <div class="collapsible-header">
+          <a class="waves-effect waves-light btn" href="#" ng-click="set_datapath('local')">
+            Local storage
+          </a>
+          <i class="material-icons">file_upload</i>
+        </div>
+        <div class="collapsible-body">
+          <p class="card">
+            <a href="" class="wave-effect waves-light btn" ng-click="upload_modal()">upload</a>
+          </p>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header">
+          <a class="waves-effect waves-light btn" href="#" ng-click="set_datapath('server')">
+            Remote Server
+          </a>
+          <i class="material-icons">dns</i>
+        </div>
+        <div class="collapsible-body">
+          <p class="card">
+            <input type="text" id="remote-server-url" placeholder="server url" value="">
+            <a href="#!" class="waves-effect waves-light btn">
+              import
+            </a>
+          </p>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header active">
+          <a class="waves-effect waves-light btn" href="#">
+            Earth System Grid Federation
+          </a>
+          <i class="material-icons">cloud</i>
+        </div>
+        <div class="collapsible-body">
+          <p>
+            <a href="#" class="waves-effect waves-light btn" ng-click="set_datapath('esgf')">ESGF</a>
+          </p>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+
+  <!-- TODO: Get this to work with a template, so that when new windows are created dynamicall they compile themselves -->
+  <!-- step 1:select node pane -->
+  <div class="dashboard-show-hide" ng-show="datapath == 'esgf'">
+    <form class="dashboard-show-hide esgf_scope_[[$id]]" ng-show="step == 1 && ready == true">
+      <p ng-repeat="node in node_list | orderBy: 'node'">
+        <input type="checkbox" id="[[node + $id]]" value="[[node]]"/>
+        <label for="[[node + $id]]">[[node]]</label>
+      </p>
+      <a class="waves-effect waves-light btn" ng-click="select_nodes($id)"> select </a>
+    </form>
+
+
+    <!-- step 2: select facet -->
+    <div class="dashboard-show-hide" ng-show="step == 2 && ready == true">
+      <div class="card-panel teal">
+        <span class="white-text">Search Terms</span>
+        <div class="collection">
+          <a href="#!" class="collection-item waves-effect waves-dark"  ng-repeat="(facet, option) in searchTerms" ng-click="remove_facet(facet)">
+            [[facet]] : [[option]]
+          </a>
+        </div>
+        <a href="#!" class="waves-effect waves-light btn" ng-click="search()">Search</a>
+        <div class="input-field" style="padding: 1em;" id="facet_lookup_field">
+          <input class="typeahead" type="text" placeholder="lookup">
+        </div>
+      </div>
+      <ul class="collapsible popout" data-collapsible="accordion">
+        <li ng-repeat="(facet,options) in facet_options | orderBy: 'facet'" class="facet_holder" id="[[facet]]">
+          <div class="collapsible-header" id="[[facet]]_collapsible" ng-click="facet_option_typeahead(facet)">
+            <i class="material-icons" id="[[facet]]_arrow">play_arrow</i>
+            [[facet]]
+          </div>
+          <div class="collapsible-body" id="[[facet]]_lookup">
+            <ul class="collection">
+              <li class="collection-item">
+                <div class="input-field" style="padding: 1em;">
+                  <input class="typeahead" type="text" id="[[facet]]_lookup_field" placeholder="lookup">
+                </div>
+              </li>
+              <li class="collection-item" ng-repeat="(option, hits) in facet_cache[facet] | orderBy: 'option'" style="padding: 1em;">
+                <input name="[[facet]]" type="radio" ng-click="searchTerms[facet] = option" id="[[option]]" />
+                <label for="[[option]]">[[option]] : [[hits]]</label>
+              </li>
+              <li class="collection-item" ng-show="show_more_facet_options(facet)">
+                <a href="#" class="waves-effect waves-light btn" ng-click="next_facet_page(facet)">more</a>
+              </li>
+            </ul>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+
+
+    <!-- step 3: select a dataset -->
+    <div class="dashboard-show-hide" ng-show="step == 3 && ready == true">
+      <ul class="collapsible popout" data-collapsible="accordion">
+        <li ng-repeat="key in dataset_cache track by $index">
+          <div class="collapsible-header" ng-click="switch_arrow($index)">
+            <i class="material-icons" id="[[$index]]_arrow">play_arrow</i>
+            [[key.title]]
+          </div>
+          <div class="collapsible-body">
+            <ul class="collection popout" style="padding-left: 1em;">
+              <li>
+                <a href="" class="waves-effect waves-light btn" ng-click="download_modal()">download</a>
+              </li>
+              <li class="collection-item" ng-repeat="(k,v) in key">
+                [[k]] : [[v]]
+              </li>
+            </ul>
+          </div>
+        </li>
+        <li ng-show="show_more_datesets()">
+          <a href="#" class="waves-effect waves-light btn" ng-click="next_dataset_page()">more</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="modal" id="download_dataset_modal" style="overflow: hidden; max-height: 80%;">
+    <div class="" id="download_type_radio_select">
+      <p ng-repeat="type in ['model', 'observation']">
+        <input name="download_type" type="radio" id="download_[[type]]_radio" data-download-type="[[type]]"/>
+        <label for="download_[[type]]_radio">[[type]]</label>
+      </p>
+    </div>
+    <div class="input-field col s6">
+        <input id="download_name" type="text">
+        <label for="download_name">Dataset name</label>
+    </div>
+    <div class="input-field col s6">
+        <input id="openid_username" type="text">
+        <label for="openid_username">OpenID username</label>
+    </div>
+    <div class="input-field col s6">
+        <input id="openid_password" type="password">
+        <label for="openid_password">OpenID password</label>
+    </div>
+    <a href="" class="waves-effect waves-light btn" ng-click="download_dataset()">download</a>
+  </div>
+
+  <div class="modal" id="file_upload_modal" style="overflow: hidden; max-height: 80%;">
+    <form action="/esgf/file_upload/" method="POST" onsubmit="return false;">
+      <div id="upload_type_radio_select">
+        <p ng-repeat="type in ['model', 'observation']">
+        <input name="upload_type_radio_select" type="radio" id="upload_[[type]]_radio" data-upload-type="[[type]]"/>
+        <label for="upload_[[type]]_radio">[[type]]</label>
+      </p>
+      </div>
+      <div class="input-field col s6" style="margin: 1em;">
+        <input id="upload_name" type="text">
+        <label for="upload_name">Upload name</label>
+      </div>
+      <input type="file" id="file-upload-picker" name="" multiple>
+      <a href="#" class="wave-effect wave-light btn" style="margin: 1em;" ng-click="upload_file()">upload</a>
+
+    </form>
+  </div>
+
+</div>

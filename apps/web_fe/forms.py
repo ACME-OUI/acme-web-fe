@@ -7,7 +7,6 @@ from django.forms.models import modelform_factory
 
 class UserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput())
-    # captcha = ReCaptchaField()
 
     class Meta:
         model = User
@@ -16,7 +15,7 @@ class UserForm(forms.ModelForm):
 
 class UserCreationForm(django.contrib.auth.forms.UserCreationForm):
     email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'E-Mail'}), required=True)
-    captcha = ReCaptchaField(attrs={'theme': 'blackglass'})
+    captcha = ReCaptchaField(use_ssl=False)
     password1 = forms.CharField(label="Password",
                                 widget=forms.PasswordInput(attrs={"placeholder": "Password"}))
     password2 = forms.CharField(label="Confirm Password",
