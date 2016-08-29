@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from util.utilities import get_client_ip, print_debug
 from django.contrib.auth.decorators import login_required
-from models import ESGFNode
+from models import ESGFNode, PublishConfig
 from pyesgf.logon import LogonManager
 from pyesgf.search import SearchConnection
 from constants import ESGF_SEARCH_SUFFIX, ESGF_CREDENTIALS, NODE_HOSTNAMES
@@ -15,7 +15,7 @@ import shutil
 import subprocess
 import os
 from util.utilities import print_debug, print_message, get_directory_structure
-
+from util.esgf_publication_client import IngestionClient
 
 # From: https://github.com/apache/climate
 #
@@ -38,133 +38,6 @@ from util.utilities import print_debug, print_message, get_directory_structure
 #
 import urllib2, httplib
 from os.path import expanduser, join
-
-
-class HTTPSClientAuthHandler(urllib2.HTTPSHandler):
-    '''
-    HTTP handler that transmits an X509 certificate as part of the request
-    '''
-
-    def __init__(self, key, cert):
-            urllib2.HTTPSHandler.__init__(self)
-            self.key = key
-            self.cert = cert
-
-    def https_open(self, req):
-            return self.do_open(self.getConnection, req)
-
-    def getConnection(self, host, timeout=300):
-            return httplib.HTTPSConnection(host, key_file=self.key, cert_file=self.cert)
-
-
-def esgf_download(url, toDirectory="/tmp"):
-    '''
-    Function to download a single file from ESGF.
-
-    :param url: the URL of the file to download
-    :param toDirectory: target directory where the file will be written
-    '''
-
-    # setup HTTP handler
-    certFile = expanduser(ESGF_CREDENTIALS)
-    opener = urllib2.build_opener(HTTPSClientAuthHandler(certFile,certFile))
-    opener.add_handler(urllib2.HTTPCookieProcessor())
-
-    # download file
-    localFilePath = join(toDirectory,url.split('/')[-1])
-    print "\nDownloading url: %s to local path: %s ..." % (url, localFilePath)
-    localFile = open( localFilePath, 'w')
-    webFile = opener.open(url)
-    localFile.write(webFile.read())
-
-    # cleanup
-    localFile.close()
-    webFile.close()
-    opener.close()
-    print "... done"
-
-
-#
-# Downloads the requested file from ESGF
-#
-# input: username (an OpenID), password, search_string, nodes, data_type (model/obs), data_name (a name for the folder the data will go into)
-def download(request):
-    user = str(request.user)
-    username = request.GET.get('openid_username')
-    password = request.GET.get('openid_password')
-    search_string = json.loads(request.GET.get('search_string'))
-    nodes = json.loads(request.GET.get('nodes'))
-    data_type = request.GET.get('data_type')
-    data_name = request.GET.get('data_name')
-    if not username:
-        print_message('No username given')
-        return HttpResponse(status=400)
-    if not password:
-        print_message('No password given')
-        return HttpResponse(status=400)
-    if not search_string:
-        print_message('No search_string given')
-        return HttpResponse(status=400)
-    if not nodes:
-        print_message('No nodes given')
-        return HttpResponse(status=400)
-    if not data_type:
-        print_message('No data_type given')
-        return HttpResponse(status=400)
-    if not data_name:
-        print_message('No data_name given')
-        return HttpResponse(status=400)
-
-    lm = LogonManager()
-    lm.logon_with_openid(username, password, bootstrap=True)
-    if not lm.is_logged_on():
-        return HttpResponse(status=403)
-    for node in nodes:
-        try:
-            print '[+] searching {node} for {string}'.format(node=node, string=search_string)
-            conn_string = 'http://{node}{suffix}'.format(node=node, suffix=ESGF_SEARCH_SUFFIX)
-            conn = SearchConnection(conn_string, distrib=True)
-            context = conn.new_context(**search_string)
-            rs = context.search()
-            print_message('got reply from {node}'.format(node=node))
-            if len(rs) == 0:
-                continue
-            #
-            # lets try with the get_download_script method
-            #
-            # url = rs[0].json.get('url')[0]
-            # directory = USER_DATA_PREFIX + user
-            # if data_type == 'obs':
-            #     directory += '/observations/'
-            # elif data_type == 'model':
-            #     directory += '/model_output/'
-            # directory += data_name
-            # print_message('Downloading {url} to {dir}'.format(url=url, dir=directory))
-            # esgf_download(url, directory)
-
-            script_text = context.get_download_script()
-            script_name = '{name}_download_script.sh'.format(name=data_name)
-            try:
-                with open(script_name, 'w') as script:
-                    script.write(script_text)
-                    script.close()
-            except Exception, e:
-                print_debug(e)
-
-            try:
-                print subprocess.call(['chmod', '+x', script_name])
-                p = subprocess.Popen(['./{name}'.format(name=script_name)], stdout=subprocess.PIPE, shell=True)
-                for line in p.stdout:
-                    print line
-                out, err = p.communicate()
-                print out, err
-            except Exception, e:
-                print_debug(e)
-
-        except Exception as e:
-            print_debug(e)
-            return HttpResponse(status=400)
-    return HttpResponse(status=200)
 
 
 # Logs the user into ESGF with their given openID and password
@@ -196,6 +69,142 @@ def logon(request):
         return HttpResponse(status=200)
     else:
         return HttpResponse(status=403)
+
+
+#
+# Gets a specified publish config by name
+# input: config_name, the name of the config
+@login_required
+def get_publish_config(request):
+    user = str(request.user)
+    config = request.GET.get('config_name')
+    if not config:
+        print_message('No config name given')
+        return HttpResponse(status=403)
+    res = PublishConfig.objects.get(config_name=config)
+    data = {}
+    for field in PublishConfig._meta.get_fields():
+        item = str(field).split('.')[-1]
+        print_message(item)
+        data[item] = getattr(res, item)
+    return HttpResponse(json.dumps(data))
+
+
+@login_required
+def get_publish_config_list(request):
+    user = str(request.user)
+    res = PublishConfig.objects.all().filter(user=user)
+    if len(res) == 0:
+        print_message('{} has no stored publication configs'.format(user))
+        return HttpResponse()
+    data = {}
+    for r in res:
+        data[ getattr(r, 'config_name') ] = getattr(r, 'facets')
+    return HttpResponse(json.dumps(data))
+
+
+#
+# Saves a publication config
+#
+# input: config_name, the name of the dataset
+#        organization, the publishing org
+#        firstname, the authors first name
+#        lastname, the authors last name
+#        description, a short description of the dataset
+#        datanode, the node to publish to
+#        facets: a JSON object holding a list of facets
+@login_required
+def save_publish_config(request):
+    user = str(request.user)
+    data = json.loads(request.body)
+    params = {
+        'config_name': data.get('config_name'),
+        'organization': data.get('organization'),
+        'firstname': data.get('firstname'),
+        'lastname': data.get('lastname'),
+        'description': data.get('description'),
+        'datanode': data.get('data_node'),
+        'facets': data.get('facets')
+    }
+    for item in params:
+        if not params[item]:
+            print_message('No {} given'.format(item))
+            return HttpResponse(status=400)
+    config = PublishConfig(
+        user=user,
+        config_name=params['config_name'],
+        organization=params['organization'],
+        firstname=params['firstname'],
+        lastname=params['lastname'],
+        description=params['description'],
+        datanode=params['datanode'],
+        facets=params['facets'])
+    try:
+        config.save()
+    except Exception as e:
+        print_message('error saveing new config')
+        return HttpResponse(status=500)
+    return HttpResponse()
+
+
+#
+# publish a local dataset to ESGF
+# input: config_name, the name of the dataset (optional)
+#        data_name, the name of the dataset (if no config_name)
+#        organization, the publishing org (if no config_name)
+#        firstname, the authors first name (if no config_name)
+#        lastname, the authors last name (if no config_name)
+#        description, a short description of the dataset (if no config_name)
+#        datanode, the node to publish to (if no config_name)
+#        facets: an object holding a list of facets (if no config_name)
+#        server: the esgf server to publish to
+#        esgf_user: the username to publish with
+#        esgf_password: the password for the user
+@login_required
+def publish(request):
+    data = json.loads(request.body)
+    config_name = data.get('config_name')
+    data_name = data.get('data_name')
+    server = data.get('server')
+    esgf_user = data.get('esgf_user')
+    esgf_password = data.get('esgf_password')
+    if not data_name:
+        print_message('No data_name given')
+        return HttpResponse(status=400)
+    if not server:
+        print_message('No server given')
+        return HttpResponse(status=400)
+    if not esgf_user:
+        print_message('No esgf_user given')
+        return HttpResponse(status=400)
+    if not esgf_password:
+        print_message('No esgf_password given')
+        return HttpResponse(status=400)
+    config = {}
+    if config_name:
+        res = PublishConfig.objects.get(config_name=config_name)
+        if not res:
+            print_message('No PublishConfig matching {}'.format(config_name))
+            return HttpResponse(status=400)
+        for field in PublishConfig._meta.get_fields():
+            item = str(field).split('.')[-1]
+            config[item] = getattr(res, item)
+    else:
+        config = {
+            'organization': data.get('organization'),
+            'firstname': data.get('firstname'),
+            'lastname': data.get('lastname'),
+            'description': data.get('description'),
+            'datanode': data.get('data_node'),
+            'facets': data.get('facets')
+        }
+        for item in config:
+            if not config[item]:
+                print_message('No {} given'.format(item))
+                return HttpResponse(status=400)
+    print_message(config)
+
+    return HttpResponse(status=400)
 
 
 # Queries a set of nodes for their facets

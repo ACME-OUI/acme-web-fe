@@ -32,6 +32,11 @@
       $scope.step = step;
     }
 
+    $scope.publish = (diag_folder) => {
+      $scope.diag_folder = diag_folder;
+      $('#publish_modal').openModal();
+    }
+
     $scope.init = () => {
       console.log('[+] Initializing Data Manager window');
       $scope.setup_socket();

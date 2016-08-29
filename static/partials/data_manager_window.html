@@ -16,15 +16,27 @@
           <ul class="collapsible">
             <li ng-repeat="diag_folder in userdata.diagnostic_output">
               <div class="collapsible-header" ng-click="load_diag_cache(diag_folder)">
-                <span>[[ diag_folder ]]</span> 
+                <span>[[ diag_folder ]]</span>
               </div>
               <div class="collapsible-body">
                 <ul class="collection">
                   <li>
-                    <a href="/run_manager/get_output_zip?run_name=[[ diag_folder ]]&run_type=diagnostic" 
-                       style="padding: 0.5rem; margin-left: 3vw;">
-                       download zip
-                    </a>
+                    <div style="padding: 0.5em;">
+                      <span>
+                        <a href="/run_manager/get_output_zip?run_name=[[ diag_folder ]]&run_type=diagnostic"
+                           class="waves-effect waves-light btn" 
+                           style="margin-left: 3vw;">
+                             download zip
+                          </a>
+                      </span>
+                      <span>
+                        <a href="" 
+                           class="waves-effect waves-light btn"
+                           ng-click="publish(diag_folder)">
+                             publish
+                           </a>
+                      </span> 
+                    </div>
                   </li>
                   <li ng-repeat="diag in diag_cache[diag_folder]">
                     <span style="padding: 0.5rem; margin-left: 3vw;">[[ diag ]]</span>
@@ -221,6 +233,8 @@
     </div>
   </div>
 
+  <!-- modals -->
+
   <div class="modal" id="download_dataset_modal" style="overflow: hidden; max-height: 80%;">
     <div class="" id="download_type_radio_select">
       <p ng-repeat="type in ['model', 'observation']">
@@ -257,8 +271,39 @@
       </div>
       <input type="file" id="file-upload-picker" name="" multiple>
       <a href="#" class="wave-effect wave-light btn" style="margin: 1em;" ng-click="upload_file()">upload</a>
-
     </form>
   </div>
+
+  <div class="modal" id="publish_modal" style="overflow: hidden; max-height: 80%;">
+    <div class="input-field col s6" style="margin: 1em;">
+      <input id="publish_name" type="text">
+      <label for="publish_name">Publication name</label>
+    </div>
+    <div class="input-field col s6" style="margin: 1em;">
+      <input id="org_name" type="text">
+      <label for="org_name">Organization</label>
+    </div>
+    <div class="input-field col s6" style="margin: 1em;">
+      <input id="publication_author_name_first" type="text">
+      <label for="publication_author_name_first">Author first name</label>
+    </div>
+    <div class="input-field col s6" style="margin: 1em;">
+      <input id="publication_author_name_last" type="text">
+      <label for="publication_author_name_last">Author last name</label>
+    </div>
+    <div class="input-field col s6" style="margin: 1em;">
+      <input id="publication_description" type="text">
+      <label for="publication_description">Description</label>
+    </div>
+    <div class="input-field col s6" style="margin: 1em;">
+      <input id="publication_datanode" type="text">
+      <label for="publication_datanode">Datanode</label>
+    </div>
+  </div>
+
+
+
+
+
 
 </div>

@@ -4,6 +4,109 @@ import requests
 from constants import NODE_HOSTNAMES
 import inspect
 from util.utilities import print_message
+from django.contrib.auth.models import User
+from django.test import Client
+
+
+class TestPublishConfig(LiveServerTestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='test')
+        self.user.set_password('test')
+        self.user.save()
+        self.c = Client()
+        logged_in = self.c.login(username='test', password='test')
+        self.params = json.dumps({
+            'config_name': 'test_data',
+            'firstname': 'Tester',
+            'lastname': 'McTest',
+            'data_node': 'node',
+            'organization': 'test org',
+            'description':'a test publish config',
+            'facets': {
+                'project': 'ACME',
+                'data_type': 'h0',
+                'experiment': 'b1850c5_m1a',
+                'versionnum': 'v0_1',
+                'realm': 'atm',
+                'regrinding': 'ne30_g16',
+                'range': 'all',
+            }
+        })
+
+    def test_publish_from_config(self):
+        publish_url = self.live_server_url + '/esgf/publish/'
+        save_url = self.live_server_url + '/esgf/save_publish_config/'
+        r = self.c.post(save_url, data=self.params, content_type='application/json')
+        self.assertTrue(r.status_code == 200)
+        config = json.dumps({
+            'config_name': 'test_data',
+            'data_name': 'test_dataset'
+        })
+        r = self.c.post(publish_url, config, content_type='application/json')
+        self.assertTrue(r.status_code == 200)
+
+    def test_publish_no_config(self):
+        publish_url = self.live_server_url + '/esgf/publish/'
+        params = json.loads(self.params)
+        params['data_name'] = 'test_dataset'
+        del params['config_name']
+        params = json.dumps(params)
+        r = self.c.post(publish_url, params, content_type='application/json')
+        self.assertTrue(r.status_code == 200)
+
+    def test_get_config(self):
+        save_url = self.live_server_url + '/esgf/save_publish_config/'
+        get_url = self.live_server_url + '/esgf/get_publish_config/'
+
+        r = self.c.post(save_url, data=self.params, content_type='application/json')
+        self.assertTrue(r.status_code == 200)
+        r = self.c.get(get_url, {'config_name': 'test_data'})
+        content = json.loads(r.content)
+        print_message(content)
+        self.assertTrue(r.status_code == 200)
+        self.assertTrue('test_data' in content.get('config_name'))
+
+    def test_get_config_list(self):
+        save_url = self.live_server_url + '/esgf/save_publish_config/'
+        get_url = self.live_server_url + '/esgf/get_publish_config_list/'
+
+        r = self.c.post(save_url, data=self.params, content_type='application/json')
+        self.assertTrue(r.status_code == 200)
+        r = self.c.post(get_url)
+        print_message(r.content)
+        self.assertTrue(r.status_code == 200)
+        self.assertTrue('test_data' in json.loads(r.content))
+
+    def test_save_valid_config(self):
+        url = self.live_server_url + '/esgf/save_publish_config/'
+
+        r = self.c.post(url, data=self.params, content_type='application/json')
+        self.assertTrue(r.status_code == 200)
+
+    def test_save_invalid_config(self):
+        url = self.live_server_url + '/esgf/save_publish_config/'
+        params = json.dumps({
+            'not a valid key': 'some value',
+            'facets': {
+                'project': 'ACME',
+                'data_type': 'h0',
+                'experiment': 'b1850c5_m1a',
+                'versionnum': 'v0_1',
+                'realm': 'atm',
+                'regrinding': 'ne30_g16',
+                'range': 'all',
+            }
+        })
+        r = self.c.post(url, data=params, content_type='application/json')
+        self.assertTrue(r.status_code == 400)
+
+    def test_save_same_config_twice(self):
+        url = self.live_server_url + '/esgf/save_publish_config/'
+
+        r = self.c.post(url, data=self.params, content_type='application/json')
+        self.assertTrue(r.status_code == 200)
+        r = self.c.post(url, data=self.params, content_type='application/json')
+        self.assertTrue(r.status_code == 500)
 
 
 class TestLogon(LiveServerTestCase):
