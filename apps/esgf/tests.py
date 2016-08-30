@@ -17,11 +17,17 @@ class TestPublishConfig(LiveServerTestCase):
         logged_in = self.c.login(username='test', password='test')
         self.params = json.dumps({
             'config_name': 'test_data',
-            'firstname': 'Tester',
-            'lastname': 'McTest',
-            'data_node': 'node',
-            'organization': 'test org',
-            'description':'a test publish config',
+            'metadata': {
+                'name': 'test publication',
+                'firstname': 'Tester',
+                'lastname': 'McTest',
+                'datanode': 'node',
+                'organization': 'test org',
+                'description':'a test publish config',
+            },
+            'server': 'some.server.somewhere.gov',
+            'esgf_user': 'Tester',
+            'esgf_password': 'McTesterson',
             'facets': {
                 'project': 'ACME',
                 'data_type': 'h0',
@@ -40,7 +46,13 @@ class TestPublishConfig(LiveServerTestCase):
         self.assertTrue(r.status_code == 200)
         config = json.dumps({
             'config_name': 'test_data',
-            'data_name': 'test_dataset'
+            'metadata': {
+                'name': 'name',
+                'value': 'test dataset'
+            },
+            'server': 'some.server.somewhere.gov',
+            'esgf_user': 'Tester',
+            'esgf_password': 'McTesterson',
         })
         r = self.c.post(publish_url, config, content_type='application/json')
         self.assertTrue(r.status_code == 200)
@@ -48,7 +60,6 @@ class TestPublishConfig(LiveServerTestCase):
     def test_publish_no_config(self):
         publish_url = self.live_server_url + '/esgf/publish/'
         params = json.loads(self.params)
-        params['data_name'] = 'test_dataset'
         del params['config_name']
         params = json.dumps(params)
         r = self.c.post(publish_url, params, content_type='application/json')

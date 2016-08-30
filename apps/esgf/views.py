@@ -117,14 +117,18 @@ def get_publish_config_list(request):
 def save_publish_config(request):
     user = str(request.user)
     data = json.loads(request.body)
+    metadata = data.get('metadata')
+    if not metadata:
+        print_message('no metadata given')
+        return HttpResponse(status=400)
     params = {
         'config_name': data.get('config_name'),
-        'organization': data.get('organization'),
-        'firstname': data.get('firstname'),
-        'lastname': data.get('lastname'),
-        'description': data.get('description'),
-        'datanode': data.get('data_node'),
-        'facets': data.get('facets')
+        'organization': metadata.get('organization'),
+        'firstname': metadata.get('firstname'),
+        'lastname': metadata.get('lastname'),
+        'description': metadata.get('description'),
+        'datanode': metadata.get('datanode'),
+        'facets': json.dumps(data.get('facets'))
     }
     for item in params:
         if not params[item]:
@@ -164,10 +168,11 @@ def save_publish_config(request):
 def publish(request):
     data = json.loads(request.body)
     config_name = data.get('config_name')
-    data_name = data.get('data_name')
+    data_name = data['metadata'].get('name')
     server = data.get('server')
     esgf_user = data.get('esgf_user')
     esgf_password = data.get('esgf_password')
+
     if not data_name:
         print_message('No data_name given')
         return HttpResponse(status=400)
@@ -180,30 +185,89 @@ def publish(request):
     if not esgf_password:
         print_message('No esgf_password given')
         return HttpResponse(status=400)
-    config = {}
+    client_config = {
+        'server': server,
+        'openid': esgf_user,
+        'password': esgf_password
+    }
+    config = {
+        'scan': {
+            'options': '',
+            'path': '',
+        },
+        'publish': {
+            'options': {
+                'files': 'all'
+            },
+            'files': [],
+        },
+    }
     if config_name:
         res = PublishConfig.objects.get(config_name=config_name)
         if not res:
             print_message('No PublishConfig matching {}'.format(config_name))
             return HttpResponse(status=400)
+        config['metadata'] = []
+        config['facets'] = []
         for field in PublishConfig._meta.get_fields():
             item = str(field).split('.')[-1]
-            config[item] = getattr(res, item)
+            if item != 'facets':
+                if item == 'id' or item == 'config_name':
+                    continue
+                config['metadata'].append({
+                    'name': item,
+                    'value': getattr(res, item)
+                })
+            else:
+                facets = json.loads(getattr(res, item))
+                for k in facets:
+                    print k, facets[k]
+                    config['facets'].append({
+                        'name': k,
+                        'value': facets[k]
+                    })
     else:
         config = {
-            'organization': data.get('organization'),
-            'firstname': data.get('firstname'),
-            'lastname': data.get('lastname'),
-            'description': data.get('description'),
-            'datanode': data.get('data_node'),
-            'facets': data.get('facets')
+            'metadata': [
+                {
+                    'name': 'name',
+                    'value': data_name
+                },{
+                    'name': 'organization',
+                    'value': data.get('organization')
+                },{
+                    'name': 'firstname',
+                    'value': data.get('firstname')
+                },{
+                    'name': 'lastname',
+                    'value': data.get('lastname')
+                }, {
+                    'name': 'description',
+                    'value': data.get('description')
+                }, {
+                    'name': 'datanode',
+                    'value': data.get('data_node')
+                }
+            ],
+            'facets': [],
+            'scan': {
+                'options': '',
+                'path': '',
+            },
+            'publish': {
+                'options': {
+                    'files': 'all'
+                },
+                'files': [],
+            },
         }
-        for item in config:
-            if not config[item]:
-                print_message('No {} given'.format(item))
-                return HttpResponse(status=400)
-    print_message(config)
-
+        facets = data.get('facets')
+        for k in facets:
+            config['facets'].append({
+                'name': k,
+                'value': facets[k]
+            })
+    client = IngestionClient(client_config)
     return HttpResponse(status=400)
 
 
