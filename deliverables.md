@@ -1,5 +1,6 @@
 # ACME Dashboard deliverables (provisional)
 
+**Provenance should be captured at all steps**
 
 **Run Manager**
 * &#x1F535; As a user, I should be able to create new run configurations. A run config consists of all the nessisary parameters to start a new run. Runs are broken into five catagories, Model Run, &#x1F534; Create Climatologies, &#x1F534; Archive and transfer, Diagnostic Run, and Publication.
