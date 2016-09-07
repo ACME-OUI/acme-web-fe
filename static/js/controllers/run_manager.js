@@ -111,6 +111,26 @@
       if(!window.ACMEDashboard.socket){
         window.ACMEDashboard.socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + window.location.pathname);
       }
+      window.ACMEDashboard.socket_handlers = window.ACMEDashboard.socket_handlers || {};
+      window.ACMEDashboard.socket_handlers.set_run_status = (data) => {
+          console.log('got a status update');
+            var job = $scope.all_runs.filter((obj) => {
+              return obj.job_id == data.job_id
+            });
+            if(job.length == 0){
+              var optional_message = JSON.parse(data.optional_message);
+              var run_name = optional_message.run_name;
+              var job = {
+                'run_name': 'upload_to_viewer',
+                'job_id': data.job_id
+              }
+              if(run_name){
+                job.run_name = run_name;
+              }
+              $scope.all_runs.push(job);
+            }
+            $scope.set_status_text(data.status, data.job_id + "_queue");
+        }
       window.ACMEDashboard.socket.onopen = function() {
         message = JSON.stringify({
           'target_app': 'run_manager',
@@ -124,14 +144,20 @@
         if(data.user != $scope.user){
           return;
         }
-        switch (data.destination) {
-          case 'set_run_status':
-            console.log('got a status update');
-            $scope.set_status_text(data.status, data.job_id + "_queue");
-            break;
-          default:
-
+        var data = JSON.parse(message.data);
+        if(data.user != $scope.user){
+          return;
         }
+        for(key in window.ACMEDashboard.socket_handlers){
+          if(!window.ACMEDashboard.socket_handlers.hasOwnProperty(key)){
+            continue;
+          }
+          if(key == data.destination){
+            window.ACMEDashboard.socket_handlers[key](data);
+            break;
+          }
+        }
+        $scope.$apply();
       }
     }
 

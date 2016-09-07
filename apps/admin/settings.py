@@ -69,6 +69,7 @@ TEMPLATES = [
         'DIRS': [os.path.join(os.path.abspath("."), 'templates')],
         'APP_DIRS': False,
         'OPTIONS': {
+            'debug': DEBUG,
             'context_processors': [
                 # Insert your TEMPLATE_CONTEXT_PROCESSORS here or use this
                 # list if you haven't customized them:
@@ -169,6 +170,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+    'django_extensions',
     'captcha',
     'web_fe',
     'poller',

@@ -1,50 +1,44 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
-from util.utilities import get_client_ip, print_debug
 from django.contrib.auth.decorators import login_required
 from models import ESGFNode, PublishConfig
+
 from pyesgf.logon import LogonManager
 from pyesgf.search import SearchConnection
-from constants import ESGF_SEARCH_SUFFIX, ESGF_CREDENTIALS, NODE_HOSTNAMES
+
+from constants import ESGF_SEARCH_SUFFIX
+from constants import ESGF_CREDENTIALS
+from constants import NODE_HOSTNAMES
 from run_manager.constants import USER_DATA_PREFIX
+from run_manager.constants import RUN_SCRIPT_PATH
+from poller.views import update as poller_update
+
+from util.utilities import get_client_ip
+from util.utilities import print_debug
+from util.utilities import print_message
+from util.utilities import get_directory_structure
+from util.utilities import check_params
+from util.esgf_publication_client import IngestionClient
+
 import json
 import requests
 import os.path
 import shutil
 import subprocess
 import os
-from util.utilities import print_debug, print_message, get_directory_structure
-from util.esgf_publication_client import IngestionClient
 
-# From: https://github.com/apache/climate
-#
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied.  See the License for the
-# specific language governing permissions and limitations
-# under the License.
-#
-import urllib2, httplib
-from os.path import expanduser, join
+
+# An empty dict subclass, to allow me to call poller views directly
+# without needing to make an http request
+class mydict(dict):
+    pass
 
 
 # Logs the user into ESGF with their given openID and password
 # Inputs: username, password
 # returns: status 200 if successful, 403 otherwise
 def logon(request):
-
     credential = {
         'username': request.GET.get('username'),
         'password': request.GET.get('password')
@@ -69,6 +63,53 @@ def logon(request):
         return HttpResponse(status=200)
     else:
         return HttpResponse(status=403)
+
+
+@login_required
+def upload_to_viewer(request):
+    if request.method != 'POST':
+        return HttpResponse(status=404)
+    user = str(request.user)
+    expected_params = [
+        'run_name',
+        'username',
+        'password',
+        'server',
+    ]
+    params = check_params(json.loads(request.body), expected_params)
+    for p in expected_params:
+        if not params[p]:
+            return HttpResponse(status=400)
+
+    run_directory = USER_DATA_PREFIX \
+        + user + '/diagnostic_output/' \
+        + params['run_name'] + '/diagnostic_output/amwg/'
+
+    request = mydict()
+    request.body = json.dumps({
+        'user': user,
+        'request': 'new',
+        'run_type': 'upload_to_viewer',
+        'request_attr': {
+            'run_name': params['run_name'],
+            'username': params['username'],
+            'password': params['password'],
+            'server': params['server'],
+            'path': run_directory
+        }
+    })
+    request.method = 'POST'
+    try:
+        r = poller_update(request)
+        if(r.status_code != 200):
+            print_message('Error communicating with poller')
+            return HttpResponse(status=500)
+        return HttpResponse(r.content)
+    except Exception as e:
+        print_message('Error making request to poller')
+        print_debug(e)
+        return HttpResponse(status=500)
+    return HttpResponse(status=400)
 
 
 #
@@ -146,6 +187,7 @@ def save_publish_config(request):
     try:
         config.save()
     except Exception as e:
+        print_debug(e)
         print_message('error saveing new config')
         return HttpResponse(status=500)
     return HttpResponse()
@@ -166,34 +208,34 @@ def save_publish_config(request):
 #        esgf_password: the password for the user
 @login_required
 def publish(request):
-    data = json.loads(request.body)
-    config_name = data.get('config_name')
-    data_name = data['metadata'].get('name')
-    server = data.get('server')
-    esgf_user = data.get('esgf_user')
-    esgf_password = data.get('esgf_password')
+    expected_params = [
+        'metadata',
+        'config_name',
+        'server',
+        'esgf_user',
+        'esgf_password',
+        'path',
+        'facets',
+    ]
+    params = check_params(json.loads(request.body), expected_params)
+    # print_message(params)
+    config_name = params.get('config_name')
+    data_name = params.get('metadata').get('name')
+    server = params.get('server')
+    esgf_user = params.get('esgf_user')
+    esgf_password = params.get('esgf_password')
+    path = params.get('path')
+    facets = params.get('facets')
 
-    if not data_name:
-        print_message('No data_name given')
-        return HttpResponse(status=400)
-    if not server:
-        print_message('No server given')
-        return HttpResponse(status=400)
-    if not esgf_user:
-        print_message('No esgf_user given')
-        return HttpResponse(status=400)
-    if not esgf_password:
-        print_message('No esgf_password given')
-        return HttpResponse(status=400)
     client_config = {
         'server': server,
         'openid': esgf_user,
         'password': esgf_password
     }
-    config = {
+    submission_config = {
         'scan': {
             'options': '',
-            'path': '',
+            'path': path,
         },
         'publish': {
             'options': {
@@ -207,52 +249,51 @@ def publish(request):
         if not res:
             print_message('No PublishConfig matching {}'.format(config_name))
             return HttpResponse(status=400)
-        config['metadata'] = []
-        config['facets'] = []
+        submission_config['metadata'] = []
+        submission_config['facets'] = []
         for field in PublishConfig._meta.get_fields():
             item = str(field).split('.')[-1]
             if item != 'facets':
                 if item == 'id' or item == 'config_name':
                     continue
-                config['metadata'].append({
+                submission_config['metadata'].append({
                     'name': item,
                     'value': getattr(res, item)
                 })
             else:
                 facets = json.loads(getattr(res, item))
                 for k in facets:
-                    print k, facets[k]
-                    config['facets'].append({
+                    submission_config['facets'].append({
                         'name': k,
                         'value': facets[k]
                     })
     else:
-        config = {
+        submission_config = {
             'metadata': [
                 {
                     'name': 'name',
                     'value': data_name
                 },{
                     'name': 'organization',
-                    'value': data.get('organization')
+                    'value': params.get('organization')
                 },{
                     'name': 'firstname',
-                    'value': data.get('firstname')
+                    'value': params.get('firstname')
                 },{
                     'name': 'lastname',
-                    'value': data.get('lastname')
+                    'value': params.get('lastname')
                 }, {
                     'name': 'description',
-                    'value': data.get('description')
+                    'value': params.get('description')
                 }, {
                     'name': 'datanode',
-                    'value': data.get('data_node')
+                    'value': params.get('data_node')
                 }
             ],
             'facets': [],
             'scan': {
                 'options': '',
-                'path': '',
+                'path': path,
             },
             'publish': {
                 'options': {
@@ -261,13 +302,18 @@ def publish(request):
                 'files': [],
             },
         }
-        facets = data.get('facets')
         for k in facets:
-            config['facets'].append({
+            submission_config['facets'].append({
                 'name': k,
                 'value': facets[k]
             })
+    print_message(client_config)
+    print_message(submission_config)
     client = IngestionClient(client_config)
+    if client is None:
+        print_message('Unable to create connection with ESGF ingestion service')
+        return HttpResponse(500)
+    response, content = client.submit(submission_config)
     return HttpResponse(status=400)
 
 

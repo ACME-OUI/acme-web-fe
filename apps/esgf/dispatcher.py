@@ -28,7 +28,7 @@ def dataset_download(message, data, user):
     search_string = data.get('params').get('search_string')
     nodes = data.get('params').get('nodes')
     data_type = data.get('params').get('data_type')
-    data_name = data.get('params').get('data_name')
+    data_name = data.get('params').get('data_name').replace(' ', '_')
     if not username:
         print_message('No username given')
         return -1
@@ -138,6 +138,7 @@ def dataset_download(message, data, user):
                         }
                         should_break = True
                     if update_message:
+                        print_message("sending to active group {}".format(update_message))
                         Group('active').send(update_message)
                     if should_break:
                         break

@@ -32,8 +32,15 @@
                       <span>
                         <a href="" 
                            class="waves-effect waves-light btn"
-                           ng-click="publish(diag_folder)">
-                             publish
+                           ng-click="publish_modal(diag_folder)">
+                             publish to esgf
+                           </a>
+                      </span>
+                      <span>
+                        <a href="" 
+                           class="waves-effect waves-light btn"
+                           ng-click="upload_to_viewer_trigger(diag_folder)">
+                             upload to viewer
                            </a>
                       </span> 
                     </div>
@@ -90,7 +97,7 @@
         </div>
       </li>
     </ul>
-    <ul class="collection" ng-show="downloads">
+    <ul class="collection" ng-show="downloads" style="margin: 1em; box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12)">
       <li ng-repeat="download in downloads" 
           class="collection-item" 
           styles="margin: 0 24px; box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12)">
@@ -235,7 +242,7 @@
 
   <!-- modals -->
 
-  <div class="modal" id="download_dataset_modal" style="overflow: hidden; max-height: 80%;">
+  <div class="modal" id="download_dataset_modal" style="overflow: auto; max-height: 80%;">
     <div class="" id="download_type_radio_select">
       <p ng-repeat="type in ['model', 'observation']">
         <input name="download_type" type="radio" id="download_[[type]]_radio" data-download-type="[[type]]"/>
@@ -243,15 +250,15 @@
       </p>
     </div>
     <div class="input-field col s6">
-        <input id="download_name" type="text">
+        <input id="download_name" style="margin: 1em;" type="text">
         <label for="download_name">Dataset name</label>
     </div>
     <div class="input-field col s6">
-        <input id="openid_username" type="text">
+        <input id="openid_username" type="text" style="margin: 1em;">
         <label for="openid_username">OpenID username</label>
     </div>
     <div class="input-field col s6">
-        <input id="openid_password" type="password">
+        <input id="openid_password" type="password" style="margin: 1em;">
         <label for="openid_password">OpenID password</label>
     </div>
     <a href="" class="waves-effect waves-light btn" ng-click="download_dataset()">download</a>
@@ -270,11 +277,21 @@
         <label for="upload_name">Upload name</label>
       </div>
       <input type="file" id="file-upload-picker" name="" multiple>
-      <a href="#" class="wave-effect wave-light btn" style="margin: 1em;" ng-click="upload_file()">upload</a>
+      <a href="#" class="waves-effect waves-light btn" style="margin: 1em;" ng-click="upload_file()">upload</a>
     </form>
   </div>
 
-  <div class="modal" id="publish_modal" style="overflow: hidden; max-height: 80%;">
+  <div class="modal" id="publish_modal" style="max-height: 80%;">
+    <div class="input-field col s6" ng-show="publish_configs">
+      <select>
+        <option ng-repeat="config in publish_configs"> [[ config.name ]] </option>
+      </select>
+      <label> Saved Publication Configurations</label>
+    </div>
+    <div class="input-field col s6" style="margin: 1em;">
+      <input id="publish_config_name" ng-model="publish_config_name" type="text">
+      <label for="publish_config_name">Configuration name</label>
+    </div>
     <div class="input-field col s6" style="margin: 1em;">
       <input id="publish_name" type="text">
       <label for="publish_name">Publication name</label>
@@ -299,9 +316,53 @@
       <input id="publication_datanode" type="text">
       <label for="publication_datanode">Datanode</label>
     </div>
+    <div ng-repeat="facet in facet_list">
+      <div class="input-field col s4" style="margin: 1em;">
+        <input type="text" id="new_facet_name_[[facet]]" 
+              style="margin: 1em 0em 1em 0em;">
+        <label for="new_facet_name_[[facet]]">facet name</label>
+      </div>
+      <div class="input-field col s4" style="margin: 1em;">
+        <input type="text" id="new_facet_value_[[facet]]">
+        <label for="new_facet_value_[[facet]]">facet value</label>
+      </div>
+    </div>
+    <a href="" 
+       class="waves-effect waves-light btn" 
+       ng-click="new_facet()"
+       style="margin: 1em;">
+        new facet
+    </a>
+    <a href="" 
+       class="waves-effect waves-light btn" 
+       ng-click="save_publication_config()"
+       style="margin: 1em 0em 1em 0em;">
+        save configuration
+    </a>
+    <a href="" 
+       class="waves-effect waves-light btn" 
+       ng-click="publish()"
+       style="margin: 1em;">
+        publish [[data_folder]]
+    </a>
   </div>
 
-
+  <div class="modal" id="upload_to_viewer_modal">
+    <div class="input-field col s6" style="margin: 1em;">
+      <input id="upload_to_viewer_user" type="text">
+      <label for="upload_to_viewer_user">Viewer username</label>
+    </div>
+    <div class="input-field col s6" style="margin: 1em;">
+      <input id="upload_to_viewer_pass" type="password">
+      <label for="upload_to_viewer_pass">Viewer password</label>
+    </div>
+    <a href="" 
+       class="waves-effect waves-light btn" 
+       ng-click="upload_to_viewer()"
+       style="margin: 1em;">
+        upload [[diag_folder]] to viewer 
+    </a>
+  </div>
 
 
 

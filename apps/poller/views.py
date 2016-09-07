@@ -105,8 +105,22 @@ def post_update(job_id, data, request_type):
         if output:
             job.output = output
             options = json.loads(job.config_options)
+            run_type = options.get('run_type')
+            print_message('Job finished with output options: {}'.format(options))
             request_attr = options.get('request_attr')
-            outputdir = DIAG_OUTPUT_PREFIX + job.user \
+            outputdir = DIAG_OUTPUT_PREFIX + job.user
+            if run_type == 'diagnostic':
+                outputdir += '/diagnostic_output'
+            elif run_type == 'model':
+                outputdir += '/model_output'
+            elif run_type == 'upload_to_viewer':
+                job.save()
+                group_job_update(job_id, job.user, request_type)
+                return HttpResponse()
+            else:
+                print_message('Unrecognized run_type: {}'.format(run_type))
+
+            outputdir = outputdir \
                 + '/' + options.get('run_name') + '_' + str(job_id) \
                 + request_attr.get('outputdir') \
                 + '/' + request_attr.get('diag_type').lower()
@@ -147,7 +161,9 @@ def post_new(user, data):
         config.update({key: value})
     del config['user']
     del config['request']
+    run_name = config.get('run_name')
     config = json.dumps(config)
+    print_message('new job config: {}'.format(config))
     new_run = UserRuns.objects.create(
         status='new',
         config_options=config,
@@ -159,9 +175,12 @@ def post_new(user, data):
         'job_id': new_run.id,
     })
     print_message('returning new job response {}'.format(response))
-    res = HttpResponse(response, content_type='application/json')
+    message = json.dumps({
+        'run_name': run_name
+    })
+    print_message(message)
     group_job_update(new_run.id, new_run.user, 'new')
-    return res
+    return HttpResponse(response, content_type='application/json')
 
 
 def post_all(user, status):

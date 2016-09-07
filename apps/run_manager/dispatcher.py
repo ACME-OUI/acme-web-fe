@@ -41,13 +41,14 @@ def send_to_group(data, group):
     return 0
 
 
-def group_job_update(job_id, user, status):
+def group_job_update(job_id, user, status, optional_message=None):
     message = {
         'text': json.dumps({
             'destination': 'set_run_status',
             'job_id': job_id,
             'user': user,
-            'status': status
+            'status': status,
+            'optional_message': optional_message
         })
     }
     Group('active').send(message)

@@ -12,4 +12,5 @@ urlpatterns = [
     url(r'^get_publish_config_list/$', views.get_publish_config_list),
     url(r'^save_publish_config/$', views.save_publish_config),
     url(r'^publish/$', views.publish),
+    url(r'^upload_to_viewer/$', views.upload_to_viewer),
 ]

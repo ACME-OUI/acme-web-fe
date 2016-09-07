@@ -172,12 +172,12 @@ def start_run(request):
     try:
         with open(config_path, 'r') as f:
             config = f.read()
-            f.close()
         print_message(config)
         config_options = json.loads(config)
     except Exception as e:
-        print_message('Error reading file {}'.format(config_path))
-
+        print_debug(e)
+        #print_message('Error reading file {}'.format(config_path))
+        #return HttpResponse(status=500)
     request = mydict()
     request.body = {
         'user': user,
@@ -539,7 +539,11 @@ def read_output_script(request):
         print_message('No job id given', 'error')
         return HttpResponse(status=400)
 
-    output_directory = DIAG_OUTPUT_PREFIX + user + '/' + run_name + '_' + job_id
+    output_directory = DIAG_OUTPUT_PREFIX \
+        + user + '/' \
+        + 'diagnostic_output/' \
+        + run_name + '_' + job_id \
+        + '/diagnostic_output/amwg/'
     print_message('looking for script in {}'.format(output_directory))
     script_name_exists = False
     script_path = ''

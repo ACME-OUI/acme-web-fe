@@ -32,9 +32,18 @@
       $scope.step = step;
     }
 
-    $scope.publish = (diag_folder) => {
-      $scope.diag_folder = diag_folder;
+    $scope.publish_modal = (data_folder) => {
+      $scope.data_folder = data_folder;
       $('#publish_modal').openModal();
+      $http({
+        url: '/esgf/get_publish_config_list/',
+        method: 'GET'
+      }).then((res) => {
+        console.log(res.data);
+        $scope.publish_configs = res.data;
+      }).catch((res) => {
+        console.log('Error retrieving publication config list');
+      });
     }
 
     $scope.init = () => {
@@ -45,6 +54,9 @@
       $scope.ready = false; 
       $scope.datapath = false;
       $scope.facet_options = undefined;
+      $scope.publish_configs = undefined;
+      $scope.facet_list = [0];
+      $scope.new_facet_count = 1;
       $scope.searchTerms = {};
       $scope.datasets = {};
       $scope.current_facet = {};
@@ -55,12 +67,81 @@
       $scope.userdata = {};
       $scope.get_user();
       $scope.get_node_list();
+      $scope.publish_config_name = 'adsf'
       $timeout(() => {
         $scope.get_user_data();
         $('.collapsible').collapsible({
           accordion : false
         });
-      }, 200);
+      }, 500);
+    }
+
+    $scope.new_facet = () => {
+      $scope.facet_list.push($scope.new_facet_count++);
+    }
+
+    $scope.upload_to_viewer_trigger = (diag_folder) => {
+      $scope.diag_folder = diag_folder;
+      $('#upload_to_viewer_modal').openModal();
+    }
+
+    $scope.upload_to_viewer = () => {
+      var data = {
+        'run_name': $scope.diag_folder,
+        'username': $('#upload_to_viewer_user').val(),
+        'password': $('#upload_to_viewer_pass').val(),
+        'server': 'http://pcmdi10.llnl.gov:8008/'
+      }
+      $http({
+        url: '/esgf/upload_to_viewer/',
+        method: 'POST',
+        data: data,
+        headers: {
+          'X-CSRFToken' : $scope.get_csrf(),
+          'Content-Type': 'application/json'
+        }
+      }).then((res) => {
+        console.log(res.data);
+        $('#upload_to_viewer_modal').closeModal();
+        $scope.showToast('Upload added to run queue');
+      }).catch((res) => {
+        console.log(res.data);
+        $('#upload_to_viewer_modal').closeModal();
+        $scope.showToast('Failed to upload to viewer');
+      });
+    }
+
+    $scope.save_publication_config = () => {
+      var params = {
+        'config_name': $('#publish_config_name').val(),
+        'metadata': {
+          'organization': $('#org_name').val(),
+          'firstname': $('#publication_author_name_first').val(),
+          'lastname': $('#publication_author_name_last').val(),
+          'description': $('#publication_description').val(),
+          'datanode': $('#publication_datanode').val(),
+        },
+        'facet': []
+      }
+      $.each($scope.facet_list, (i, val) => {
+        params['facet'].push({
+          'name': $('#new_facet_name_' + i).val(),
+          'value': $('#new_facet_value_' + i).val()
+        });
+      });
+      $http({
+        url: '/esgf/save_publish_config/',
+        method: 'POST',
+        data: params,
+        headers: {
+          'X-CSRFToken' : $scope.get_csrf(),
+          'Content-Type': 'application/json'
+        }
+      }).then((res) => {
+
+      }).catch((res) => {
+
+      })
     }
 
     $scope.get_csrf = () => {
@@ -122,6 +203,17 @@
       if(!window.ACMEDashboard.socket){
         window.ACMEDashboard.socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + window.location.pathname);
       }
+      window.ACMEDashboard.socket_handlers = window.ACMEDashboard.socket_handlers || {};
+      window.ACMEDashboard.socket_handlers.esgf_download_status = (data) => {
+          console.log('got a status update');
+            console.log(data);
+            $scope.downloads = $scope.downloads || {};
+            $scope.downloads[data.data_name] = $scope.downloads[data.data_name] || {}; 
+            $scope.downloads[data.data_name]['percent_complete'] = data.percent_complete.toFixed(2);
+            $scope.downloads[data.data_name]['data_name'] = data.data_name;
+            $scope.downloads[data.data_name]['message'] = data.message;
+            $scope.$apply();
+        }
       window.ACMEDashboard.socket.onopen = function() {
         message = JSON.stringify({
           'target_app': 'run_manager',
@@ -135,19 +227,13 @@
         if(data.user != $scope.user){
           return;
         }
-        switch (data.destination) {
-          case 'esgf_download_status':
-            console.log('got a status update');
-            console.log(data);
-            $scope.downloads = $scope.downloads || {};
-            $scope.downloads[data.data_name] = $scope.downloads[data.data_name] || {}; 
-            $scope.downloads[data.data_name]['percent_complete'] = data.percent_complete.toFixed(2);
-            $scope.downloads[data.data_name]['data_name'] = data.data_name;
-            $scope.downloads[data.data_name]['message'] = data.message;
-            $scope.$apply();
-            break;
-          default:
-
+        for (key in window.ACMEDashboard.socket_handlers){
+          if(!window.ACMEDashboard.socket_handlers.hasOwnProperty(key)){
+            continue;
+          }
+          if(key == data.destination){
+            window.ACMEDashboard.socket_handlers[key](data);
+          }
         }
       }
     }
@@ -173,6 +259,7 @@
         'percent_complete': 0
       };      
       $('#download_modal').closeModal();
+      $scope.step = -1;
     }
 
     $scope.get_user = () => {
