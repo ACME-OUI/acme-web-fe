@@ -2,11 +2,12 @@
 
 
 **Run Manager**
-* &#x1F535; As a user, I should be able to create new run configurations. A run config consists of all the nessisary parameters to start a new run. Runs are broken into three catagories, Model Run, Diagnostic Run, and Publication.
+* &#x1F535; As a user, I should be able to create new run configurations. A run config consists of all the nessisary parameters to start a new run. Runs are broken into five catagories, Model Run, &#x1F534; Create Climatologies, &#x1F534; Archive and transfer, Diagnostic Run, and Publication.
 * &#x1F535; As a user, I can browse through all my created run configurations.
 * &#x1F535; As a user, I can modify my run configs, &#x1F534; with the ability to undo modifications.
 * &#x1F534; As a user with HPC resource access, I should be able to start new Model runs. A model run should give me feedback on its status in real time as the run progresses. When a Model run completes, I should have access to the output files in the Data Manager.
-* As a model is run, every 5 years is automatically copied to HPSS, its climatologies are computed and published to ESGF after.
+* &#x1F534; As a model is run, every 5 years climatologies are automatially computed and made available to the user.
+* copied to HPSS, its climatologies are computed and published to ESGF after.
 * &#x1F535; As a user, I should be able to start diagnostic runs on any model or observation data in the Data Manager.
 
 
