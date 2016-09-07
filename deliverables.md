@@ -6,6 +6,7 @@
 * &#x1F534; For all status changes, a notification is created to alert the user of a change.
 * &#x1F534; A list of notifications is displayed with all passed steps.
 * &#x1F534; The status of all current running jobs is displayed. All status changes go to the notification log.
+* &#x1F534; Display of HPC global queue.
 
 **Run Manager**
 * &#x1F535; As a user, I should be able to create new run configurations. A run config consists of all the nessisary parameters to start a new run. Runs are broken into five catagories, Model Run, &#x1F534; Create Climatologies, &#x1F534; Archive and transfer, Diagnostic Run, and Publication.
