@@ -3,7 +3,7 @@
 **Provenance should be captured at all steps**
 
 **Notification Manager**
-* &#x1F534; For all status changes, a notification is created to alert the user of a change.
+* &#x1F534; For all status changes, a notification is created to alert the user of a change. The user can decide if they want an email notification for status changes.
 * &#x1F534; A list of notifications is displayed with all passed steps.
 * &#x1F534; The status of all current running jobs is displayed. All status changes go to the notification log.
 * &#x1F534; Display of HPC global queue.
