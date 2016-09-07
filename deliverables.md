@@ -7,7 +7,10 @@
 * &#x1F535; As a user, I can modify my run configs, &#x1F534; with the ability to undo modifications.
 * &#x1F534; As a user with HPC resource access, I should be able to start new Model runs. A model run should give me feedback on its status in real time as the run progresses. When a Model run completes, I should have access to the output files in the Data Manager.
 * &#x1F534; As a model is run, every 5 years climatologies are automatially computed and made available to the user.
-* copied to HPSS, its climatologies are computed and published to ESGF after.
+* &#x1F534; Raw output is copied to HPSS, and climos are transfered to analysis server.
+* &#x1F534; Once transfer is complete, diagnostics are computed.
+* &#x1F534; Climos published to ESGF after.
+* &#x1F534; diag output published to diagnostic viewer.
 * &#x1F535; As a user, I should be able to start diagnostic runs on any model or observation data in the Data Manager.
 
 
