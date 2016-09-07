@@ -16,6 +16,8 @@
 
 
 **Data Manager**
+* As a user, I can import a provenance file to recreate mutations on datasets.
+* As a user, I can examine provenance files for all reproducability steps.
 * &#x1F535; As a user, I should be able to both upload and download my custom datasets, catagorized as Diagnostic, Model, or Observation. Dataset should be importable from a local computer, a remote server (via URL), or through ESGF.
 * &#x1F534; As a user with the ESGF publication role, I should be able to publish any dataset to ESGF.
 * &#x1F534; As a user I should be able to create a sharable download link. Download URLs should be created for both individual datafiles as well as entire datasets. These links should be access controlled.
