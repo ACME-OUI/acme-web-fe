@@ -4,6 +4,7 @@
 
 **Run Manager**
 * &#x1F535; As a user, I should be able to create new run configurations. A run config consists of all the nessisary parameters to start a new run. Runs are broken into five catagories, Model Run, &#x1F534; Create Climatologies, &#x1F534; Archive and transfer, Diagnostic Run, and Publication.
+* When runs complete, I should have access to and be able to share run performance information.
 * Run configurations and status should be sharable between Dashboard users.
 * &#x1F535; As a user, I can browse through all my created run configurations.
 * &#x1F535; As a user, I can modify my run configs, &#x1F534; with the ability to undo modifications.
