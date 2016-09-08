@@ -2,6 +2,7 @@ import sys
 import traceback
 import pprint
 import os
+import json
 pp = pprint.PrettyPrinter(indent=4)
 
 
@@ -51,7 +52,7 @@ def get_directory_structure(rootdir):
     dir = {}
     rootdir = rootdir.rstrip(os.sep)
     start = rootdir.rfind(os.sep) + 1
-    for path, dirs, files in os.walk(rootdir):
+    for path, dirs, files in os.walk(rootdir, followlinks=True):
         folders = path[start:].split(os.sep)
         subdir = dict.fromkeys(files)
         parent = reduce(dict.get, folders[:-1], dir)
@@ -74,3 +75,11 @@ def check_params(params, check_list):
         if item not in check_list:
             print_message('Unrecognized parameter: {}'.format(item))
     return output
+
+
+def is_json(myjson):
+    try:
+        json_object = json.loads(myjson)
+    except ValueError, e:
+        return False
+    return True

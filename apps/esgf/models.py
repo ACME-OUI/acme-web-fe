@@ -58,3 +58,8 @@ class PublishConfig(models.Model):
     description = models.CharField(max_length=100, default='default_description')
     datanode = models.CharField(max_length=100, default='default_datanode')
     facets = models.TextField(null=True)
+
+
+class FavoritePlot(models.Model):
+    user = models.CharField(max_length=100, default='default_user')
+    plot = models.TextField()

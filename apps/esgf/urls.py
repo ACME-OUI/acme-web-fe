@@ -13,4 +13,6 @@ urlpatterns = [
     url(r'^save_publish_config/$', views.save_publish_config),
     url(r'^publish/$', views.publish),
     url(r'^upload_to_viewer/$', views.upload_to_viewer),
+    url(r'^get_favorite_plots/$', views.get_favorite_plots),
+    url(r'^set_favorite_plot/$', views.set_favorite_plot),
 ]

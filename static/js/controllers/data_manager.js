@@ -19,6 +19,10 @@
         return sliced;
     }
 
+    $scope.$on('thing', (data) => {
+      console.log(data);
+    })
+
     $scope.showToast = function(message) {
       $mdToast.show(
         $mdToast.simple()
@@ -30,6 +34,69 @@
 
     $scope.set_step = (step) => {
       $scope.step = step;
+    }
+
+    $scope.set_favorite_plot = () => {
+      var data = {
+        'user': $scope.$parent.user,
+        'plot': $('#image_download_link').attr('data-plot')
+      }
+      $http({
+        url: '/esgf/set_favorite_plot/',
+        method: 'POST',
+        data: data,
+        headers: {
+          'X-CSRFToken' : $scope.get_csrf(),
+          'Content-Type': 'application/json'
+        }
+      }).then((res) => {
+        $scope.get_favorite_plots();
+      }).catch((res) => {
+
+      })
+    }
+
+    $scope.get_favorite_plots = () => {
+      $http({
+        url: '/esgf/get_favorite_plots/',
+        method: 'GET'
+      }).then((res) => {
+        $scope.favorite_plots = res.data;
+      }).catch((res) => {
+
+      })
+    }
+
+    $scope.open_output = (diag, diag_folder) => {
+      $('#image_view_modal_data_manager').openModal();
+      $scope.open_image(diag_folder, diag);
+    }
+
+    $scope.get_src = (index) => {
+      var prefix = '/acme/userdata/image/userdata/' + $scope.$parent.user + '/diagnostic_output/';
+      var src = prefix + $scope.diag_folder + '/diagnostic_output/amwg/' + $scope.diag_cache[$scope.diag_folder][index];
+      return src;
+    }
+
+    $scope.open_image = (run, image) => {
+      $scope.diag_folder = run;
+      $scope.show_image = true;
+      $scope.image_index = $scope.diag_cache[run].indexOf(image);
+      var src = $scope.get_src($scope.image_index);
+      var image_viewer = $('#image_view_data_manager');
+      var image_link = $('#image_link_data_manager');
+      $('#image_title_data_manager').text(image);
+      image_link.attr({
+        'href': src
+      });
+      $('#image_download_link').attr({
+        'href': src,
+        'download': image,
+        'data-plot': $scope.diag_cache[$scope.diag_folder][$scope.image_index]
+      });
+      image_viewer.attr({
+        'src': src
+      });
     }
 
     $scope.publish_modal = (data_folder) => {
@@ -205,15 +272,16 @@
       }
       window.ACMEDashboard.socket_handlers = window.ACMEDashboard.socket_handlers || {};
       window.ACMEDashboard.socket_handlers.esgf_download_status = (data) => {
-          console.log('got a status update');
-            console.log(data);
-            $scope.downloads = $scope.downloads || {};
-            $scope.downloads[data.data_name] = $scope.downloads[data.data_name] || {}; 
-            $scope.downloads[data.data_name]['percent_complete'] = data.percent_complete.toFixed(2);
-            $scope.downloads[data.data_name]['data_name'] = data.data_name;
-            $scope.downloads[data.data_name]['message'] = data.message;
-            $scope.$apply();
-        }
+        $scope.$emit('notification', {'message': data});
+        console.log('got a status update');
+        console.log(data);
+        $scope.downloads = $scope.downloads || {};
+        $scope.downloads[data.data_name] = $scope.downloads[data.data_name] || {}; 
+        $scope.downloads[data.data_name]['percent_complete'] = data.percent_complete.toFixed(2);
+        $scope.downloads[data.data_name]['data_name'] = data.data_name;
+        $scope.downloads[data.data_name]['message'] = data.message;
+        $scope.$apply();
+      }
       window.ACMEDashboard.socket.onopen = function() {
         message = JSON.stringify({
           'target_app': 'run_manager',
@@ -294,6 +362,7 @@
         $scope.obs_cache = undefined;
         $scope.diag_cache = undefined;
         $scope.model_cache = undefined;
+        $scope.get_favorite_plots();
       }).catch((res) => {
         console.log(res.data);
       })

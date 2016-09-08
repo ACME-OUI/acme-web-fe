@@ -6,7 +6,9 @@ from poller.models import UserRuns
 import json
 import os
 
-from util.utilities import print_debug, print_message
+from util.utilities import print_debug
+from util.utilities import print_message
+from util.utilities import is_json
 from run_manager.constants import DIAG_OUTPUT_PREFIX
 from run_manager.dispatcher import group_job_update
 
@@ -100,6 +102,11 @@ def post_update(job_id, data, request_type):
         job = UserRuns.objects.get(id=job_id)
         job.status = request_type
         output = data.get('output')
+        message = ''
+        if is_json(output):
+            message = json.loads(output)
+        else:
+            message = output
         # Check if the job finished and has output
         # if it does, write it to the db and an output file
         if output:
@@ -115,7 +122,8 @@ def post_update(job_id, data, request_type):
                 outputdir += '/model_output'
             elif run_type == 'upload_to_viewer':
                 job.save()
-                group_job_update(job_id, job.user, request_type)
+                print_message('Sending job update with message {}'.format(message))
+                group_job_update(job_id, job.user, request_type, optional_message=message)
                 return HttpResponse()
             else:
                 print_message('Unrecognized run_type: {}'.format(run_type))
@@ -130,8 +138,10 @@ def post_update(job_id, data, request_type):
             with open(outputdir + '/console_output.txt', 'w+') as output_file:
                 output_file.write(' '.join(output))
                 output_file.close()
+
         job.save()
-        group_job_update(job_id, job.user, request_type)
+        print_message('Sending job update with message {}'.format(message))
+        group_job_update(job_id, job.user, request_type, optional_message=message)
         return HttpResponse(status=200)
     except Exception as e:
         print_debug(e)

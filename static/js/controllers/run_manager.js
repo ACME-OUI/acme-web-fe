@@ -33,7 +33,7 @@
         url: '/run_manager/get_user',
         method: 'GET'
       }).then((res) => {
-        $scope.user = res.data
+        $scope.$parent.user = res.data
       }).catch((res) => {
         console.log('Error getting user');
         console.log(res);
@@ -60,6 +60,9 @@
     $scope.init = function(){
       console.log('[+] Initializing RunManager window');
       $scope.setup_socket();
+      $scope.$on('notification', (data) => {
+        console.log('got a notification')
+      })
       $scope.run_options = ['New run configuration', 'start run', 'stop run', 'update status', 'new template'];
       $scope.run_types = ['diagnostic', 'model'];
       $scope.aceModel = '';
@@ -113,24 +116,25 @@
       }
       window.ACMEDashboard.socket_handlers = window.ACMEDashboard.socket_handlers || {};
       window.ACMEDashboard.socket_handlers.set_run_status = (data) => {
-          console.log('got a status update');
-            var job = $scope.all_runs.filter((obj) => {
-              return obj.job_id == data.job_id
-            });
-            if(job.length == 0){
-              var optional_message = JSON.parse(data.optional_message);
-              var run_name = optional_message.run_name;
-              var job = {
-                'run_name': 'upload_to_viewer',
-                'job_id': data.job_id
-              }
-              if(run_name){
-                job.run_name = run_name;
-              }
-              $scope.all_runs.push(job);
-            }
-            $scope.set_status_text(data.status, data.job_id + "_queue");
-        }
+        console.log('got a status update');
+        $scope.$emit('notification', {'message': data});
+        var job = $scope.all_runs.filter((obj) => {
+          return obj.job_id == data.job_id
+        });
+        // if(job.length == 0){
+        //   var optional_message = JSON.parse(data.optional_message);
+        //   var run_name = optional_message.run_name;
+        //   var job = {
+        //     'run_name': 'upload_to_viewer',
+        //     'job_id': data.job_id
+        //   }
+        //   if(run_name){
+        //     job.run_name = run_name;
+        //   }
+        //   $scope.all_runs.push(job);
+        // }
+        $scope.set_status_text(data.status, data.job_id + "_queue");
+      }
       window.ACMEDashboard.socket.onopen = function() {
         message = JSON.stringify({
           'target_app': 'run_manager',
@@ -141,11 +145,11 @@
       }
       window.ACMEDashboard.socket.onmessage = (message) => {
         var data = JSON.parse(message.data);
-        if(data.user != $scope.user){
+        if(data.user != $scope.$parent.user){
           return;
         }
         var data = JSON.parse(message.data);
-        if(data.user != $scope.user){
+        if(data.user != $scope.$parent.user){
           return;
         }
         for(key in window.ACMEDashboard.socket_handlers){
@@ -181,7 +185,7 @@
     }
 
     $scope.get_src = (index) => {
-      var prefix = '/acme/userdata/image/userdata/' + $scope.user + '/diagnostic_output/';
+      var prefix = '/acme/userdata/image/userdata/' + $scope.$parent.user + '/diagnostic_output/';
       var src = prefix + $scope.selected_run + '/diagnostic_output/amwg/' + $scope.output_list[$scope.selected_run][index];
       return src;
     }

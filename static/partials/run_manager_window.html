@@ -4,22 +4,18 @@
       height : 70vh;
     }
   </style>
-  <div id="run_options">
-    <ul class="collection">
-      <li class="collection-item">
-        <div class="" style="margin-left:auto;margin-right:auto;">
-          <a
-            href="#"
-            ng-repeat="option in run_options"
-            class="waves-effect waves-light btn"
-            ng-click="trigger_option(option)"
-            style="margin-left: 0.5vw; margin-right: 0.5vw; margin-top: 1vh;">
-            [[option]]
-          </a>
-        </div>
-      </li>
-    </ul>
+  <div id="run_options" style="display: flex; justify-content: space-between; width: 80%; margin-left: 10%">
+    <div class="" ng-repeat="option in run_options">
+      <a
+        href="#"
+        class="waves-effect waves-light btn"
+        ng-click="trigger_option(option)"
+        style="margin-left: 0.5vw; margin-right: 0.5vw; margin-top: 1vh;">
+        [[option]]
+      </a>
+    </div>
   </div>
+  <hr>
   <div class="run_list dashboard-show-hide" ng-show="ready == true">
     <p style="margin-left: 5vw;">Run List</p>
     <ul class="collapsible popout" id="run-list" data-collapsible="accordion">
@@ -229,27 +225,35 @@
   <div class="modal" id="image_view_modal" style="width: fit-content; overflow: hidden; max-height: 80%;">
     <p id="image_title" style="text-align: center;"></p>
     <img id="image_view" style="margin: 1vw;" class="" src="" />
-    <div class="" style="text-align: justify;
-    -ms-text-justify: distribute-all-lines;
-    text-justify: distribute-all-lines;">
-      <a href="#"
+    <div class="" style="display: flex; justify-content: space-between; width: 100%">
+      <div>
+        <a href="#"
          target="_blank"
          ng-click="$('#image_view_modal').closeModal()"
-         style="margin: 1vw; display: inline-block;
-    *display: inline; width: 30%"
+         style="margin: 1vw;"
          class="waves-effect waves-light btn"
          id="image_link">
-         new window
+          new window
        </a>
-       <a href="#"
-          style="display: inline-block;
-    *display: inline;width: 30%;margin: 1vw;"
+      </div>
+      <div>
+        <a href=""
+          style="margin:1vw;"
+          class="waves-effect waves-light btn"
+          id="image_set_favorite"
+          ng-click="set_favorite_plot()">
+           favorite
+       </a>
+      </div>
+      <div>
+        <a href="#"
+          style="margin: 1vw;"
           class="waves-effect waves-light btn"
           id="image_download_link"
           download>
-          download
+           download
        </a>
-       <span class="stretch"></span>
+      </div>
     </div>
   </div>
   

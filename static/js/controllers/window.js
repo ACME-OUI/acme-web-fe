@@ -24,6 +24,12 @@
                  componentState: {
                    templateId: 'run_manager_wrapper'
                  }
+             },{
+                 type: 'component',
+                 componentName: 'Notifications',
+                 componentState: {
+                   templateId: 'notification_manager_wrapper'
+                 }
              }]
          }]
      }
@@ -74,6 +80,19 @@
        // Actually kick off Angular's magic
        angular.bootstrap( element[ 0 ], [ state.module ] );
      });
+     window.layout.registerComponent( 'Notifications', function( container, state ){
+        var templateHtml = $( '#' + state.templateId ).html();
+        var element = container.getElement();
+        state.module = 'notification_manager';
+        element.html( templateHtml );
+        angular
+          .module( state.module )
+          .value( 'container', container )
+          .value( 'state', state );
+
+        // Actually kick off Angular's magic
+        angular.bootstrap( element[ 0 ], [ state.module ] );
+     });
 
      window.layout.on( 'initialised', function(){
         //angular.bootstrap( document.body, [ 'dashboard' ]);
@@ -108,5 +127,6 @@
    addMenuItem('DataManager', 'data_manager_wrapper');
    addMenuItem('CDAT', 'cdat_wrapper');
    addMenuItem('RunManager', 'run_manager_wrapper');
+   addMenuItem('Notifications', 'notification_manager_wrapper');
 
  }).call(this);

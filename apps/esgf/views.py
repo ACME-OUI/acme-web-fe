@@ -2,7 +2,9 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-from models import ESGFNode, PublishConfig
+from models import ESGFNode
+from models import PublishConfig
+from models import FavoritePlot
 
 from pyesgf.logon import LogonManager
 from pyesgf.search import SearchConnection
@@ -142,6 +144,34 @@ def get_publish_config_list(request):
     for r in res:
         data[ getattr(r, 'config_name') ] = getattr(r, 'facets')
     return HttpResponse(json.dumps(data))
+
+
+@login_required
+def get_favorite_plots(request):
+    user = str(request.user)
+    res = FavoritePlot.objects.all().filter(user=user)
+    plots = []
+    for r in res:
+        plots.append(getattr(r, 'plot'))
+    return HttpResponse(json.dumps(plots))
+
+
+@login_required
+def set_favorite_plot(request):
+    user = str(request.user)
+    data = json.loads(request.body)
+    plot = data.get('plot')
+    if not plot:
+        print_message('no plot given')
+        return HttpResponse(status=400)
+
+    new_fav = FavoritePlot(user=user, plot=plot)
+    try:
+        new_fav.save()
+    except Exception as e:
+        print_debug(e)
+        return HttpResponse(status=500)
+    return HttpResponse()
 
 
 #

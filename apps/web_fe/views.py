@@ -193,6 +193,7 @@ def setup_output_directories(user):
         if not os.path.exists(p):
             print "... creating {}".format(p)
             os.makedirs(p)
+    os.symlink('/export/baldwin32/data/obs_for_diagnostics/', path + '/../../userdata/' + user + '/observations/obs_for_diagnostics')
     return
 
 

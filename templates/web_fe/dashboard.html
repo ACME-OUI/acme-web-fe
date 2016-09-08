@@ -36,6 +36,7 @@
   <script src="{% static "js/controllers/cdat.js" %}"></script>
   <script src="{% static "js/controllers/data_manager.js" %}"></script>
   <script src="{% static "js/controllers/run_manager.js" %}"></script>
+  <script src="{% static "js/controllers/notification_manager.js" %}"></script>
 
 
   <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
@@ -64,7 +65,7 @@
 {% endblock %}
 
 {% block layout %}
-  <div class="wrapper" id="layout-wrapper">
+  <div class="wrapper" id="layout-wrapper" ng-app="dashboard">
     <ul id="menuContainer" style="margin-top: 0px;"></ul>
     <div class="layoutContainer" id="layoutContainer" ng-controller="DashboardControl" ng-init="init()">
       <div class="">
@@ -92,6 +93,13 @@
             </div>
             <ng-include src="'{% static 'partials/run_manager_window.html' %}'"></ng-include>
           </div>
+        </template>
+      </div>
+      <div class="">
+        <template type="text/html" id="notification_manager_wrapper">
+          <div class="data_manager_window" ng-controller="NotificationControl" ng-init="init()">
+            <ng-include src="'{% static 'partials/notification_manager_window.html' %}'"></ng-include>
+          <div>
         </template>
       </div>
     </div>

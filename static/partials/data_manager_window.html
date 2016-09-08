@@ -45,8 +45,30 @@
                       </span> 
                     </div>
                   </li>
+                  <hr>
+                  <span style="padding: 0.5rem; margin-left: 3vw;"> 
+                    favorite plots
+                  </span>
+                  <li ng-repeat="fav in favorite_plots">
+                    <a href="" 
+                         ng-click="open_output(fav, diag_folder)" 
+                         style="padding: 0.5rem; margin-left: 3vw;">
+                          [[ fav ]]
+                      </a>
+                  </li>
+                  <hr>
                   <li ng-repeat="diag in diag_cache[diag_folder]">
-                    <span style="padding: 0.5rem; margin-left: 3vw;">[[ diag ]]</span>
+                    <span ng-if="diag.endsWith('.png')"> 
+                      <a href="" 
+                         ng-click="open_output(diag, diag_folder)" 
+                         style="padding: 0.5rem; margin-left: 3vw;">
+                          [[ diag ]]
+                      </a>
+                    </span>
+                    <span ng-if="!diag.endsWith('.png')" 
+                          style="padding: 0.5rem; margin-left: 3vw;">
+                           [[ diag ]]
+                    </span>
                   </li>
                 </ul>
               </div>
@@ -364,7 +386,40 @@
     </a>
   </div>
 
-
+  <div class="modal" id="image_view_modal_data_manager" style="width: fit-content; overflow: hidden; max-height: 80%;">
+    <p id="image_title_data_manager" style="text-align: center;"></p>
+    <img id="image_view_data_manager" style="margin: 1vw;" class="" src="" />
+    <div class="" style="display: flex; justify-content: space-between; width: 100%">
+      <div>
+        <a href="#"
+         target="_blank"
+         ng-click="$('#image_view_modal').closeModal()"
+         style="margin: 1vw;"
+         class="waves-effect waves-light btn"
+         id="image_link_data_manager">
+          new window
+       </a>
+      </div>
+      <div>
+        <a href=""
+          style="margin:1vw;"
+          class="waves-effect waves-light btn"
+          id="image_set_favorite_data_manager"
+          ng-click="set_favorite_plot()">
+           favorite
+       </a>
+      </div>
+      <div>
+        <a href="#"
+          style="margin: 1vw;"
+          class="waves-effect waves-light btn"
+          id="image_download_link_data_manager"
+          download>
+           download
+       </a>
+      </div>
+    </div>
+  </div>
 
 
 </div>
