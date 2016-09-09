@@ -1,7 +1,23 @@
 <div style="margin: 1em;">
-    <ul>
-        <li ng-repeat="notification in notification_list">
-            [[ notification.message ]]
+    <ul class="collection">
+        <li class="collection-item" ng-repeat="n in notification_list">
+            <span ng-if="n.status == 'in_progress'" style="vertical-align:middle;">
+            	<i class="material-icons">loop</i>
+            	[[ n.optional_message.run_type]] is in progress
+            </span>
+            <span ng-if="n.status == 'complete'" style="vertical-align:middle;">
+            	<i class="material-icons">done</i>
+            	[[ n.optional_message.run_type]] complete
+            	<a ng-href="[[n.optional_message.request_attr.server]]?dataset=[[n.optional_message.dataset_id]]"
+            	   ng-if="n.optional_message.run_type == 'upload_to_viewer'"
+            	   target="_blank">
+            	    open in viewer
+            	</a>
+            </span>
+            <span ng-if="n.status == 'new' && n.optional_message.run_type == 'upload_to_viewer'" style="vertical-align:middle;">
+            	<i class="material-icons">input</i>
+            	Diagnostic upload job submitted
+            </span>
         </li>
     </ul>
 </div>

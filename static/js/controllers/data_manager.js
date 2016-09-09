@@ -1,6 +1,6 @@
 (function(){
   angular.module('data_manager', ['ngAnimate', 'ngMaterial'])
-  .controller('DataManagerControl', ['$scope', '$http', '$timeout', '$mdToast', function($scope, $http, $timeout, $mdToast) {
+  .controller('DataManagerControl', function($scope, $http, $timeout, $mdToast) {
 
     /**
      * Slices the object. Note that returns a new spliced object,
@@ -114,7 +114,7 @@
     }
 
     $scope.init = () => {
-      console.log('[+] Initializing Data Manager window');
+      console.log('[+] Initializing Data Manager window parent scope.id = ' + $scope.$parent.$id);
       $scope.setup_socket();
       $scope.step = -1;
       $scope.selected_nodes = undefined;
@@ -134,7 +134,9 @@
       $scope.userdata = {};
       $scope.get_user();
       $scope.get_node_list();
-      $scope.publish_config_name = 'adsf'
+      $scope.publish_config_name = 'adsf';
+      $scope.diag_limit = 20;
+      $scope.obs_limit = 20;
       $timeout(() => {
         $scope.get_user_data();
         $('.collapsible').collapsible({
@@ -270,17 +272,19 @@
       if(!window.ACMEDashboard.socket){
         window.ACMEDashboard.socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + window.location.pathname);
       }
+      window.ACMEDashboard.notificaiton_list = window.ACMEDashboard.notificaiton_list || [];
       window.ACMEDashboard.socket_handlers = window.ACMEDashboard.socket_handlers || {};
       window.ACMEDashboard.socket_handlers.esgf_download_status = (data) => {
-        $scope.$emit('notification', {'message': data});
-        console.log('got a status update');
-        console.log(data);
-        $scope.downloads = $scope.downloads || {};
-        $scope.downloads[data.data_name] = $scope.downloads[data.data_name] || {}; 
-        $scope.downloads[data.data_name]['percent_complete'] = data.percent_complete.toFixed(2);
-        $scope.downloads[data.data_name]['data_name'] = data.data_name;
-        $scope.downloads[data.data_name]['message'] = data.message;
-        $scope.$apply();
+        $scope.$apply(() => {
+          window.ACMEDashboard.notificaiton_list.push({'message': data});
+          console.log('got a status update');
+          console.log(data);
+          $scope.downloads = $scope.downloads || {};
+          $scope.downloads[data.data_name] = $scope.downloads[data.data_name] || {}; 
+          $scope.downloads[data.data_name]['percent_complete'] = data.percent_complete.toFixed(2);
+          $scope.downloads[data.data_name]['data_name'] = data.data_name;
+          $scope.downloads[data.data_name]['message'] = data.message;
+        });
       }
       window.ACMEDashboard.socket.onopen = function() {
         message = JSON.stringify({
@@ -330,16 +334,22 @@
       $scope.step = -1;
     }
 
-    $scope.get_user = () => {
+    $scope.get_user = (callback) => {
       $http({
         url: '/run_manager/get_user',
         method: 'GET'
       }).then((res) => {
         $scope.user = res.data
         $scope.get_user_data();
+        if(callback){
+          callback();
+        }
       }).catch((res) => {
         console.log('Error getting user');
         console.log(res);
+        if(callback){
+          callback();
+        }
       });
     }
 
@@ -355,17 +365,27 @@
         url: '/esgf/get_user_data'
       }).then((res) => {
         console.log(res.data);
-        $scope.all_userdata = res.data[$scope.user]
-        $scope.userdata['model_output'] = Object.keys($scope.all_userdata.model_output);
-        $scope.userdata['diagnostic_output'] = Object.keys($scope.all_userdata.diagnostic_output);
-        $scope.userdata['observations'] = Object.keys($scope.all_userdata.observations);
-        $scope.obs_cache = undefined;
-        $scope.diag_cache = undefined;
-        $scope.model_cache = undefined;
-        $scope.get_favorite_plots();
+        if($scope.user){
+          $scope.set_alldata(res.data[$scope.user]);
+        } else {
+          $scope.get_user(() => {
+            $scope.set_alldata(res.data[$scope.user]);
+          });
+        }
       }).catch((res) => {
         console.log(res.data);
-      })
+      });
+    }
+
+    $scope.set_alldata = (data) => {
+      $scope.all_userdata = data;
+      $scope.userdata['model_output'] = Object.keys($scope.all_userdata.model_output);
+      $scope.userdata['diagnostic_output'] = Object.keys($scope.all_userdata.diagnostic_output);
+      $scope.userdata['observations'] = Object.keys($scope.all_userdata.observations);
+      $scope.obs_cache = undefined;
+      $scope.diag_cache = undefined;
+      $scope.model_cache = undefined;
+      $scope.get_favorite_plots();
     }
 
     $scope.load_obs_cache = (obs_folder) => {
@@ -377,8 +397,14 @@
       $scope.model_cache[model_folder] = Object.keys($scope.all_userdata['model_output'][model_folder]);
     }
     $scope.load_diag_cache = (diag_folder) => {
-      $scope.diag_cache = $scope.diag_cache || {};
+      $scope.diag_cache = $scope.diag_cache || {};      $scope.diag_limit = 20;
       $scope.diag_cache[diag_folder] = Object.keys($scope.all_userdata['diagnostic_output'][diag_folder]['diagnostic_output']['amwg']);
+    }
+    $scope.increase_diag_limit = () => {
+      $scope.diag_limit += 20;
+    }
+    $scope.increase_obs_limit = () => {
+      $scope.obs_limit += 20;
     }
 
     $scope.search = () => {
@@ -550,7 +576,7 @@
         $scope.showToast('Error retrieving facet options');
       });
     }
-  }])
+  })
   .config(function($interpolateProvider) {
     $interpolateProvider.startSymbol('[[');
     return $interpolateProvider.endSymbol(']]');

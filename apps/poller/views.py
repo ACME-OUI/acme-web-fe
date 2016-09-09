@@ -122,6 +122,7 @@ def post_update(job_id, data, request_type):
                 outputdir += '/model_output'
             elif run_type == 'upload_to_viewer':
                 job.save()
+                message.update(options)
                 print_message('Sending job update with message {}'.format(message))
                 group_job_update(job_id, job.user, request_type, optional_message=message)
                 return HttpResponse()
@@ -172,11 +173,11 @@ def post_new(user, data):
     del config['user']
     del config['request']
     run_name = config.get('run_name')
-    config = json.dumps(config)
+    config_json = json.dumps(config)
     print_message('new job config: {}'.format(config))
     new_run = UserRuns.objects.create(
         status='new',
-        config_options=config,
+        config_options=config_json,
         user=user
     )
     new_run.save()
@@ -185,11 +186,13 @@ def post_new(user, data):
         'job_id': new_run.id,
     })
     print_message('returning new job response {}'.format(response))
-    message = json.dumps({
-        'run_name': run_name
-    })
+    message = {
+        'run_name': run_name,
+        'run_type': config.get('run_type'),
+        'request_attr': config.get('request_attr')
+    }
     print_message(message)
-    group_job_update(new_run.id, new_run.user, 'new')
+    group_job_update(new_run.id, new_run.user, 'new', optional_message=message)
     return HttpResponse(response, content_type='application/json')
 
 
@@ -292,5 +295,5 @@ def get_next():
     r['job_id'] = data.id
     r['user'] = data.user
     r.update(config)
-    group_job_update(data.id, data.user, 'in_progress')
+    group_job_update(data.id, data.user, 'in_progress', optional_message=r)
     return r

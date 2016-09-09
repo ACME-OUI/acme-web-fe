@@ -51,13 +51,18 @@
                   </span>
                   <li ng-repeat="fav in favorite_plots">
                     <a href="" 
-                         ng-click="open_output(fav, diag_folder)" 
-                         style="padding: 0.5rem; margin-left: 3vw;">
-                          [[ fav ]]
-                      </a>
+                      ng-click="open_output(fav, diag_folder)" 
+                      style="padding: 0.5rem; margin-left: 3vw;"
+                      ng-if="diag_cache[diag_folder].includes(fav)">
+                       [[ fav ]]
+                    </a>
                   </li>
                   <hr>
-                  <li ng-repeat="diag in diag_cache[diag_folder]">
+                  <div class="input-field col s6" style="margin: 1em;">
+                    <input type="text" ng-model="diag_query" name="diag_query_field">
+                    <label for="diag_query_field">filter</label>
+                  </div>
+                  <li ng-repeat="diag in diag_cache[diag_folder] | orderBy:diag | filter:diag_query | limitTo:diag_limit">
                     <span ng-if="diag.endsWith('.png')"> 
                       <a href="" 
                          ng-click="open_output(diag, diag_folder)" 
@@ -70,6 +75,12 @@
                            [[ diag ]]
                     </span>
                   </li>
+                  <a href="" 
+                     class="waves-effect waves-light btn" 
+                     ng-click="increase_diag_limit()"
+                     style="margin-left: 3vw;">
+                      more
+                  </a>
                 </ul>
               </div>
             </li>
@@ -109,9 +120,20 @@
               </div>
               <div class="collapsible-body">
                 <ul class="collection">
-                  <li ng-repeat="obs in obs_cache[obs_folder]">
+                  <div class="input-field col s6" style="margin: 1em;">
+                    <input type="text" ng-model="obs_query" name="obs_query_field">
+                    <label for="obs_query_field">filter</label>
+                  </div>
+                  <li ng-repeat="obs in obs_cache[obs_folder] | orderBy:obs | filter:obs_query | limitTo:obs_limit">
                     <span style="padding: 0.5rem; margin-left: 3vw;">[[ obs ]]</span>
                   </li>
+                  <a href="" 
+                     class="waves-effect waves-light btn"
+                     ng-if="obs_limit < obs_cache[obs_folder].length" 
+                     ng-click="increase_obs_limit()"
+                     style="margin-left: 3vw;">
+                      more
+                  </a>
                 </ul>
               </div>
             </li>

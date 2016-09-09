@@ -1,6 +1,6 @@
 (function(){
   angular.module('run_manager', ['ui.ace', 'ngMaterial'])
-  .controller('RunManagerControl', ['$scope', '$http', '$timeout', '$mdToast', function($scope, $http, $timeout, $mdToast) {
+  .controller('RunManagerControl', function($scope, $http, $timeout, $mdToast, $rootScope) {
 
     /**
      * Slices the object. Note that returns a new spliced object,
@@ -58,11 +58,9 @@
   	}
 
     $scope.init = function(){
-      console.log('[+] Initializing RunManager window');
+      console.log('[+] Initializing RunManager window parent scope.id = ' + $scope.$parent.$id);
+      console.log($rootScope);
       $scope.setup_socket();
-      $scope.$on('notification', (data) => {
-        console.log('got a notification')
-      })
       $scope.run_options = ['New run configuration', 'start run', 'stop run', 'update status', 'new template'];
       $scope.run_types = ['diagnostic', 'model'];
       $scope.aceModel = '';
@@ -114,25 +112,18 @@
       if(!window.ACMEDashboard.socket){
         window.ACMEDashboard.socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + window.location.pathname);
       }
+      window.ACMEDashboard.notificaiton_list = window.ACMEDashboard.notificaiton_list || [];
       window.ACMEDashboard.socket_handlers = window.ACMEDashboard.socket_handlers || {};
       window.ACMEDashboard.socket_handlers.set_run_status = (data) => {
+        if(data.user != $scope.user){
+          return;
+        }
         console.log('got a status update');
-        $scope.$emit('notification', {'message': data});
+        console.log($rootScope)
+        $rootScope.$emit('notification', {'message': data});
         var job = $scope.all_runs.filter((obj) => {
           return obj.job_id == data.job_id
         });
-        // if(job.length == 0){
-        //   var optional_message = JSON.parse(data.optional_message);
-        //   var run_name = optional_message.run_name;
-        //   var job = {
-        //     'run_name': 'upload_to_viewer',
-        //     'job_id': data.job_id
-        //   }
-        //   if(run_name){
-        //     job.run_name = run_name;
-        //   }
-        //   $scope.all_runs.push(job);
-        // }
         $scope.set_status_text(data.status, data.job_id + "_queue");
       }
       window.ACMEDashboard.socket.onopen = function() {
@@ -618,7 +609,7 @@
       }
     }
 
-  }])
+  })
   .config(function($interpolateProvider) {
     $interpolateProvider.startSymbol('[[');
     return $interpolateProvider.endSymbol(']]');

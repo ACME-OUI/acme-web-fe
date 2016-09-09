@@ -1,9 +1,10 @@
 (function(){
-  var dashboard = angular.module('dashboard', ['data_manager', 'run_manager'])
-  .controller('DashboardControl', ['$scope', function($scope) {
+  var dashboard = angular.module('dashboard', ['data_manager', 'run_manager', 'notification_manager'])
+  .controller('DashboardControl', function($scope, $rootScope) {
 
     $scope.init = () => {
-      console.log('[+] Initializing dashboard');
+      console.log('[+] Initializing dashboard scope.id = ' + $scope.$id);
+      console.log($rootScope);
     }
 
    //  $scope.showToast = function(message) {
@@ -77,7 +78,7 @@
   	// 	return $('input[name="csrfmiddlewaretoken"]').attr('value');
   	// }
 
-  }])
+  })
   .config(function($interpolateProvider) {
     $interpolateProvider.startSymbol('[[');
     return $interpolateProvider.endSymbol(']]');
