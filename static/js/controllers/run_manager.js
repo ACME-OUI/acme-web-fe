@@ -33,7 +33,7 @@
         url: '/run_manager/get_user',
         method: 'GET'
       }).then((res) => {
-        $scope.$parent.user = res.data
+        window.ACMEDashboard.user = res.data
       }).catch((res) => {
         console.log('Error getting user');
         console.log(res);
@@ -114,13 +114,18 @@
       }
       window.ACMEDashboard.notificaiton_list = window.ACMEDashboard.notificaiton_list || [];
       window.ACMEDashboard.socket_handlers = window.ACMEDashboard.socket_handlers || {};
+      window.ACMEDashboard.notification_echo = {
+        'target_app': 'run_manager',
+        'destination': 'echo',
+        'content': ''
+      }
       window.ACMEDashboard.socket_handlers.set_run_status = (data) => {
-        if(data.user != $scope.user){
+        if(data.user != window.ACMEDashboard.user){
           return;
         }
         console.log('got a status update');
-        console.log($rootScope)
-        $rootScope.$emit('notification', {'message': data});
+        // console.log($rootScope)
+        // $rootScope.$emit('notification', {'message': data});
         var job = $scope.all_runs.filter((obj) => {
           return obj.job_id == data.job_id
         });
@@ -136,11 +141,7 @@
       }
       window.ACMEDashboard.socket.onmessage = (message) => {
         var data = JSON.parse(message.data);
-        if(data.user != $scope.$parent.user){
-          return;
-        }
-        var data = JSON.parse(message.data);
-        if(data.user != $scope.$parent.user){
+        if(data.user != window.ACMEDashboard.user){
           return;
         }
         for(key in window.ACMEDashboard.socket_handlers){
@@ -176,7 +177,7 @@
     }
 
     $scope.get_src = (index) => {
-      var prefix = '/acme/userdata/image/userdata/' + $scope.$parent.user + '/diagnostic_output/';
+      var prefix = '/acme/userdata/image/userdata/' + window.ACMEDashboard.user + '/diagnostic_output/';
       var src = prefix + $scope.selected_run + '/diagnostic_output/amwg/' + $scope.output_list[$scope.selected_run][index];
       return src;
     }
@@ -218,7 +219,7 @@
     $scope.aceOption = {
       mode: $scope.mode.toLowerCase(),
       onLoad: function (_ace) {
-        $scope.ace = _ace;
+        window.ACMEDashboard.ace = _ace;
         $scope.modeChanged = function () {
           _ace.getSession().setMode("ace/mode/" + $scope.mode.toLowerCase());
         };
@@ -266,8 +267,8 @@
         console.log(res);
         var script = JSON.stringify(JSON.parse(res.data.script), null, 2);
         //$scope.aceModel = script;
-        $scope.ace.setValue(script);
-        $scope.ace.setReadOnly(false);
+        window.ACMEDashboard.ace.setValue(script);
+        window.ACMEDashboard.ace.setReadOnly(false);
         $('#text_edit_save_btn').removeClass('disabled');
       }).catch((res) => {
         console.log(res);
@@ -591,8 +592,8 @@
             console.log(res);
             var script = res.data.script;
             $scope.aceModel = script;
-            $scope.ace.setValue(script);
-            $scope.ace.setReadOnly(true);
+            window.ACMEDashboard.ace.setValue(script);
+            window.ACMEDashboard.ace.setReadOnly(true);
             $('#text_edit_save_btn').addClass('disabled');
           }).catch((res) => {
             console.log(res);

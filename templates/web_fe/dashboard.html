@@ -6,6 +6,11 @@
 
 {% csrf_token %}
 
+  <link href="{% static "css/widgets.css" %}"/>
+  <script src="{% static "js/resources/Cesium.js" %}"></script>
+  <script src="{% static "js/resources/cdms.js" %}"></script>
+  <script src="{% static "js/resources/vcs.js" %}"></script>
+
   <!-- Materialize -->
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css">
   <link href="//fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -39,14 +44,13 @@
   <script src="{% static "js/controllers/notification_manager.js" %}"></script>
 
 
+
+
   <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
 
   <!-- Typehead and Bloodhound -->
   <script src="{% static "js/resources/typeahead.bundle.js" %}"></script>
   <link rel="stylesheet" href="{% static "css/typeahead.css" %}">
-
-  <!-- CDAT Web css-->
-  <link rel="stylesheet" href="{% static "css/cdat.css" %}">
 
   <!-- vtkweb -->
   <!-- <script type="text/javascript" src="{% static "vtkweb/js/autobahn.min.js" %}"></script>
@@ -65,12 +69,16 @@
 {% endblock %}
 
 {% block layout %}
+  <!-- ng-app="dashboard" -->
   <div class="wrapper" id="layout-wrapper" ng-app="dashboard">
     <ul id="menuContainer" style="margin-top: 0px;"></ul>
     <div class="layoutContainer" id="layoutContainer" ng-controller="DashboardControl" ng-init="init()">
       <div class="">
         <template type="text/html" id="cdat_wrapper">
           <div class="cdat_window" ng-controller="CDATControl" ng-init="init()">
+            <div>
+              <div id="cesiumContainer"></div>
+            </div>
             <ng-include src="'{% static 'partials/visualization_manager.html' %}'"></ng-include>
           </div>
         </template>

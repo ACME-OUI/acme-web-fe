@@ -106,7 +106,9 @@ def post_update(job_id, data, request_type):
         if is_json(output):
             message = json.loads(output)
         else:
-            message = output
+            message = {
+                'text': output
+            }
         # Check if the job finished and has output
         # if it does, write it to the db and an output file
         if output:
@@ -118,6 +120,7 @@ def post_update(job_id, data, request_type):
             outputdir = DIAG_OUTPUT_PREFIX + job.user
             if run_type == 'diagnostic':
                 outputdir += '/diagnostic_output'
+                message['run_type'] = 'diagnostic'
             elif run_type == 'model':
                 outputdir += '/model_output'
             elif run_type == 'upload_to_viewer':

@@ -194,6 +194,7 @@ def setup_output_directories(user):
             print "... creating {}".format(p)
             os.makedirs(p)
     os.symlink('/export/baldwin32/data/obs_for_diagnostics/', path + '/../../userdata/' + user + '/observations/obs_for_diagnostics')
+    os.symlink('/export/baldwin32/diags/metadiags_test_data/', path + '/../../userdata/' + user + '/model_output/metadiags_test_data')
     return
 
 

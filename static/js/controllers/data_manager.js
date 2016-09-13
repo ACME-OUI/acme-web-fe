@@ -30,7 +30,28 @@
           .position('center')
           .hideDelay(1200)
       );
-    };  
+    };
+
+    $scope.open_nc = (file, folder, type) => {
+      params = {
+        'filename': file,
+        'folder': folder,
+        'data_type': type
+      }
+      $http({
+        url: '/esgf/read_nc/',
+        method: 'GET',
+        params: params
+      }).then((res)=>{
+        $('#text_edit_modal').openModal();
+        console.log(res);
+        window.ACMEDashboard.ace.setValue(res.data);
+        window.ACMEDashboard.ace.setReadOnly(false);
+        $('#text_edit_save_btn').addClass('disabled');
+      }).catch((res)=>{
+
+      })
+    }  
 
     $scope.set_step = (step) => {
       $scope.step = step;
@@ -73,7 +94,7 @@
     }
 
     $scope.get_src = (index) => {
-      var prefix = '/acme/userdata/image/userdata/' + $scope.$parent.user + '/diagnostic_output/';
+      var prefix = '/acme/userdata/image/userdata/' + window.ACMEDashboard.user + '/diagnostic_output/';
       var src = prefix + $scope.diag_folder + '/diagnostic_output/amwg/' + $scope.diag_cache[$scope.diag_folder][index];
       return src;
     }
@@ -144,6 +165,25 @@
         });
       }, 500);
     }
+
+        // The modes
+    $scope.modes = ['json'];
+    $scope.mode = $scope.modes[0];
+
+    // The ui-ace option
+    $scope.aceOption = {
+      mode: $scope.mode.toLowerCase(),
+      onLoad: function (_ace) {
+        window.ACMEDashboard.ace = _ace;
+        $scope.modeChanged = function () {
+          _ace.getSession().setMode("ace/mode/" + $scope.mode.toLowerCase());
+        };
+
+      },
+      onChange: function(_ace){
+        $scope.aceModel = _ace[1].getValue();
+      }
+    };
 
     $scope.new_facet = () => {
       $scope.facet_list.push($scope.new_facet_count++);
@@ -276,7 +316,6 @@
       window.ACMEDashboard.socket_handlers = window.ACMEDashboard.socket_handlers || {};
       window.ACMEDashboard.socket_handlers.esgf_download_status = (data) => {
         $scope.$apply(() => {
-          window.ACMEDashboard.notificaiton_list.push({'message': data});
           console.log('got a status update');
           console.log(data);
           $scope.downloads = $scope.downloads || {};
@@ -296,7 +335,7 @@
       }
       window.ACMEDashboard.socket.onmessage = (message) => {
         var data = JSON.parse(message.data);
-        if(data.user != $scope.user){
+        if(data.user != window.ACMEDashboard.user){
           return;
         }
         for (key in window.ACMEDashboard.socket_handlers){

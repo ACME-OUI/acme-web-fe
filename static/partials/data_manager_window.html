@@ -14,7 +14,7 @@
         </div>
         <div class="collapsible-body">
           <ul class="collapsible">
-            <li ng-repeat="diag_folder in userdata.diagnostic_output">
+            <li ng-repeat="diag_folder in userdata.diagnostic_output | orderBy:diag_folder">
               <div class="collapsible-header" ng-click="load_diag_cache(diag_folder)">
                 <span>[[ diag_folder ]]</span>
               </div>
@@ -49,7 +49,7 @@
                   <span style="padding: 0.5rem; margin-left: 3vw;"> 
                     favorite plots
                   </span>
-                  <li ng-repeat="fav in favorite_plots">
+                  <li ng-repeat="fav in favorite_plots | orderBy:fav">
                     <a href="" 
                       ng-click="open_output(fav, diag_folder)" 
                       style="padding: 0.5rem; margin-left: 3vw;"
@@ -58,7 +58,7 @@
                     </a>
                   </li>
                   <hr>
-                  <div class="input-field col s6" style="margin: 1em;">
+                  <div class="input-field col s6" style="margin-left: 3vw;">
                     <input type="text" ng-model="diag_query" name="diag_query_field">
                     <label for="diag_query_field">filter</label>
                   </div>
@@ -70,7 +70,14 @@
                           [[ diag ]]
                       </a>
                     </span>
-                    <span ng-if="!diag.endsWith('.png')" 
+                    <span ng-if="diag.endsWith('.nc')"> 
+                      <a href="" 
+                         ng-click="open_nc(diag, diag_folder, 'diagnostic')" 
+                         style="padding: 0.5rem; margin-left: 3vw;">
+                          [[ diag ]]
+                      </a>
+                    </span>
+                    <span ng-if="!diag.endsWith('.png') && !diag.endsWith('.nc')" 
                           style="padding: 0.5rem; margin-left: 3vw;">
                            [[ diag ]]
                     </span>
@@ -114,13 +121,13 @@
         </div>
         <div class="collapsible-body">
           <ul class="collapsible">
-            <li ng-repeat="obs_folder in userdata.observations">
+            <li ng-repeat="obs_folder in userdata.observations | orderBy:obs_folder">
               <div class="collapsible-header" ng-click="load_obs_cache(obs_folder)">
                 <span>[[ obs_folder ]]</span>
               </div>
               <div class="collapsible-body">
                 <ul class="collection">
-                  <div class="input-field col s6" style="margin: 1em;">
+                  <div class="input-field col s6" style="margin-left: 3vw;">
                     <input type="text" ng-model="obs_query" name="obs_query_field">
                     <label for="obs_query_field">filter</label>
                   </div>
@@ -305,7 +312,7 @@
         <input id="openid_password" type="password" style="margin: 1em;">
         <label for="openid_password">OpenID password</label>
     </div>
-    <a href="" class="waves-effect waves-light btn" ng-click="download_dataset()">download</a>
+    <a href="" style="margin-left: 1em;" class="waves-effect waves-light btn" ng-click="download_dataset()">download</a>
   </div>
 
   <div class="modal" id="file_upload_modal" style="overflow: hidden; max-height: 80%;">

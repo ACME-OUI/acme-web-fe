@@ -2,21 +2,30 @@
     <ul class="collection">
         <li class="collection-item" ng-repeat="n in notification_list">
             <span ng-if="n.status == 'in_progress'" style="vertical-align:middle;">
-            	<i class="material-icons">loop</i>
-            	[[ n.optional_message.run_type]] is in progress
+                <i class="material-icons" style="vertical-align:middle;">loop</i>
+                [[ n.optional_message.run_type]] is in progress
             </span>
             <span ng-if="n.status == 'complete'" style="vertical-align:middle;">
-            	<i class="material-icons">done</i>
-            	[[ n.optional_message.run_type]] complete
-            	<a ng-href="[[n.optional_message.request_attr.server]]?dataset=[[n.optional_message.dataset_id]]"
-            	   ng-if="n.optional_message.run_type == 'upload_to_viewer'"
-            	   target="_blank">
-            	    open in viewer
-            	</a>
+                <i class="material-icons" style="vertical-align:middle;">done</i>
+                [[ n.optional_message.run_type]] complete
+                <a ng-href="[[n.optional_message.request_attr.server]]?dataset=[[n.optional_message.dataset_id]]"
+                   ng-if="n.optional_message.run_type == 'upload_to_viewer'"
+                   target="_blank">
+                    open in viewer
+                </a>
+                <a ng-href="#"
+                   ng-if="n.optional_message.run_type == 'diagnostic'"
+                   ng-click="open_output(n)">
+                    console output
+                </a>
             </span>
-            <span ng-if="n.status == 'new' && n.optional_message.run_type == 'upload_to_viewer'" style="vertical-align:middle;">
-            	<i class="material-icons">input</i>
-            	Diagnostic upload job submitted
+            <span ng-if="n.status == 'new' && n.optional_message.run_type == 'upload_to_viewer'">
+                <i class="material-icons" style="vertical-align:middle;">input</i>
+                Upload to diagnostic viewer submitted
+            </span>
+            <span ng-if="n.status == 'new' && n.optional_message.run_type == 'diagnostic'">
+                <i class="material-icons" style="vertical-align:middle;">input</i>
+                Diagnostic job submitted
             </span>
         </li>
     </ul>

@@ -80,6 +80,6 @@ def check_params(params, check_list):
 def is_json(myjson):
     try:
         json_object = json.loads(myjson)
-    except ValueError, e:
+    except Exception as e:
         return False
     return True

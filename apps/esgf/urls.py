@@ -15,4 +15,5 @@ urlpatterns = [
     url(r'^upload_to_viewer/$', views.upload_to_viewer),
     url(r'^get_favorite_plots/$', views.get_favorite_plots),
     url(r'^set_favorite_plot/$', views.set_favorite_plot),
+    url(r'^read_nc/$', views.read_nc),
 ]

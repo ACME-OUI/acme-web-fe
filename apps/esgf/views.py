@@ -28,6 +28,7 @@ import requests
 import os.path
 import shutil
 import subprocess
+from subprocess import Popen, PIPE
 import os
 
 
@@ -35,6 +36,44 @@ import os
 # without needing to make an http request
 class mydict(dict):
     pass
+
+
+@login_required
+def read_nc(request):
+    user = str(request.user)
+    folder = request.GET.get('folder')
+    data_type = request.GET.get('data_type')
+    filename = request.GET.get('filename')
+    error = False
+    if folder is None:
+        print_message('No folder')
+        error = True
+    if data_type is None:
+        print_message('No data_type')
+        error = True
+    if filename is None:
+        print_message('No filename')
+        error = True
+    if error:
+        return HttpResponse(status=400)
+
+    path = os.path.abspath(os.path.dirname(__file__)) \
+        + '/../../userdata/' \
+        + user + '/'
+    if data_type == 'diagnostic':
+        path += 'diagnostic_output/' + folder + '/diagnostic_output/amwg/'
+    elif data_type == 'model':
+        path += 'model_output/' + folder
+    elif data_type == 'observation':
+        path += 'observations/' + folder
+    else:
+        print_message('Unrecognized data_type')
+        return HttpResponse(status=400)
+    path += filename
+    path = os.path.abspath(path)
+    proc = Popen(['ncdump', '-h',path], stdout=PIPE)
+    output = proc.stdout.read()
+    return HttpResponse(str(output))
 
 
 # Logs the user into ESGF with their given openID and password
