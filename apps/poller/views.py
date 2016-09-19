@@ -169,13 +169,17 @@ def post_new(user, data):
     if not user:
         return HttpResponse(status=400)
 
-    config = {}
-    for key in data:
-        value = data.get(key)
-        config.update({key: value})
+    config = data
+    # for key in data:
+    #     value = data.get(key)
+    #     config.update({key: value})
     del config['user']
     del config['request']
     run_name = config.get('run_name')
+    if not run_name:
+        print_message('no run name given, using run type {}'.format(config.get('run_type')))
+        run_name = config.get('run_type')
+    config['run_name'] = run_name
     config_json = json.dumps(config)
     print_message('new job config: {}'.format(config))
     new_run = UserRuns.objects.create(
