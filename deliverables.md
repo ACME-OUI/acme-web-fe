@@ -1,4 +1,6 @@
 # ACME Dashboard deliverables (provisional)
+&#x1F535; = currently working
+&#x1F534; = planned feature
 
 **Provenance should be captured at all steps**
 
