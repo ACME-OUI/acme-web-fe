@@ -107,7 +107,17 @@
               <div class="collapsible-body">
                 <ul class="collection">
                   <li ng-repeat="m in model_cache[model_folder]">
-                    <span style="padding: 0.5rem; margin-left: 3vw;">[[ m ]]</span>
+                    <span style="padding: 0.5rem; margin-left: 3vw;"
+                          ng-if="!m.endsWith('.nc')">
+                           [[ m ]]
+                    </span>
+                    <span ng-if="m.endsWith('.nc')"> 
+                      <a href="" 
+                         ng-click="open_nc(m, model_folder, 'model')" 
+                         style="padding: 0.5rem; margin-left: 3vw;">
+                          [[ m ]]
+                      </a>
+                    </span>
                   </li>
                 </ul>
               </div>

@@ -63,7 +63,7 @@ def read_nc(request):
     if data_type == 'diagnostic':
         path += 'diagnostic_output/' + folder + '/diagnostic_output/amwg/'
     elif data_type == 'model':
-        path += 'model_output/' + folder
+        path += 'model_output/' + folder + '/'
     elif data_type == 'observation':
         path += 'observations/' + folder
     else:
