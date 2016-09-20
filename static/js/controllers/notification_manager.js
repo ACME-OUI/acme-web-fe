@@ -4,7 +4,7 @@
     $scope.init = () => {
       console.log('[+] Initializing Notification Manager parent scope.id = ' + $scope.$parent.$id);
       $scope.notification_list = [];
-
+      $scope.get_notification_list();
       $scope.setup_socket();
 
       // ACE setup
@@ -25,8 +25,17 @@
           $scope.aceModel = _ace[1].getValue();
         }
       };
+    }
 
-
+    $scope.get_notification_list = () => {
+      $http({
+        url: '/acme/get_notification_list/',
+        method: 'GET'
+      }).then((res) => {
+        $scope.notificaiton_list = res.data;
+      }).catch((res) => {
+        console.log('error retrieving notification list from server')
+      })
     }
 
     $scope.open_output = (notification) => {

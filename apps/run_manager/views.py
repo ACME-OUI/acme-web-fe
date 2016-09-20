@@ -176,8 +176,8 @@ def start_run(request):
         config_options = json.loads(config)
     except Exception as e:
         print_debug(e)
-        #print_message('Error reading file {}'.format(config_path))
-        #return HttpResponse(status=500)
+        # print_message('Error reading file {}'.format(config_path))
+        # return HttpResponse(status=500)
     request = mydict()
     request.body = {
         'user': user,
@@ -223,6 +223,7 @@ def stop_run(request):
     # url = ''.join([POLLER_HOST, ':', request.META['SERVER_PORT'], POLLER_SUFFIX])
     try:
         # r = requests.post(url, request)
+        print_message('sending request to poller with data {}'.format(request.body), 'ok')
         r = poller_update(request)
         if r.status_code == 200:
             return HttpResponse()

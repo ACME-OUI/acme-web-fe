@@ -5,6 +5,7 @@ from constants import NODE_HOSTNAMES
 import inspect
 from util.utilities import print_message
 from django.contrib.auth.models import User
+from web_fe.models import Notification
 from django.test import Client
 
 
@@ -15,11 +16,12 @@ class TestUploadToViewer(LiveServerTestCase):
         self.user.save()
         self.c = Client()
         logged_in = self.c.login(username='test', password='test')
-
+        self.note = Notification(user='test')
+        self.note.save()
         self.upload_viewer_user = 'baldwin2'
         self.upload_password = 'qwertyuiop'
         self.server_url = 'https://acme-ea.ornl.gov/'
-        self.esgf_endpoint = '/esgf/upload_to_viewer/'
+        self.upload_endpoint = '/esgf/upload_to_viewer/'
 
     def test_upload_to_viewer(self):
         request = json.dumps({
@@ -28,7 +30,7 @@ class TestUploadToViewer(LiveServerTestCase):
             'password': self.upload_password,
             'server': self.server_url
         })
-        r = self.c.post(self.esgf_endpoint, data=request, content_type='application/json')
+        r = self.c.post(self.upload_endpoint, data=request, content_type='application/json')
         self.assertTrue(r.status_code == 200)
         self.assertTrue('dataset_id' in r.content)
 
@@ -38,6 +40,8 @@ class TestPublishConfig(LiveServerTestCase):
         self.user = User.objects.create(username='test')
         self.user.set_password('test')
         self.user.save()
+        self.note = Notification(user='test')
+        self.note.save()
         self.c = Client()
         logged_in = self.c.login(username='test', password='test')
         self.params = json.dumps({
@@ -152,6 +156,8 @@ class TestLogon(LiveServerTestCase):
     def setUp(self):
         self.username = 'https://pcmdi.llnl.gov/esgf-idp/openid/acmetest'
         self.password = 'ACM#t3st'
+        self.note = Notification(user='test')
+        self.note.save()
 
     def test_logon_success(self):
         print "\n---->[+] Starting " + inspect.stack()[0][3]
@@ -215,6 +221,8 @@ class TestNodeSearch(LiveServerTestCase):
 
     def setUp(self):
         self.valid_nodes = NODE_HOSTNAMES[0:1]
+        self.note = Notification(user='test')
+        self.note.save()
         self.invalid_nodes = ['not.a.node.gov', 'also.not.a.node.gov']
         self.valid_terms = {'project': 'ACME'}
         self.invalid_terms = {'not_a_valid': 'search_term'}
