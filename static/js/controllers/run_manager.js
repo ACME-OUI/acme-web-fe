@@ -1,6 +1,6 @@
 (function(){
   angular.module('run_manager', ['ui.ace', 'ngMaterial'])
-  .controller('RunManagerControl', ['$scope', '$http', '$timeout', '$mdToast', function($scope, $http, $timeout, $mdToast) {
+  .controller('RunManagerControl', function($scope, $http, $timeout, $mdToast, $rootScope) {
 
     /**
      * Slices the object. Note that returns a new spliced object,
@@ -33,7 +33,7 @@
         url: '/run_manager/get_user',
         method: 'GET'
       }).then((res) => {
-        $scope.user = res.data
+        window.ACMEDashboard.user = res.data
       }).catch((res) => {
         console.log('Error getting user');
         console.log(res);
@@ -58,7 +58,8 @@
   	}
 
     $scope.init = function(){
-      console.log('[+] Initializing RunManager window');
+      console.log('[+] Initializing RunManager window parent scope.id = ' + $scope.$parent.$id);
+      console.log($rootScope);
       $scope.setup_socket();
       $scope.run_options = ['New run configuration', 'start run', 'stop run', 'update status', 'new template'];
       $scope.run_types = ['diagnostic', 'model'];
@@ -111,6 +112,25 @@
       if(!window.ACMEDashboard.socket){
         window.ACMEDashboard.socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + window.location.pathname);
       }
+      window.ACMEDashboard.notificaiton_list = window.ACMEDashboard.notificaiton_list || [];
+      window.ACMEDashboard.socket_handlers = window.ACMEDashboard.socket_handlers || {};
+      window.ACMEDashboard.notification_echo = {
+        'target_app': 'run_manager',
+        'destination': 'echo',
+        'content': ''
+      }
+      window.ACMEDashboard.socket_handlers.set_run_status = (data) => {
+        if(data.user != window.ACMEDashboard.user){
+          return;
+        }
+        console.log('got a status update');
+        // console.log($rootScope)
+        // $rootScope.$emit('notification', {'message': data});
+        var job = $scope.all_runs.filter((obj) => {
+          return obj.job_id == data.job_id
+        });
+        $scope.set_status_text(data.status, data.job_id + "_queue");
+      }
       window.ACMEDashboard.socket.onopen = function() {
         message = JSON.stringify({
           'target_app': 'run_manager',
@@ -121,17 +141,19 @@
       }
       window.ACMEDashboard.socket.onmessage = (message) => {
         var data = JSON.parse(message.data);
-        if(data.user != $scope.user){
+        if(data.user != window.ACMEDashboard.user){
           return;
         }
-        switch (data.destination) {
-          case 'set_run_status':
-            console.log('got a status update');
-            $scope.set_status_text(data.status, data.job_id + "_queue");
+        for(key in window.ACMEDashboard.socket_handlers){
+          if(!window.ACMEDashboard.socket_handlers.hasOwnProperty(key)){
+            continue;
+          }
+          if(key == data.destination){
+            window.ACMEDashboard.socket_handlers[key](data);
             break;
-          default:
-
+          }
         }
+        $scope.$apply();
       }
     }
 
@@ -155,7 +177,7 @@
     }
 
     $scope.get_src = (index) => {
-      var prefix = '/acme/userdata/image/userdata/' + $scope.user + '/diagnostic_output/';
+      var prefix = '/acme/userdata/image/userdata/' + window.ACMEDashboard.user + '/diagnostic_output/';
       var src = prefix + $scope.selected_run + '/diagnostic_output/amwg/' + $scope.output_list[$scope.selected_run][index];
       return src;
     }
@@ -197,7 +219,7 @@
     $scope.aceOption = {
       mode: $scope.mode.toLowerCase(),
       onLoad: function (_ace) {
-        $scope.ace = _ace;
+        window.ACMEDashboard.ace = _ace;
         $scope.modeChanged = function () {
           _ace.getSession().setMode("ace/mode/" + $scope.mode.toLowerCase());
         };
@@ -245,8 +267,8 @@
         console.log(res);
         var script = JSON.stringify(JSON.parse(res.data.script), null, 2);
         //$scope.aceModel = script;
-        $scope.ace.setValue(script);
-        $scope.ace.setReadOnly(false);
+        window.ACMEDashboard.ace.setValue(script);
+        window.ACMEDashboard.ace.setReadOnly(false);
         $('#text_edit_save_btn').removeClass('disabled');
       }).catch((res) => {
         console.log(res);
@@ -570,8 +592,8 @@
             console.log(res);
             var script = res.data.script;
             $scope.aceModel = script;
-            $scope.ace.setValue(script);
-            $scope.ace.setReadOnly(true);
+            window.ACMEDashboard.ace.setValue(script);
+            window.ACMEDashboard.ace.setReadOnly(true);
             $('#text_edit_save_btn').addClass('disabled');
           }).catch((res) => {
             console.log(res);
@@ -588,7 +610,7 @@
       }
     }
 
-  }])
+  })
   .config(function($interpolateProvider) {
     $interpolateProvider.startSymbol('[[');
     return $interpolateProvider.endSymbol(']]');

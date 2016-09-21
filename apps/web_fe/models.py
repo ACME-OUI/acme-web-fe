@@ -18,3 +18,8 @@ class Credential(models.Model):
     service_user_name = models.CharField(max_length=100, default='default_user')
     password = models.CharField(max_length=100)
     service = models.CharField(max_length=100)
+
+
+class Notification(models.Model):
+    user = models.CharField(max_length=100)
+    notification_list = models.TextField()

@@ -47,3 +47,19 @@ class ESGFNode(models.Model):
             node_data["children"][item.tag] = self.xml_to_json(item)
 
         return node_data
+
+
+class PublishConfig(models.Model):
+    config_name = models.CharField(max_length=100, unique=True, default='default_config_name')
+    user = models.CharField(max_length=100, default='default_user')
+    firstname = models.CharField(max_length=100, default='default_first_name')
+    lastname = models.CharField(max_length=100, default='default_last_name')
+    organization = models.CharField(max_length=100, default='default_org')
+    description = models.CharField(max_length=100, default='default_description')
+    datanode = models.CharField(max_length=100, default='default_datanode')
+    facets = models.TextField(null=True)
+
+
+class FavoritePlot(models.Model):
+    user = models.CharField(max_length=100, default='default_user')
+    plot = models.TextField()

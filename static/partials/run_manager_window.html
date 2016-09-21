@@ -1,26 +1,21 @@
 <div class="" ng-init="init()">
   <style media="screen">
-  .ace_editor  {
-    height : 70vh;
-  }
-
+    .ace_editor  {
+      height : 70vh;
+    }
   </style>
-  <div id="run_options">
-    <ul class="collection">
-      <li class="collection-item">
-        <div class="" style="margin-left:auto;margin-right:auto;">
-          <a
-            href="#"
-            ng-repeat="option in run_options"
-            class="waves-effect waves-light btn"
-            ng-click="trigger_option(option)"
-            style="margin-left: 0.5vw; margin-right: 0.5vw; margin-top: 1vh;">
-            [[option]]
-          </a>
-        </div>
-      </li>
-    </ul>
+  <div id="run_options" style="display: flex; justify-content: space-between; width: 80%; margin-left: 10%">
+    <div class="" ng-repeat="option in run_options">
+      <a
+        href="#"
+        class="waves-effect waves-light btn"
+        ng-click="trigger_option(option)"
+        style="margin-left: 0.5vw; margin-right: 0.5vw; margin-top: 1vh;">
+         [[option]]
+      </a>
+    </div>
   </div>
+  <hr>
   <div class="run_list dashboard-show-hide" ng-show="ready == true">
     <p style="margin-left: 5vw;">Run List</p>
     <ul class="collapsible popout" id="run-list" data-collapsible="accordion">
@@ -28,7 +23,6 @@
         <div class="collapsible-header" ng-click="get_run_data(run)">
           <i class="material-icons" id="[[run]]_arrow">play_arrow</i>
           <span class="">[[run]]</span>
-          <!-- <span href="#" id="[[run]]_status" style="float: right; margin-right: 2vw; color:grey;">idle</span> -->
         </div>
         <div class="collapsible-body">
           <div class="" ng-show="empty_run == false">
@@ -191,7 +185,7 @@
   </div>
 
   <!-- text edit modal -->
-  <div class="modal" id="text_edit_modal" >
+  <div class="modal" id="text_edit_modal" style="width: 90%;">
     <section>
       <a href="#" id="text_edit_save_btn" class="waves-effect waves-light btn" style="margin: .5vh;" ng-click="update_script()">save</a>
       <div ui-ace="aceOption" ng-model="aceModel"></div>
@@ -231,27 +225,35 @@
   <div class="modal" id="image_view_modal" style="width: fit-content; overflow: hidden; max-height: 80%;">
     <p id="image_title" style="text-align: center;"></p>
     <img id="image_view" style="margin: 1vw;" class="" src="" />
-    <div class="" style="text-align: justify;
-    -ms-text-justify: distribute-all-lines;
-    text-justify: distribute-all-lines;">
-      <a href="#"
+    <div class="" style="display: flex; justify-content: space-between; width: 100%">
+      <div>
+        <a href="#"
          target="_blank"
          ng-click="$('#image_view_modal').closeModal()"
-         style="margin: 1vw; display: inline-block;
-    *display: inline; width: 30%"
+         style="margin: 1vw;"
          class="waves-effect waves-light btn"
          id="image_link">
-         new window
+          new window
        </a>
-       <a href="#"
-          style="display: inline-block;
-    *display: inline;width: 30%;margin: 1vw;"
+      </div>
+      <div>
+        <a href=""
+          style="margin:1vw;"
+          class="waves-effect waves-light btn"
+          id="image_set_favorite"
+          ng-click="set_favorite_plot()">
+           favorite
+       </a>
+      </div>
+      <div>
+        <a href="#"
+          style="margin: 1vw;"
           class="waves-effect waves-light btn"
           id="image_download_link"
           download>
-          download
+           download
        </a>
-       <span class="stretch"></span>
+      </div>
     </div>
   </div>
   

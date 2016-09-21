@@ -14,21 +14,80 @@
         </div>
         <div class="collapsible-body">
           <ul class="collapsible">
-            <li ng-repeat="diag_folder in userdata.diagnostic_output">
+            <li ng-repeat="diag_folder in userdata.diagnostic_output | orderBy:diag_folder">
               <div class="collapsible-header" ng-click="load_diag_cache(diag_folder)">
-                <span>[[ diag_folder ]]</span> 
+                <span>[[ diag_folder ]]</span>
               </div>
               <div class="collapsible-body">
                 <ul class="collection">
                   <li>
-                    <a href="/run_manager/get_output_zip?run_name=[[ diag_folder ]]&run_type=diagnostic" 
-                       style="padding: 0.5rem; margin-left: 3vw;">
-                       download zip
+                    <div style="padding: 0.5em;">
+                      <span>
+                        <a href="/run_manager/get_output_zip?run_name=[[ diag_folder ]]&run_type=diagnostic"
+                           class="waves-effect waves-light btn" 
+                           style="margin-left: 3vw;">
+                             download zip
+                          </a>
+                      </span>
+                      <span>
+                        <a href="" 
+                           class="waves-effect waves-light btn"
+                           ng-click="publish_modal(diag_folder)">
+                             publish to esgf
+                           </a>
+                      </span>
+                      <span>
+                        <a href="" 
+                           class="waves-effect waves-light btn"
+                           ng-click="upload_to_viewer_trigger(diag_folder)">
+                             upload to viewer
+                           </a>
+                      </span> 
+                    </div>
+                  </li>
+                  <hr>
+                  <span style="padding: 0.5rem; margin-left: 3vw;"> 
+                    favorite plots
+                  </span>
+                  <li ng-repeat="fav in favorite_plots | orderBy:fav">
+                    <a href="" 
+                      ng-click="open_output(fav, diag_folder)" 
+                      style="padding: 0.5rem; margin-left: 3vw;"
+                      ng-if="diag_cache[diag_folder].includes(fav)">
+                       [[ fav ]]
                     </a>
                   </li>
-                  <li ng-repeat="diag in diag_cache[diag_folder]">
-                    <span style="padding: 0.5rem; margin-left: 3vw;">[[ diag ]]</span>
+                  <hr>
+                  <div class="input-field col s6" style="margin-left: 3vw;">
+                    <input type="text" ng-model="diag_query" name="diag_query_field">
+                    <label for="diag_query_field">filter</label>
+                  </div>
+                  <li ng-repeat="diag in diag_cache[diag_folder] | orderBy:diag | filter:diag_query | limitTo:diag_limit">
+                    <span ng-if="diag.endsWith('.png')"> 
+                      <a href="" 
+                         ng-click="open_output(diag, diag_folder)" 
+                         style="padding: 0.5rem; margin-left: 3vw;">
+                          [[ diag ]]
+                      </a>
+                    </span>
+                    <span ng-if="diag.endsWith('.nc')"> 
+                      <a href="" 
+                         ng-click="open_nc(diag, diag_folder, 'diagnostic')" 
+                         style="padding: 0.5rem; margin-left: 3vw;">
+                          [[ diag ]]
+                      </a>
+                    </span>
+                    <span ng-if="!diag.endsWith('.png') && !diag.endsWith('.nc')" 
+                          style="padding: 0.5rem; margin-left: 3vw;">
+                           [[ diag ]]
+                    </span>
                   </li>
+                  <a href="" 
+                     class="waves-effect waves-light btn" 
+                     ng-click="increase_diag_limit()"
+                     style="margin-left: 3vw;">
+                      more
+                  </a>
                 </ul>
               </div>
             </li>
@@ -48,7 +107,17 @@
               <div class="collapsible-body">
                 <ul class="collection">
                   <li ng-repeat="m in model_cache[model_folder]">
-                    <span style="padding: 0.5rem; margin-left: 3vw;">[[ m ]]</span>
+                    <span style="padding: 0.5rem; margin-left: 3vw;"
+                          ng-if="!m.endsWith('.nc')">
+                           [[ m ]]
+                    </span>
+                    <span ng-if="m.endsWith('.nc')"> 
+                      <a href="" 
+                         ng-click="open_nc(m, model_folder, 'model')" 
+                         style="padding: 0.5rem; margin-left: 3vw;">
+                          [[ m ]]
+                      </a>
+                    </span>
                   </li>
                 </ul>
               </div>
@@ -62,15 +131,26 @@
         </div>
         <div class="collapsible-body">
           <ul class="collapsible">
-            <li ng-repeat="obs_folder in userdata.observations">
+            <li ng-repeat="obs_folder in userdata.observations | orderBy:obs_folder">
               <div class="collapsible-header" ng-click="load_obs_cache(obs_folder)">
                 <span>[[ obs_folder ]]</span>
               </div>
               <div class="collapsible-body">
                 <ul class="collection">
-                  <li ng-repeat="obs in obs_cache[obs_folder]">
+                  <div class="input-field col s6" style="margin-left: 3vw;">
+                    <input type="text" ng-model="obs_query" name="obs_query_field">
+                    <label for="obs_query_field">filter</label>
+                  </div>
+                  <li ng-repeat="obs in obs_cache[obs_folder] | orderBy:obs | filter:obs_query | limitTo:obs_limit">
                     <span style="padding: 0.5rem; margin-left: 3vw;">[[ obs ]]</span>
                   </li>
+                  <a href="" 
+                     class="waves-effect waves-light btn"
+                     ng-if="obs_limit < obs_cache[obs_folder].length" 
+                     ng-click="increase_obs_limit()"
+                     style="margin-left: 3vw;">
+                      more
+                  </a>
                 </ul>
               </div>
             </li>
@@ -78,7 +158,7 @@
         </div>
       </li>
     </ul>
-    <ul class="collection" ng-show="downloads">
+    <ul class="collection" ng-show="downloads" style="margin: 1em; box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12)">
       <li ng-repeat="download in downloads" 
           class="collection-item" 
           styles="margin: 0 24px; box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12)">
@@ -221,7 +301,9 @@
     </div>
   </div>
 
-  <div class="modal" id="download_dataset_modal" style="overflow: hidden; max-height: 80%;">
+  <!-- modals -->
+
+  <div class="modal" id="download_dataset_modal" style="overflow: auto; max-height: 80%;">
     <div class="" id="download_type_radio_select">
       <p ng-repeat="type in ['model', 'observation']">
         <input name="download_type" type="radio" id="download_[[type]]_radio" data-download-type="[[type]]"/>
@@ -229,18 +311,18 @@
       </p>
     </div>
     <div class="input-field col s6">
-        <input id="download_name" type="text">
+        <input id="download_name" style="margin: 1em;" type="text">
         <label for="download_name">Dataset name</label>
     </div>
     <div class="input-field col s6">
-        <input id="openid_username" type="text">
+        <input id="openid_username" type="text" style="margin: 1em;">
         <label for="openid_username">OpenID username</label>
     </div>
     <div class="input-field col s6">
-        <input id="openid_password" type="password">
+        <input id="openid_password" type="password" style="margin: 1em;">
         <label for="openid_password">OpenID password</label>
     </div>
-    <a href="" class="waves-effect waves-light btn" ng-click="download_dataset()">download</a>
+    <a href="" style="margin-left: 1em;" class="waves-effect waves-light btn" ng-click="download_dataset()">download</a>
   </div>
 
   <div class="modal" id="file_upload_modal" style="overflow: hidden; max-height: 80%;">
@@ -256,9 +338,127 @@
         <label for="upload_name">Upload name</label>
       </div>
       <input type="file" id="file-upload-picker" name="" multiple>
-      <a href="#" class="wave-effect wave-light btn" style="margin: 1em;" ng-click="upload_file()">upload</a>
-
+      <a href="#" class="waves-effect waves-light btn" style="margin: 1em;" ng-click="upload_file()">upload</a>
     </form>
   </div>
+
+  <div class="modal" id="publish_modal" style="max-height: 80%;">
+    <div class="input-field col s6" ng-show="publish_configs">
+      <select>
+        <option ng-repeat="config in publish_configs"> [[ config.name ]] </option>
+      </select>
+      <label> Saved Publication Configurations</label>
+    </div>
+    <div class="input-field col s6" style="margin: 1em;">
+      <input id="publish_config_name" ng-model="publish_config_name" type="text">
+      <label for="publish_config_name">Configuration name</label>
+    </div>
+    <div class="input-field col s6" style="margin: 1em;">
+      <input id="publish_name" type="text">
+      <label for="publish_name">Publication name</label>
+    </div>
+    <div class="input-field col s6" style="margin: 1em;">
+      <input id="org_name" type="text">
+      <label for="org_name">Organization</label>
+    </div>
+    <div class="input-field col s6" style="margin: 1em;">
+      <input id="publication_author_name_first" type="text">
+      <label for="publication_author_name_first">Author first name</label>
+    </div>
+    <div class="input-field col s6" style="margin: 1em;">
+      <input id="publication_author_name_last" type="text">
+      <label for="publication_author_name_last">Author last name</label>
+    </div>
+    <div class="input-field col s6" style="margin: 1em;">
+      <input id="publication_description" type="text">
+      <label for="publication_description">Description</label>
+    </div>
+    <div class="input-field col s6" style="margin: 1em;">
+      <input id="publication_datanode" type="text">
+      <label for="publication_datanode">Datanode</label>
+    </div>
+    <div ng-repeat="facet in facet_list">
+      <div class="input-field col s4" style="margin: 1em;">
+        <input type="text" id="new_facet_name_[[facet]]" 
+              style="margin: 1em 0em 1em 0em;">
+        <label for="new_facet_name_[[facet]]">facet name</label>
+      </div>
+      <div class="input-field col s4" style="margin: 1em;">
+        <input type="text" id="new_facet_value_[[facet]]">
+        <label for="new_facet_value_[[facet]]">facet value</label>
+      </div>
+    </div>
+    <a href="" 
+       class="waves-effect waves-light btn" 
+       ng-click="new_facet()"
+       style="margin: 1em;">
+        new facet
+    </a>
+    <a href="" 
+       class="waves-effect waves-light btn" 
+       ng-click="save_publication_config()"
+       style="margin: 1em 0em 1em 0em;">
+        save configuration
+    </a>
+    <a href="" 
+       class="waves-effect waves-light btn" 
+       ng-click="publish()"
+       style="margin: 1em;">
+        publish [[data_folder]]
+    </a>
+  </div>
+
+  <div class="modal" id="upload_to_viewer_modal">
+    <div class="input-field col s6" style="margin: 1em;">
+      <input id="upload_to_viewer_user" type="text">
+      <label for="upload_to_viewer_user">Viewer username</label>
+    </div>
+    <div class="input-field col s6" style="margin: 1em;">
+      <input id="upload_to_viewer_pass" type="password">
+      <label for="upload_to_viewer_pass">Viewer password</label>
+    </div>
+    <a href="" 
+       class="waves-effect waves-light btn" 
+       ng-click="upload_to_viewer()"
+       style="margin: 1em;">
+        upload [[diag_folder]] to viewer 
+    </a>
+  </div>
+
+  <div class="modal" id="image_view_modal_data_manager" style="width: fit-content; overflow: hidden; max-height: 80%;">
+    <p id="image_title_data_manager" style="text-align: center;"></p>
+    <img id="image_view_data_manager" style="margin: 1vw;" class="" src="" />
+    <div class="" style="display: flex; justify-content: space-between; width: 100%">
+      <div>
+        <a href="#"
+         target="_blank"
+         ng-click="$('#image_view_modal').closeModal()"
+         style="margin: 1vw;"
+         class="waves-effect waves-light btn"
+         id="image_link_data_manager">
+          new window
+       </a>
+      </div>
+      <div>
+        <a href=""
+          style="margin:1vw;"
+          class="waves-effect waves-light btn"
+          id="image_set_favorite_data_manager"
+          ng-click="set_favorite_plot()">
+           favorite
+       </a>
+      </div>
+      <div>
+        <a href="#"
+          style="margin: 1vw;"
+          class="waves-effect waves-light btn"
+          id="image_download_link_data_manager"
+          download>
+           download
+       </a>
+      </div>
+    </div>
+  </div>
+
 
 </div>

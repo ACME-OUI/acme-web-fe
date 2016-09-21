@@ -6,18 +6,23 @@ from poller.models import UserRuns
 import json
 import os
 
-from util.utilities import print_debug, print_message
+from util.utilities import print_debug
+from util.utilities import print_message
+from util.utilities import is_json
 from run_manager.constants import DIAG_OUTPUT_PREFIX
 from run_manager.dispatcher import group_job_update
+from web_fe.models import Notification
 
 
 @csrf_exempt
 def update(request):
     if request.method == 'GET':
         try:
+            print_message(request.GET, 'ok')
             request_type = request.GET.get('request')
             user = request.GET.get('user')
             if not request_type:
+                print_message('No request type given')
                 return HttpResponse(status=400)
 
             # request for all jobs
@@ -35,6 +40,7 @@ def update(request):
                 job_id = request.GET.get('job_id')  # todo: write tests for this
                 return get_job(job_id)
             else:
+                print_message('Unrecognized request type')
                 return HttpResponse(status=400)
 
             return send_data(data)
@@ -49,6 +55,7 @@ def update(request):
     if request.method == 'POST':
         try:
             print_message(request.body)
+            print_message('body: {}'.format(request.body), 'ok')
             data = json.loads(request.body)
             request_type = data.get('request')
             if not request_type:
@@ -100,13 +107,40 @@ def post_update(job_id, data, request_type):
         job = UserRuns.objects.get(id=job_id)
         job.status = request_type
         output = data.get('output')
+        message = ''
+        if is_json(output):
+            message = json.loads(output)
+        else:
+            message = {
+                'text': output
+            }
         # Check if the job finished and has output
         # if it does, write it to the db and an output file
         if output:
             job.output = output
             options = json.loads(job.config_options)
+            run_type = options.get('run_type')
+            print_message('Job finished with output options: {}'.format(options), 'ok')
             request_attr = options.get('request_attr')
-            outputdir = DIAG_OUTPUT_PREFIX + job.user \
+            outputdir = DIAG_OUTPUT_PREFIX + job.user
+            if run_type == 'diagnostic':
+                outputdir += '/diagnostic_output'
+                message['run_type'] = 'diagnostic'
+            elif run_type == 'model':
+                outputdir += '/model_output'
+            elif run_type == 'upload_to_viewer':
+                job.save()
+                message.update(options)
+                print_message('Sending job update with message {}'.format(message), 'ok')
+                group_job_update(job_id, job.user, request_type, optional_message=message)
+                note = Notification.objects.get(user=job.user)
+                note.notification_list += 'job_id:{} type:{} message:{},'.format(job_id, request_type, message)
+                note.save()
+                return HttpResponse()
+            else:
+                print_message('Unrecognized run_type: {}'.format(run_type))
+
+            outputdir = outputdir \
                 + '/' + options.get('run_name') + '_' + str(job_id) \
                 + request_attr.get('outputdir') \
                 + '/' + request_attr.get('diag_type').lower()
@@ -116,8 +150,13 @@ def post_update(job_id, data, request_type):
             with open(outputdir + '/console_output.txt', 'w+') as output_file:
                 output_file.write(' '.join(output))
                 output_file.close()
+
         job.save()
-        group_job_update(job_id, job.user, request_type)
+        print_message('Sending job update with message {}'.format(message))
+        note = Notification.objects.get(user=job.user)
+        note.notification_list += 'job_id:{} type:{} message:{},'.format(job_id, request_type, message)
+        note.save()
+        group_job_update(job_id, job.user, request_type, optional_message=message)
         return HttpResponse(status=200)
     except Exception as e:
         print_debug(e)
@@ -131,6 +170,9 @@ def post_delete(job_id):
         job = UserRuns.objects.get(id=job_id)
         group_job_update(job_id, job.user, 'deleted')
         job.delete()
+        note = Notification.objects.get(user=job.user)
+        note.notification_list += 'job_id:{} deleted,'.format(job_id)
+        note.save()
         return HttpResponse(status=200)
     except Exception as e:
         print_debug(e)
@@ -141,27 +183,51 @@ def post_new(user, data):
     if not user:
         return HttpResponse(status=400)
 
-    config = {}
-    for key in data:
-        value = data.get(key)
-        config.update({key: value})
+    config = data
+    # for key in data:
+    #     value = data.get(key)
+    #     config.update({key: value})
     del config['user']
     del config['request']
-    config = json.dumps(config)
+    run_name = config.get('run_name')
+    if not run_name:
+        print_message('no run name given, using run type {}'.format(config.get('run_type')))
+        run_name = config.get('run_type')
+    config['run_name'] = run_name
+    print_message(config)
+    config_json = json.dumps(config)
+    print_message('new job config: {}'.format(config), 'ok')
     new_run = UserRuns.objects.create(
         status='new',
-        config_options=config,
+        config_options=config_json,
         user=user
     )
     new_run.save()
-    print_message('returning job_id: {}'.format(new_run.id))
+    print_message('returning job_id: {}'.format(new_run.id), 'ok')
     response = json.dumps({
         'job_id': new_run.id,
+        'dataset_id': 0
     })
-    print_message('returning new job response {}'.format(response))
-    res = HttpResponse(response, content_type='application/json')
-    group_job_update(new_run.id, new_run.user, 'new')
-    return res
+    print_message('returning new job response {}'.format(response), 'ok')
+    message = {
+        'run_name': run_name,
+        'run_type': config.get('run_type'),
+        'request_attr': config.get('request_attr')
+    }
+    print_message(message, 'ok')
+    try:
+        note = Notification.objects.get(user=new_run.user)
+        note.notification_list += 'job_id:{} type:{} message:{},'.format(new_run.id, config.get('run_type'), message)
+        note.save()
+    except Exception, e:
+        raise
+    else:
+        pass
+    finally:
+        pass
+
+    group_job_update(new_run.id, new_run.user, 'new', optional_message=message)
+    return HttpResponse(response, content_type='application/json')
 
 
 def post_all(user, status):
@@ -190,6 +256,16 @@ def post_stop(job_id):
         print_debug(e)
         return HttpResponse(status=500)
     group_job_update(job_id, job.user, 'stopped')
+    try:
+        note = Notification.objects.get(user=job.user)
+        note.notification_list += 'job_id:{} message:{},'.format(job.id, 'stopping job')
+        note.save()
+    except Exception, e:
+        raise
+    else:
+        pass
+    finally:
+        pass
     return HttpResponse()
 
 
@@ -242,6 +318,38 @@ def get_all(user=None):
         data = UserRuns.objects.all()
     return data
 
+    try:
+        runs = UserRuns.objects.filter(status='new')
+        if len(runs) == 0:
+            return {}
+        data = runs.earliest()
+        data.status = 'in_progress'
+        data.save()
+    except Exception as e:
+        print_message('Error getting next job from database')
+        print_debug(e)
+        return {}
+    if not data:
+        return {}
+
+    config = json.loads(data.config_options)
+    r = {}
+    r['job_id'] = data.id
+    r['user'] = data.user
+    r.update(config)
+    group_job_update(data.id, data.user, 'in_progress', optional_message=r)
+    try:
+        note = Notification.objects.get(user=data.user)
+        note.notification_list += 'job_id:{} type:{} message:{},'.format(data.id, data.get('run_type'), r)
+        note.save()
+    except Exception, e:
+        raise
+    else:
+        pass
+    finally:
+        pass
+    return r
+
 
 def get_next():
     try:
@@ -263,5 +371,5 @@ def get_next():
     r['job_id'] = data.id
     r['user'] = data.user
     r.update(config)
-    group_job_update(data.id, data.user, 'in_progress')
+    group_job_update(data.id, data.user, 'in_progress', optional_message=r)
     return r

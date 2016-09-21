@@ -12,7 +12,9 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 
-from web_fe.models import TileLayout, Credential
+from web_fe.models import TileLayout
+from web_fe.models import Credential
+from web_fe.models import Notification
 import json
 import simplejson
 import os
@@ -193,7 +195,26 @@ def setup_output_directories(user):
         if not os.path.exists(p):
             print "... creating {}".format(p)
             os.makedirs(p)
+    os.symlink('/export/baldwin32/data/obs_for_diagnostics/', path + '/../../userdata/' + user + '/observations/obs_for_diagnostics')
+    os.symlink('/export/baldwin32/diags/metadiags_test_data/', path + '/../../userdata/' + user + '/model_output/metadiags_test_data')
     return
+
+
+@login_required
+def get_notification_list(request):
+    user = str(request.user)
+    try:
+        note = Notification.objects.get(user=user)
+    except Exception, e:
+        raise
+        return HttpResponse(status=500)
+    else:
+        pass
+    finally:
+        pass
+
+    n_list = note.notification_list.split(',')
+    return HttpResponse(json.dumps(n_list))
 
 
 # Register new user
@@ -222,6 +243,15 @@ def register(request):
                 message = 'User: {} created an account and logged in'.format(username)
                 messages.success(request, message)
                 setup_output_directories(username)
+                note = Notification(user=str(request.user), notification_list='')
+                try:
+                    note.save()
+                except Exception, e:
+                    raise
+                else:
+                    pass
+                finally:
+                    pass
         else:
             print user_form.errors
     else:

@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.test import LiveServerTestCase
 from django.test import Client
 from django.contrib.auth.models import User
+from web_fe.models import Notification
 import json
 import shutil
 import os
@@ -14,6 +15,8 @@ class TestCreateRun(LiveServerTestCase):
 
     def setUp(self):
         self.user = User.objects.create(username='test')
+        self.note = Notification(user='test')
+        self.note.save()
         self.user.set_password('test')
         self.user.save()
         self.c = Client()
@@ -96,9 +99,6 @@ class TestCreateRun(LiveServerTestCase):
         print_message('status code given ' + str(r.status_code), 'error')
         self.assertTrue(r.status_code == 409)
 
-    def test_THSISATEST(self):
-        self.assertTrue(True)
-
     # All these tests should be run from their own test class, but django
     # doesnt want to run them, so instead im putting them here. If I fix this bug
     # they will all be removed
@@ -131,21 +131,15 @@ class TestCreateRun(LiveServerTestCase):
         }
         r = self.c.post(self.live_server_url + '/run_manager/start_run/', data=json.dumps(request), content_type='application/json')
         self.assertTrue(r.status_code == 200)
-
+        print_message(r.content, 'ok')
+        job_id = json.loads(r.content).get('job_id')
         # Now we can stop it
         request = {
             'run_name': 'test_run',
             'request': 'stop_run',
-            'job_id': 7
+            'job_id': job_id
         }
         r = self.c.post(self.live_server_url + '/run_manager/stop_run/', data=json.dumps(request), content_type='application/json')
-        if r.status_code != 200:
-            request = {
-                'run_name': 'test_run',
-                'request': 'stop_run',
-                'job_id': 2
-            }
-            r = self.c.post(self.live_server_url + '/run_manager/stop_run/', data=json.dumps(request), content_type='application/json')
         self.assertTrue(r.status_code == 200)
 
     def test_no_run_name(self):
@@ -173,6 +167,8 @@ class TestStartRun(LiveServerTestCase):
         self.user = User.objects.create(username='test')
         self.user.set_password('test')
         self.user.save()
+        self.note = Notification(user='test')
+        self.note.save()
         self.c = Client()
         self.url = self.live_server_url + '/run_manager/start_run/'
         logged_in = self.c.login(username='test', password='test')
@@ -206,6 +202,8 @@ class TestRunStatus(LiveServerTestCase):
         self.user = User.objects.create(username='test')
         self.user.set_password('test')
         self.user.save()
+        self.note = Notification(user='test')
+        self.note.save()
         self.c = Client()
         self.url = self.live_server_url + '/run_manager/run_status/'
         logged_in = self.c.login(username='test', password='test')
@@ -234,6 +232,10 @@ class TestDeleteRun(LiveServerTestCase):
         self.user2.set_password('test')
         self.user.save()
         self.user2.save()
+        self.note = Notification(user='test')
+        self.note.save()
+        self.note2 = Notification(user='test2')
+        self.note2.save()
         self.c = Client()
         self.c2 = Client()
 
@@ -300,6 +302,8 @@ class TestCreateScript(LiveServerTestCase):
         self.user = User.objects.create(username='test')
         self.user.set_password('test')
         self.user.save()
+        self.note = Notification(user='test')
+        self.note.save()
         self.c = Client()
         logged_in = self.c.login(username='test', password='test')
 
@@ -411,6 +415,8 @@ class TestGetRuns(LiveServerTestCase):
         self.user = User.objects.create(username='test')
         self.user.set_password('test')
         self.user.save()
+        self.note = Notification(user='test')
+        self.note.save()
         self.c = Client()
         logged_in = self.c.login(username='test', password='test')
         self.url = self.live_server_url + '/run_manager/view_runs/'
@@ -445,6 +451,8 @@ class TestUpdateScript(LiveServerTestCase):
         self.user = User.objects.create(username='test')
         self.user.set_password('test')
         self.user.save()
+        self.note = Notification(user='test')
+        self.note.save()
         self.c = Client()
         logged_in = self.c.login(username='test', password='test')
         self.url = self.live_server_url + '/run_manager/'
@@ -615,6 +623,8 @@ class TestReadScript(LiveServerTestCase):
         self.user = User.objects.create(username='test')
         self.user.set_password('test')
         self.user.save()
+        self.note = Notification(user='test')
+        self.note.save()
         self.c = Client()
         logged_in = self.c.login(username='test', password='test')
         self.url = self.live_server_url + '/run_manager/'
@@ -712,6 +722,8 @@ class TestGetScripts(LiveServerTestCase):
         self.user = User.objects.create(username='test')
         self.user.set_password('test')
         self.user.save()
+        self.note = Notification(user='test')
+        self.note.save()
         self.c = Client()
         logged_in = self.c.login(username='test', password='test')
         self.url = self.live_server_url + '/run_manager/'
@@ -847,6 +859,8 @@ class TestStartRun(LiveServerTestCase):
         self.user = User.objects.create(username='test')
         self.user.set_password('test')
         self.user.save()
+        self.note = Notification(user='test')
+        self.note.save()
         self.username = 'test'
         self.c = Client()
         self.c.login(username='test', password='test')
@@ -879,6 +893,8 @@ class TestGetStatus(LiveServerTestCase):
         self.user = User.objects.create(username='test')
         self.user.set_password('test')
         self.user.save()
+        self.note = Notification(user='test')
+        self.note.save()
         self.username = 'test'
         self.c = Client()
         self.c.login(username='test', password='test')
@@ -925,6 +941,8 @@ class TestCopyTemplates(LiveServerTestCase):
         self.user = User.objects.create(username='test')
         self.user.set_password('test')
         self.user.save()
+        self.note = Notification(user='test')
+        self.note.save()
         self.c = Client()
         self.c2 = Client()
         logged_in = self.c.login(username='test', password='test')

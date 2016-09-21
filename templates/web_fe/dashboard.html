@@ -6,6 +6,11 @@
 
 {% csrf_token %}
 
+  <link href="{% static "css/widgets.css" %}"/>
+  <script src="{% static "js/resources/Cesium.js" %}"></script>
+  <script src="{% static "js/resources/cdms.js" %}"></script>
+  <script src="{% static "js/resources/vcs.js" %}"></script>
+
   <!-- Materialize -->
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css">
   <link href="//fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -27,25 +32,25 @@
   <script src="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js"></script>
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular-messages.min.js"></script>
 
-  <script src="{% static "js/resources/ace.js"%}"></script>
-  <script src="{% static "js/resources/mode-scheme.js"%}"></script>
-  <script src="{% static "js/resources/mode-json.js"%}"></script>
-  <script src="{% static "js/resources/ui-ace.min.js"%}"></script>
+  <script src="{% static "js/resources/ace.js" %}"></script>
+  <script src="{% static "js/resources/mode-scheme.js" %}"></script>
+  <script src="{% static "js/resources/mode-json.js" %}"></script>
+  <script src="{% static "js/resources/ui-ace.min.js" %}"></script>
 
   <script src="{% static "js/controllers/app.js" %}"></script>
   <script src="{% static "js/controllers/cdat.js" %}"></script>
   <script src="{% static "js/controllers/data_manager.js" %}"></script>
   <script src="{% static "js/controllers/run_manager.js" %}"></script>
+  <script src="{% static "js/controllers/notification_manager.js" %}"></script>
+
+
 
 
   <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
 
   <!-- Typehead and Bloodhound -->
-  <script src="{% static "js/resources/typeahead.bundle.js"%}"></script>
-  <link rel="stylesheet" href="{% static "css/typeahead.css"%}">
-
-  <!-- CDAT Web css-->
-  <link rel="stylesheet" href="{% static "css/cdat.css" %}">
+  <script src="{% static "js/resources/typeahead.bundle.js" %}"></script>
+  <link rel="stylesheet" href="{% static "css/typeahead.css" %}">
 
   <!-- vtkweb -->
   <!-- <script type="text/javascript" src="{% static "vtkweb/js/autobahn.min.js" %}"></script>
@@ -55,7 +60,7 @@
   <script type="text/javascript">cdat.visualization_launcher = "{{ vis_launcher }}";</script> -->
 
   <!-- Dashboard -->
-  <link rel="stylesheet" href="{% static "css/dashboard.css"%}">
+  <link rel="stylesheet" href="{% static "css/dashboard.css" %}">
   <script type="text/javascript">
     window.ACMEDashboard = {};
   </script>
@@ -64,13 +69,17 @@
 {% endblock %}
 
 {% block layout %}
-  <div class="wrapper" id="layout-wrapper">
+  <!-- ng-app="dashboard" -->
+  <div class="wrapper" id="layout-wrapper" ng-app="dashboard">
     <ul id="menuContainer" style="margin-top: 0px;"></ul>
     <div class="layoutContainer" id="layoutContainer" ng-controller="DashboardControl" ng-init="init()">
       <div class="">
         <template type="text/html" id="cdat_wrapper">
           <div class="cdat_window" ng-controller="CDATControl" ng-init="init()">
-
+            <div>
+              <div id="cesiumContainer"></div>
+            </div>
+            <ng-include src="'{% static 'partials/visualization_manager.html' %}'"></ng-include>
           </div>
         </template>
       </div>
@@ -94,7 +103,14 @@
           </div>
         </template>
       </div>
+      <div class="">
+        <template type="text/html" id="notification_manager_wrapper">
+          <div class="data_manager_window" ng-controller="NotificationControl" ng-init="init()">
+            <ng-include src="'{% static 'partials/notification_manager_window.html' %}'"></ng-include>
+          <div>
+        </template>
+      </div>
     </div>
   </div>
-  <script src="{% static "js/controllers/window.js"%}"></script>
+  <script src="{% static "js/controllers/window.js" %}"></script>
 {% endblock %}

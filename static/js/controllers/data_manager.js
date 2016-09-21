@@ -1,6 +1,6 @@
 (function(){
   angular.module('data_manager', ['ngAnimate', 'ngMaterial'])
-  .controller('DataManagerControl', ['$scope', '$http', '$timeout', '$mdToast', function($scope, $http, $timeout, $mdToast) {
+  .controller('DataManagerControl', function($scope, $http, $timeout, $mdToast) {
 
     /**
      * Slices the object. Note that returns a new spliced object,
@@ -19,6 +19,10 @@
         return sliced;
     }
 
+    $scope.$on('thing', (data) => {
+      console.log(data);
+    })
+
     $scope.showToast = function(message) {
       $mdToast.show(
         $mdToast.simple()
@@ -26,20 +30,121 @@
           .position('center')
           .hideDelay(1200)
       );
-    };  
+    };
+
+    $scope.open_nc = (file, folder, type) => {
+      params = {
+        'filename': file,
+        'folder': folder,
+        'data_type': type
+      }
+      $http({
+        url: '/esgf/read_nc/',
+        method: 'GET',
+        params: params
+      }).then((res)=>{
+        $('#text_edit_modal').openModal();
+        console.log(res);
+        window.ACMEDashboard.ace.setValue(res.data);
+        window.ACMEDashboard.ace.setReadOnly(false);
+        $('#text_edit_save_btn').addClass('disabled');
+      }).catch((res)=>{
+
+      })
+    }  
 
     $scope.set_step = (step) => {
       $scope.step = step;
     }
 
+    $scope.set_favorite_plot = () => {
+      var data = {
+        'user': $scope.$parent.user,
+        'plot': $('#image_download_link').attr('data-plot')
+      }
+      $http({
+        url: '/esgf/set_favorite_plot/',
+        method: 'POST',
+        data: data,
+        headers: {
+          'X-CSRFToken' : $scope.get_csrf(),
+          'Content-Type': 'application/json'
+        }
+      }).then((res) => {
+        $scope.get_favorite_plots();
+      }).catch((res) => {
+
+      })
+    }
+
+    $scope.get_favorite_plots = () => {
+      $http({
+        url: '/esgf/get_favorite_plots/',
+        method: 'GET'
+      }).then((res) => {
+        $scope.favorite_plots = res.data;
+      }).catch((res) => {
+
+      })
+    }
+
+    $scope.open_output = (diag, diag_folder) => {
+      $('#image_view_modal_data_manager').openModal();
+      $scope.open_image(diag_folder, diag);
+    }
+
+    $scope.get_src = (index) => {
+      var prefix = '/acme/userdata/image/userdata/' + window.ACMEDashboard.user + '/diagnostic_output/';
+      var src = prefix + $scope.diag_folder + '/diagnostic_output/amwg/' + $scope.diag_cache[$scope.diag_folder][index];
+      return src;
+    }
+
+    $scope.open_image = (run, image) => {
+      $scope.diag_folder = run;
+      $scope.show_image = true;
+      $scope.image_index = $scope.diag_cache[run].indexOf(image);
+      var src = $scope.get_src($scope.image_index);
+      var image_viewer = $('#image_view_data_manager');
+      var image_link = $('#image_link_data_manager');
+      $('#image_title_data_manager').text(image);
+      image_link.attr({
+        'href': src
+      });
+      $('#image_download_link').attr({
+        'href': src,
+        'download': image,
+        'data-plot': $scope.diag_cache[$scope.diag_folder][$scope.image_index]
+      });
+      image_viewer.attr({
+        'src': src
+      });
+    }
+
+    $scope.publish_modal = (data_folder) => {
+      $scope.data_folder = data_folder;
+      $('#publish_modal').openModal();
+      $http({
+        url: '/esgf/get_publish_config_list/',
+        method: 'GET'
+      }).then((res) => {
+        console.log(res.data);
+        $scope.publish_configs = res.data;
+      }).catch((res) => {
+        console.log('Error retrieving publication config list');
+      });
+    }
+
     $scope.init = () => {
-      console.log('[+] Initializing Data Manager window');
+      console.log('[+] Initializing Data Manager window parent scope.id = ' + $scope.$parent.$id);
       $scope.setup_socket();
       $scope.step = -1;
       $scope.selected_nodes = undefined;
       $scope.ready = false; 
       $scope.datapath = false;
       $scope.facet_options = undefined;
+      $scope.publish_configs = undefined;
+      $scope.facet_list = [0];
+      $scope.new_facet_count = 1;
       $scope.searchTerms = {};
       $scope.datasets = {};
       $scope.current_facet = {};
@@ -50,12 +155,102 @@
       $scope.userdata = {};
       $scope.get_user();
       $scope.get_node_list();
+      $scope.publish_config_name = 'adsf';
+      $scope.diag_limit = 20;
+      $scope.obs_limit = 20;
       $timeout(() => {
         $scope.get_user_data();
         $('.collapsible').collapsible({
           accordion : false
         });
-      }, 200);
+      }, 500);
+    }
+
+        // The modes
+    $scope.modes = ['json'];
+    $scope.mode = $scope.modes[0];
+
+    // The ui-ace option
+    $scope.aceOption = {
+      mode: $scope.mode.toLowerCase(),
+      onLoad: function (_ace) {
+        window.ACMEDashboard.ace = _ace;
+        $scope.modeChanged = function () {
+          _ace.getSession().setMode("ace/mode/" + $scope.mode.toLowerCase());
+        };
+
+      },
+      onChange: function(_ace){
+        $scope.aceModel = _ace[1].getValue();
+      }
+    };
+
+    $scope.new_facet = () => {
+      $scope.facet_list.push($scope.new_facet_count++);
+    }
+
+    $scope.upload_to_viewer_trigger = (diag_folder) => {
+      $scope.diag_folder = diag_folder;
+      $('#upload_to_viewer_modal').openModal();
+    }
+
+    $scope.upload_to_viewer = () => {
+      var data = {
+        'run_name': $scope.diag_folder,
+        'username': $('#upload_to_viewer_user').val(),
+        'password': $('#upload_to_viewer_pass').val(),
+        'server': 'http://pcmdi10.llnl.gov:8008/'
+      }
+      $http({
+        url: '/esgf/upload_to_viewer/',
+        method: 'POST',
+        data: data,
+        headers: {
+          'X-CSRFToken' : $scope.get_csrf(),
+          'Content-Type': 'application/json'
+        }
+      }).then((res) => {
+        console.log(res.data);
+        $('#upload_to_viewer_modal').closeModal();
+        $scope.showToast('Upload added to run queue');
+      }).catch((res) => {
+        console.log(res.data);
+        $('#upload_to_viewer_modal').closeModal();
+        $scope.showToast('Failed to upload to viewer');
+      });
+    }
+
+    $scope.save_publication_config = () => {
+      var params = {
+        'config_name': $('#publish_config_name').val(),
+        'metadata': {
+          'organization': $('#org_name').val(),
+          'firstname': $('#publication_author_name_first').val(),
+          'lastname': $('#publication_author_name_last').val(),
+          'description': $('#publication_description').val(),
+          'datanode': $('#publication_datanode').val(),
+        },
+        'facet': []
+      }
+      $.each($scope.facet_list, (i, val) => {
+        params['facet'].push({
+          'name': $('#new_facet_name_' + i).val(),
+          'value': $('#new_facet_value_' + i).val()
+        });
+      });
+      $http({
+        url: '/esgf/save_publish_config/',
+        method: 'POST',
+        data: params,
+        headers: {
+          'X-CSRFToken' : $scope.get_csrf(),
+          'Content-Type': 'application/json'
+        }
+      }).then((res) => {
+
+      }).catch((res) => {
+
+      })
     }
 
     $scope.get_csrf = () => {
@@ -117,6 +312,19 @@
       if(!window.ACMEDashboard.socket){
         window.ACMEDashboard.socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + window.location.pathname);
       }
+      window.ACMEDashboard.notificaiton_list = window.ACMEDashboard.notificaiton_list || [];
+      window.ACMEDashboard.socket_handlers = window.ACMEDashboard.socket_handlers || {};
+      window.ACMEDashboard.socket_handlers.esgf_download_status = (data) => {
+        $scope.$apply(() => {
+          console.log('got a status update');
+          console.log(data);
+          $scope.downloads = $scope.downloads || {};
+          $scope.downloads[data.data_name] = $scope.downloads[data.data_name] || {}; 
+          $scope.downloads[data.data_name]['percent_complete'] = data.percent_complete.toFixed(2);
+          $scope.downloads[data.data_name]['data_name'] = data.data_name;
+          $scope.downloads[data.data_name]['message'] = data.message;
+        });
+      }
       window.ACMEDashboard.socket.onopen = function() {
         message = JSON.stringify({
           'target_app': 'run_manager',
@@ -127,22 +335,16 @@
       }
       window.ACMEDashboard.socket.onmessage = (message) => {
         var data = JSON.parse(message.data);
-        if(data.user != $scope.user){
+        if(data.user != window.ACMEDashboard.user){
           return;
         }
-        switch (data.destination) {
-          case 'esgf_download_status':
-            console.log('got a status update');
-            console.log(data);
-            $scope.downloads = $scope.downloads || {};
-            $scope.downloads[data.data_name] = $scope.downloads[data.data_name] || {}; 
-            $scope.downloads[data.data_name]['percent_complete'] = data.percent_complete.toFixed(2);
-            $scope.downloads[data.data_name]['data_name'] = data.data_name;
-            $scope.downloads[data.data_name]['message'] = data.message;
-            $scope.$apply();
-            break;
-          default:
-
+        for (key in window.ACMEDashboard.socket_handlers){
+          if(!window.ACMEDashboard.socket_handlers.hasOwnProperty(key)){
+            continue;
+          }
+          if(key == data.destination){
+            window.ACMEDashboard.socket_handlers[key](data);
+          }
         }
       }
     }
@@ -168,18 +370,25 @@
         'percent_complete': 0
       };      
       $('#download_modal').closeModal();
+      $scope.step = -1;
     }
 
-    $scope.get_user = () => {
+    $scope.get_user = (callback) => {
       $http({
         url: '/run_manager/get_user',
         method: 'GET'
       }).then((res) => {
         $scope.user = res.data
         $scope.get_user_data();
+        if(callback){
+          callback();
+        }
       }).catch((res) => {
         console.log('Error getting user');
         console.log(res);
+        if(callback){
+          callback();
+        }
       });
     }
 
@@ -195,16 +404,27 @@
         url: '/esgf/get_user_data'
       }).then((res) => {
         console.log(res.data);
-        $scope.all_userdata = res.data[$scope.user]
-        $scope.userdata['model_output'] = Object.keys($scope.all_userdata.model_output);
-        $scope.userdata['diagnostic_output'] = Object.keys($scope.all_userdata.diagnostic_output);
-        $scope.userdata['observations'] = Object.keys($scope.all_userdata.observations);
-        $scope.obs_cache = undefined;
-        $scope.diag_cache = undefined;
-        $scope.model_cache = undefined;
+        if($scope.user){
+          $scope.set_alldata(res.data[$scope.user]);
+        } else {
+          $scope.get_user(() => {
+            $scope.set_alldata(res.data[$scope.user]);
+          });
+        }
       }).catch((res) => {
         console.log(res.data);
-      })
+      });
+    }
+
+    $scope.set_alldata = (data) => {
+      $scope.all_userdata = data;
+      $scope.userdata['model_output'] = Object.keys($scope.all_userdata.model_output);
+      $scope.userdata['diagnostic_output'] = Object.keys($scope.all_userdata.diagnostic_output);
+      $scope.userdata['observations'] = Object.keys($scope.all_userdata.observations);
+      $scope.obs_cache = undefined;
+      $scope.diag_cache = undefined;
+      $scope.model_cache = undefined;
+      $scope.get_favorite_plots();
     }
 
     $scope.load_obs_cache = (obs_folder) => {
@@ -216,8 +436,14 @@
       $scope.model_cache[model_folder] = Object.keys($scope.all_userdata['model_output'][model_folder]);
     }
     $scope.load_diag_cache = (diag_folder) => {
-      $scope.diag_cache = $scope.diag_cache || {};
+      $scope.diag_cache = $scope.diag_cache || {};      $scope.diag_limit = 20;
       $scope.diag_cache[diag_folder] = Object.keys($scope.all_userdata['diagnostic_output'][diag_folder]['diagnostic_output']['amwg']);
+    }
+    $scope.increase_diag_limit = () => {
+      $scope.diag_limit += 20;
+    }
+    $scope.increase_obs_limit = () => {
+      $scope.obs_limit += 20;
     }
 
     $scope.search = () => {
@@ -389,7 +615,7 @@
         $scope.showToast('Error retrieving facet options');
       });
     }
-  }])
+  })
   .config(function($interpolateProvider) {
     $interpolateProvider.startSymbol('[[');
     return $interpolateProvider.endSymbol(']]');
