@@ -265,7 +265,7 @@ class TestBehavior(LiveServerTestCase):
         '''
          Test the queue gives jobs back in the correct order
         '''
-        #first seed the db with two jobs
+        # first seed the db with two jobs
         payload = {
             'request': 'new',
             'user': 'test',
@@ -296,28 +296,20 @@ class TestBehavior(LiveServerTestCase):
         payload1 = {'request': 'next'}
         r1 = self.c.get(self.live_server_url + '/poller/update/', data=payload1, content_type='application/json')
         self.assertTrue(r1.status_code == 200)
-        oldid = json.loads(r1.content)['job_id']
-
+        oldid = json.loads(r1.content).get('job_id')
         # finished getting first user run
+
         payload2 = {'request': 'complete', 'job_id': oldid}
-        r2 = self.c.post(self.live_server_url + '/poller/update/', data=payload2, content_type='application/json')
+        r2 = self.c.post(self.live_server_url + '/poller/update/', data=json.dumps(payload2), content_type='application/json')
         self.assertTrue(r2.status_code == 200)
         # finished updated the run's status
+
         r3 = self.c.get(self.live_server_url + '/poller/update/', data=payload1, content_type='application/json')
         self.assertTrue(r3.status_code == 200)
         # r3 run should be a different id
+
         newid = json.loads(r3.content)['job_id']
         self.assertNotEqual(oldid, newid)
-
-    # def test_next_repeat(self):
-    #     payload = {'request': 'next'}
-    #     r = requests.get(self.live_server_url + '/poller/update/', data=payload)
-    #     datanew = json.loads(r.content)
-    #     for i in range(20):
-    #         dataold = datanew
-    #         r = requests.get(self.live_server_url + '/poller/update/', data=payload)
-    #         datanew = json.loads(r.content)
-    #         self.assertTrue(dataold['job_id'] == datanew['job_id'])
 
     def test_get_bad_request(self):
         payload = {'request': 'bad_parameter', 'job_id': 1, 'status': 'complete'}

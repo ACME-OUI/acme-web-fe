@@ -285,6 +285,7 @@ def publish(request):
         'esgf_password',
         'path',
         'facets',
+        'debug'
     ]
     params = check_params(json.loads(request.body), expected_params)
     # print_message(params)
@@ -378,6 +379,8 @@ def publish(request):
             })
     print_message(client_config)
     print_message(submission_config)
+    if params.get('debug'):
+        return HttpResponse()
     client = IngestionClient(client_config)
     if client is None:
         print_message('Unable to create connection with ESGF ingestion service')

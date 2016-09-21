@@ -84,6 +84,7 @@ class TestPublishConfig(LiveServerTestCase):
             'server': 'some.server.somewhere.gov',
             'esgf_user': 'Tester',
             'esgf_password': 'McTesterson',
+            'debug': True
         })
         r = self.c.post(publish_url, config, content_type='application/json')
         self.assertTrue(r.status_code == 200)
@@ -91,6 +92,7 @@ class TestPublishConfig(LiveServerTestCase):
     def test_publish_no_config(self):
         publish_url = self.live_server_url + '/esgf/publish/'
         params = json.loads(self.params)
+        params['debug'] = True
         del params['config_name']
         params = json.dumps(params)
         r = self.c.post(publish_url, params, content_type='application/json')
