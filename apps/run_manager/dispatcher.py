@@ -1,7 +1,3 @@
-# {   u'content': u'hello world!',
-#     u'destination': u'init',
-#     u'target_app': u'run_manager'}
-# from poller.views import update as poller_update
 from util.utilities import print_message
 from channels import Group
 import json

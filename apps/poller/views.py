@@ -18,7 +18,6 @@ from web_fe.models import Notification
 def update(request):
     if request.method == 'GET':
         try:
-            print_message(request.GET, 'ok')
             request_type = request.GET.get('request')
             user = request.GET.get('user')
             if not request_type:
@@ -111,9 +110,7 @@ def post_update(job_id, data, request_type):
         if is_json(output):
             message = json.loads(output)
         else:
-            message = {
-                'text': output
-            }
+            message = {}
         # Check if the job finished and has output
         # if it does, write it to the db and an output file
         if output:
@@ -125,7 +122,10 @@ def post_update(job_id, data, request_type):
             outputdir = DIAG_OUTPUT_PREFIX + job.user
             if run_type == 'diagnostic':
                 outputdir += '/diagnostic_output'
-                message['run_type'] = 'diagnostic'
+                message = {
+                    'run_type': 'diagnostic',
+                    'run_name': options.get('run_name'),
+                }
             elif run_type == 'model':
                 outputdir += '/model_output'
             elif run_type == 'upload_to_viewer':
@@ -152,7 +152,7 @@ def post_update(job_id, data, request_type):
                 output_file.close()
 
         job.save()
-        print_message('Sending job update with message {}'.format(message))
+        print_message('Sending job update with message {}'.format(message), 'ok')
         note = Notification.objects.get(user=job.user)
         note.notification_list += 'job_id:{} type:{} message:{},'.format(job_id, request_type, message)
         note.save()

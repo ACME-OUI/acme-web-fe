@@ -63,7 +63,7 @@
                     <label for="diag_query_field">filter</label>
                   </div>
                   <li ng-repeat="diag in diag_cache[diag_folder] | orderBy:diag | filter:diag_query | limitTo:diag_limit">
-                    <span ng-if="diag.endsWith('.png')"> 
+                    <span ng-if="diag.endsWith('.png') || diag.endsWith('.svg')"> 
                       <a href="" 
                          ng-click="open_output(diag, diag_folder)" 
                          style="padding: 0.5rem; margin-left: 3vw;">
@@ -77,7 +77,14 @@
                           [[ diag ]]
                       </a>
                     </span>
-                    <span ng-if="!diag.endsWith('.png') && !diag.endsWith('.nc')" 
+                    <span ng-if="diag.endsWith('.pdf')"> 
+                      <a href="" 
+                         ng-click="open_pdf(diag, diag_folder, 'diagnostic')" 
+                         style="padding: 0.5rem; margin-left: 3vw;">
+                          [[ diag ]]
+                      </a>
+                    </span>
+                    <span ng-if="!diag.endsWith('.png') && !diag.endsWith('.nc') && !diag.endsWith('.svg') && !diag.endsWith('.pdf')" 
                           style="padding: 0.5rem; margin-left: 3vw;">
                            [[ diag ]]
                     </span>
@@ -427,7 +434,16 @@
 
   <div class="modal" id="image_view_modal_data_manager" style="width: fit-content; overflow: hidden; max-height: 80%;">
     <p id="image_title_data_manager" style="text-align: center;"></p>
-    <img id="image_view_data_manager" style="margin: 1vw;" class="" src="" />
+    <img ng-show="image_type == 'image'" 
+         id="image_view_data_manager" 
+         style="margin: 1vw;" 
+         class="" 
+         src="" />
+    <object ng-show="image_type == 'pdf'" 
+            id="pdf_view_data_manager" 
+            style="margin: 1vw; width:70vw; height: 60vh;" 
+            data=""
+            type='application/pdf'></object>
     <div class="" style="display: flex; justify-content: space-between; width: 100%">
       <div>
         <a href="#"

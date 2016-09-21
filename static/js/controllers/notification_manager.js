@@ -40,13 +40,22 @@
 
     $scope.open_output = (notification) => {
       var text = '';
-      $.each(notification.optional_message.text, (i, v) => {
-        text += v;
-      })
-      $('#text_edit_modal').openModal();
-      window.ACMEDashboard.ace.setValue(text);
-      window.ACMEDashboard.ace.setReadOnly(true);
-      $('#text_edit_save_btn').addClass('disabled');
+      var params = {
+        'script_name': 'console_output.txt',
+        'run_name': notification.message.run_name,
+        'job_id': notification.job_id
+      }
+      $http({
+        url: '/run_manager/read_output_script/',
+        method: 'GET'
+      }).then((res) => {
+        $('#text_edit_modal').openModal();
+        window.ACMEDashboard.ace.setValue(text);
+        window.ACMEDashboard.ace.setReadOnly(true);
+        $('#text_edit_save_btn').addClass('disabled');
+      }).catch((res) => {
+
+      });
     }
 
     $scope.setup_socket = () => {

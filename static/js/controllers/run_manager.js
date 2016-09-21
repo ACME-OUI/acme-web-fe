@@ -223,6 +223,7 @@
         $scope.modeChanged = function () {
           _ace.getSession().setMode("ace/mode/" + $scope.mode.toLowerCase());
         };
+        _ace.$blockScrolling = Infinity;
 
       },
       onChange: function(_ace){
