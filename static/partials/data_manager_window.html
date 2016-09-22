@@ -64,7 +64,7 @@
                   </div>
                   <li ng-repeat="diag in diag_cache[diag_folder] | orderBy:diag | filter:diag_query | limitTo:diag_limit">
                     <span ng-if="diag.endsWith('.png') || diag.endsWith('.svg')"> 
-                      <a href="" 
+                      <a href=""
                          ng-click="open_output(diag, diag_folder)" 
                          style="padding: 0.5rem; margin-left: 3vw;">
                           [[ diag ]]

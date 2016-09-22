@@ -233,7 +233,6 @@
 
     $scope.set_run_status = (data) => {
       for(obj in data){
-        //$scope.set_status_text(data[obj].status, data[obj].run_name);
         $scope.set_status_text(data[obj].status, data[obj].job_id + "_queue");
       }
     }
