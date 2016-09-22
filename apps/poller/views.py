@@ -134,7 +134,13 @@ def post_update(job_id, data, request_type):
                 print_message('Sending job update with message {}'.format(message), 'ok')
                 group_job_update(job_id, job.user, request_type, optional_message=message)
                 note = Notification.objects.get(user=job.user)
-                note.notification_list += 'job_id:{} type:{} message:{},'.format(job_id, request_type, message)
+                new_notification = json.dumps({
+                    'job_id': job_id,
+                    'run_type': run_type,
+                    'optional_message': message,
+                    'status': request_type
+                })
+                note.notification_list += new_notification + ' -|- '
                 note.save()
                 return HttpResponse()
             else:
@@ -154,7 +160,13 @@ def post_update(job_id, data, request_type):
         job.save()
         print_message('Sending job update with message {}'.format(message), 'ok')
         note = Notification.objects.get(user=job.user)
-        note.notification_list += 'job_id:{} type:{} message:{},'.format(job_id, request_type, message)
+        new_notification = json.dumps({
+            'job_id': job_id,
+            'run_type': run_type,
+            'optional_message': message,
+            'status': request_type
+        })
+        note.notification_list += new_notification + ' -|- '
         note.save()
         group_job_update(job_id, job.user, request_type, optional_message=message)
         return HttpResponse(status=200)
@@ -169,10 +181,19 @@ def post_delete(job_id):
     try:
         job = UserRuns.objects.get(id=job_id)
         group_job_update(job_id, job.user, 'deleted')
-        job.delete()
         note = Notification.objects.get(user=job.user)
-        note.notification_list += 'job_id:{} deleted,'.format(job_id)
+        new_notification = json.dumps({
+            'job_id': job_id,
+            'run_type': 'delete',
+            'optional_message': {
+                'run_name': job.get('run_name'),
+                'run_type': job.get('run_type')
+            },
+            'status': 'deleted'
+        })
+        note.notification_list += new_notification + ' -|- '
         note.save()
+        job.delete()
         return HttpResponse(status=200)
     except Exception as e:
         print_debug(e)
@@ -217,7 +238,13 @@ def post_new(user, data):
     print_message(message, 'ok')
     try:
         note = Notification.objects.get(user=new_run.user)
-        note.notification_list += 'job_id:{} type:{} message:{},'.format(new_run.id, config.get('run_type'), message)
+        new_notification = json.dumps({
+            'job_id': new_run.id,
+            'run_type': config.get('run_type'),
+            'optional_message': message,
+            'status': 'new'
+        })
+        note.notification_list += new_notification + ' -|- '
         note.save()
     except Exception, e:
         raise
@@ -258,7 +285,16 @@ def post_stop(job_id):
     group_job_update(job_id, job.user, 'stopped')
     try:
         note = Notification.objects.get(user=job.user)
-        note.notification_list += 'job_id:{} message:{},'.format(job.id, 'stopping job')
+        new_notification = json.dumps({
+            'job_id': job_id,
+            'run_type': 'stop',
+            'optional_message': {
+                'run_name': job.get('run_name'),
+                'run_type': job.get('run_type')
+            },
+            'status': 'stopped'
+        })
+        note.notification_list += new_notification + ' -|- '
         note.save()
     except Exception, e:
         raise
@@ -340,7 +376,13 @@ def get_all(user=None):
     group_job_update(data.id, data.user, 'in_progress', optional_message=r)
     try:
         note = Notification.objects.get(user=data.user)
-        note.notification_list += 'job_id:{} type:{} message:{},'.format(data.id, data.get('run_type'), r)
+        new_notification = json.dumps({
+            'job_id': data.get('id'),
+            'run_type': data.get('run_type'),
+            'optional_message': r,
+            'status': data.get('status')
+        })
+        note.notification_list += new_notification + ' -|- '
         note.save()
     except Exception, e:
         raise
@@ -372,4 +414,20 @@ def get_next():
     r['user'] = data.user
     r.update(config)
     group_job_update(data.id, data.user, 'in_progress', optional_message=r)
+    try:
+        note = Notification.objects.get(user=data.user)
+        new_notification = json.dumps({
+            'job_id': data.id,
+            'run_type': r.get('run_type'),
+            'optional_message': r,
+            'status': 'in_progress'
+        })
+        note.notification_list += new_notification + ' -|- '
+        note.save()
+    except Exception, e:
+        raise
+    else:
+        pass
+    finally:
+        pass
     return r

@@ -32,9 +32,18 @@
         url: '/acme/get_notification_list/',
         method: 'GET'
       }).then((res) => {
-        $scope.notificaiton_list = res.data;
+        var list = res.data;
+        $.each(list, (i, v) => {
+          if(v == ' '){
+            return;
+          }
+          var note = JSON.parse(v);
+          $scope.notification_list.push(note);
+        });
       }).catch((res) => {
         console.log('error retrieving notification list from server')
+      }).then(() => {
+        console.log($scope.notification_list)
       })
     }
 
@@ -42,13 +51,15 @@
       var text = '';
       var params = {
         'script_name': 'console_output.txt',
-        'run_name': notification.message.run_name,
+        'run_name': notification.optional_message.run_name,
         'job_id': notification.job_id
       }
       $http({
         url: '/run_manager/read_output_script/',
-        method: 'GET'
+        method: 'GET',
+        params: params
       }).then((res) => {
+        text = res.data.script;
         $('#text_edit_modal').openModal();
         window.ACMEDashboard.ace.setValue(text);
         window.ACMEDashboard.ace.setReadOnly(true);

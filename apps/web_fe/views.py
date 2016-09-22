@@ -213,7 +213,10 @@ def get_notification_list(request):
     finally:
         pass
 
-    n_list = note.notification_list.split(',')
+    n_list = note.notification_list.split('-|-')
+    import pprint
+    pp = pprint.PrettyPrinter(indent=4)
+    pp.pprint(n_list)
     return HttpResponse(json.dumps(n_list))
 
 
