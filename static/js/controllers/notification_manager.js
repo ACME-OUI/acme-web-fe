@@ -38,13 +38,30 @@
             return;
           }
           var note = JSON.parse(v);
-          $scope.notification_list.push(note);
+          $scope.list_insert(note);
         });
       }).catch((res) => {
         console.log('error retrieving notification list from server')
       }).then(() => {
         console.log($scope.notification_list)
       })
+    }
+
+    $scope.list_insert = (note) => {
+      var inserted = false;
+      for(var key in $scope.notification_list){
+        let value = $scope.notification_list[key];
+        if(value.job_id == note.job_id){
+          value.list.push(note);
+          inserted = true;
+        }
+      }
+      if(!inserted){
+        $scope.notification_list.push({
+          'job_id': note.job_id,
+          'list': [note]
+        });
+      }
     }
 
     $scope.open_output = (notification) => {
@@ -80,7 +97,7 @@
         $scope.$apply(() => {
           console.log('got a notication');
           console.log(data);
-          $scope.notification_list.push(data);
+          $scope.list_insert(data);
         })
       }
 
