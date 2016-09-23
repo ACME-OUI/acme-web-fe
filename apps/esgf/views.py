@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-from models import ESGFNode
+# from models import ESGFNode
 from models import PublishConfig
 from models import FavoritePlot
 
@@ -98,7 +98,7 @@ def logon(request):
     try:
         lm.logon_with_openid(credential['username'], credential['password'], bootstrap=bootstrap)
     except Exception as e:
-        print_debug(e)
+        print_message('Unable to log in user {}'.format(credential.get('username')))
         return HttpResponse(status=403)
     if lm.is_logged_on():
         return HttpResponse(status=200)

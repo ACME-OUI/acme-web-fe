@@ -88,6 +88,29 @@
       })
     }
 
+    $scope.open_pdf = (diag, diag_folder) => {
+      $scope.image_type = 'pdf';
+      $scope.diag_folder = diag_folder;
+      $scope.show_image = true;
+      $scope.image_index = $scope.diag_cache[diag_folder].indexOf(diag);
+      var src = $scope.get_src($scope.image_index);
+      var image_viewer = $('#pdf_view_data_manager');
+      var image_link = $('#image_link_data_manager');
+      $('#image_title_data_manager').text(diag);
+      image_link.attr({
+        'href': src
+      });
+      $('#image_download_link_data_manager').attr({
+        'href': src,
+        'download': diag,
+        'data-plot': $scope.diag_cache[$scope.diag_folder][$scope.image_index]
+      });
+      image_viewer.attr({
+        'data': src
+      });
+      $('#image_view_modal_data_manager').openModal();
+    }
+
     $scope.open_output = (diag, diag_folder) => {
       $('#image_view_modal_data_manager').openModal();
       $scope.open_image(diag_folder, diag);
@@ -100,6 +123,7 @@
     }
 
     $scope.open_image = (run, image) => {
+      $scope.image_type = 'image';
       $scope.diag_folder = run;
       $scope.show_image = true;
       $scope.image_index = $scope.diag_cache[run].indexOf(image);
@@ -110,7 +134,7 @@
       image_link.attr({
         'href': src
       });
-      $('#image_download_link').attr({
+      $('#image_download_link_data_manager').attr({
         'href': src,
         'download': image,
         'data-plot': $scope.diag_cache[$scope.diag_folder][$scope.image_index]

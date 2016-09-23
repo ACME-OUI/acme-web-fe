@@ -1,32 +1,51 @@
 <div style="margin: 1em;">
-    <ul class="collection">
-        <li class="collection-item" ng-repeat="n in notification_list">
-            <span ng-if="n.status == 'in_progress'" style="vertical-align:middle;">
-                <i class="material-icons" style="vertical-align:middle;">loop</i>
-                [[ n.optional_message.run_type]] is in progress
-            </span>
-            <span ng-if="n.status == 'complete'" style="vertical-align:middle;">
-                <i class="material-icons" style="vertical-align:middle;">done</i>
-                [[ n.optional_message.run_type]] complete
-                <a ng-href="[[n.optional_message.request_attr.server]]?dataset=[[n.optional_message.dataset_id]]"
-                   ng-if="n.optional_message.run_type == 'upload_to_viewer'"
-                   target="_blank">
-                    open in viewer
-                </a>
-                <a ng-href="#"
-                   ng-if="n.optional_message.run_type == 'diagnostic'"
-                   ng-click="open_output(n)">
-                    console output
-                </a>
-            </span>
-            <span ng-if="n.status == 'new' && n.optional_message.run_type == 'upload_to_viewer'">
-                <i class="material-icons" style="vertical-align:middle;">input</i>
-                Upload to diagnostic viewer submitted
-            </span>
-            <span ng-if="n.status == 'new' && n.optional_message.run_type == 'diagnostic'">
-                <i class="material-icons" style="vertical-align:middle;">input</i>
-                Diagnostic job submitted
-            </span>
+    <ul class="collapsible" data-collapsible="accordion">
+        <li ng-repeat="n in notification_list | orderBy:'-'">
+            <div class="collapsible-header">
+                <span>[[ n.job_id ]]</span>
+                <span ng-if="n.list.last().status == 'in_progress'">
+                    <i class="material-icons" style="vertical-align:middle;">loop</i>
+                </span>
+                <span ng-if="n.list.last().status == 'complete'">
+                    <i class="material-icons" style="vertical-align:middle;">done</i>
+                </span>
+                <span ng-if="n.list.last().status == 'new'">
+                    <i class="material-icons" style="vertical-align:middle;">input</i>
+                </span>
+                <span>[[ n.list.last().status ]]</span>
+            </div>
+            <div class="collapsible-body">
+                <ul class="collection">
+                    <li ng-repeat="note in n.list" style="padding: 0.5rem; margin-left: 3vw;">
+                        <span ng-if="note.status == 'in_progress'" style="vertical-align:middle;">
+                            <span ng-if="note.timestamp"> [[ note.timestamp ]] </span>
+                            [[ note.optional_message.run_type]] is in progress
+                        </span>
+                        <span ng-if="note.status == 'complete'" style="vertical-align:middle;">
+                            <span ng-if="note.timestamp"> [[ note.timestamp ]] </span>
+                            [[ note.optional_message.run_type]] complete
+                            <a ng-href="[[note.optional_message.request_attr.server]]?dataset=[[note.optional_message.dataset_id]]"
+                               ng-if="note.last().optional_message.run_type == 'upload_to_viewer'"
+                               target="_blank">
+                                open in viewer
+                            </a>
+                            <a ng-href="#"
+                               ng-if="note.optional_message.run_type == 'diagnostic'"
+                               ng-click="open_output(note)">
+                                open console output
+                            </a>
+                        </span>
+                        <span ng-if="note.status == 'new' && note.optional_message.run_type == 'upload_to_viewer'">
+                            <span ng-if="note.timestamp"> [[ note.timestamp ]] </span>
+                            Upload to diagnostic viewer submitted
+                        </span>
+                        <span ng-if="note.status == 'new' && note.optional_message.run_type == 'diagnostic'">
+                            <span ng-if="note.timestamp"> [[ note.timestamp ]] </span>
+                            Diagnostic job submitted
+                        </span>
+                    </li>
+                </ul>
+            </div>
         </li>
     </ul>
 </div>

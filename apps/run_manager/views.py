@@ -528,6 +528,7 @@ def read_output_script(request):
     run_name = request.GET.get('run_name')
     user = str(request.user)
     job_id = str(request.GET.get('job_id'))
+    print_message(request.GET, 'ok')
     if not script_name:
         print_message('No script name given', 'error')
         return HttpResponse(status=400)

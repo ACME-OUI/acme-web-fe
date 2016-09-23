@@ -32,21 +32,58 @@
         url: '/acme/get_notification_list/',
         method: 'GET'
       }).then((res) => {
-        $scope.notificaiton_list = res.data;
+        var list = res.data;
+        $.each(list, (i, v) => {
+          if(v == ' '){
+            return;
+          }
+          var note = JSON.parse(v);
+          $scope.list_insert(note);
+        });
       }).catch((res) => {
         console.log('error retrieving notification list from server')
+      }).then(() => {
+        console.log($scope.notification_list)
       })
+    }
+
+    $scope.list_insert = (note) => {
+      var inserted = false;
+      for(var key in $scope.notification_list){
+        let value = $scope.notification_list[key];
+        if(value.job_id == note.job_id){
+          value.list.push(note);
+          inserted = true;
+        }
+      }
+      if(!inserted){
+        $scope.notification_list.push({
+          'job_id': note.job_id,
+          'list': [note]
+        });
+      }
     }
 
     $scope.open_output = (notification) => {
       var text = '';
-      $.each(notification.optional_message.text, (i, v) => {
-        text += v;
-      })
-      $('#text_edit_modal').openModal();
-      window.ACMEDashboard.ace.setValue(text);
-      window.ACMEDashboard.ace.setReadOnly(true);
-      $('#text_edit_save_btn').addClass('disabled');
+      var params = {
+        'script_name': 'console_output.txt',
+        'run_name': notification.optional_message.run_name,
+        'job_id': notification.job_id
+      }
+      $http({
+        url: '/run_manager/read_output_script/',
+        method: 'GET',
+        params: params
+      }).then((res) => {
+        text = res.data.script;
+        $('#text_edit_modal').openModal();
+        window.ACMEDashboard.ace.setValue(text);
+        window.ACMEDashboard.ace.setReadOnly(true);
+        $('#text_edit_save_btn').addClass('disabled');
+      }).catch((res) => {
+
+      });
     }
 
     $scope.setup_socket = () => {
@@ -60,7 +97,7 @@
         $scope.$apply(() => {
           console.log('got a notication');
           console.log(data);
-          $scope.notification_list.push(data);
+          $scope.list_insert(data);
         })
       }
 
