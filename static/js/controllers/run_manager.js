@@ -336,7 +336,11 @@
             }
           }
         } else {
-          $scope.all_runs = runs;
+          if(Object.keys(runs).length != 0){
+            $scope.all_runs = runs;
+          } else {
+            $scope.all_runs = undefined;
+          }
         }
         $timeout($scope.set_run_status, delay=200, true, runs);
         if(callback){
