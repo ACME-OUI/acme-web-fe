@@ -222,6 +222,21 @@
     </div>
   </div>
 
+  <div class="modal" id="diagnostic_run_setup_modal" style="padding: .5vh;">
+    <span> model options </span>
+    <ul>
+      <li ng-repeat="model in model_options">[[model]]</li>
+    </ul>
+    <span> obs options </span>
+    <ul>
+      <li ng-repeat="obs in obs_options">[[obs]]</li>
+    </ul>
+    <span> set options </span>
+    <ul>
+      <li ng-repeat="set in set_options">[[set]]</li>
+    </ul>
+  </div>
+
   <div class="modal" id="image_view_modal" style="width: fit-content; overflow: hidden; max-height: 80%;">
     <p id="image_title" style="text-align: center;"></p>
     <img id="image_view" style="margin: 1vw;" class="" src="" />

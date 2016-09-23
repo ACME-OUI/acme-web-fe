@@ -19,4 +19,6 @@ urlpatterns = [
     url(r'^copy_template/$', views.copy_template),
     url(r'^get_user/$', views.get_user),
     url(r'^get_output_zip/$', views.get_output_zip),
+    url(r'^save_diagnostic_config/$', views.save_diagnostic_config),
+    url(r'^get_diagnostic_configs/$', views.get_diagnostic_configs),
 ]

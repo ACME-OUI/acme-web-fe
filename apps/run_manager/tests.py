@@ -11,6 +11,54 @@ from constants import RUN_SCRIPT_PATH
 from util.utilities import print_message
 
 
+class TestDiagnosticConfig(LiveServerTestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(username='test')
+        self.note = Notification(user='test')
+        self.note.save()
+        self.user.set_password('test')
+        self.user.save()
+        self.c = Client()
+        self.save_url = self.live_server_url + '/run_manager/save_diagnostic_config/'
+        self.get_url = self.live_server_url + '/run_manager/get_diagnostic_configs/'
+        logged_in = self.c.login(username='test', password='test')
+
+    def test_save_config(self):
+        params = json.dumps({
+            'name': 'test_config',
+            'user': 'test',
+            'diag_set': 5,
+            'obs_path': '/some/path/somewhere',
+            'model_path': '/another/path/elsewhere',
+            'output_path': '/a/third/path',
+            'shared_users': 'userA, userB'
+        })
+        r = self.c.post(self.save_url, data=params, content_type='application/json')
+        self.assertTrue(r.status_code == 200)
+
+    def test_get_config(self):
+        # first save a config
+        params = {
+            'name': 'test_config',
+            'user': 'test',
+            'diag_set': 5,
+            'obs_path': '/some/path/somewhere',
+            'model_path': '/another/path/elsewhere',
+            'output_path': '/a/third/path',
+            'shared_users': 'userA, userB'
+        }
+        r = self.c.post(self.save_url, data=json.dumps(params), content_type='application/json')
+        self.assertTrue(r.status_code == 200)
+
+        # now we can test if we can get it back
+        r = self.c.get(self.get_url)
+        print_message(r.content)
+        self.assertTrue(r.status_code == 200)
+        self.assertTrue(params.get('name') in r.content)
+        self.assertTrue(False)
+
+
 class TestCreateRun(LiveServerTestCase):
 
     def setUp(self):

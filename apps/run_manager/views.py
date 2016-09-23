@@ -7,9 +7,13 @@ from constants import RUN_CONFIG_DEFAULT_PATH
 from constants import POLLER_HOST
 from constants import POLLER_SUFFIX
 from constants import DIAG_OUTPUT_PREFIX
+from constants import USER_DATA_PREFIX
 from sendfile import sendfile
-from util.utilities import print_debug, print_message
-from models import ModelRun, RunScript
+from util.utilities import print_debug
+from util.utilities import print_message
+from models import ModelRun
+from models import RunScript
+from models import DiagnosticConfig
 
 import shutil
 import requests
@@ -18,6 +22,7 @@ import json
 import os
 
 from poller.views import update as poller_update
+from poller.models import UserRuns
 
 
 # An empty dict subclass, to allow me to call poller views directly
@@ -316,7 +321,105 @@ def view_runs(request):
             print_debug(e)
             return HttpResponse(status=500)
     run_dirs = os.listdir(run_directory)
+    runs = UserRuns.objects.filter()
     return HttpResponse(json.dumps(run_dirs))
+
+
+@login_required
+def save_diagnostic_config(request):
+    """
+    Saves the parameters of a diagnostic run to the db
+    input:
+        diag_set: the set of diagnostic sets to run,
+        user: the user creating the config,
+        obs_data: the name of the obs data folder to use (can also be model data),
+        model_data: the name of the model data to use (can also be obs, even though obs/obs comparisons dont make a lot of sense),
+        NOTE: the obs/model data path should have 'observations/<obs_folder>', or 'model_output/<model_folder>'
+        output_folder: the name of the output folder,
+        name: the name of the config,
+        shared_users: any other users who should have access to the config
+    """
+    if request.method != 'POST':
+        return HttpResponse(status=404)
+    user = str(request.user)
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print_debug(e)
+        return HttpResponse(status=400)
+
+    diag_set = data.get('diag_set')
+    obs_data = data.get('obs_path')
+    model_data = data.get('model_path')
+    output_folder = data.get('output_path')
+    name = data.get('name')
+    shared_users = data.get('shared_users')
+    if not diag_set:
+        print_message('No diag set')
+        return HttpResponse(status=400)
+    if not obs_data:
+        print_message('no obs data folder')
+        return HttpResponse(status=400)
+    if not model_data:
+        print_message('no model data folder')
+        return HttpResponse(status=400)
+    if not output_folder:
+        print_message('no output folder')
+        return HttpResponse(status=400)
+    if not name:
+        print_message('no name')
+        return HttpResponse(status=400)
+    if not shared_users:
+        shared_users = user
+    else:
+        shared_users = '{},{}'.format(shared_users, user)
+
+    obs_path = USER_DATA_PREFIX \
+        + user + '/' \
+        + obs_data
+    model_path = USER_DATA_PREFIX \
+        + user + '/' \
+        + model_data
+    output_path = USER_DATA_PREFIX \
+        + user + '/diagnostic_output' \
+        + output_folder
+
+    config = DiagnosticConfig(
+        user=user,
+        diag_set=diag_set,
+        obs_path=obs_path,
+        model_path=model_path,
+        output_path=output_path,
+        name=name,
+        allowed_users=shared_users)
+    try:
+        config.save()
+    except Exception as e:
+        print_debug(e)
+        return HttpResponse(status=500)
+
+    return HttpResponse()
+
+
+def get_diagnostic_configs(request):
+    """
+    Returns a list of the requesting users saved diagnostic configs
+    """
+    user = str(request.user)
+    configs = DiagnosticConfig.objects.filter(user=user)
+    response = {
+        config.name: dict([
+            ('version', config.version),
+            ('obs_path', config.obs_path),
+            ('model_path', config.model_path),
+            ('output_path', config.output_path),
+            ('allowed_users', config.allowed_users),
+            ('set', config.diag_set)
+        ])
+        for config in configs
+    }
+    print_message('config list: {}'.format(response))
+    return HttpResponse(json.dumps(response))
 
 
 #
