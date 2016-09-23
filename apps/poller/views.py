@@ -13,6 +13,7 @@ from util.utilities import is_json
 from run_manager.constants import DIAG_OUTPUT_PREFIX
 from run_manager.dispatcher import group_job_update
 from web_fe.models import Notification
+timeformat = '%b %d %H:%M:%S'
 
 
 @csrf_exempt
@@ -117,7 +118,7 @@ def post_update(job_id, data, request_type):
             message = json.loads(output)
         else:
             message = {}
-        message['timestamp'] = datetime.datetime.now().strftime('%a, %d %b %Y %H:%M:%S')
+        message['timestamp'] = datetime.datetime.now().strftime(timeformat)
         # Check if the job finished and has output
         # if it does, write it to the db and an output file
         if output:
@@ -128,16 +129,15 @@ def post_update(job_id, data, request_type):
             outputdir = DIAG_OUTPUT_PREFIX + job.user
             if run_type == 'diagnostic':
                 outputdir += '/diagnostic_output'
-                message = {
+                message.update({
                     'run_type': 'diagnostic',
                     'run_name': options.get('run_name'),
-                }
+                })
             elif run_type == 'model':
                 outputdir += '/model_output'
             elif run_type == 'upload_to_viewer':
                 job.save()
                 message.update(options)
-                message['timestamp'] = datetime.datetime.now().strftime('%a, %d %b %Y %H:%M:%S')
                 print_message('Sending job update with message {}'.format(message), 'ok')
                 group_job_update(job_id, job.user, request_type, optional_message=message)
                 note = Notification.objects.get(user=job.user)
@@ -146,7 +146,7 @@ def post_update(job_id, data, request_type):
                     'run_type': run_type,
                     'optional_message': message,
                     'status': request_type,
-                    'timestamp': datetime.datetime.now().strftime('%a, %d %b %Y %H:%M:%S')
+                    'timestamp': datetime.datetime.now().strftime(timeformat)
                 })
                 note.notification_list += new_notification + ' -|- '
                 note.save()
@@ -173,11 +173,11 @@ def post_update(job_id, data, request_type):
             'run_type': options.get('run_type'),
             'optional_message': message,
             'status': request_type,
-            'timestamp': datetime.datetime.now().strftime('%a, %d %b %Y %H:%M:%S')
+            'timestamp': datetime.datetime.now().strftime(timeformat)
         })
         note.notification_list += new_notification + ' -|- '
         note.save()
-        message['timestamp'] = datetime.datetime.now().strftime('%a, %d %b %Y %H:%M:%S')
+        print_message('Pushing update to client {}'.format(message))
         group_job_update(job_id, job.user, request_type, optional_message=message)
         return HttpResponse(status=200)
     except Exception as e:
@@ -193,7 +193,7 @@ def post_delete(job_id):
         options = json.loads(job.config_options)
         message = {
             'type': 'deleted',
-            'timestamp': datetime.datetime.now().strftime('%a, %d %b %Y %H:%M:%S')
+            'timestamp': datetime.datetime.now().strftime(timeformat)
         }
         group_job_update(job_id, job.user, message)
         note = Notification.objects.get(user=job.user)
@@ -205,7 +205,7 @@ def post_delete(job_id):
                 'run_type': options.get('run_type')
             },
             'status': 'deleted',
-            'timestamp': datetime.datetime.now().strftime('%a, %d %b %Y %H:%M:%S')
+            'timestamp': datetime.datetime.now().strftime(timeformat)
         })
         note.notification_list += new_notification + ' -|- '
         note.save()
@@ -250,7 +250,7 @@ def post_new(user, data):
         'run_name': run_name,
         'run_type': config.get('run_type'),
         'request_attr': config.get('request_attr'),
-        'timestamp': datetime.datetime.now().strftime('%a, %d %b %Y %H:%M:%S')
+        'timestamp': datetime.datetime.now().strftime(timeformat)
     }
     print_message(message, 'ok')
     try:
@@ -260,7 +260,7 @@ def post_new(user, data):
             'run_type': config.get('run_type'),
             'optional_message': message,
             'status': 'new',
-            'timestamp': datetime.datetime.now().strftime('%a, %d %b %Y %H:%M:%S')
+            'timestamp': datetime.datetime.now().strftime(timeformat)
         })
         note.notification_list += new_notification + ' -|- '
         note.save()
@@ -270,7 +270,7 @@ def post_new(user, data):
         pass
     finally:
         pass
-
+    print_message('Pushing update to client {}'.format(message))
     group_job_update(new_run.id, new_run.user, 'new', optional_message=message)
     return HttpResponse(response, content_type='application/json')
 
@@ -303,7 +303,7 @@ def post_stop(job_id):
         return HttpResponse(status=500)
     message = {
         'type': 'stopped',
-        'timestamp': datetime.datetime.now().strftime('%a, %d %b %Y %H:%M:%S')
+        'timestamp': datetime.datetime.now().strftime(timeformat)
     }
     group_job_update(job_id, job.user, message)
     try:
@@ -316,7 +316,7 @@ def post_stop(job_id):
                 'run_type': options.get('run_type')
             },
             'status': 'stopped',
-            'timestamp': datetime.datetime.now().strftime('%a, %d %b %Y %H:%M:%S')
+            'timestamp': datetime.datetime.now().strftime(timeformat)
         })
         note.notification_list += new_notification + ' -|- '
         note.save()
@@ -394,7 +394,7 @@ def get_all(user=None):
 
     config = json.loads(data.config_options)
     r = {
-        'timestamp': datetime.datetime.now().strftime('%a, %d %b %Y %H:%M:%S'),
+        'timestamp': datetime.datetime.now().strftime(timeformat),
         'job_id': data.id,
         'user': data.user
     }
@@ -407,7 +407,7 @@ def get_all(user=None):
             'run_type': data.get('run_type'),
             'optional_message': r,
             'status': data.get('status'),
-            'timestamp': datetime.datetime.now().strftime('%a, %d %b %Y %H:%M:%S')
+            'timestamp': datetime.datetime.now().strftime(timeformat)
         })
         note.notification_list += new_notification + ' -|- '
         note.save()
@@ -437,7 +437,7 @@ def get_next():
 
     config = json.loads(data.config_options)
     r = {
-        'timestamp': datetime.datetime.now().strftime('%a, %d %b %Y %H:%M:%S'),
+        'timestamp': datetime.datetime.now().strftime(timeformat),
         'job_id': data.id,
         'user': data.user
     }
@@ -450,7 +450,7 @@ def get_next():
             'run_type': r.get('run_type'),
             'optional_message': r,
             'status': 'in_progress',
-            'timestamp': datetime.datetime.now().strftime('%a, %d %b %Y %H:%M:%S')
+            'timestamp': datetime.datetime.now().strftime(timeformat)
         })
         note.notification_list += new_notification + ' -|- '
         note.save()

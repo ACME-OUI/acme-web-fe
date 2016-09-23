@@ -1,7 +1,8 @@
 <div style="margin: 1em;">
     <ul class="collection">
         <li class="collection-item" ng-repeat="n in notification_list | orderBy:'-'">
-            <span> [[ n.timestamp ]] </span>
+            <span ng-if="n.timestamp"> [[ n.timestamp ]] </span>
+            <span ng-if="n.optional_message.timestamp"> [[ n.optional_message.timestamp ]] </span>
             <span ng-if="n.status == 'in_progress'" style="vertical-align:middle;">
                 <i class="material-icons" style="vertical-align:middle;">loop</i>
                 [[ n.optional_message.run_type]] is in progress
