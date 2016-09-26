@@ -275,6 +275,10 @@
       })
     }
 
+    $scope.open_diagnostic_setup = (run) => {
+
+    }
+
     $scope.update_script = () => {
       var data = {
         'script_name': $scope.selected_script,

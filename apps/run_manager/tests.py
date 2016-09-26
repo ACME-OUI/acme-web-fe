@@ -22,6 +22,7 @@ class TestDiagnosticConfig(LiveServerTestCase):
         self.c = Client()
         self.save_url = self.live_server_url + '/run_manager/save_diagnostic_config/'
         self.get_url = self.live_server_url + '/run_manager/get_diagnostic_configs/'
+        self.get_by_name_url = self.live_server_url + '/run_manager/get_diagnostic_by_name/'
         logged_in = self.c.login(username='test', password='test')
 
     def test_save_config(self):
@@ -35,6 +36,7 @@ class TestDiagnosticConfig(LiveServerTestCase):
             'shared_users': 'userA, userB'
         })
         r = self.c.post(self.save_url, data=params, content_type='application/json')
+        print_message('status code: {}'.format(r.status_code))
         self.assertTrue(r.status_code == 200)
 
     def test_get_config(self):
@@ -49,14 +51,97 @@ class TestDiagnosticConfig(LiveServerTestCase):
             'shared_users': 'userA, userB'
         }
         r = self.c.post(self.save_url, data=json.dumps(params), content_type='application/json')
+        print_message('status code: {}'.format(r.status_code))
         self.assertTrue(r.status_code == 200)
 
         # now we can test if we can get it back
         r = self.c.get(self.get_url)
         print_message(r.content)
         self.assertTrue(r.status_code == 200)
+        print_message('status code: {}'.format(r.status_code))
         self.assertTrue(params.get('name') in r.content)
-        self.assertTrue(False)
+
+    def test_get_config_by_name_no_version(self):
+        # first save a config
+        params = {
+            'name': 'test_config',
+            'user': 'test',
+            'diag_set': 5,
+            'obs_path': '/some/path/somewhere',
+            'model_path': '/another/path/elsewhere',
+            'output_path': '/a/third/path',
+            'shared_users': 'userA, userB'
+        }
+        r = self.c.post(self.save_url, data=json.dumps(params), content_type='application/json')
+        print_message('status code: {}'.format(r.status_code))
+        self.assertTrue(r.status_code == 200)
+
+        # second save another config
+        # first save a config
+        params = {
+            'name': 'test_config',
+            'user': 'test',
+            'diag_set': 5,
+            'obs_path': '/some/path/somewhere',
+            'model_path': '/another/path/elsewhere',
+            'output_path': '/a/third/path',
+            'shared_users': 'userA, userB'
+        }
+        r = self.c.post(self.save_url, data=json.dumps(params), content_type='application/json')
+        print_message('status code: {}'.format(r.status_code))
+        self.assertTrue(r.status_code == 200)
+
+        request = {
+            'name': 'test_config'
+        }
+        r = self.c.get(self.get_by_name_url, request)
+        print_message(r.status_code)
+        self.assertTrue(r.status_code == 200)
+        print_message(r.content)
+        config = json.loads(r.content)
+        self.assertTrue('test_config' in r.content)
+        self.assertTrue(config.get('version') == 2)
+
+    def test_get_config_by_name_with_version(self):
+        # first save a config
+        params = {
+            'name': 'test_config',
+            'user': 'test',
+            'diag_set': 5,
+            'obs_path': '/some/path/somewhere',
+            'model_path': '/another/path/elsewhere',
+            'output_path': '/a/third/path',
+            'shared_users': 'userA, userB'
+        }
+        r = self.c.post(self.save_url, data=json.dumps(params), content_type='application/json')
+        print_message('status code: {}'.format(r.status_code))
+        self.assertTrue(r.status_code == 200)
+
+        # second save the same config again, incrementing its version number
+        params = {
+            'name': 'test_config',
+            'user': 'test',
+            'diag_set': 5,
+            'obs_path': '/some/path/somewhere',
+            'model_path': '/another/path/elsewhere',
+            'output_path': '/a/third/path',
+            'shared_users': 'userA, userB'
+        }
+        r = self.c.post(self.save_url, data=json.dumps(params), content_type='application/json')
+        print_message('status code: {}'.format(r.status_code))
+        self.assertTrue(r.status_code == 200)
+
+        # third, request the first version
+        request = {
+            'name': 'test_config',
+            'version': 1
+        }
+        r = self.c.get(self.get_by_name_url, request)
+        print_message(r.status_code)
+        self.assertTrue(r.status_code == 200)
+        print_message(r.content)
+        config = json.loads(r.content)
+        self.assertTrue(config.get('version') == 1)
 
 
 class TestCreateRun(LiveServerTestCase):

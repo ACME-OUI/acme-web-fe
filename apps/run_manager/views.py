@@ -340,11 +340,13 @@ def save_diagnostic_config(request):
         shared_users: any other users who should have access to the config
     """
     if request.method != 'POST':
+        print_message('invalid HTTP verb')
         return HttpResponse(status=404)
     user = str(request.user)
     try:
         data = json.loads(request.body)
     except Exception as e:
+        print_message('Error loading request json')
         print_debug(e)
         return HttpResponse(status=400)
 
@@ -374,6 +376,19 @@ def save_diagnostic_config(request):
     else:
         shared_users = '{},{}'.format(shared_users, user)
 
+    version = None
+    try:
+        config = DiagnosticConfig.objects.filter(user=user, name=data.get('name')).extra(order_by=['version'])
+        latest = config[0].version + 1
+        print_message('Looking for latest {}'.format(latest))
+        print_message(config.__dict__)
+    except Exception, e:
+        latest = 1
+    else:
+        # If a config with the given name exists, set the version to its version + 1
+        print_message('latest verion: {}'.format(latest))
+    version = latest
+
     obs_path = USER_DATA_PREFIX \
         + user + '/' \
         + obs_data
@@ -391,16 +406,19 @@ def save_diagnostic_config(request):
         model_path=model_path,
         output_path=output_path,
         name=name,
-        allowed_users=shared_users)
+        allowed_users=shared_users,
+        version=version)
     try:
         config.save()
     except Exception as e:
+        print_message('Error saving diagnostic config to db')
         print_debug(e)
         return HttpResponse(status=500)
 
     return HttpResponse()
 
 
+@login_required
 def get_diagnostic_configs(request):
     """
     Returns a list of the requesting users saved diagnostic configs
@@ -420,6 +438,54 @@ def get_diagnostic_configs(request):
     }
     print_message('config list: {}'.format(response))
     return HttpResponse(json.dumps(response))
+
+
+@login_required
+def get_diagnostic_by_name(request):
+    """
+    Looks up a specific config and returns its information
+    inputs: user, the user making the request
+            name, the name of the config to lookup
+            version, an optional argument for the version to look for, default is latest
+    """
+    user = str(request.user)
+    name = request.GET.get('name')
+    version = request.GET.get('version')
+    version = version if version else 'latest'
+    if not name:
+        print_message('No name given')
+        return HttpResponse(status=400)
+
+    try:
+        if version == 'latest':
+            config = DiagnosticConfig.objects.filter(
+                user=user,
+                name=name).latest()
+        else:
+            config = DiagnosticConfig.objects.filter(
+                user=user,
+                name=name,
+                version=version)[0]
+        for c in DiagnosticConfig.objects.all():
+            print_message(c.__dict__)
+    except Exception as e:
+        print_message('Error looking up config with user: {user}, name: {name}, version: {version}'.format(user=user, name=name, version=version))
+        print_debug(e)
+        return HttpResponse(status=400)
+
+    if not config:
+        print_message('No diagnostic config matching the name {} and version {} was found'.format(name, version))
+        for c in DiagnosticConfig.objects.all():
+            print_message(c.__dict__)
+    response = json.dumps({
+        'version': config.version,
+        'name': config.name,
+        'model_path': config.model_path,
+        'obs_path': config.obs_path,
+        'output_path': config.output_path,
+        'allowed_users': config.allowed_users
+    })
+    return HttpResponse(response)
 
 
 #
