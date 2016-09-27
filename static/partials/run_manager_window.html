@@ -21,17 +21,19 @@
     <ul class="collapsible popout" id="run-list" data-collapsible="accordion">
       <li ng-repeat="run in run_list">
         <div class="collapsible-header" ng-click="get_run_data(run)">
-          <i class="material-icons" id="[[run]]_arrow">play_arrow</i>
-          <span class="">[[run]]</span>
+          <i class="material-icons" id="[[run.config.run_name]]_arrow">play_arrow</i>
+          <span class="">[[run.config.run_name]]</span>
         </div>
         <div class="collapsible-body">
           <div class="" ng-show="empty_run == false">
             <ul class="collection">
               <li class="collection-item">
-                <a href="#" class="waves-effect waves-light btn">new script</a>
+                <a href="#" 
+                   class="waves-effect waves-light btn"
+                   ng-click="edit_run_config(run)">edit configuration</a>
               </li>
               <li ng-repeat="script in script_list" class="collection-item">
-                <a href="#" style="margin-left: 3vw;" ng-click="open_text_edit(run, script)">
+                <a href="#" style="margin-left: 3vw;" ng-click="open_text_edit(run.config.run_name, script)">
                   [[script]]
                 </a>
               </li>
@@ -53,7 +55,7 @@
 
         <li ng-repeat="run in all_runs | orderBy: 'job_id' : true">
           <div class="collapsible-header" ng-click="get_run_data(run.run_name, run.job_id)">
-            <span>[[run.run_name]]_[[run.job_id]]</span>
+            <span>[[run.config.run_name]]_[[run.job_id]]</span>
             <span style="float: right; margin-right: 2vw; color:grey;" id="[[run.job_id]]_queue_status"></span>
           </div>
           <div class="collapsible-body">
@@ -222,19 +224,28 @@
     </div>
   </div>
 
-  <div class="modal" id="diagnostic_run_setup_modal" style="padding: .5vh;">
-    <span> model options </span>
-    <ul>
-      <li ng-repeat="model in model_options">[[model]]</li>
-    </ul>
-    <span> obs options </span>
-    <ul>
-      <li ng-repeat="obs in obs_options">[[obs]]</li>
-    </ul>
-    <span> set options </span>
-    <ul>
-      <li ng-repeat="set in set_options">[[set]]</li>
-    </ul>
+  <!-- Diagnostic run configuration modal -->
+  <div class="modal" id="diagnostic_run_setup_modal" style="padding: 2vh; margin: 5vw">
+    <div class="input-field col s12">
+      <select id="diag_model_select">
+        <option value="" disabled selected>Model</option>
+        <option ng-repeat="model in diag_model_options" value="[[model]]">[[model]]</option>
+      </select>
+    </div>
+    <div class="input-field col s12">
+      <select id="diag_obs_select">
+        <option value="" disabled selected>observations</option>
+        <option ng-repeat="obs in diag_obs_options" value="[[obs]]">[[obs]]</option>
+      </select>
+    </div>
+    <div class="input-field col s12">
+      <p ng-repeat="set in diag_set_options" id="diag_set_select">
+        <input type="checkbox" class="filled-in diag_set_checkbox" ng-if="set != 'all'" id="diag_set_select_[[set]]" value="[[set]]"/>
+        <input type="checkbox" class="filled-in" ng-if="set == 'all'" ng-click="select_all_diag_set()" id="diag_set_select_[[set]]" />
+        <label for="diag_set_select_[[set]]">[[set]]</label>
+      </p>
+    </div>
+    <a href="" class="waves-effect waves-light btn" style="margin: 1vw;" ng-click="save_diag_config()">save</a>
   </div>
 
   <div class="modal" id="image_view_modal" style="width: fit-content; overflow: hidden; max-height: 80%;">

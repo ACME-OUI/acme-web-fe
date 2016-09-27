@@ -11,6 +11,7 @@ from constants import USER_DATA_PREFIX
 from sendfile import sendfile
 from util.utilities import print_debug
 from util.utilities import print_message
+from util.utilities import get_directory_structure
 from models import ModelRun
 from models import RunScript
 from models import DiagnosticConfig
@@ -311,18 +312,42 @@ def delete_run(request):
 @login_required
 def view_runs(request):
     user = str(request.user)
-    path = os.path.abspath(os.path.dirname(__file__))
-    run_directory = path + RUN_SCRIPT_PATH + user + '/'
-    if not os.path.exists(run_directory):
-        try:
-            os.mkdir(run_directory)
-        except Exception as e:
-            print_message('Error creating user directory for {}'.format(user), 'error')
-            print_debug(e)
-            return HttpResponse(status=500)
-    run_dirs = os.listdir(run_directory)
-    runs = UserRuns.objects.filter()
-    return HttpResponse(json.dumps(run_dirs))
+    # path = os.path.abspath(os.path.dirname(__file__))
+    # run_directory = path + RUN_SCRIPT_PATH + user + '/'
+    # if not os.path.exists(run_directory):
+    #     try:
+    #         os.mkdir(run_directory)
+    #     except Exception as e:
+    #         print_message('Error creating user directory for {}'.format(user), 'error')
+    #         print_debug(e)
+    #         return HttpResponse(status=500)
+    # run_dirs = os.listdir(run_directory)
+    runs = UserRuns.objects.filter(user=user)
+    response = {
+        run.id: dict([
+            ('job_id', run.id),
+            ('config', json.loads(run.config_options)),
+            ('status', run.status)])
+        for run in runs
+    }
+    return HttpResponse(json.dumps(response))
+
+
+@login_required
+def save_diag_config(request):
+    user = str(request.user)
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print_message('Unable to decode request')
+        return HttpResponse(status=400)
+
+    model_path = ''
+    obs_path = ''
+    user_data_directory = get_directory_structure('userdata/' + user)
+    path = find_value(user_data_directory, data.get('model'), ['.'], [])
+    print_message(path)
+    return HttpResponse()
 
 
 @login_required
