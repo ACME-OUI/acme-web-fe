@@ -56,6 +56,15 @@ def create_run(request):
         return HttpResponse(status=400)
 
     if run_type == 'diagnostic':
+        # Check to see if this config already exists
+        try:
+            conf = DiagnosticConfig.objects.get(user=user, name=new_run)
+        except Exception as e:
+            pass
+        else:
+            print_message('Run config already exists')
+            return HttpResponse(status=409)
+
         # create diag config object
         conf = DiagnosticConfig(
             user=user,
@@ -92,42 +101,19 @@ def start_run(request):
         print_message('No run name given', 'error')
         return HttpResponse(status=400)
 
-    path = os.path.abspath(os.path.dirname(__file__))
-    run_directory = path + RUN_SCRIPT_PATH + user + '/' + run_name + '/'
-    config_path = None
-    try:
-        config_version = RunScript.objects.filter(
-            user=user,
-            run=run_name,
-            name='config.json'
-        ).latest().version
-    except Exception as e:
-        raise
-    for f in os.listdir(run_directory):
-        f = f.split('_')[0]
-        if f.endswith('.json'):
-            config_path = f
-            break
-    if not config_path:
-        print_message('Unable to find config file in run directory {}'.format(run_directory))
-        return HttpResponse(status=500)
-    config_path = run_directory + config_path + '_' + str(config_version)
-    try:
-        with open(config_path, 'r') as f:
-            config = f.read()
-        print_message(config)
-        config_options = json.loads(config)
-    except Exception as e:
-        print_debug(e)
-        # print_message('Error reading file {}'.format(config_path))
-        # return HttpResponse(status=500)
+    conf = DiagnosticConfig.objects.filter(user=user, name=run_name)
+    if not conf:
+        print_message('Unable to find config {} for user {}'.format(run_name, user))
+        return HttpResponse(400)
+
+    conf = conf.latest()
     request = mydict()
     request.body = {
         'user': user,
         'request': 'new'
     }
     request.method = 'POST'
-    request.body.update(config_options)
+    request.body.update(model_to_dict(conf))
     request.body = json.dumps(request.body)
     try:
         r = poller_update(request)
@@ -289,57 +275,6 @@ def view_runs(request):
 
 
 @login_required
-def save_diag_config(request):
-    user = str(request.user)
-    try:
-        data = json.loads(request.body)
-    except Exception as e:
-        print_message('Unable to decode request')
-        return HttpResponse(status=400)
-
-    model = data.get('model')
-    obs = data.get('obs')
-    name = data.get('name')
-    allowed_users = data.get('allowed_users')
-    if not model:
-        print_message('No model given')
-        return HttpResponse(status=400)
-    if not obs:
-        print_message('No obs given')
-        return HttpResponse(status=400)
-    if not name:
-        print_message('No name given')
-        return HttpResponse(status=400)
-    if not allowed_users:
-        allowed_users = ''
-    model_path = None
-    obs_path = None
-    # user_data_directory = get_directory_structure('userdata/' + user)
-
-    def find_directory(directory, model, obs):
-        model_path = None
-        obs_path = None
-        for dirname, subdirlist, filelist in os.walk(directory):
-            for subdir in subdirlist:
-                if subdir == model:
-                    model_path = os.path.abspath(subdir)
-                if subdir == obs:
-                    obs_path = os.path.abspath(subdir)
-                if model_path and obs_path:
-                    return model_path, obs_path
-        return '', ''
-    model_path, obs_path = find_directory(os.path.abspath('./userdata/' + user), model, obs)
-    if not model_path:
-        print_message('Unable to find model {}'.format(model))
-        return HttpResponse(status=400)
-    if not obs_path:
-        print_message('Unable to find obs {}'.format(obs))
-        return HttpResponse(status=400)
-
-    return HttpResponse()
-
-
-@login_required
 def save_diagnostic_config(request):
     """
     Saves the parameters of a diagnostic run to the db
@@ -416,8 +351,9 @@ def save_diagnostic_config(request):
         + '/diagnostic_output' \
         + name
 
-    for s in diag_set:
-        s.encode("utf-8")
+    if not isinstance(diag_set, int):
+        for s in diag_set:
+            s.encode("utf-8")
 
     print_message('saving config: user: {user}, diag_set: {set}, obs: {obs}, model: {model}, allowed_users: {allowed}'.format(user=user, set=diag_set, obs=obs_path, model=model_path, allowed=shared_users))
     config = DiagnosticConfig(
