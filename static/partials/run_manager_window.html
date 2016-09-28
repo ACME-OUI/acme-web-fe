@@ -229,13 +229,13 @@
     <div class="input-field col s12">
       <select id="diag_model_select">
         <option value="" disabled selected>Model</option>
-        <option ng-repeat="model in diag_model_options" value="[[model]]">[[model]]</option>
+        <option ng-repeat="model in diag_model_options" id="diag_select_model_[[model]]"value="[[model]]">[[model]]</option>
       </select>
     </div>
     <div class="input-field col s12">
       <select id="diag_obs_select">
-        <option value="" disabled selected>observations</option>
-        <option ng-repeat="obs in diag_obs_options" value="[[obs]]">[[obs]]</option>
+        <option value="" disabled selected>Observation</option>
+        <option ng-repeat="obs in diag_obs_options" id="diag_select_obs_[[obs]]" value="[[obs]]">[[obs]]</option>
       </select>
     </div>
     <div class="input-field col s12">

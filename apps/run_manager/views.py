@@ -342,11 +342,45 @@ def save_diag_config(request):
         print_message('Unable to decode request')
         return HttpResponse(status=400)
 
-    model_path = ''
-    obs_path = ''
-    user_data_directory = get_directory_structure('userdata/' + user)
-    path = find_value(user_data_directory, data.get('model'), ['.'], [])
-    print_message(path)
+    model = data.get('model')
+    obs = data.get('obs')
+    name = data.get('name')
+    allowed_users = data.get('allowed_users')
+    if not model:
+        print_message('No model given')
+        return HttpResponse(status=400)
+    if not obs:
+        print_message('No obs given')
+        return HttpResponse(status=400)
+    if not name:
+        print_message('No name given')
+        return HttpResponse(status=400)
+    if not allowed_users:
+        allowed_users = ''
+    model_path = None
+    obs_path = None
+    # user_data_directory = get_directory_structure('userdata/' + user)
+
+    def find_directory(directory, model, obs):
+        model_path = None
+        obs_path = None
+        for dirname, subdirlist, filelist in os.walk(directory):
+            for subdir in subdirlist:
+                if subdir == model:
+                    model_path = os.path.abspath(subdir)
+                if subdir == obs:
+                    obs_path = os.path.abspath(subdir)
+                if model_path and obs_path:
+                    return model_path, obs_path
+        return '', ''
+    model_path, obs_path = find_directory(os.path.abspath('./userdata/' + user), model, obs)
+    if not model_path:
+        print_message('Unable to find model {}'.format(model))
+        return HttpResponse(status=400)
+    if not obs_path:
+        print_message('Unable to find obs {}'.format(obs))
+        return HttpResponse(status=400)
+
     return HttpResponse()
 
 
@@ -355,12 +389,10 @@ def save_diagnostic_config(request):
     """
     Saves the parameters of a diagnostic run to the db
     input:
-        diag_set: the set of diagnostic sets to run,
+        set: the set of diagnostic sets to run,
         user: the user creating the config,
-        obs_data: the name of the obs data folder to use (can also be model data),
-        model_data: the name of the model data to use (can also be obs, even though obs/obs comparisons dont make a lot of sense),
-        NOTE: the obs/model data path should have 'observations/<obs_folder>', or 'model_output/<model_folder>'
-        output_folder: the name of the output folder,
+        obs: the name of the obs data folder to use (can also be model data),
+        model: the name of the model data to use (can also be obs, even though obs/obs comparisons dont make a lot of sense),
         name: the name of the config,
         shared_users: any other users who should have access to the config
     """
@@ -375,10 +407,9 @@ def save_diagnostic_config(request):
         print_debug(e)
         return HttpResponse(status=400)
 
-    diag_set = data.get('diag_set')
-    obs_data = data.get('obs_path')
-    model_data = data.get('model_path')
-    output_folder = data.get('output_path')
+    diag_set = data.get('set')
+    obs_data = data.get('obs')
+    model_data = data.get('model')
     name = data.get('name')
     shared_users = data.get('shared_users')
     if not diag_set:
@@ -389,9 +420,6 @@ def save_diagnostic_config(request):
         return HttpResponse(status=400)
     if not model_data:
         print_message('no model data folder')
-        return HttpResponse(status=400)
-    if not output_folder:
-        print_message('no output folder')
         return HttpResponse(status=400)
     if not name:
         print_message('no name')
@@ -404,7 +432,7 @@ def save_diagnostic_config(request):
     version = None
     try:
         config = DiagnosticConfig.objects.filter(user=user, name=data.get('name')).extra(order_by=['version'])
-        latest = config[0].version + 1
+        latest = config[len(config) - 1].version + 1
         print_message('Looking for latest {}'.format(latest))
         print_message(config.__dict__)
     except Exception, e:
@@ -414,19 +442,32 @@ def save_diagnostic_config(request):
         print_message('latest verion: {}'.format(latest))
     version = latest
 
-    obs_path = USER_DATA_PREFIX \
-        + user + '/' \
-        + obs_data
-    model_path = USER_DATA_PREFIX \
-        + user + '/' \
-        + model_data
-    output_path = USER_DATA_PREFIX \
-        + user + '/diagnostic_output' \
-        + output_folder
+    def find_directory(directory, model, obs):
+        model_path = None
+        obs_path = None
+        for dirname, subdirlist, filelist in os.walk(directory):
+            for subdir in subdirlist:
+                if subdir == model:
+                    model_path = os.path.abspath(subdir)
+                if subdir == obs:
+                    obs_path = os.path.abspath(subdir)
+                if model_path and obs_path:
+                    return model_path, obs_path
+        return '', ''
+    model_path, obs_path = find_directory(os.path.abspath('./userdata/' + user), model_data, obs_data)
 
+    output_path = USER_DATA_PREFIX \
+        + user \
+        + '/diagnostic_output' \
+        + name
+
+    for s in diag_set:
+        s.encode("utf-8")
+
+    print_message('saving config: user: {user}, diag_set: {set}, obs: {obs}, model: {model}, allowed_users: {allowed}'.format(user=user, set=diag_set, obs=obs_path, model=model_path, allowed=shared_users))
     config = DiagnosticConfig(
         user=user,
-        diag_set=diag_set,
+        diag_set=json.dumps(diag_set),
         obs_path=obs_path,
         model_path=model_path,
         output_path=output_path,
@@ -508,7 +549,8 @@ def get_diagnostic_by_name(request):
         'model_path': config.model_path,
         'obs_path': config.obs_path,
         'output_path': config.output_path,
-        'allowed_users': config.allowed_users
+        'allowed_users': config.allowed_users,
+        'set': config.diag_set
     })
     return HttpResponse(response)
 

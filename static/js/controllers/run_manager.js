@@ -537,6 +537,7 @@
     $scope.edit_run_config = (run) => {
       if(run.config.run_type == 'diagnostic'){
         $scope.get_diagnostic_config_options();
+        $scope.get_saved_diagnostic_config(run.config.run_name);
         $('#diagnostic_run_setup_modal').openModal();
       }
       else if(run.config.run_type == 'model'){
@@ -550,34 +551,38 @@
       $('.diag_set_checkbox').prop("checked", true);
     }
     
-    $scope.save_diag_config = () => {
+    $scope.save_diag_config = (run_name) => {
       var model_selected = $('#diag_model_select option:selected').text();
-      var obs_selected = $('#diag_obs_select option:selected').text()
+      var obs_selected = $('#diag_obs_select option:selected').text();
       params = {
         'model': model_selected,
         'obs': obs_selected,
-        'set': []
+        'set': [],
+        'name': $scope.selected_run
       };
       $.each($('#diag_set_select input:checked'), (index, val) => {
         params.set.push($(val).attr('value'));
       });
       $http({
-        url: '/run_manager/save_diag_config/',
+        url: '/run_manager/save_diagnostic_config/',
         method: 'POST',
         data: params,
         headers: {
           'X-CSRFToken' : $scope.get_csrf()
         },
       }).then((res) => {
-
+        console.log(res);
+        $('#diagnostic_run_setup_modal').closeModal();
+        $scope.showToast('Configuration saved');
       }).catch((res) => {
-
+        console.log(res);
       });
     }
 
     $scope.get_diagnostic_config_options = () => {
       $http({
-        url: '/esgf/get_user_data'
+        url: '/esgf/get_user_data',
+        method: 'GET'
       }).then((res) => {
         // put the user name into scope becaues its here, might want to use it later
         $scope.user = Object.keys(res.data);
@@ -592,7 +597,33 @@
       }).catch((res) => {
         console.log(res.data);
       });
-    
+    }
+
+    $scope.get_saved_diagnostic_config = (run_name) => {
+      $http({
+        url: '/run_manager/get_diagnostic_by_name',
+        method: 'GET',
+        params: {
+          'name': run_name
+        }
+      }).then((res) => {
+        console.log(res.data);
+        $timeout(() => {
+          // $('#diag_select_model_' + res.data.model_path.split('/').pop()).selected = true;
+          $('#diag_model_select').val(res.data.model_path.split('/').pop())
+          //$('#diag_select_obs_' + res.data.obs_path.split('/').pop()).selected = true;
+          $('#diag_obs_select').val(res.data.obs_path.split('/').pop())
+          $('select').material_select();
+          var sets = JSON.parse(res.data.set);
+          $('.diag_set_checkbox').prop("checked", false);
+          $.each(sets, (index, value) => {
+            $('#diag_set_select_' + value).prop({'checked': true});
+          })  
+        }, 100);
+      
+      }).catch((res) => {
+        console.log(res.data);
+      })
     }
 
     $scope.get_run_data = (run, job_id) => {
@@ -609,6 +640,7 @@
         $scope.selected_run = run_name;
         $http({
           url: '/run_manager/get_scripts',
+          method: 'GET',
           params: {
             'run_name' : run.config.run_name,
             'job_id': run.job_id

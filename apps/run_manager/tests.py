@@ -30,9 +30,8 @@ class TestDiagnosticConfig(LiveServerTestCase):
             'name': 'test_config',
             'user': 'test',
             'diag_set': 5,
-            'obs_path': '/some/path/somewhere',
-            'model_path': '/another/path/elsewhere',
-            'output_path': '/a/third/path',
+            'obs_path': 'metadiags_test_data',
+            'model_path': 'obs_for_metadiags',
             'shared_users': 'userA, userB'
         })
         r = self.c.post(self.save_url, data=params, content_type='application/json')
