@@ -76,7 +76,7 @@
       $scope.show_image = false;
       $scope.image_index = 0;
       $scope.selected_run_params = {};
-      $scope.get_templates();
+      $scope.get_configs();
       $scope.get_runs();
       $scope.get_user();
       $scope.get_run_status();
@@ -319,6 +319,18 @@
       })
     }
 
+    $scope.get_configs = () => {
+      $http({
+        url: '/run_manager/get_all_configs/',
+        method: 'GET'
+      }).then((res) => {
+        console.log(res.data);
+        $scope.config_name_list = Object.keys(res.data);
+        $scope.config_list = res.data;
+      }).catch((res) => {
+        console.log(res.data);
+      });
+    }
 
     $scope.get_run_status = (callback) => {
       $http({
@@ -392,10 +404,6 @@
       }).then((res) => {
         console.log('created a new run');
         console.log(res.data);
-        if('error' in res.data){
-          $scope.showToast(res.data['error']);
-          return;
-        }
         $scope.run_list.push(run_name);
         $('#new_run_modal').closeModal();
         $('#new_run_name').val('');
@@ -412,7 +420,6 @@
         $http({
           url: '/run_manager/view_runs'
         }).then((res) => {
-          console.log('Got some runs bruh');
           console.log(res.data);
           $scope.run_list = res.data;
           $('#run-list').collapsible({
@@ -474,7 +481,7 @@
         }
       }).then((res) => {
         $scope.get_run_status();
-        $scope.set_status_text('new', run);
+        // $scope.set_status_text('new', run);
         $scope.showToast("Run added to the queue");
         $('#start_run_modal').closeModal();
         //$scope.get_run_status($scope.set_run_status);
@@ -534,13 +541,13 @@
       });
     }
 
-    $scope.edit_run_config = (run) => {
-      if(run.config.run_type == 'diagnostic'){
+    $scope.edit_run_config = (conf) => {
+      if($scope.config_list[$scope.selected_run].type == 'diagnostic'){
         $scope.get_diagnostic_config_options();
-        $scope.get_saved_diagnostic_config(run.config.run_name);
+        $scope.get_saved_diagnostic_config(conf);
         $('#diagnostic_run_setup_modal').openModal();
       }
-      else if(run.config.run_type == 'model'){
+      else if($scope.config_list[$scope.selected_run].type == 'model'){
         // handle model config
       } else {
         // probably error
@@ -599,12 +606,12 @@
       });
     }
 
-    $scope.get_saved_diagnostic_config = (run_name) => {
+    $scope.get_saved_diagnostic_config = () => {
       $http({
         url: '/run_manager/get_diagnostic_by_name',
         method: 'GET',
         params: {
-          'name': run_name
+          'name': $scope.selected_run
         }
       }).then((res) => {
         console.log(res.data);
@@ -614,16 +621,23 @@
           //$('#diag_select_obs_' + res.data.obs_path.split('/').pop()).selected = true;
           $('#diag_obs_select').val(res.data.obs_path.split('/').pop())
           $('select').material_select();
-          var sets = JSON.parse(res.data.set);
           $('.diag_set_checkbox').prop("checked", false);
-          $.each(sets, (index, value) => {
-            $('#diag_set_select_' + value).prop({'checked': true});
-          })  
+          if(res.data.set.length != 0){
+            var sets = JSON.parse(res.data.set);
+            $.each(sets, (index, value) => {
+              $('#diag_set_select_' + value).prop({'checked': true});
+            })  
+          }
         }, 100);
       
       }).catch((res) => {
         console.log(res.data);
       })
+    }
+
+    $scope.set_selected_run = (run) => {
+      $scope.selected_run = run;
+      $scope.switch_arrow(run);
     }
 
     $scope.get_run_data = (run, job_id) => {

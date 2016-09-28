@@ -35,19 +35,19 @@ class DiagnosticConfig(models.Model):
     version = models.IntegerField(default=1)
 
     # The set of diagnostic sets, comma delimited
-    diag_set = models.CharField(max_length=100)
+    diag_set = models.CharField(max_length=100, default='')
 
     # The path to the obs data
-    obs_path = models.CharField(max_length=200)
+    obs_path = models.CharField(max_length=200, default='')
 
     # The path to the model data
-    model_path = models.CharField(max_length=200)
+    model_path = models.CharField(max_length=200, default='')
 
     # The output data path
-    output_path = models.CharField(max_length=200)
+    output_path = models.CharField(max_length=200, default='')
 
     # The run config name
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, default='default')
 
     # The set of authorized users
     allowed_users = models.TextField()

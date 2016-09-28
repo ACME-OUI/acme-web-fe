@@ -1,6 +1,7 @@
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
+from django.forms.models import model_to_dict
 from constants import RUN_SCRIPT_PATH
 from constants import TEMPLATE_PATH
 from constants import RUN_CONFIG_DEFAULT_PATH
@@ -43,99 +44,35 @@ def create_run(request):
     print request.body
     data = json.loads(request.body)
     user = str(request.user)
-    path = os.path.abspath(os.path.dirname(__file__))
-    user_directory = path + RUN_SCRIPT_PATH + user
-    template_directory = path + TEMPLATE_PATH
-    config_path = path + RUN_CONFIG_DEFAULT_PATH
-
-    if not os.path.exists(user_directory):
-        print_message("Creating directory {}".format(user_directory), 'ok')
-        os.makedirs(user_directory)
 
     new_run = data.get('run_name')
     if not new_run:
         print_message('No new run_name specied', 'error')
         return HttpResponse(status=400)
 
-    new_run_dir = os.path.join(user_directory, new_run)
-    if os.path.exists(new_run_dir):
-        print_message('Run directory already exists', 'error')
-        return HttpResponse(status=409)
-
-    try:
-        os.makedirs(new_run_dir)
-    except Exception as e:
-        print_debug(e)
-        return HttpResponse(status=500)
-
     run_type = data.get('run_type')
     if not run_type:
         print_message('No run_type specied', 'error')
         return HttpResponse(status=400)
 
-    config_path += run_type + '.json'
-    new_config_path = new_run_dir + '/config.json_1'
-    conf = {}
-    try:
-        with open(config_path, 'r') as config_file:
-            conf = json.loads(config_file.read())
-            conf['run_name'] = new_run
-            config_file.close()
-        with open(new_config_path, 'w') as new_config:
-            conf = json.dumps(conf)
-            new_config.write(conf)
-            new_config.close()
-        new_script = RunScript(
+    if run_type == 'diagnostic':
+        # create diag config object
+        conf = DiagnosticConfig(
             user=user,
-            name='config.json',
-            run=new_run,
-            version=1)
-        new_script.save()
-    except Exception as e:
-        print_debug(e)
-        print_message("Error saving config file {} for user {}".format(config_path, user), 'error')
-        return JsonResponse({'error': 'config not saved'})
-
-    template = data.get('template')
-    if not template:
-        return JsonResponse({'new_run_dir': new_run_dir})
-
-    if user in template:
-        template_search_dirs = [user, 'global']
-    else:
-        template_search_dirs = ['global']
-
-    template = template.split('/')[-1]
-    print_message('looking for template {}'.format(template))
-    found_template = False
-    template_path = False
-    template_search_dirs = [ str(template_directory + x) for x in template_search_dirs]
-    for directory in template_search_dirs:
-        print_message('searching in dir {}'.format(directory))
-        if os.path.exists(directory):
-            if template in os.listdir(directory):
-                found_template = True
-                template_path = directory + '/' + template
-        else:
-            os.mkdir(directory)
-
-    if found_template:
+            name=new_run)
         try:
-            shutil.copyfile(template_path, new_run_dir + '/' + template + '_1')
+            conf.save()
         except Exception as e:
+            print_message('Error saving diagnostic config')
             print_debug(e)
-            print_message("Error saving template {} for user {}".format(template, request.user), 'error')
-            return JsonResponse({'new_run_dir': new_run_dir, 'error': 'template not saved'})
-
-        new_script = RunScript(
-            user=user,
-            name=template,
-            run=new_run,
-            version=1)
-        new_script.save()
-        return JsonResponse({'new_run_dir': new_run_dir, 'template': 'template saved'})
+            return HttpResponse(status=500)
+    elif run_type == 'model':
+        # create model config object
+        print_message('Got a model create request')
     else:
-        return JsonResponse({'new_run_dir': new_run_dir, 'error': 'template not found'})
+        print_message('Unrecognized run_type {}'.format(run_type))
+        return HttpResponse(status=400)
+    return HttpResponse()
 
 
 #
@@ -304,6 +241,24 @@ def delete_run(request):
         return HttpResponse(status=500)
 
     return HttpResponse()
+
+
+@login_required
+def get_all_configs(request):
+    user = str(request.user)
+    # get diagnostic run configs
+    diag_configs = DiagnosticConfig.objects.filter(user=user)
+    configs = {}
+    for conf in diag_configs:
+        if configs.get(conf.name):
+            # check its the latest version
+            if configs.get(conf.name).get('version') < conf.version:
+                configs[conf.name] = model_to_dict(conf)
+        else:
+            configs[conf.name] = model_to_dict(conf)
+        configs[conf.name].update({'type': 'diagnostic'})
+    # get model run configs (eventually)
+    return HttpResponse(json.dumps(configs))
 
 
 #

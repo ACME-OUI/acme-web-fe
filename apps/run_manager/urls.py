@@ -23,4 +23,5 @@ urlpatterns = [
     url(r'^get_diagnostic_configs/$', views.get_diagnostic_configs),
     url(r'^get_diagnostic_by_name/$', views.get_diagnostic_by_name),
     url(r'^save_diag_config/$', views.save_diag_config),
+    url(r'^get_all_configs/$', views.get_all_configs),
 ]
