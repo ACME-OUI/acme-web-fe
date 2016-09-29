@@ -480,6 +480,11 @@
           'X-CSRFToken' : $scope.get_csrf()
         }
       }).then((res) => {
+        $('#start_run_modal').closeModal();
+        if(typeof res.data.error !== 'undefined'){
+          $scope.showToast(res.data.error);
+          return;
+        }
         $scope.get_run_status();
         // $scope.set_status_text('new', run);
         $scope.showToast("Run added to the queue");
@@ -580,6 +585,10 @@
       }).then((res) => {
         console.log(res);
         $('#diagnostic_run_setup_modal').closeModal();
+        if(typeof res.data.error !== 'undefined'){
+          $scope.showToast(res.data.error);
+          return;
+        }
         $scope.showToast('Configuration saved');
       }).catch((res) => {
         console.log(res);
@@ -641,50 +650,50 @@
     }
 
     $scope.get_run_data = (run, job_id) => {
-      $scope.switch_arrow(run.config.run_name);
-      var run_name = '';
-      if(job_id){
-        run_name = run.config.run_name + '_' + job_id
-      } else {
-        run_name = run.config.run_name
+      $scope.switch_arrow(run.run_name);
+      var get_diag_http_config = {
+        url: '/run_manager/get_diagnostic_by_name',
+        method: 'GET',
+        params: {
+          'name': run.run_name
+        }
       }
-      if($scope.selected_run == run_name){
-        return;
-      } else {
-        $scope.selected_run = run_name;
-        $http({
-          url: '/run_manager/get_scripts',
-          method: 'GET',
-          params: {
-            'run_name' : run.config.run_name,
-            'job_id': run.job_id
-          }
-        }).then((res) => {
-          $timeout(() => {
-            console.log('Got some script data');
-            console.log(res.data);
-            $scope.script_list = res.data.script_list;
-            $scope.output_list[$scope.selected_run] = [];
-            $scope.output_list[$scope.selected_run] = res.data.output_list;
-            if($scope.script_list.length == 0){
-              $scope.empty_run = true;
-            } else {
-              $scope.empty_run = false;
-            }
+      var get_script_http_config = {
+        url: '/run_manager/get_scripts',
+        method: 'GET',
+        params: {
+          'run_name' : run.run_name,
+          'job_id': run.job_id
+        }
+      }
+      var get_diag_data = $http(get_diag_http_config);
+      var get_script_data = $http(get_script_http_config);
 
-            if($scope.output_list[$scope.selected_run].length != 0){
-              $scope.output_cache_count[$scope.selected_run] = 0;
-              $scope.load_output_cache();
+      Promise.all([get_diag_data, get_script_data]).then(values => {
+        $timeout(() => {
+          $scope.selected_run_config = {};
+          for(var k in values[0].data){
+            if(values[0].data.hasOwnProperty(k)){
+              if(typeof values[0].data[k] != "number"){
+                $scope.selected_run_config[k] = values[0].data[k].split('/').pop();  
+              } else {
+                $scope.selected_run_config[k] = values[0].data[k];
+              }
             }
-            $('.collapsible').collapsible({
-              accordion : false
-            });
-          }, delay=200);
-        }).catch((res) => {
-          console.log('Error getting script list');
-          console.log(res);
-        })
-      }
+          }
+          $scope.output_list[$scope.selected_run] = values[1].data.output_list;
+          if($scope.output_list[$scope.selected_run].length != 0){
+            $scope.output_cache_count[$scope.selected_run] = 0;
+            $scope.load_output_cache();
+          }
+        }, 50);
+      }, reason => {
+        console.log(reason);
+      }).then(() => {
+        $('.collapsible').collapsible({
+          accordion : false
+        });
+      })
     }
 
     $scope.open_output = (run, item, job_id) => {

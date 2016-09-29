@@ -94,11 +94,9 @@
       window.ACMEDashboard.notificaiton_list = window.ACMEDashboard.notificaiton_list || [];
       window.ACMEDashboard.socket_handlers = window.ACMEDashboard.socket_handlers || {};
       window.ACMEDashboard.socket_handlers.notification = (data) => {
-        $scope.$apply(() => {
-          console.log('got a notication');
-          console.log(data);
-          $scope.list_insert(data);
-        })
+        console.log('got a notication');
+        console.log(data);
+        $scope.list_insert(data);
       }
 
 

@@ -51,3 +51,6 @@ class DiagnosticConfig(models.Model):
 
     # The set of authorized users
     allowed_users = models.TextField()
+
+    # Diagnostic package
+    package = models.CharField(max_length=50, default='AMWG')

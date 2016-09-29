@@ -110,10 +110,22 @@ def start_run(request):
     request = mydict()
     request.body = {
         'user': user,
-        'request': 'new'
+        'request': 'new',
+        'run_name': run_name,
+        'run_type': 'diagnostic'
     }
     request.method = 'POST'
     request.body.update(model_to_dict(conf))
+
+    if not os.path.exists(request.body.get('obs_path')):
+        return HttpResponse(json.dumps({
+            'error': 'Invalid observation path'
+        }))
+    if not os.path.exists(request.body.get('model_path')):
+        return HttpResponse(json.dumps({
+            'error': 'Invalid model path'
+        }))
+
     request.body = json.dumps(request.body)
     try:
         r = poller_update(request)
@@ -253,16 +265,6 @@ def get_all_configs(request):
 @login_required
 def view_runs(request):
     user = str(request.user)
-    # path = os.path.abspath(os.path.dirname(__file__))
-    # run_directory = path + RUN_SCRIPT_PATH + user + '/'
-    # if not os.path.exists(run_directory):
-    #     try:
-    #         os.mkdir(run_directory)
-    #     except Exception as e:
-    #         print_message('Error creating user directory for {}'.format(user), 'error')
-    #         print_debug(e)
-    #         return HttpResponse(status=500)
-    # run_dirs = os.listdir(run_directory)
     runs = UserRuns.objects.filter(user=user)
     response = {
         run.id: dict([
@@ -324,7 +326,6 @@ def save_diagnostic_config(request):
         config = DiagnosticConfig.objects.filter(user=user, name=data.get('name')).extra(order_by=['version'])
         latest = config[len(config) - 1].version + 1
         print_message('Looking for latest {}'.format(latest))
-        print_message(config.__dict__)
     except Exception, e:
         latest = 1
     else:
@@ -338,18 +339,22 @@ def save_diagnostic_config(request):
         for dirname, subdirlist, filelist in os.walk(directory):
             for subdir in subdirlist:
                 if subdir == model:
-                    model_path = os.path.abspath(subdir)
+                    model_path = os.path.abspath(os.path.join(dirname, subdir))
                 if subdir == obs:
-                    obs_path = os.path.abspath(subdir)
+                    obs_path = os.path.abspath(os.path.join(dirname, subdir))
                 if model_path and obs_path:
                     return model_path, obs_path
         return '', ''
-    model_path, obs_path = find_directory(os.path.abspath('./userdata/' + user), model_data, obs_data)
-
-    output_path = USER_DATA_PREFIX \
-        + user \
-        + '/diagnostic_output' \
-        + name
+    model_path, obs_path = find_directory('./userdata/' + user, model_data, obs_data)
+    print_message('model_path: {}, obs_path: {}'.format(model_path, obs_path))
+    if not os.path.exists(model_path):
+        return HttpResponse(json.dumps({
+            'error': 'Invalid model path'
+        }))
+    if not os.path.exists(obs_path):
+        return HttpResponse(json.dumps({
+            'error': 'Invalid observation path'
+        }))
 
     if not isinstance(diag_set, int):
         for s in diag_set:
@@ -361,7 +366,7 @@ def save_diagnostic_config(request):
         diag_set=json.dumps(diag_set),
         obs_path=obs_path,
         model_path=model_path,
-        output_path=output_path,
+        output_path='',
         name=name,
         allowed_users=shared_users,
         version=version)
@@ -423,8 +428,6 @@ def get_diagnostic_by_name(request):
                 user=user,
                 name=name,
                 version=version)[0]
-        for c in DiagnosticConfig.objects.all():
-            print_message(c.__dict__)
     except Exception as e:
         print_message('Error looking up config with user: {user}, name: {name}, version: {version}'.format(user=user, name=name, version=version))
         print_debug(e)
@@ -432,8 +435,7 @@ def get_diagnostic_by_name(request):
 
     if not config:
         print_message('No diagnostic config matching the name {} and version {} was found'.format(name, version))
-        for c in DiagnosticConfig.objects.all():
-            print_message(c.__dict__)
+
     response = json.dumps({
         'version': config.version,
         'name': config.name,
@@ -589,43 +591,45 @@ def get_scripts(request):
         print_message('No run name specified in get scripts request', 'error')
         return HttpResponse(status=400)
 
-    path = os.path.abspath(os.path.dirname(__file__))
-    run_directory = path + RUN_SCRIPT_PATH + user + '/' + run_name
-    if not os.path.exists(run_directory):
-        print_message('Request for config folder that doesnt exist {}'.format(run_name), 'error')
-        return HttpResponse(status=403)
+    # path = os.path.abspath(os.path.dirname(__file__))
+    # run_directory = path + RUN_SCRIPT_PATH + user + '/' + run_name + '_' + job_id
+    # if not os.path.exists(run_directory):
+    #     print_message('Request for config folder that doesnt exist {}'.format(run_directory), 'error')
+    #     return HttpResponse(status=403)
 
     try:
         files = {}
         script_list = []
         output_list = []
-        directory_contents = os.listdir(run_directory)
-        for item in directory_contents:
-            if not os.path.isdir(run_directory + '/' + item):
-                # print_message('Got a normal item: ' + item)
-                item = item.rsplit('_', 1)[0]
-                if item not in script_list:
-                    script_list.append(item)
+        # directory_contents = os.listdir(run_directory)
+        # for item in directory_contents:
+        #     if not os.path.isdir(run_directory + '/' + item):
+        #         # print_message('Got a normal item: ' + item)
+        #         item = item.rsplit('_', 1)[0]
+        #         if item not in script_list:
+        #             script_list.append(item)
 
-        outputdir = ''
-        config_script = RunScript.objects.filter(user=user, run=run_name, name='config.json').latest()
-        print_message(run_directory + 'config.json_' + str(config_script.version))
-        with open(run_directory + '/config.json_' + str(config_script.version)) as config_file:
-            config = json.loads(config_file.read())
-            config = config.get('request_attr')
-            outdir = config.get('outputdir')
-            diag_type = config.get('diag_type')
-            outputdir = DIAG_OUTPUT_PREFIX \
-                + user \
-                + '/diagnostic_output/' \
-                + run_name + '_' + job_id \
-                + outdir + '/' \
-                + diag_type
-            outputdir = outputdir.lower()
-            print_message('outputdir: {}'.format(outputdir))
-        if os.path.exists(outputdir):
-            directory_contents = os.listdir(outputdir)
-            for root, dirs, file_list in os.walk(outputdir):
+        diag_config = DiagnosticConfig.objects.filter(user=user, name=run_name).extra(order_by=['version'])
+        latest = diag_config[len(diag_config) - 1]
+        print_message('looking up: {}'.format(latest.__dict__))
+        output_dir = diag_config[len(diag_config) - 1].output_path
+        # config_script = RunScript.objects.filter(user=user, run=run_name, name='config.json').latest()
+        # print_message(run_directory + 'config.json_' + str(config_script.version))
+        # with open(run_directory + '/config.json_' + str(config_script.version)) as config_file:
+        #     config = json.loads(config_file.read())
+        #     config = config.get('request_attr')
+        #     outdir = config.get('outputdir')
+        #     diag_type = config.get('diag_type')
+        #     outputdir = DIAG_OUTPUT_PREFIX \
+        #         + user \
+        #         + '/diagnostic_output/' \
+        #         + run_name + '_' + job_id \
+        #         + outdir + '/' \
+        #         + diag_type
+        #     outputdir = outputdir.lower()
+        print_message('output_dir: {}'.format(output_dir))
+        if os.path.exists(output_dir):
+            for root, dirs, file_list in os.walk(output_dir):
                 for file in file_list:
                     if file.endswith('.png'):
                         output_list.append(file)

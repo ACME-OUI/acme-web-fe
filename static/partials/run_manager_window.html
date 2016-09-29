@@ -39,8 +39,8 @@
       <p style="margin-left: 5vw; margin-top: 1vw;"> Run queue </p>
 
         <li ng-repeat="run in all_runs | orderBy: 'job_id' : true">
-          <div class="collapsible-header" ng-click="get_run_data(run.config.run_name, run.job_id)">
-            <span>[[run.config.run_name]]_[[run.job_id]]</span>
+          <div class="collapsible-header" ng-click="get_run_data(run, run.job_id)">
+            <span>[[run.run_name]]_[[run.job_id]]</span>
             <span style="float: right; margin-right: 2vw; color:grey;" id="[[run.job_id]]_queue_status"></span>
           </div>
           <div class="collapsible-body">
@@ -50,11 +50,12 @@
                   <span>run config</span>
                 </div>
                 <div class="collapsible-body">
-                  <ul class="collection">
-                    <li ng-repeat="(key,value) in run" style="padding: 1vh;">
-                      <span>[[key]]: [[value]]</span>
-                    </li>
-                  </ul>
+                  <table>
+                      <tr ng-repeat="(key,value) in selected_run_config | orderBy:key" style="padding: 1vh;">
+                        <th>[[key]]</th>
+                        <td>[[value]]</td>
+                      </tr>
+                  </table>
                 </div>
               </li>
               <li>
@@ -147,10 +148,10 @@
   <div class="modal" id="start_run_modal">
     <div class="modal-content" style="padding: .5vh;">
       <ul class="collection dashboard-show-hide" id="run_collection">
-        <li class="collection-item" ng-repeat="run in run_list" >
+        <li class="collection-item" ng-repeat="conf in config_name_list" >
           <i class="material-icons" style="vertical-align:middle;">play_circle_outline</i>
-          <a href="#" class="" style="color:#009688; padding-bottom: 5px; vertical-align:middle;" ng-click="start_run(run.config.run_name)">
-            [[run.config.run_name]]
+          <a href="#" class="" style="color:#009688; padding-bottom: 5px; vertical-align:middle;" ng-click="start_run(conf)">
+            [[conf]]
           </a>
         </li>
       </ul>
