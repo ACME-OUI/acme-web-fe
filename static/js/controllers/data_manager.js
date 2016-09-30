@@ -59,8 +59,8 @@
 
     $scope.set_favorite_plot = () => {
       var data = {
-        'user': $scope.$parent.user,
-        'plot': $('#image_download_link').attr('data-plot')
+        'user': window.ACMEDashboard.user,
+        'plot': $('#image_download_link_data_manager').attr('data-plot')
       }
       $http({
         url: '/esgf/set_favorite_plot/',
@@ -88,27 +88,45 @@
       })
     }
 
+    $scope.get_user = () => {
+      $http({
+        url: '/run_manager/get_user',
+        method: 'GET'
+      }).then((res) => {
+        window.ACMEDashboard.user = res.data;
+        resolve(res.data);
+      }).catch((res) => {
+        console.log('Error getting user');
+        console.log(res);
+        reject(res);
+      });
+    }
+
     $scope.open_pdf = (diag, diag_folder) => {
       $scope.image_type = 'pdf';
       $scope.diag_folder = diag_folder;
       $scope.show_image = true;
       $scope.image_index = $scope.diag_cache[diag_folder].indexOf(diag);
-      var src = $scope.get_src($scope.image_index);
-      var image_viewer = $('#pdf_view_data_manager');
-      var image_link = $('#image_link_data_manager');
-      $('#image_title_data_manager').text(diag);
-      image_link.attr({
-        'href': src
-      });
-      $('#image_download_link_data_manager').attr({
-        'href': src,
-        'download': diag,
-        'data-plot': $scope.diag_cache[$scope.diag_folder][$scope.image_index]
-      });
-      image_viewer.attr({
-        'data': src
-      });
-      $('#image_view_modal_data_manager').openModal();
+      var src = $scope.get_src($scope.image_index).then((src) => {
+        var image_viewer = $('#pdf_view_data_manager');
+        var image_link = $('#image_link_data_manager');
+        $('#image_title_data_manager').text(diag);
+        image_link.attr({
+          'href': src
+        });
+        $('#image_download_link_data_manager').attr({
+          'href': src,
+          'download': diag,
+          'data-plot': $scope.diag_cache[$scope.diag_folder][$scope.image_index]
+        });
+        image_viewer.attr({
+          'data': src
+        });
+        $('#image_view_modal_data_manager').openModal();
+      }).catch((reason) => {
+        console.log('Error: ' + reason);
+      })
+      
     }
 
     $scope.open_output = (diag, diag_folder) => {
@@ -117,9 +135,27 @@
     }
 
     $scope.get_src = (index) => {
-      var prefix = '/acme/userdata/image/userdata/' + window.ACMEDashboard.user + '/diagnostic_output/';
-      var src = prefix + $scope.diag_folder + '/diagnostic_output/amwg/' + $scope.diag_cache[$scope.diag_folder][index];
-      return src;
+      return new Promise((resolve, reject) => {
+        if(typeof window.ACMEDashboard.user === 'undefined'){
+          $http({
+            url: '/run_manager/get_user',
+            method: 'GET'
+          }).then((res) => {
+            window.ACMEDashboard.user = res.data;
+            var prefix = '/acme/userdata/image/userdata/' + window.ACMEDashboard.user + '/diagnostic_output/';
+            var src = prefix + $scope.diag_folder + '/amwg/' + $scope.diag_cache[$scope.diag_folder][index];
+            resolve(src);
+          }).catch((res) => {
+            console.log('Error getting user');
+            console.log(res);
+            reject(res);
+          });
+        } else {
+          var prefix = '/acme/userdata/image/userdata/' + window.ACMEDashboard.user + '/diagnostic_output/';
+          var src = prefix + $scope.diag_folder + '/amwg/' + $scope.diag_cache[$scope.diag_folder][index];
+          resolve(src);
+        }
+      });
     }
 
     $scope.open_image = (run, image) => {
@@ -127,20 +163,23 @@
       $scope.diag_folder = run;
       $scope.show_image = true;
       $scope.image_index = $scope.diag_cache[run].indexOf(image);
-      var src = $scope.get_src($scope.image_index);
-      var image_viewer = $('#image_view_data_manager');
-      var image_link = $('#image_link_data_manager');
-      $('#image_title_data_manager').text(image);
-      image_link.attr({
-        'href': src
-      });
-      $('#image_download_link_data_manager').attr({
-        'href': src,
-        'download': image,
-        'data-plot': $scope.diag_cache[$scope.diag_folder][$scope.image_index]
-      });
-      image_viewer.attr({
-        'src': src
+      $scope.get_src($scope.image_index).then((src) => {
+        var image_viewer = $('#image_view_data_manager');
+        var image_link = $('#image_link_data_manager');
+        $('#image_title_data_manager').text(image);
+        image_link.attr({
+          'href': src
+        });
+        $('#image_download_link_data_manager').attr({
+          'href': src,
+          'download': image,
+          'data-plot': $scope.diag_cache[$scope.diag_folder][$scope.image_index]
+        });
+        image_viewer.attr({
+          'src': src
+        });
+      }).catch((reason) => {
+        console.log("error: " + reason);
       });
     }
 
@@ -461,7 +500,7 @@
     }
     $scope.load_diag_cache = (diag_folder) => {
       $scope.diag_cache = $scope.diag_cache || {};      $scope.diag_limit = 20;
-      $scope.diag_cache[diag_folder] = Object.keys($scope.all_userdata['diagnostic_output'][diag_folder]['diagnostic_output']['amwg']);
+      $scope.diag_cache[diag_folder] = Object.keys($scope.all_userdata['diagnostic_output'][diag_folder]['amwg']);
     }
     $scope.increase_diag_limit = () => {
       $scope.diag_limit += 20;

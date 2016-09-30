@@ -123,6 +123,11 @@ def post_update(job_id, data, request_type):
         # if it does, write it to the db and an output file
         if output:
             job.output = output
+            try:
+                job.save()
+            except Exception as e:
+                print_debug(e)
+                print_message('Unable to save job {}'.format(job.__dict__))
             run_type = options.get('run_type')
             print_message('Job finished with output options: {}'.format(options), 'ok')
             outputdir = options.get('output_dir')
@@ -130,6 +135,7 @@ def post_update(job_id, data, request_type):
                 message.update({
                     'run_type': 'diagnostic',
                     'run_name': options.get('run_name'),
+                    'status': request_type
                 })
             elif run_type == 'model':
                 outputdir = options.get('output_dir')
@@ -175,7 +181,6 @@ def post_update(job_id, data, request_type):
         })
         note.notification_list += new_notification + ' -|- '
         note.save()
-        print_message('Pushing update to client {}'.format(message))
         group_job_update(job_id, job.user, request_type, optional_message=message)
         return HttpResponse(status=200)
     except Exception as e:

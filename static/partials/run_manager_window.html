@@ -19,7 +19,7 @@
   <div class="run_list dashboard-show-hide" ng-show="ready == true">
     <p style="margin-left: 5vw;">Configuration List</p>
     <ul class="collapsible popout" id="run-list" data-collapsible="accordion">
-      <li ng-repeat="conf in config_name_list">
+      <li ng-repeat="conf in config_name_list | orderBy:conf">
         <div class="collapsible-header" ng-click="set_selected_run(conf)">
           <i class="material-icons" id="[[conf]]_arrow">play_arrow</i>
           <span class="">[[conf]]</span>
@@ -64,7 +64,8 @@
                 </div>
                 <div class="collapsible-body">
                   <ul class="collection">
-                    <li ng-show="output_list[run.run_name + '_' + run.job_id].length != 0" class="collection-item">
+                  <!-- ng-show="output_list[run.run_name + '_' + run.job_id].length != 0" -->
+                    <li  class="collection-item">
                       <div class="" ng-repeat="item in output_cache[run.run_name + '_' + run.job_id]">
                         <a href="#"
                            class="[[run.run_name]]_preview"
@@ -148,7 +149,7 @@
   <div class="modal" id="start_run_modal">
     <div class="modal-content" style="padding: .5vh;">
       <ul class="collection dashboard-show-hide" id="run_collection">
-        <li class="collection-item" ng-repeat="conf in config_name_list" >
+        <li class="collection-item" ng-repeat="conf in config_name_list | orderBy:conf" >
           <i class="material-icons" style="vertical-align:middle;">play_circle_outline</i>
           <a href="#" class="" style="color:#009688; padding-bottom: 5px; vertical-align:middle;" ng-click="start_run(conf)">
             [[conf]]
@@ -211,7 +212,7 @@
   </div>
 
   <!-- Diagnostic run configuration modal -->
-  <div class="modal" id="diagnostic_run_setup_modal" style="padding: 2vh; margin: 5vw">
+  <div class="modal" id="diagnostic_run_setup_modal" style="padding: 2vh;">
     <div class="input-field col s12">
       <select id="diag_model_select">
         <option value="" disabled selected>Model</option>
