@@ -69,7 +69,7 @@
       $scope.all_runs = undefined;
       $scope.selected_run = undefined;
       $scope.script_list = undefined;
-      $scope.output_list = [];
+      $scope.output_list = {};
       $scope.output_cache = {};
       $scope.output_cache_count = {};
       $scope.template_list = undefined;
@@ -178,13 +178,13 @@
 
     $scope.get_src = (index) => {
       var prefix = '/acme/userdata/image/userdata/' + window.ACMEDashboard.user + '/diagnostic_output/';
-      var src = prefix + $scope.selected_run + '/diagnostic_output/amwg/' + $scope.output_list[$scope.selected_run][index];
+      var src = prefix + $scope.selected_job_identifier + '/amwg/' + $scope.output_list[$scope.selected_job_identifier][index];
       return src;
     }
 
     $scope.open_image = (run, image) => {
       $scope.show_image = true;
-      $scope.image_index = $scope.output_list[$scope.selected_run].indexOf(image);
+      $scope.image_index = $scope.output_list[$scope.selected_job_identifier].indexOf(image);
       var image_el = $('#' + run + '_' + image.slice(0,20));
       //var src = image_el.attr('data-img-location');
       var src = $scope.get_src($scope.image_index);
@@ -210,8 +210,8 @@
     $scope.mode = $scope.modes[0];
 
     $scope.load_output_cache = () => {
-      $scope.output_cache_count[$scope.selected_run] += 1;
-      $scope.output_cache[$scope.selected_run] = $scope.output_list[$scope.selected_run].slice(0, $scope.output_cache_count[$scope.selected_run] * 10);
+      $scope.output_cache_count[$scope.selected_job_identifier] += 1;
+      $scope.output_cache[$scope.selected_job_identifier] = $scope.output_list[$scope.selected_job_identifier].slice(0, $scope.output_cache_count[$scope.selected_job_identifier] * 10);
     }
 
 
@@ -404,7 +404,8 @@
       }).then((res) => {
         console.log('created a new run');
         console.log(res.data);
-        $scope.run_list.push(run_name);
+        // $scope.run_list.push(run_name);
+        $scope.get_configs();
         $('#new_run_modal').closeModal();
         $('#new_run_name').val('');
         //$scope.$apply();
@@ -651,6 +652,9 @@
 
     $scope.get_run_data = (run, job_id) => {
       $scope.switch_arrow(run.run_name);
+      $scope.selected_run = run.run_name;
+      $scope.selected_job_id = run.job_id;
+      $scope.selected_job_identifier = run.run_name + '_' + run.job_id;
       var get_diag_http_config = {
         url: '/run_manager/get_diagnostic_by_name',
         method: 'GET',
@@ -681,9 +685,9 @@
               }
             }
           }
-          $scope.output_list[$scope.selected_run] = values[1].data.output_list;
-          if($scope.output_list[$scope.selected_run].length != 0){
-            $scope.output_cache_count[$scope.selected_run] = 0;
+          $scope.output_list[$scope.selected_job_identifier] = values[1].data.output_list;
+          if($scope.output_list[$scope.selected_job_identifier].length != 0){
+            $scope.output_cache_count[$scope.selected_job_identifier] = 0;
             $scope.load_output_cache();
           }
         }, 50);

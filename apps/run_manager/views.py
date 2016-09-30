@@ -591,42 +591,16 @@ def get_scripts(request):
         print_message('No run name specified in get scripts request', 'error')
         return HttpResponse(status=400)
 
-    # path = os.path.abspath(os.path.dirname(__file__))
-    # run_directory = path + RUN_SCRIPT_PATH + user + '/' + run_name + '_' + job_id
-    # if not os.path.exists(run_directory):
-    #     print_message('Request for config folder that doesnt exist {}'.format(run_directory), 'error')
-    #     return HttpResponse(status=403)
-
     try:
         files = {}
         script_list = []
         output_list = []
-        # directory_contents = os.listdir(run_directory)
-        # for item in directory_contents:
-        #     if not os.path.isdir(run_directory + '/' + item):
-        #         # print_message('Got a normal item: ' + item)
-        #         item = item.rsplit('_', 1)[0]
-        #         if item not in script_list:
-        #             script_list.append(item)
 
         diag_config = DiagnosticConfig.objects.filter(user=user, name=run_name).extra(order_by=['version'])
         latest = diag_config[len(diag_config) - 1]
         print_message('looking up: {}'.format(latest.__dict__))
         output_dir = diag_config[len(diag_config) - 1].output_path
-        # config_script = RunScript.objects.filter(user=user, run=run_name, name='config.json').latest()
-        # print_message(run_directory + 'config.json_' + str(config_script.version))
-        # with open(run_directory + '/config.json_' + str(config_script.version)) as config_file:
-        #     config = json.loads(config_file.read())
-        #     config = config.get('request_attr')
-        #     outdir = config.get('outputdir')
-        #     diag_type = config.get('diag_type')
-        #     outputdir = DIAG_OUTPUT_PREFIX \
-        #         + user \
-        #         + '/diagnostic_output/' \
-        #         + run_name + '_' + job_id \
-        #         + outdir + '/' \
-        #         + diag_type
-        #     outputdir = outputdir.lower()
+
         print_message('output_dir: {}'.format(output_dir))
         if os.path.exists(output_dir):
             for root, dirs, file_list in os.walk(output_dir):
@@ -643,11 +617,34 @@ def get_scripts(request):
         print_debug(e)
         return HttpResponse(status=500)
 
-    print_message(script_list)
-    print_message(output_list)
     files['script_list'] = script_list
     files['output_list'] = output_list
     return HttpResponse(json.dumps(files))
+
+
+@login_required
+def get_run_output(request):
+    """
+    Looks up a runs output and returns it to the front end
+    input: user, the user making the request
+           job_id, the id of the job to get the output for
+    """
+    user = str(request.user)
+    job_id = request.GET.get('job_id')
+    if not job_id:
+        print_message('No job_id in output request')
+        return HttpResponse(status=400)
+    try:
+        job = UserRuns.objects.get(id=job_id)
+    except Exception as e:
+        print_debug(e)
+        print_message('Error looking up job with id: {}'.format(job_id))
+        return HttpResponse(status=500)
+
+    response = {
+        'output': job.output.split('u\'').pop()
+    }
+    return HttpResponse(json.dumps(response))
 
 
 #
@@ -672,36 +669,15 @@ def read_output_script(request):
         print_message('No job id given', 'error')
         return HttpResponse(status=400)
 
-    output_directory = DIAG_OUTPUT_PREFIX \
-        + user + '/' \
-        + 'diagnostic_output/' \
-        + run_name + '_' + job_id \
-        + '/diagnostic_output/amwg/'
-    print_message('looking for script in {}'.format(output_directory))
-    script_name_exists = False
-    script_path = ''
-    for (dirpath, dirnames, filenames) in os.walk(output_directory):
-        for file in filenames:
-            if file == script_name:
-                script_name_exists = True
-                script_path = os.path.join(dirpath, file)
-                print_message('Found output file at {}'.format(script_path), 'ok')
-    if not script_name_exists:
-        print_message("unable to find script {}".format(script_name))
-        return HttpResponse(status=400)
-
     try:
-        contents = ''
-        with open(script_path, 'r') as f:
-            for line in f:
-                contents += line
+        run = UserRuns.objects.get(id=job_id)
     except Exception as e:
-        print_message('Error reading from file {}'.format(script_path), 'error')
         print_debug(e)
+        print_message('Error looking up job with id: {}'.format(job_id))
         return HttpResponse(status=500)
-
+    
+    contents = run.output
     return JsonResponse({'script': contents})
-    return HttpResponse()
 
 
 #
