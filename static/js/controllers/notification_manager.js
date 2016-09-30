@@ -27,6 +27,18 @@
       };
     }
 
+    $scope.get_user = () => {
+      $http({
+        url: '/run_manager/get_user',
+        method: 'GET'
+      }).then((res) => {
+        window.ACMEDashboard.user = res.data
+      }).catch((res) => {
+        console.log('Error getting user');
+        console.log(res);
+      });
+    }
+
     $scope.get_notification_list = () => {
       $http({
         url: '/acme/get_notification_list/',
@@ -40,6 +52,9 @@
           var note = JSON.parse(v);
           $scope.list_insert(note);
         });
+        $('#notification_list').collapsible({
+            accordion : false
+          });
       }).catch((res) => {
         console.log('error retrieving notification list from server')
       }).then(() => {
@@ -67,22 +82,22 @@
     $scope.open_output = (notification) => {
       var text = '';
       var params = {
-        'script_name': 'console_output.txt',
         'run_name': notification.optional_message.run_name,
         'job_id': notification.job_id
       }
       $http({
-        url: '/run_manager/read_output_script/',
+        url: '/run_manager/get_run_output/',
         method: 'GET',
         params: params
       }).then((res) => {
-        text = res.data.script;
+        text = res.data.output;
         $('#text_edit_modal').openModal();
         window.ACMEDashboard.ace.setValue(text);
         window.ACMEDashboard.ace.setReadOnly(true);
+        window.ACMEDashboard.ace.setMode('text');
         $('#text_edit_save_btn').addClass('disabled');
       }).catch((res) => {
-
+        console.log(res);
       });
     }
 
