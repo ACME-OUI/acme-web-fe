@@ -692,7 +692,7 @@ def read_output_script(request):
         print_debug(e)
         print_message('Error looking up job with id: {}'.format(job_id))
         return HttpResponse(status=500)
-    
+
     contents = run.output
     return JsonResponse({'script': contents})
 

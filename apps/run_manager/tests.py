@@ -236,8 +236,6 @@ class TestCreateRun(LiveServerTestCase):
     #     self.assertTrue('template saved' in r.content)
     #     template_path = '/Users/baldwin32/projects/acme-web-fe/apps/run_manager/resources//test/ACME_script.csh'
     #     shutil.rmtree(template_path, ignore_errors=True)
-
-
     # All these tests should be run from their own test class, but django
     # doesnt want to run them, so instead im putting them here. If I fix this bug
     # they will all be removed
