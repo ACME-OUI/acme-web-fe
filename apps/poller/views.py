@@ -12,6 +12,7 @@ from util.utilities import print_message
 from util.utilities import is_json
 from run_manager.constants import DIAG_OUTPUT_PREFIX
 from run_manager.dispatcher import group_job_update
+from run_manager.models import DiagnosticConfig
 from web_fe.models import Notification
 timeformat = '%b %d %H:%M:%S'
 
@@ -56,7 +57,6 @@ def update(request):
     if request.method == 'POST':
         try:
             print_message(request.body)
-            print_message('body: {}'.format(request.body), 'ok')
             if is_json(request.body):
                 data = json.loads(request.body)
             else:
@@ -123,18 +123,22 @@ def post_update(job_id, data, request_type):
         # if it does, write it to the db and an output file
         if output:
             job.output = output
+            try:
+                job.save()
+            except Exception as e:
+                print_debug(e)
+                print_message('Unable to save job {}'.format(job.__dict__))
             run_type = options.get('run_type')
             print_message('Job finished with output options: {}'.format(options), 'ok')
-            request_attr = options.get('request_attr')
-            outputdir = DIAG_OUTPUT_PREFIX + job.user
+            outputdir = options.get('output_dir')
             if run_type == 'diagnostic':
-                outputdir += '/diagnostic_output'
                 message.update({
                     'run_type': 'diagnostic',
                     'run_name': options.get('run_name'),
+                    'status': request_type
                 })
             elif run_type == 'model':
-                outputdir += '/model_output'
+                outputdir = options.get('output_dir')
             elif run_type == 'upload_to_viewer':
                 job.save()
                 message.update(options)
@@ -154,10 +158,6 @@ def post_update(job_id, data, request_type):
             else:
                 print_message('Unrecognized run_type: {}'.format(run_type))
 
-            outputdir = outputdir \
-                + '/' + options.get('run_name') + '_' + str(job_id) \
-                + request_attr.get('outputdir') \
-                + '/' + request_attr.get('diag_type').lower()
             print_message('output dir: {}'.format(outputdir))
             if not os.path.exists(outputdir):
                 os.makedirs(outputdir)
@@ -165,7 +165,11 @@ def post_update(job_id, data, request_type):
                 output_file.write(' '.join(output))
                 output_file.close()
 
-        job.save()
+        try:
+            job.save()
+        except Exception as e:
+            print_debug(e)
+            print_message('Unable to save job {}'.format(job.__dict__))
         print_message('Sending job update with message {}'.format(message), 'ok')
         note = Notification.objects.get(user=job.user)
         new_notification = json.dumps({
@@ -177,7 +181,6 @@ def post_update(job_id, data, request_type):
         })
         note.notification_list += new_notification + ' -|- '
         note.save()
-        print_message('Pushing update to client {}'.format(message))
         group_job_update(job_id, job.user, request_type, optional_message=message)
         return HttpResponse(status=200)
     except Exception as e:
@@ -217,13 +220,12 @@ def post_delete(job_id):
 
 
 def post_new(user, data):
-    if not user:
+    if not user or not data:
         return HttpResponse(status=400)
-
+    if not data.get('run_type'):
+        print_message('No run type')
+        return HttpResponse(status=400)
     config = data
-    # for key in data:
-    #     value = data.get(key)
-    #     config.update({key: value})
     del config['user']
     del config['request']
     run_name = config.get('run_name')
@@ -231,15 +233,61 @@ def post_new(user, data):
         print_message('no run name given, using run type {}'.format(config.get('run_type')))
         run_name = config.get('run_type')
     config['run_name'] = run_name
-    print_message(config)
+    if data.get('diag_set'):
+        config['set'] = data.get('diag_set')
+        del config['diag_set']
+    print_message(config, 'ok')
+
     config_json = json.dumps(config)
-    print_message('new job config: {}'.format(config), 'ok')
     new_run = UserRuns.objects.create(
         status='new',
         config_options=config_json,
         user=user
     )
-    new_run.save()
+    try:
+        new_run.save()
+    except Exception as e:
+        print_debug(e)
+        print_message('error saving new run {}'.format(new_run.__dict__))
+        return HttpResponse(status=500)
+
+    path = 'userdata/{user}/{run_type}_output/{run_name}_{id}'.format(
+        user=user,
+        run_type=config.get('run_type'),
+        run_name=run_name,
+        id=new_run.id
+    )
+    output_dir = os.path.abspath(path)
+    print_message('creating output directory: {}'.format(output_dir))
+    try:
+        os.makedirs(output_dir)
+    except Exception as e:
+        print_debug(e)
+        print_message('Error creating output directory {}'.format(output_dir))
+        return HttpResponse(status=500)
+
+    config['output_dir'] = output_dir
+    try:
+        new_run.config_options = json.dumps(config)
+        new_run.save()
+    except Exception as e:
+        print_debug(e)
+        print_message('error saving new run {}'.format(new_run.__dict__))
+        return HttpResponse(status=500)
+    try:
+        diag_config = DiagnosticConfig.objects.filter(user=user, name=run_name).extra(order_by=['version'])
+        if diag_config:
+            latest = diag_config[len(diag_config) - 1]
+            latest.output_path = output_dir
+            latest.save()
+        else:
+            print_message('Unable to find config with name {}'.format(run_name))
+            return HttpResponse(status=400)
+    except Exception as e:
+        print_debug(e)
+        print_message('Error saving diagnostic config')
+        return HttpResponse(status=500)
+
     print_message('returning job_id: {}'.format(new_run.id), 'ok')
     response = json.dumps({
         'job_id': new_run.id,

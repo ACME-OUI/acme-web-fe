@@ -1,15 +1,21 @@
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
+from django.forms.models import model_to_dict
 from constants import RUN_SCRIPT_PATH
 from constants import TEMPLATE_PATH
 from constants import RUN_CONFIG_DEFAULT_PATH
 from constants import POLLER_HOST
 from constants import POLLER_SUFFIX
 from constants import DIAG_OUTPUT_PREFIX
+from constants import USER_DATA_PREFIX
 from sendfile import sendfile
-from util.utilities import print_debug, print_message
-from models import ModelRun, RunScript
+from util.utilities import print_debug
+from util.utilities import print_message
+from util.utilities import get_directory_structure
+from models import ModelRun
+from models import RunScript
+from models import DiagnosticConfig
 
 import shutil
 import requests
@@ -18,6 +24,7 @@ import json
 import os
 
 from poller.views import update as poller_update
+from poller.models import UserRuns
 
 
 # An empty dict subclass, to allow me to call poller views directly
@@ -37,99 +44,44 @@ def create_run(request):
     print request.body
     data = json.loads(request.body)
     user = str(request.user)
-    path = os.path.abspath(os.path.dirname(__file__))
-    user_directory = path + RUN_SCRIPT_PATH + user
-    template_directory = path + TEMPLATE_PATH
-    config_path = path + RUN_CONFIG_DEFAULT_PATH
-
-    if not os.path.exists(user_directory):
-        print_message("Creating directory {}".format(user_directory), 'ok')
-        os.makedirs(user_directory)
 
     new_run = data.get('run_name')
     if not new_run:
-        print_message('No new run_name specied', 'error')
+        print_message('No new run_name given', 'error')
         return HttpResponse(status=400)
-
-    new_run_dir = os.path.join(user_directory, new_run)
-    if os.path.exists(new_run_dir):
-        print_message('Run directory already exists', 'error')
-        return HttpResponse(status=409)
-
-    try:
-        os.makedirs(new_run_dir)
-    except Exception as e:
-        print_debug(e)
-        return HttpResponse(status=500)
 
     run_type = data.get('run_type')
     if not run_type:
         print_message('No run_type specied', 'error')
         return HttpResponse(status=400)
 
-    config_path += run_type + '.json'
-    new_config_path = new_run_dir + '/config.json_1'
-    conf = {}
-    try:
-        with open(config_path, 'r') as config_file:
-            conf = json.loads(config_file.read())
-            conf['run_name'] = new_run
-            config_file.close()
-        with open(new_config_path, 'w') as new_config:
-            conf = json.dumps(conf)
-            new_config.write(conf)
-            new_config.close()
-        new_script = RunScript(
-            user=user,
-            name='config.json',
-            run=new_run,
-            version=1)
-        new_script.save()
-    except Exception as e:
-        print_debug(e)
-        print_message("Error saving config file {} for user {}".format(config_path, user), 'error')
-        return JsonResponse({'error': 'config not saved'})
-
-    template = data.get('template')
-    if not template:
-        return JsonResponse({'new_run_dir': new_run_dir})
-
-    if user in template:
-        template_search_dirs = [user, 'global']
-    else:
-        template_search_dirs = ['global']
-
-    template = template.split('/')[-1]
-    print_message('looking for template {}'.format(template))
-    found_template = False
-    template_path = False
-    template_search_dirs = [ str(template_directory + x) for x in template_search_dirs]
-    for directory in template_search_dirs:
-        print_message('searching in dir {}'.format(directory))
-        if os.path.exists(directory):
-            if template in os.listdir(directory):
-                found_template = True
-                template_path = directory + '/' + template
-        else:
-            os.mkdir(directory)
-
-    if found_template:
+    if run_type == 'diagnostic':
+        # Check to see if this config already exists
         try:
-            shutil.copyfile(template_path, new_run_dir + '/' + template + '_1')
+            conf = DiagnosticConfig.objects.get(user=user, name=new_run)
         except Exception as e:
-            print_debug(e)
-            print_message("Error saving template {} for user {}".format(template, request.user), 'error')
-            return JsonResponse({'new_run_dir': new_run_dir, 'error': 'template not saved'})
+            pass
+        else:
+            print_message('Run config already exists')
+            return HttpResponse(status=409)
 
-        new_script = RunScript(
+        # create diag config object
+        conf = DiagnosticConfig(
             user=user,
-            name=template,
-            run=new_run,
-            version=1)
-        new_script.save()
-        return JsonResponse({'new_run_dir': new_run_dir, 'template': 'template saved'})
+            name=new_run)
+        try:
+            conf.save()
+        except Exception as e:
+            print_message('Error saving diagnostic config')
+            print_debug(e)
+            return HttpResponse(status=500)
+    elif run_type == 'model':
+        # create model config object
+        print_message('Got a model create request')
     else:
-        return JsonResponse({'new_run_dir': new_run_dir, 'error': 'template not found'})
+        print_message('Unrecognized run_type {}'.format(run_type))
+        return HttpResponse(status=400)
+    return HttpResponse()
 
 
 #
@@ -149,48 +101,41 @@ def start_run(request):
         print_message('No run name given', 'error')
         return HttpResponse(status=400)
 
-    path = os.path.abspath(os.path.dirname(__file__))
-    run_directory = path + RUN_SCRIPT_PATH + user + '/' + run_name + '/'
-    config_path = None
-    try:
-        config_version = RunScript.objects.filter(
-            user=user,
-            run=run_name,
-            name='config.json'
-        ).latest().version
-    except Exception as e:
-        raise
-    for f in os.listdir(run_directory):
-        f = f.split('_')[0]
-        if f.endswith('.json'):
-            config_path = f
-            break
-    if not config_path:
-        print_message('Unable to find config file in run directory {}'.format(run_directory))
-        return HttpResponse(status=500)
-    config_path = run_directory + config_path + '_' + str(config_version)
-    try:
-        with open(config_path, 'r') as f:
-            config = f.read()
-        print_message(config)
-        config_options = json.loads(config)
-    except Exception as e:
-        print_debug(e)
-        # print_message('Error reading file {}'.format(config_path))
-        # return HttpResponse(status=500)
+    conf = DiagnosticConfig.objects.filter(user=user, name=run_name)
+    if not conf:
+        print_message('Unable to find config {} for user {}'.format(run_name, user))
+        return HttpResponse(400)
+
+    conf = conf.latest()
     request = mydict()
     request.body = {
         'user': user,
-        'request': 'new'
+        'request': 'new',
+        'run_name': run_name,
+        'run_type': 'diagnostic'
     }
     request.method = 'POST'
-    request.body.update(config_options)
+    request.body.update(model_to_dict(conf))
+
+    if not os.path.exists(request.body.get('obs_path')):
+        print_message(request.body)
+        print_message('could not find {}'.format(request.body.get('obs_path')))
+        return HttpResponse(json.dumps({
+            'error': 'Invalid observation path'
+        }))
+    if not os.path.exists(request.body.get('model_path')):
+        print_message('could not find {}'.format(request.body.get('model_path')))
+        return HttpResponse(json.dumps({
+            'error': 'Invalid model path'
+        }))
+
     request.body = json.dumps(request.body)
     try:
         r = poller_update(request)
         if(r.status_code != 200):
             print_message('Error communicating with poller')
             return HttpResponse(status=500)
+        print_message("poller returning content: {}".format(r.content), 'ok')
         return HttpResponse(r.content)
     except Exception as e:
         print_message('Error making request to poller')
@@ -300,23 +245,224 @@ def delete_run(request):
     return HttpResponse()
 
 
+@login_required
+def get_all_configs(request):
+    user = str(request.user)
+    # get diagnostic run configs
+    diag_configs = DiagnosticConfig.objects.filter(user=user)
+    configs = {}
+    for conf in diag_configs:
+        if configs.get(conf.name):
+            # check its the latest version
+            if configs.get(conf.name).get('version') < conf.version:
+                configs[conf.name] = model_to_dict(conf)
+        else:
+            configs[conf.name] = model_to_dict(conf)
+        configs[conf.name].update({'type': 'diagnostic'})
+    # get model run configs (eventually)
+    return HttpResponse(json.dumps(configs))
+
+
 #
 # View all of a users runs
 # input: user, the user requesting their runs
 @login_required
 def view_runs(request):
     user = str(request.user)
-    path = os.path.abspath(os.path.dirname(__file__))
-    run_directory = path + RUN_SCRIPT_PATH + user + '/'
-    if not os.path.exists(run_directory):
-        try:
-            os.mkdir(run_directory)
-        except Exception as e:
-            print_message('Error creating user directory for {}'.format(user), 'error')
-            print_debug(e)
-            return HttpResponse(status=500)
-    run_dirs = os.listdir(run_directory)
-    return HttpResponse(json.dumps(run_dirs))
+    runs = UserRuns.objects.filter(user=user)
+    response = {
+        run.id: dict([
+            ('job_id', run.id),
+            ('config', json.loads(run.config_options)),
+            ('status', run.status)])
+        for run in runs
+    }
+    return HttpResponse(json.dumps(response))
+
+
+@login_required
+def save_diagnostic_config(request):
+    """
+    Saves the parameters of a diagnostic run to the db
+    input:
+        set: the set of diagnostic sets to run,
+        user: the user creating the config,
+        obs: the name of the obs data folder to use (can also be model data),
+        model: the name of the model data to use (can also be obs, even though obs/obs comparisons dont make a lot of sense),
+        name: the name of the config,
+        shared_users: any other users who should have access to the config
+    """
+    if request.method != 'POST':
+        print_message('invalid HTTP verb')
+        return HttpResponse(status=404)
+    user = str(request.user)
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print_message('Error loading request json')
+        print_debug(e)
+        return HttpResponse(status=400)
+
+    diag_set = data.get('set')
+    obs_data = data.get('obs')
+    model_data = data.get('model')
+    name = data.get('name')
+    shared_users = data.get('shared_users')
+    if not diag_set:
+        print_message('No diag set')
+        return HttpResponse(status=400)
+    if not obs_data:
+        print_message('no obs data folder')
+        return HttpResponse(status=400)
+    if not model_data:
+        print_message('no model data folder')
+        return HttpResponse(status=400)
+    if not name:
+        print_message('no name')
+        return HttpResponse(status=400)
+    if not shared_users:
+        shared_users = user
+    else:
+        shared_users = '{},{}'.format(shared_users, user)
+
+    version = None
+    try:
+        config = DiagnosticConfig.objects.filter(user=user, name=data.get('name')).extra(order_by=['version'])
+        latest = config[len(config) - 1].version + 1
+        print_message('Looking for latest {}'.format(latest))
+    except Exception, e:
+        latest = 1
+    else:
+        # If a config with the given name exists, set the version to its version + 1
+        print_message('latest verion: {}'.format(latest))
+    version = latest
+
+    def find_directory(directory, model, obs):
+        model_path = None
+        obs_path = None
+        for dirname, subdirlist, filelist in os.walk(directory):
+            for subdir in subdirlist:
+                if subdir == model:
+                    model_path = os.path.abspath(os.path.join(dirname, subdir))
+                if subdir == obs:
+                    obs_path = os.path.abspath(os.path.join(dirname, subdir))
+                if model_path and obs_path:
+                    return model_path, obs_path
+        return '', ''
+    model_path, obs_path = find_directory('./userdata/' + user, model_data, obs_data)
+    print_message('model_path: {}, obs_path: {}'.format(model_path, obs_path))
+    if not os.path.exists(model_path):
+        return HttpResponse(json.dumps({
+            'error': 'Invalid model path'
+        }))
+    if not os.path.exists(obs_path):
+        return HttpResponse(json.dumps({
+            'error': 'Invalid observation path'
+        }))
+
+    if not isinstance(diag_set, int):
+        for s in diag_set:
+            s.encode("utf-8")
+
+    print_message('saving config: user: {user}, diag_set: {set}, obs: {obs}, model: {model}, allowed_users: {allowed}'.format(user=user, set=diag_set, obs=obs_path, model=model_path, allowed=shared_users))
+    config = DiagnosticConfig(
+        user=user,
+        diag_set=json.dumps(diag_set),
+        obs_path=obs_path,
+        model_path=model_path,
+        output_path='',
+        name=name,
+        allowed_users=shared_users,
+        version=version)
+    try:
+        config.save()
+    except Exception as e:
+        print_message('Error saving diagnostic config to db')
+        print_debug(e)
+        return HttpResponse(status=500)
+
+    return HttpResponse()
+
+
+@login_required
+def get_diagnostic_configs(request):
+    """
+    Returns a list of the requesting users saved diagnostic configs
+    """
+    user = str(request.user)
+    configs = DiagnosticConfig.objects.filter(user=user)
+    response = {
+        config.name: dict([
+            ('version', config.version),
+            ('obs_path', config.obs_path),
+            ('model_path', config.model_path),
+            ('output_path', config.output_path),
+            ('allowed_users', config.allowed_users),
+            ('set', config.diag_set)
+        ])
+        for config in configs
+    }
+    print_message('config list: {}'.format(response))
+    return HttpResponse(json.dumps(response))
+
+
+@login_required
+def get_diagnostic_by_name(request):
+    """
+    Looks up a specific config and returns its information
+    inputs: user, the user making the request
+            name, the name of the config to lookup
+            version, an optional argument for the version to look for, default is latest
+    """
+    user = str(request.user)
+    name = request.GET.get('name')
+    version = request.GET.get('version')
+    version = version if version else 'latest'
+    if not name:
+        print_message('No name given')
+        return HttpResponse(status=400)
+
+    try:
+        if version == 'latest':
+            print_message('Looking for config with name={name}, user={user}'.format(name=name, user=user))
+            config = DiagnosticConfig.objects.filter(
+                user=user,
+                name=name)
+            if config:
+                config = config.latest()
+        else:
+            print_message('Looking for config with name={name}, user={user}, version={version}'.format(name=name, user=user, version=version))
+            config = DiagnosticConfig.objects.filter(
+                user=user,
+                name=name,
+                version=version)
+            if config:
+                print_message('config was found')
+                config.extra(order_by=['version'])
+                config = config[0]
+            else:
+                for c in DiagnosticConfig.objects.all():
+                    print_message(c.__dict__)
+                print_message('error finding config')
+    except Exception as e:
+        print_message('Error looking up config with user: {user}, name: {name}, version: {version}'.format(user=user, name=name, version=version))
+        print_debug(e)
+        return HttpResponse(status=400)
+
+    if not config:
+        print_message('No config matching with name={name} and version={version} was found'.format(name=name, version=version))
+        return HttpResponse(status=400)
+
+    response = json.dumps({
+        'version': config.version,
+        'name': config.name,
+        'model_path': config.model_path,
+        'obs_path': config.obs_path,
+        'output_path': config.output_path,
+        'allowed_users': config.allowed_users,
+        'set': config.diag_set
+    })
+    return HttpResponse(response)
 
 
 #
@@ -462,43 +608,19 @@ def get_scripts(request):
         print_message('No run name specified in get scripts request', 'error')
         return HttpResponse(status=400)
 
-    path = os.path.abspath(os.path.dirname(__file__))
-    run_directory = path + RUN_SCRIPT_PATH + user + '/' + run_name
-    if not os.path.exists(run_directory):
-        print_message('Request for config folder that doesnt exist {}'.format(run_name), 'error')
-        return HttpResponse(status=403)
-
     try:
         files = {}
         script_list = []
         output_list = []
-        directory_contents = os.listdir(run_directory)
-        for item in directory_contents:
-            if not os.path.isdir(run_directory + '/' + item):
-                # print_message('Got a normal item: ' + item)
-                item = item.rsplit('_', 1)[0]
-                if item not in script_list:
-                    script_list.append(item)
 
-        outputdir = ''
-        config_script = RunScript.objects.filter(user=user, run=run_name, name='config.json').latest()
-        print_message(run_directory + 'config.json_' + str(config_script.version))
-        with open(run_directory + '/config.json_' + str(config_script.version)) as config_file:
-            config = json.loads(config_file.read())
-            config = config.get('request_attr')
-            outdir = config.get('outputdir')
-            diag_type = config.get('diag_type')
-            outputdir = DIAG_OUTPUT_PREFIX \
-                + user \
-                + '/diagnostic_output/' \
-                + run_name + '_' + job_id \
-                + outdir + '/' \
-                + diag_type
-            outputdir = outputdir.lower()
-            print_message('outputdir: {}'.format(outputdir))
-        if os.path.exists(outputdir):
-            directory_contents = os.listdir(outputdir)
-            for root, dirs, file_list in os.walk(outputdir):
+        diag_config = DiagnosticConfig.objects.filter(user=user, name=run_name).extra(order_by=['version'])
+        latest = diag_config[len(diag_config) - 1]
+        print_message('looking up: {}'.format(latest.__dict__))
+        output_dir = diag_config[len(diag_config) - 1].output_path
+
+        print_message('output_dir: {}'.format(output_dir))
+        if os.path.exists(output_dir):
+            for root, dirs, file_list in os.walk(output_dir):
                 for file in file_list:
                     if file.endswith('.png'):
                         output_list.append(file)
@@ -512,11 +634,34 @@ def get_scripts(request):
         print_debug(e)
         return HttpResponse(status=500)
 
-    print_message(script_list)
-    print_message(output_list)
     files['script_list'] = script_list
     files['output_list'] = output_list
     return HttpResponse(json.dumps(files))
+
+
+@login_required
+def get_run_output(request):
+    """
+    Looks up a runs output and returns it to the front end
+    input: user, the user making the request
+           job_id, the id of the job to get the output for
+    """
+    user = str(request.user)
+    job_id = request.GET.get('job_id')
+    if not job_id:
+        print_message('No job_id in output request')
+        return HttpResponse(status=400)
+    try:
+        job = UserRuns.objects.get(id=job_id)
+    except Exception as e:
+        print_debug(e)
+        print_message('Error looking up job with id: {}'.format(job_id))
+        return HttpResponse(status=500)
+
+    response = {
+        'output': job.output.split('u\'').pop()
+    }
+    return HttpResponse(json.dumps(response))
 
 
 #
@@ -541,36 +686,15 @@ def read_output_script(request):
         print_message('No job id given', 'error')
         return HttpResponse(status=400)
 
-    output_directory = DIAG_OUTPUT_PREFIX \
-        + user + '/' \
-        + 'diagnostic_output/' \
-        + run_name + '_' + job_id \
-        + '/diagnostic_output/amwg/'
-    print_message('looking for script in {}'.format(output_directory))
-    script_name_exists = False
-    script_path = ''
-    for (dirpath, dirnames, filenames) in os.walk(output_directory):
-        for file in filenames:
-            if file == script_name:
-                script_name_exists = True
-                script_path = os.path.join(dirpath, file)
-                print_message('Found output file at {}'.format(script_path), 'ok')
-    if not script_name_exists:
-        print_message("unable to find script {}".format(script_name))
-        return HttpResponse(status=400)
-
     try:
-        contents = ''
-        with open(script_path, 'r') as f:
-            for line in f:
-                contents += line
+        run = UserRuns.objects.get(id=job_id)
     except Exception as e:
-        print_message('Error reading from file {}'.format(script_path), 'error')
         print_debug(e)
+        print_message('Error looking up job with id: {}'.format(job_id))
         return HttpResponse(status=500)
 
+    contents = run.output
     return JsonResponse({'script': contents})
-    return HttpResponse()
 
 
 #

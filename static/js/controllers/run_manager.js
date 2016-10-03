@@ -69,14 +69,14 @@
       $scope.all_runs = undefined;
       $scope.selected_run = undefined;
       $scope.script_list = undefined;
-      $scope.output_list = [];
+      $scope.output_list = {};
       $scope.output_cache = {};
       $scope.output_cache_count = {};
       $scope.template_list = undefined;
       $scope.show_image = false;
       $scope.image_index = 0;
       $scope.selected_run_params = {};
-      $scope.get_templates();
+      $scope.get_configs();
       $scope.get_runs();
       $scope.get_user();
       $scope.get_run_status();
@@ -178,13 +178,13 @@
 
     $scope.get_src = (index) => {
       var prefix = '/acme/userdata/image/userdata/' + window.ACMEDashboard.user + '/diagnostic_output/';
-      var src = prefix + $scope.selected_run + '/diagnostic_output/amwg/' + $scope.output_list[$scope.selected_run][index];
+      var src = prefix + $scope.selected_job_identifier + '/amwg/' + $scope.output_list[$scope.selected_job_identifier][index];
       return src;
     }
 
     $scope.open_image = (run, image) => {
       $scope.show_image = true;
-      $scope.image_index = $scope.output_list[$scope.selected_run].indexOf(image);
+      $scope.image_index = $scope.output_list[$scope.selected_job_identifier].indexOf(image);
       var image_el = $('#' + run + '_' + image.slice(0,20));
       //var src = image_el.attr('data-img-location');
       var src = $scope.get_src($scope.image_index);
@@ -210,8 +210,8 @@
     $scope.mode = $scope.modes[0];
 
     $scope.load_output_cache = () => {
-      $scope.output_cache_count[$scope.selected_run] += 1;
-      $scope.output_cache[$scope.selected_run] = $scope.output_list[$scope.selected_run].slice(0, $scope.output_cache_count[$scope.selected_run] * 10);
+      $scope.output_cache_count[$scope.selected_job_identifier] += 1;
+      $scope.output_cache[$scope.selected_job_identifier] = $scope.output_list[$scope.selected_job_identifier].slice(0, $scope.output_cache_count[$scope.selected_job_identifier] * 10);
     }
 
 
@@ -275,6 +275,10 @@
       })
     }
 
+    $scope.open_diagnostic_setup = (run) => {
+
+    }
+
     $scope.update_script = () => {
       var data = {
         'script_name': $scope.selected_script,
@@ -315,6 +319,18 @@
       })
     }
 
+    $scope.get_configs = () => {
+      $http({
+        url: '/run_manager/get_all_configs/',
+        method: 'GET'
+      }).then((res) => {
+        console.log(res.data);
+        $scope.config_name_list = Object.keys(res.data);
+        $scope.config_list = res.data;
+      }).catch((res) => {
+        console.log(res.data);
+      });
+    }
 
     $scope.get_run_status = (callback) => {
       $http({
@@ -336,7 +352,11 @@
             }
           }
         } else {
-          $scope.all_runs = runs;
+          if(Object.keys(runs).length != 0){
+            $scope.all_runs = runs;
+          } else {
+            $scope.all_runs = undefined;
+          }
         }
         $timeout($scope.set_run_status, delay=200, true, runs);
         if(callback){
@@ -384,11 +404,8 @@
       }).then((res) => {
         console.log('created a new run');
         console.log(res.data);
-        if('error' in res.data){
-          $scope.showToast(res.data['error']);
-          return;
-        }
-        $scope.run_list.push(run_name);
+        // $scope.run_list.push(run_name);
+        $scope.get_configs();
         $('#new_run_modal').closeModal();
         $('#new_run_name').val('');
         //$scope.$apply();
@@ -404,7 +421,6 @@
         $http({
           url: '/run_manager/view_runs'
         }).then((res) => {
-          console.log('Got some runs bruh');
           console.log(res.data);
           $scope.run_list = res.data;
           $('#run-list').collapsible({
@@ -465,8 +481,13 @@
           'X-CSRFToken' : $scope.get_csrf()
         }
       }).then((res) => {
+        $('#start_run_modal').closeModal();
+        if(typeof res.data.error !== 'undefined'){
+          $scope.showToast(res.data.error);
+          return;
+        }
         $scope.get_run_status();
-        $scope.set_status_text('new', run);
+        // $scope.set_status_text('new', run);
         $scope.showToast("Run added to the queue");
         $('#start_run_modal').closeModal();
         //$scope.get_run_status($scope.set_run_status);
@@ -517,7 +538,7 @@
         }
       }).then((res) => {
         console.log('successfully copied template');
-        $('copy_template_modal').closeModal();
+        $('#copy_template_modal').closeModal();
         $('#new_template_name').val('');
         $scope.showToast('Successfully copied template');
       }).catch((res) => {
@@ -526,50 +547,157 @@
       });
     }
 
-    $scope.get_run_data = (run, job_id) => {
-      $scope.switch_arrow(run);
-      var run_name = '';
-      if(job_id){
-        run_name = run + '_' + job_id
-      } else {
-        run_name = run
+    $scope.edit_run_config = (conf) => {
+      if($scope.config_list[$scope.selected_run].type == 'diagnostic'){
+        $scope.get_diagnostic_config_options();
+        $scope.get_saved_diagnostic_config(conf);
+        $('#diagnostic_run_setup_modal').openModal();
       }
-      if($scope.selected_run == run_name){
-        return;
+      else if($scope.config_list[$scope.selected_run].type == 'model'){
+        // handle model config
       } else {
-        $scope.selected_run = run_name;
-        $http({
-          url: '/run_manager/get_scripts',
-          params: {
-            'run_name' : run,
-            'job_id': job_id
-          }
-        }).then((res) => {
-          $timeout(() => {
-            console.log('Got some script data');
-            console.log(res.data);
-            $scope.script_list = res.data.script_list;
-            $scope.output_list[$scope.selected_run] = [];
-            $scope.output_list[$scope.selected_run] = res.data.output_list;
-            if($scope.script_list.length == 0){
-              $scope.empty_run = true;
-            } else {
-              $scope.empty_run = false;
-            }
+        // probably error
+      }
+    }
 
-            if($scope.output_list[$scope.selected_run].length != 0){
-              $scope.output_cache_count[$scope.selected_run] = 0;
-              $scope.load_output_cache();
-            }
-            $('.collapsible').collapsible({
-              accordion : false
-            });
-          }, delay=200);
-        }).catch((res) => {
-          console.log('Error getting script list');
-          console.log(res);
-        })
+    $scope.select_all_diag_set = () => {
+      $('.diag_set_checkbox').prop("checked", true);
+    }
+    
+    $scope.save_diag_config = (run_name) => {
+      var model_selected = $('#diag_model_select option:selected').text();
+      var obs_selected = $('#diag_obs_select option:selected').text();
+      params = {
+        'model': model_selected,
+        'obs': obs_selected,
+        'set': [],
+        'name': $scope.selected_run
+      };
+      $.each($('#diag_set_select input:checked'), (index, val) => {
+        params.set.push($(val).attr('value'));
+      });
+      $http({
+        url: '/run_manager/save_diagnostic_config/',
+        method: 'POST',
+        data: params,
+        headers: {
+          'X-CSRFToken' : $scope.get_csrf()
+        },
+      }).then((res) => {
+        console.log(res);
+        $('#diagnostic_run_setup_modal').closeModal();
+        if(typeof res.data.error !== 'undefined'){
+          $scope.showToast(res.data.error);
+          return;
+        }
+        $scope.showToast('Configuration saved');
+      }).catch((res) => {
+        console.log(res);
+      });
+    }
+
+    $scope.get_diagnostic_config_options = () => {
+      $http({
+        url: '/esgf/get_user_data',
+        method: 'GET'
+      }).then((res) => {
+        // put the user name into scope becaues its here, might want to use it later
+        $scope.user = Object.keys(res.data);
+        var model_options = Object.keys(res.data[$scope.user].model_output);
+        var obs_options = Object.keys(res.data[$scope.user].observations);
+        $scope.diag_model_options = model_options.concat(obs_options);
+        $scope.diag_obs_options = $scope.diag_model_options;
+        $scope.diag_set_options = ['1', '2', '3', '4', '5', '6', '7', 'all'];
+        $timeout(() => {
+          $('select').material_select();
+        }, 200);
+      }).catch((res) => {
+        console.log(res.data);
+      });
+    }
+
+    $scope.get_saved_diagnostic_config = () => {
+      $http({
+        url: '/run_manager/get_diagnostic_by_name',
+        method: 'GET',
+        params: {
+          'name': $scope.selected_run
+        }
+      }).then((res) => {
+        console.log(res.data);
+        $timeout(() => {
+          // $('#diag_select_model_' + res.data.model_path.split('/').pop()).selected = true;
+          $('#diag_model_select').val(res.data.model_path.split('/').pop())
+          //$('#diag_select_obs_' + res.data.obs_path.split('/').pop()).selected = true;
+          $('#diag_obs_select').val(res.data.obs_path.split('/').pop())
+          $('select').material_select();
+          $('.diag_set_checkbox').prop("checked", false);
+          if(res.data.set.length != 0){
+            var sets = JSON.parse(res.data.set);
+            $.each(sets, (index, value) => {
+              $('#diag_set_select_' + value).prop({'checked': true});
+            })  
+          }
+        }, 100);
+      
+      }).catch((res) => {
+        console.log(res.data);
+      })
+    }
+
+    $scope.set_selected_run = (run) => {
+      $scope.selected_run = run;
+      $scope.switch_arrow(run);
+    }
+
+    $scope.get_run_data = (run, job_id) => {
+      $scope.switch_arrow(run.run_name);
+      $scope.selected_run = run.run_name;
+      $scope.selected_job_id = run.job_id;
+      $scope.selected_job_identifier = run.run_name + '_' + run.job_id;
+      var get_diag_http_config = {
+        url: '/run_manager/get_diagnostic_by_name',
+        method: 'GET',
+        params: {
+          'name': run.run_name
+        }
       }
+      var get_script_http_config = {
+        url: '/run_manager/get_scripts',
+        method: 'GET',
+        params: {
+          'run_name' : run.run_name,
+          'job_id': run.job_id
+        }
+      }
+      var get_diag_data = $http(get_diag_http_config);
+      var get_script_data = $http(get_script_http_config);
+
+      Promise.all([get_diag_data, get_script_data]).then(values => {
+        $timeout(() => {
+          $scope.selected_run_config = {};
+          for(var k in values[0].data){
+            if(values[0].data.hasOwnProperty(k)){
+              if(typeof values[0].data[k] != "number"){
+                $scope.selected_run_config[k] = values[0].data[k].split('/').pop();  
+              } else {
+                $scope.selected_run_config[k] = values[0].data[k];
+              }
+            }
+          }
+          $scope.output_list[$scope.selected_job_identifier] = values[1].data.output_list;
+          if($scope.output_list[$scope.selected_job_identifier].length != 0){
+            $scope.output_cache_count[$scope.selected_job_identifier] = 0;
+            $scope.load_output_cache();
+          }
+        }, 50);
+      }, reason => {
+        console.log(reason);
+      }).then(() => {
+        $('.collapsible').collapsible({
+          accordion : false
+        });
+      })
     }
 
     $scope.open_output = (run, item, job_id) => {
