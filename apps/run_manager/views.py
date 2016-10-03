@@ -47,7 +47,7 @@ def create_run(request):
 
     new_run = data.get('run_name')
     if not new_run:
-        print_message('No new run_name specied', 'error')
+        print_message('No new run_name given', 'error')
         return HttpResponse(status=400)
 
     run_type = data.get('run_type')
@@ -118,10 +118,13 @@ def start_run(request):
     request.body.update(model_to_dict(conf))
 
     if not os.path.exists(request.body.get('obs_path')):
+        print_message(request.body)
+        print_message('could not find {}'.format(request.body.get('obs_path')))
         return HttpResponse(json.dumps({
             'error': 'Invalid observation path'
         }))
     if not os.path.exists(request.body.get('model_path')):
+        print_message('could not find {}'.format(request.body.get('model_path')))
         return HttpResponse(json.dumps({
             'error': 'Invalid model path'
         }))
@@ -132,6 +135,7 @@ def start_run(request):
         if(r.status_code != 200):
             print_message('Error communicating with poller')
             return HttpResponse(status=500)
+        print_message("poller returning content: {}".format(r.content), 'ok')
         return HttpResponse(r.content)
     except Exception as e:
         print_message('Error making request to poller')
@@ -420,21 +424,34 @@ def get_diagnostic_by_name(request):
 
     try:
         if version == 'latest':
+            print_message('Looking for config with name={name}, user={user}'.format(name=name, user=user))
             config = DiagnosticConfig.objects.filter(
                 user=user,
-                name=name).latest()
+                name=name)
+            if config:
+                config = config.latest()
         else:
+            print_message('Looking for config with name={name}, user={user}, version={version}'.format(name=name, user=user, version=version))
             config = DiagnosticConfig.objects.filter(
                 user=user,
                 name=name,
-                version=version)[0]
+                version=version)
+            if config:
+                print_message('config was found')
+                config.extra(order_by=['version'])
+                config = config[0]
+            else:
+                for c in DiagnosticConfig.objects.all():
+                    print_message(c.__dict__)
+                print_message('error finding config')
     except Exception as e:
         print_message('Error looking up config with user: {user}, name: {name}, version: {version}'.format(user=user, name=name, version=version))
         print_debug(e)
         return HttpResponse(status=400)
 
     if not config:
-        print_message('No diagnostic config matching the name {} and version {} was found'.format(name, version))
+        print_message('No config matching with name={name} and version={version} was found'.format(name=name, version=version))
+        return HttpResponse(status=400)
 
     response = json.dumps({
         'version': config.version,
