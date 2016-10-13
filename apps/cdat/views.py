@@ -1,59 +1,104 @@
 from django.shortcuts import render
 from django.conf import settings
-import requests
-from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from util.utilities import print_message
+from util.utilities import print_debug
+from run_manager.models import DiagnosticConfig
+
+import os
+import vcs
+import cdms2
+import numpy
+import json
 
 
-@csrf_exempt  # should probably fix this at some point
 @login_required
-def vtkweb_launcher(request):
-    """Proxy requests to the configured launcher service."""
+def get_provenance(request):
+    user = str(request.user)
     try:
-        VISUALIZATION_LAUNCHER = settings.VISUALIZATION_LAUNCHER
-    except ImportError:
-        VISUALIZATION_LAUNCHER = None
+        data = json.loads(request.body)
+    except Exception as e:
+        raise
 
-    if not VISUALIZATION_LAUNCHER:
-        # unconfigured launcher
-        return HttpResponse(status=404)
+    file_name = data.get('file_name')
+    run_name = data.get('run_name')
+    run_id = data.get('run_id')
+    variable = data.get('variable')
+    if not file_name:
+        print_message('No file name')
+        return HttpResponse(status=400)
+    if not run_name:
+        print_message('No run_name')
+        return HttpResponse(status=400)
+    if not run_id:
+        print_message('No run_id')
+        return HttpResponse(status=400)
+    if not varible:
+        print_message('No variable')
+        return HttpResponse(status=400)
 
-    # TODO: add status and delete methods
-    if request.method == 'POST':
-        req = requests.post(VISUALIZATION_LAUNCHER, request.body)
-        if req.ok:
-            return HttpResponse(req.content)
-        else:
-            return HttpResponse(status=500)
+    filepath = find_filepath(file_name, user, run_name)
+    try:
+        file = cdms2.open(filepath)
+    except Exception as e:
+        print_message('Error opening {file} with cdms2'.format(file=filepath))
+        print_debug(e)
+        return HttpResponse(status=500)
 
-    return HttpResponse(status=404)
-
-
-def _refresh(request):
-    """Refresh the visualization session information."""
-    # check the session for a vtkweb instance
-    vis = request.session.get('vtkweb')
-    if vis is None or vtk_launcher.status(vis.get('id', '')) is None:
-        # open a visualization instance
-        vis = vtk_launcher.new_instance()
-        request.session['vtkweb'] = vis
-    return dict(vis)
-
-
-def vtk_viewer(request):
-    """Open the main visualizer view."""
-    data = {}
-    data['base'] = base_path
-    data['files'] = [
-        f for f in os.listdir(base_path)
-        if not os.path.isdir(os.path.join(base_path, f))
-    ]
-    data['dirs'] = [
-        f for f in os.listdir(base_path)
-        if os.path.isdir(os.path.join(base_path, f))
-    ]
-    return render(request, 'vtk_view/cdat_viewer.html', data)
+    try:
+        provenance = file(variable).export_provenance()
+    except Exception as e:
+        print_message('Error getting information from {file} with variable={var}'.format(filepath, variable))
+        print_debug(e)
+        return HttpResponse(status=500)
+    return HttpResponse(json.dumps(provenance))
 
 
-def vtk_test(request, test="cone"):
-    return render(request, 'vtk_view/view_test.html', {"test": test})
+@login_required
+def get_variables(request):
+    user = str(request.user)
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        raise
+
+    file_name = data.get('file_name')
+    run_name = data.get('run_name')
+    run_id = data.get('run_id')
+    if not file_name:
+        print_message('No file name')
+        return HttpResponse(status=400)
+    if not run_name:
+        print_message('No run_name')
+        return HttpResponse(status=400)
+    if not run_id:
+        print_message('No run_id')
+        return HttpResponse(status=400)
+
+    filepath = find_filepath(file_name, user, run_name)
+    try:
+        file = cdms2.open(filepath)
+    except Exception as e:
+        print_message('Error opening {file} with cdms2'.format(file=filepath))
+        print_debug(e)
+        return HttpResponse(status=500)
+
+    variables = []
+    for v in file.variables:
+        if v != 'bounds_Latitude' and v != 'bounds_Longitude':
+            variables.append(v)
+    return HttpResponse(json.dumps(variables))
+
+
+# Utility function, should not ever be called via url
+def find_filepath(file, user, run_name, run_id, run_type='diagnostic'):
+    path = 'userdata/{user}/{run_type}_output/{run_name}_{id}/amwg/{file}'.format(
+        user=user,
+        run_type=run_type,
+        run_name=run_name,
+        id=run_id,
+        file=file
+    )
+    filepath = os.path.abspath(path)
+    return filepath
