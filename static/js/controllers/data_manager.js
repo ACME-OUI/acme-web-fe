@@ -463,15 +463,22 @@
     }
 
     $scope.get_user_data = () => {
+      if(window.ACMEDashboard.user_data){
+        return;
+      } else {
+        window.ACMEDashboard.user_data = 'pending';
+      }
       $http({
         url: '/esgf/get_user_data'
       }).then((res) => {
         console.log(res.data);
         if($scope.user){
           $scope.set_alldata(res.data[$scope.user]);
+          window.ACMEDashboard.user_data = res.data[$scope.user];
         } else {
           $scope.get_user(() => {
             $scope.set_alldata(res.data[$scope.user]);
+            window.ACMEDashboard.user_data = res.data[$scope.user];
           });
         }
       }).catch((res) => {

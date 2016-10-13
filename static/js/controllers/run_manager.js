@@ -1,6 +1,6 @@
 (function(){
-  angular.module('run_manager', ['ui.ace', 'ngMaterial'])
-  .controller('RunManagerControl', function($scope, $http, $timeout, $mdToast, $rootScope) {
+  angular.module('run_manager', ['ui.ace', 'ngMaterial', 'ngWebworker'])
+  .controller('RunManagerControl', function($scope, $http, $timeout, $mdToast, Webworker) {
 
     /**
      * Slices the object. Note that returns a new spliced object,
@@ -29,15 +29,21 @@
     };
 
     $scope.get_user = () => {
-      $http({
-        url: '/run_manager/get_user',
-        method: 'GET'
-      }).then((res) => {
-        window.ACMEDashboard.user = res.data
+      if(window.ACMEDashboard.user){
+        return;
+      } else {
+        window.ACMEDashboard.user = true;
+      }
+      var worker = Webworker.create(window.ACMEDashboard.ajax, {async: true });
+      var data = {
+        'url': 'http://aims2.llnl.gov:8000/run_manager/get_user/',
+        'method': 'GET'
+      };
+      worker.run(data).then((result) => {
+        window.ACMEDashboard.user = result;
       }).catch((res) => {
-        console.log('Error getting user');
         console.log(res);
-      });
+      })
     }
 
     $scope.get_csrf = () => {
@@ -59,7 +65,7 @@
 
     $scope.init = function(){
       console.log('[+] Initializing RunManager window parent scope.id = ' + $scope.$parent.$id);
-      console.log($rootScope);
+      $scope.url_prefix = 'http://' + window.location.hostname + ':' + window.location.port;
       $scope.setup_socket();
       $scope.run_options = ['New run configuration', 'start run', 'stop run', 'update status', 'new template'];
       $scope.run_types = ['diagnostic', 'model'];
@@ -655,49 +661,98 @@
       $scope.selected_run = run.run_name;
       $scope.selected_job_id = run.job_id;
       $scope.selected_job_identifier = run.run_name + '_' + run.job_id;
-      var get_diag_http_config = {
-        url: '/run_manager/get_diagnostic_by_name',
-        method: 'GET',
+
+      var worker1 = Webworker.create(window.ACMEDashboard.ajax, {async: true});
+      var p1 = worker1.run({
+        url: $scope.url_prefix + '/run_manager/get_diagnostic_by_name/',
+        method: 'POST',
         params: {
-          'name': run.run_name
+          'name': run.run_name,
+        },
+        headers: {
+          'X-CSRFToken' : $scope.get_csrf()
         }
-      }
-      var get_script_http_config = {
-        url: '/run_manager/get_scripts',
-        method: 'GET',
+      });
+      var worker2 = Webworker.create(window.ACMEDashboard.ajax, {async: true});
+      var p2 = worker2.run({
+        url: '/run_manager/get_scripts/',
+        method: 'POST',
         params: {
           'run_name' : run.run_name,
           'job_id': run.job_id
+        },
+        headers: {
+          'X-CSRFToken' : $scope.get_csrf()
         }
-      }
-      var get_diag_data = $http(get_diag_http_config);
-      var get_script_data = $http(get_script_http_config);
+      })
 
-      Promise.all([get_diag_data, get_script_data]).then(values => {
-        $timeout(() => {
-          $scope.selected_run_config = {};
-          for(var k in values[0].data){
-            if(values[0].data.hasOwnProperty(k)){
-              if(typeof values[0].data[k] != "number"){
-                $scope.selected_run_config[k] = values[0].data[k].split('/').pop();  
-              } else {
-                $scope.selected_run_config[k] = values[0].data[k];
-              }
+
+
+
+
+
+
+
+
+      .then((res) => {
+        console.log(res);
+        var response = JSON.parse(res);
+        $scope.selected_run_config = {};
+        for(var k in response){
+          if(response.hasOwnProperty(k)){
+            if(typeof response[k] != "number"){
+              $scope.selected_run_config[k] = response[k].split('/').pop();  
+            } else {
+              $scope.selected_run_config[k] = response[k];
             }
           }
-          $scope.output_list[$scope.selected_job_identifier] = values[1].data.output_list;
-          if($scope.output_list[$scope.selected_job_identifier].length != 0){
-            $scope.output_cache_count[$scope.selected_job_identifier] = 0;
-            $scope.load_output_cache();
-          }
-        }, 50);
-      }, reason => {
-        console.log(reason);
-      }).then(() => {
-        $('.collapsible').collapsible({
-          accordion : false
-        });
+        }
+      }).catch((res) => {
+        console.log(res);
       })
+
+      // var worker2 = Webworker.create(window.ACMEDashboard.ajax, {async: true});
+      // worker2.run({
+      //   url: '/run_manager/get_scripts',
+      //   method: 'GET',
+      //   params: {
+      //     'run_name' : run.run_name,
+      //     'job_id': run.job_id
+      //   }
+      // }).then((res) => {
+
+      // }).catch((res) => {
+
+      // })
+
+      // var get_diag_data = $http(get_diag_http_config);
+      // var get_script_data = $http(get_script_http_config);
+
+      // Promise.all([get_diag_data, get_script_data]).then(values => {
+      //   $timeout(() => {
+      //     $scope.selected_run_config = {};
+      //     for(var k in values[0].data){
+      //       if(values[0].data.hasOwnProperty(k)){
+      //         if(typeof values[0].data[k] != "number"){
+      //           $scope.selected_run_config[k] = values[0].data[k].split('/').pop();  
+      //         } else {
+      //           $scope.selected_run_config[k] = values[0].data[k];
+      //         }
+      //       }
+      //     }
+      //     $scope.output_list[$scope.selected_job_identifier] = values[1].data.output_list;
+      //     if($scope.output_list[$scope.selected_job_identifier].length != 0){
+      //       $scope.output_cache_count[$scope.selected_job_identifier] = 0;
+      //       $scope.load_output_cache();
+      //     }
+      //   }, 50);
+      // }, reason => {
+      //   console.log(reason);
+      // }).then(() => {
+      //   $('.collapsible').collapsible({
+      //     accordion : false
+      //   });
+      // })
     }
 
     $scope.open_output = (run, item, job_id) => {

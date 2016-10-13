@@ -1,4 +1,52 @@
-<!-- <div>
-	<div id="cesiumContainer"></div>
-</div> -->
+<div style="display: flex;">
+    <div ng-if="vizualizer != 'active' && !selected_source"  class="dashboard-show-hide" style="display:block;" id="viz_data_select">
+        <ul>
+            <li>
+                <a href="" 
+                   ng-click="select_source('diagnostic')" 
+                   class="waves-effect waves-light btn"
+                   style="margin: 1vw; width: 100%;">
+                    Diagnostic
+                </a>        
+            </li>
+            <li>
+                <a href="" 
+                   ng-click="select_source('model')" 
+                   class="waves-effect waves-light btn"
+                   style="margin: 1vw; width: 100%;">
+                    Model
+                </a>   
+            </li>
+        </ul>
+    </div>
+    <div ng-if="vizualizer != 'active' && selected_source" class="dashboard-show-hide">
+        <div class="input-field col s6" style="margin-left: 1vw;">
+            <input type="text" ng-model="select_option_filter" name="select_option_filter_field">
+            <label for="select_option_filter_field">filter</label>
+        </div>
+        <ul class="collapsible popout" data-collapsible="accordion">
+            <li ng-repeat="data in select_data_keys | orderBy:data | filter:select_option_filter" style="width: 100%; margin-left: 2vw;">
+                <div class="collapsible-header" ng-click="select_data_option(data)">
+                    [[data]]
+                </div>
+                <div class="collapsible-body">
+                    <div class="input-field col s6" style="margin-left: 1vw;">
+                        <input type="text" ng-model="selected_option_filter" name="selected_option_filter_field">
+                        <label for="selected_option_filter_field">filter</label>
+                    </div>
+                    <ul class="collection">
+                        <li ng-repeat="d in selected_data_options | orderBy:d | limitTo:d_limit | filter:selected_option_filter">
+                            <span style="margin: 0.5vw">
+                                <a href="" ng-click="visualize_nc(d, data)">[[d]]</a>
+                            </span>
+                        </li>
+                        <a href="" ng-click="increase_d_limit()" class="waves-effect waves-light btn" style="margin: 0.5vw">more</a>
+                        <a href="" ng-click="increase_d_limit(true)" class="waves-effect waves-light btn" style="margin: 0.5vw">all</a>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div ng-if="vizualizer == 'active'" id="vizContainer" style="align-items: stretch;"></div>
+</div>
 

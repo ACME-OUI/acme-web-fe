@@ -73,7 +73,9 @@ var cdms = {
 						buffer = new Int32Array(buffer);
 				}
 				if (headers["X-Cdms-Shape"] !== undefined) {
-					var shape = headers["X-Cdms-Shape"].split(",");
+					var shape = headers["X-Cdms-Shape"].replace('(', '');
+					shape = shape.replace(')', '');
+					shape = shape.split(",");
 					shape = shape.map(function(d) { return parseInt(d); });
 					buffer = new cdms.NDBuffer(buffer, shape);
 				}
@@ -87,37 +89,23 @@ var cdms = {
 		});
 		return promise;
 	},
-	open: function(file, server) {
-		if(server){
-			return new cdms.File(file, server);
-		} else {
-			return new cdms.File(file);
-		}
+	open: function(file, run_name) {
+		return new cdms.File(file, run_name);
 	},
-	Variable: function(file, id) {
-		var url;
-		if(cdms.server){
-			url = cdms.server + "/data?file=" + file + "&variable=" + id
-		} else {
-			url = "/data?file=" + file + "&variable=" + id
-		}
+	Variable: function(file, id, run_name) {
+		var url = "/cdat/nc_data?file=" + file + "&variable=" + id + "&run_name=" + run_name
+		
 		this.data = cdms.getArray(url);
-		if(cdms.server){
-			url = cdms.server + "/data/meta?file=" + file + "&variable=" + id
-		} else {
-			url = "/data/meta?file=" + file + "&variable=" + id
-		}
+
+		url = "/cdat/nc_meta?file=" + file + "&variable=" + id + "&run_name=" + run_name
+		
 		this.bounds = cdms.getArray(url);
 	},
-	File: function(file, server) {
+	File: function(file, run_name) {
 		this.variables = new Promise(function(resolve, reject) {
 			var xhr = new XMLHttpRequest();
-			if(server){
-				cdms.server = server;
-				xhr.open("GET", server + "/file?file=" + file);
-			} else {
-				xhr.open("GET", "/file?file=" + file);
-			}
+			xhr.open("GET", "/cdat/get_file?file=" + file + '&run_name=' + run_name);
+
 			xhr.onload = function(ev) {
 				resolve(JSON.parse(xhr.responseText)["variables"]);
 			}
@@ -128,8 +116,8 @@ var cdms = {
 		});
 		this.getVariable = function(var_id) {
 			return this.variables.then(function(vars) {
-				if (vars.indexOf(var_id) !== -1) {
-					return new cdms.Variable(file, var_id);
+				if (vars[1].indexOf(var_id) !== -1) {
+					return new cdms.Variable(file, var_id, run_name);
 				}
 				return null;
 			});

@@ -415,8 +415,10 @@ def get_diagnostic_by_name(request):
             version, an optional argument for the version to look for, default is latest
     """
     user = str(request.user)
-    name = request.GET.get('name')
-    version = request.GET.get('version')
+    print_message(request.body)
+    data = json.loads(request.body)
+    version = data.get('version')
+    name = data.get('name')
     version = version if version else 'latest'
     if not name:
         print_message('No name given')
