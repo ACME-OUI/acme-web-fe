@@ -28,22 +28,40 @@
       );
     };
 
+    // $scope.get_user = () => {
+    //   if(window.ACMEDashboard.user){
+    //     return;
+    //   } else {
+    //     window.ACMEDashboard.user = true;
+    //   }
+    //   var worker = Webworker.create(window.ACMEDashboard.ajax, {async: true });
+    //   var data = {
+    //     'url': 'http://aims2.llnl.gov:8000/run_manager/get_user/',
+    //     'method': 'GET'
+    //   };
+    //   worker.run(data).then((result) => {
+    //     window.ACMEDashboard.user = result;
+    //   }).catch((res) => {
+    //     console.log(res);
+    //   })
+    // }
+
     $scope.get_user = () => {
       if(window.ACMEDashboard.user){
-        return;
+          return;
       } else {
-        window.ACMEDashboard.user = true;
+          window.ACMEDashboard.user = 'pending';
       }
       var worker = Webworker.create(window.ACMEDashboard.ajax, {async: true });
       var data = {
-        'url': 'http://aims2.llnl.gov:8000/run_manager/get_user/',
-        'method': 'GET'
+          'url': 'http://aims2.llnl.gov:8000/run_manager/get_user/',
+          'method': 'GET'
       };
       worker.run(data).then((result) => {
-        window.ACMEDashboard.user = result;
+          window.ACMEDashboard.user = result;
       }).catch((res) => {
-        console.log(res);
-      })
+          console.log(res);
+      });
     }
 
     $scope.get_csrf = () => {
@@ -684,17 +702,8 @@
         headers: {
           'X-CSRFToken' : $scope.get_csrf()
         }
-      })
-
-
-
-
-
-
-
-
-
-      .then((res) => {
+      });
+      p1.then((res) => {
         console.log(res);
         var response = JSON.parse(res);
         $scope.selected_run_config = {};
@@ -709,6 +718,14 @@
         }
       }).catch((res) => {
         console.log(res);
+      });
+
+      p2.then((res) => {
+        $scope.output_list[$scope.selected_job_identifier] = values[1].data.output_list;
+          if($scope.output_list[$scope.selected_job_identifier].length != 0){
+            $scope.output_cache_count[$scope.selected_job_identifier] = 0;
+            $scope.load_output_cache();
+          }
       })
 
       // var worker2 = Webworker.create(window.ACMEDashboard.ajax, {async: true});

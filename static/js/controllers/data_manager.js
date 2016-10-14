@@ -1,6 +1,6 @@
 (function(){
-  angular.module('data_manager', ['ngAnimate', 'ngMaterial'])
-  .controller('DataManagerControl', function($scope, $http, $timeout, $mdToast) {
+  angular.module('data_manager', ['ngAnimate', 'ngMaterial', 'ngWebworker'])
+  .controller('DataManagerControl', function($scope, $http, $timeout, $mdToast, Webworker) {
 
     /**
      * Slices the object. Note that returns a new spliced object,
@@ -88,18 +88,39 @@
       })
     }
 
-    $scope.get_user = () => {
-      $http({
-        url: '/run_manager/get_user',
-        method: 'GET'
-      }).then((res) => {
-        window.ACMEDashboard.user = res.data;
-        resolve(res.data);
-      }).catch((res) => {
-        console.log('Error getting user');
-        console.log(res);
-        reject(res);
-      });
+    // $scope.get_user = () => {
+    //   $http({
+    //     url: '/run_manager/get_user/',
+    //     method: 'GET'
+    //   }).then((res) => {
+    //     window.ACMEDashboard.user = res.data;
+    //     resolve(res.data);
+    //   }).catch((res) => {
+    //     console.log('Error getting user');
+    //     console.log(res);
+    //     reject(res);
+    //   });
+    // }
+    $scope.get_user = (config) => {
+      if(window.ACMEDashboard.user){
+          return;
+      } else {
+          window.ACMEDashboard.user = 'pending';
+      }
+      var worker = Webworker.create(window.ACMEDashboard.ajax, {async: true });
+      var data = {
+          'url': 'http://aims2.llnl.gov:8000/run_manager/get_user/',
+          'method': 'GET'
+      };
+      if(config && config.async){
+        return worker.run(data);
+      } else {
+        worker.run(data).then((result) => {
+            window.ACMEDashboard.user = result;
+        }).catch((res) => {
+            console.log(res);
+        });
+      }
     }
 
     $scope.open_pdf = (diag, diag_folder) => {
@@ -137,11 +158,7 @@
     $scope.get_src = (index) => {
       return new Promise((resolve, reject) => {
         if(typeof window.ACMEDashboard.user === 'undefined'){
-          $http({
-            url: '/run_manager/get_user',
-            method: 'GET'
-          }).then((res) => {
-            window.ACMEDashboard.user = res.data;
+          $scope.get_user({async: true}).then(() => {
             var prefix = '/acme/userdata/image/userdata/' + window.ACMEDashboard.user + '/diagnostic_output/';
             var src = prefix + $scope.diag_folder + '/amwg/' + $scope.diag_cache[$scope.diag_folder][index];
             resolve(src);
@@ -436,24 +453,24 @@
       $scope.step = -1;
     }
 
-    $scope.get_user = (callback) => {
-      $http({
-        url: '/run_manager/get_user',
-        method: 'GET'
-      }).then((res) => {
-        $scope.user = res.data
-        $scope.get_user_data();
-        if(callback){
-          callback();
-        }
-      }).catch((res) => {
-        console.log('Error getting user');
-        console.log(res);
-        if(callback){
-          callback();
-        }
-      });
-    }
+    // $scope.get_user = (callback) => {
+    //   $http({
+    //     url: '/run_manager/get_user',
+    //     method: 'GET'
+    //   }).then((res) => {
+    //     $scope.user = res.data
+    //     $scope.get_user_data();
+    //     if(callback){
+    //       callback();
+    //     }
+    //   }).catch((res) => {
+    //     console.log('Error getting user');
+    //     console.log(res);
+    //     if(callback){
+    //       callback();
+    //     }
+    //   });
+    // }
 
     $scope.set_datapath = (path) => {
       $scope.datapath = path;
@@ -463,24 +480,27 @@
     }
 
     $scope.get_user_data = () => {
-      if(window.ACMEDashboard.user_data){
-        return;
-      } else {
-        window.ACMEDashboard.user_data = 'pending';
-      }
+      // if(window.ACMEDashboard.user_data){
+      //   return;
+      // } else {
+      //   window.ACMEDashboard.user_data = 'pending';
+      // }
       $http({
         url: '/esgf/get_user_data'
       }).then((res) => {
         console.log(res.data);
-        if($scope.user){
-          $scope.set_alldata(res.data[$scope.user]);
-          window.ACMEDashboard.user_data = res.data[$scope.user];
+        if(window.ACMEDashboard.user){
+          $scope.set_alldata(res.data[window.ACMEDashboard.user]);
+          window.ACMEDashboard.user_data = res.data[window.ACMEDashboard.user];
         } else {
           $scope.get_user(() => {
             $scope.set_alldata(res.data[$scope.user]);
             window.ACMEDashboard.user_data = res.data[$scope.user];
           });
         }
+        $('.collapsible').collapsible({
+          accordion : false
+        });
       }).catch((res) => {
         console.log(res.data);
       });

@@ -1,5 +1,5 @@
 <div style="display: flex;">
-    <div ng-if="vizualizer != 'active' && !selected_source"  class="dashboard-show-hide" style="display:block;" id="viz_data_select">
+    <div ng-show="vizualizer != 'active' && !selected_source"  class="dashboard-show-hide" style="display:block;" id="viz_data_select">
         <ul>
             <li>
                 <a href="" 
@@ -19,7 +19,7 @@
             </li>
         </ul>
     </div>
-    <div ng-if="vizualizer != 'active' && selected_source" class="dashboard-show-hide">
+    <div ng-show="vizualizer != 'active' && selected_source" class="dashboard-show-hide">
         <div class="input-field col s6" style="margin-left: 1vw;">
             <input type="text" ng-model="select_option_filter" name="select_option_filter_field">
             <label for="select_option_filter_field">filter</label>
@@ -47,6 +47,37 @@
             </li>
         </ul>
     </div>
-    <div ng-if="vizualizer == 'active'" id="vizContainer" style="align-items: stretch;"></div>
+    <div ng-show="vizualizer == 'active'" id="vizContainer_option_back">
+        <a class="waves-effect waves-light btn teal dashboard-show-hide" 
+           style="margin-bottom: 1em;" 
+           ng-click="deactivate_viz()">
+            <i class="material-icons left">
+             navigate_before
+            </i>
+        </a>
+    </div>
+    <!-- border: 1px solid black; border-radius: 4px; top: 40%; background: #fff; -->
+    <div class="valign-wrapper">
+        <div ng-if="vizualizer == 'active' && rendering" 
+         style="position: absolute; z-index: 2; left: 40%; border-radius: 50px;"
+         class="hoverable">
+            <div class="valign" style="width: 10vw; height: 10vh;">
+                <div class="sk-circle">
+                  <div class="sk-circle1 sk-child"></div>
+                  <div class="sk-circle2 sk-child"></div>
+                  <div class="sk-circle3 sk-child"></div>
+                  <div class="sk-circle4 sk-child"></div>
+                  <div class="sk-circle5 sk-child"></div>
+                  <div class="sk-circle6 sk-child"></div>
+                  <div class="sk-circle7 sk-child"></div>
+                  <div class="sk-circle8 sk-child"></div>
+                  <div class="sk-circle9 sk-child"></div>
+                  <div class="sk-circle10 sk-child"></div>
+                  <div class="sk-circle11 sk-child"></div>
+                  <div class="sk-circle12 sk-child"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div ng-show="vizualizer == 'active'" id="vizContainer" style="align-items: stretch;"></div>
 </div>
-

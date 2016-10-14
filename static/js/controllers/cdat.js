@@ -1,6 +1,6 @@
 
 angular.module('cdat', ['ngWebworker'])
-.controller('CDATControl', function($scope, $http, $timeout, Webworker) {
+.controller('CDATControl', function($scope, $http, $timeout, Webworker, $window) {
 
     $scope.init = function(){
         console.log('[+] Initializing CDAT window');
@@ -47,17 +47,28 @@ angular.module('cdat', ['ngWebworker'])
         $scope.get_user();
         $scope.load_user_data();
         $scope.d_limit = 10;
+        $window.rendering = false;
+        $scope.rendering = $window.rendering;
         $('.collapsible').collapsible({
             accordion : false
         });
+        window.addEventListener('render_complete', (event) => {
+            $scope.$apply(() => {
+                $scope.rendering = false;
+            });
+        });
     }
 
-    $scope.visualize_nc = (filename, run_name) => {
+    $scope.deactivate_viz = () => {
+        $scope.vizualizer = false;
+    }
+
+    $scope.visualize_nc = (file_name, run_name) => {
         var name_split = run_name.split('_');
+        var run_name = name_split.slice(0, name_split.length - 1).join('_');
         var run_id = name_split.last();
-        var run_name = run_split.splice(0, name_split.length - 2).join('');
-        $http({
-            url: '/cdat/get_provenance/',
+        var p1 = $http({
+            url: '/cdat/get_variables/',
             method: 'POST',
             headers: {
               'X-CSRFToken' : $scope.get_csrf()
@@ -68,18 +79,39 @@ angular.module('cdat', ['ngWebworker'])
                 'run_id': run_id
             }
         }).then((res) => {
-            console.log(res.data);
-            var vizContainer = $('#vizContainer');
-            var parent = vizContainer.parents('.lm_content');
-            var width = parent.width();
-            var height = parent.height();
-            vizContainer.width(width);
-            vizContainer.height(height);
-            $scope.canvas = VCS.init('#vizContainer');
-            $scope.canvas.plot(res.data, $scope.boxfill);
-        }).catch((res) => {
-            console.log(res);
+            $scope.variables = res.data;
+            $scope.rendering = true;
+            $http({
+                url: '/cdat/get_provenance/',
+                method: 'POST',
+                headers: {
+                  'X-CSRFToken' : $scope.get_csrf()
+                },
+                data: {
+                    'file_name': file_name,
+                    'run_name': run_name,
+                    'run_id': run_id,
+                    'variable': $scope.variables[0]
+                }
+            }).then((res) => {
+                console.log(res.data);
+                $scope.vizualizer = 'active';
+                $timeout(() => {
+                    var vizContainer = $('#vizContainer');
+                    var parent = vizContainer.parents('.lm_content');
+                    var width = parent.width();
+                    var height = parent.height();
+                    vizContainer.width(width);
+                    vizContainer.height(height);
+                    $scope.canvas = VCS.init('#vizContainer');
+                    $scope.canvas.plot(res.data, $scope.boxfill);
+                }, 0, false);
+                
+            }).catch((res) => {
+                console.log(res);
+            });
         });
+        
     }
 
     $scope.select_source = (source) => {
