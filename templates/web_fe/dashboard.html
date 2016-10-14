@@ -25,6 +25,9 @@
   <link type="text/css" rel="stylesheet" href="{% static "css/goldenlayout-light-theme.css"%}"/>
   <link type="text/css" rel="stylesheet" href="{% static "css/widgets.css"%}"/>
 
+  <!-- folding cube -->
+  <link type="text/css" rel="stylesheet" href="{% static "css/sk-circle.css"%}"/>
+
   <!-- AngularJS -->
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular-aria.js"></script>
@@ -47,21 +50,11 @@
 
   <script type="text/javascript" src="http://aims2.llnl.gov:8888/vcs.js"></script>
 
-
-
-
   <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
 
   <!-- Typehead and Bloodhound -->
   <script src="{% static "js/resources/typeahead.bundle.js" %}"></script>
   <link rel="stylesheet" href="{% static "css/typeahead.css" %}">
-
-  <!-- vtkweb -->
-  <!-- <script type="text/javascript" src="{% static "vtkweb/js/autobahn.min.js" %}"></script>
-  <script type="text/javascript" src="{% static "vtkweb/js/jquery.hammer.min.js" %}"></script>
-  <script type="text/javascript" src="{% static "vtkweb/js/vtkweb-all.js" %}"></script>
-  <script type="text/javascript" src="{% static "js/resources/cdat.js" %}"></script>
-  <script type="text/javascript">cdat.visualization_launcher = "{{ vis_launcher }}";</script> -->
 
   <!-- Dashboard -->
   <link rel="stylesheet" href="{% static "css/dashboard.css" %}">
@@ -117,4 +110,11 @@
     </div>
   </div>
   <script src="{% static "js/controllers/window.js" %}"></script>
+{% endblock %}
+
+{% block footer %}
+  <footer class="page-footer blue-grey darken-4">
+    <a class="valign" style="color: #64b5f6; margin-left: 2vw;" href="#">Privacy &amp; Legal Notice</a> &nbsp;
+    <a style="color: #64b5f6; margin-left: 2vw;" href="https://github.com/ACME-OUI/acme-web-fe/issues">Site Issues</a>
+  </footer>
 {% endblock %}
