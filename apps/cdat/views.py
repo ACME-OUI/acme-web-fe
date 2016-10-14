@@ -4,7 +4,6 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from util.utilities import print_message
 from util.utilities import print_debug
-from run_manager.models import DiagnosticConfig
 
 import os
 import vcs
@@ -34,11 +33,11 @@ def get_provenance(request):
     if not run_id:
         print_message('No run_id')
         return HttpResponse(status=400)
-    if not varible:
+    if not variable:
         print_message('No variable')
         return HttpResponse(status=400)
 
-    filepath = find_filepath(file_name, user, run_name)
+    filepath = find_filepath(file_name, user, run_name, run_id)
     try:
         file = cdms2.open(filepath)
     except Exception as e:
@@ -76,7 +75,7 @@ def get_variables(request):
         print_message('No run_id')
         return HttpResponse(status=400)
 
-    filepath = find_filepath(file_name, user, run_name)
+    filepath = find_filepath(file_name, user, run_name, run_id)
     try:
         file = cdms2.open(filepath)
     except Exception as e:
