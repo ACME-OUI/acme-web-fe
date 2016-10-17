@@ -176,6 +176,7 @@ INSTALLED_APPS = (
     'esgf',
     'cdat',
     'run_manager',
+    'transfer',
     'channels',
 )
 
