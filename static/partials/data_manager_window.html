@@ -149,7 +149,9 @@
                     <label for="obs_query_field">filter</label>
                   </div>
                   <li ng-repeat="obs in obs_cache[obs_folder] | orderBy:obs | filter:obs_query | limitTo:obs_limit">
-                    <span style="padding: 0.5rem; margin-left: 3vw;">[[ obs ]]</span>
+                    <span style="padding: 0.5rem; margin-left: 3vw;">
+                     [[ obs ]]
+                    </span>
                   </li>
                   <a href="" 
                      class="waves-effect waves-light btn"
@@ -160,6 +162,24 @@
                   </a>
                 </ul>
               </div>
+            </li>
+          </ul>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header" ng-click="view_nersc_folder('')">
+          <span>NERSC</span>
+        </div>
+        <div class="collapsible-body">
+          <ul class="collapsible">
+            <div class="input-field col s6" style="margin-left: 3vw;">
+              <input type="text" ng-model="nersc_root_query" name="nersc_root_query_field">
+              <label for="nersc_root_query_field">filter</label>
+            </div>
+            <li ng-repeat="folder in nersc_root | orderBy:folder | filter:nersc_root_query">
+              <span style="padding: 0.5rem; margin-left: 3vw;">
+               [[folder]]
+              </span>
             </li>
           </ul>
         </div>

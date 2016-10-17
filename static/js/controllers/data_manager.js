@@ -32,6 +32,24 @@
       );
     };
 
+    $scope.view_nersc_folder = (folder) => {
+      data = { 'remote_dir': folder }
+      $http({
+        url: '/transfer/view_remote_directory/',
+        method: 'POST',
+        data: data,
+        headers: {
+          'X-CSRFToken' : $scope.get_csrf(),
+          'Content-Type': 'application/json'
+        }
+      }).then((res) => {
+        console.log(res.data);
+        $scope.nersc_root = JSON.parse(res.data.out);
+      }).catch((res) => {
+        console.log(res);
+      })
+    }
+
     $scope.open_nc = (file, folder, type) => {
       params = {
         'filename': file,
