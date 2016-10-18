@@ -33,6 +33,11 @@
     };
 
     $scope.view_nersc_folder = (folder) => {
+      if($scope.nersc_folder){
+        $scope.nersc_folder += '/' + folder;
+      } else {
+        $scope.nersc_folder = folder;
+      }
       data = { 'remote_dir': folder }
       $http({
         url: '/transfer/view_remote_directory/',
@@ -44,7 +49,7 @@
         }
       }).then((res) => {
         console.log(res.data);
-        $scope.nersc_root = JSON.parse(res.data.out);
+        $scope.nersc_folder = JSON.parse(res.data.out);
       }).catch((res) => {
         console.log(res);
       })
