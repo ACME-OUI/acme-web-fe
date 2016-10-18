@@ -166,27 +166,6 @@
           </ul>
         </div>
       </li>
-      <li>
-        <div class="collapsible-header" ng-click="view_nersc_folder('')">
-          <span>NERSC</span>
-        </div>
-        <div class="collapsible-body">
-          <ul class="collapsible">
-            <div class="input-field col s6" style="margin-left: 3vw;">
-              <input type="text" ng-model="nersc_folder_query" name="nersc_folder_query_field">
-              <label for="nersc_folder_query_field">filter</label>
-            </div>
-            <li ng-repeat="item in nersc_folder | orderBy:folder | filter:nersc_root_query">
-              <span ng-if="!item.dir" style="padding: 0.5rem; margin-left: 3vw;">
-                [[item.item]]
-              </span>
-              <a href="" ng-if="item.dir" style="padding: 0.5rem; margin-left: 3vw;">
-                [[item.item]]
-              </a>
-            </li>
-          </ul>
-        </div>
-      </li>
     </ul>
     <ul class="collection" ng-show="downloads" style="margin: 1em; box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12)">
       <li ng-repeat="download in downloads" 
@@ -226,13 +205,53 @@
           <i class="material-icons">dns</i>
         </div>
         <div class="collapsible-body">
-          <p class="card">
-            <input type="text" id="remote-server-url" placeholder="server url" value="">
-            <a href="#!" class="waves-effect waves-light btn">
-              import
-            </a>
-          </p>
+          <ul class="collapsible">
+            <li>
+              <div class="collapsible-header" ng-click="view_nersc_folder('')">
+                <span>NERSC</span>
+              </div>
+              <div class="collapsible-body">
+                <div class="progress" ng-show="nersc_lookup">
+                  <div class="indeterminate"></div>
+                </div>
+                <a href=""
+                   class="waves-light waves-effect btn"
+                   ng-click="nersc_up_folder()"
+                   ng-show="nersc_path.length > 0"
+                   style="margin-left: 3vw;">
+                    <i class="material-icons" style="vertical-align:middle;">navigate_before</i>
+                   </a>
+                <ul class="collapsible">
+                  <div class="input-field col s6" style="margin-left: 3vw;">
+                    <input type="text" ng-model="nersc_folder_query" name="nersc_folder_query_field">
+                    <label for="nersc_folder_query_field">filter</label>
+                  </div>
+                  <li class="collection" ng-repeat="item in nersc_folder | orderBy:folder | filter:nersc_folder_query">
+                    <span class="collection-item" 
+                          ng-if="!item.dir" 
+                          style="padding: 0.5rem; margin-left: 3vw;">
+                      [[item.item]]
+                      <a href="" 
+                         class="waves-effect waves-light btn"
+                         style="height: 30px; float: right;" 
+                         ng-click="transfer_from_remote(item.item)">
+                          import
+                      </a>
+                    </span>
+                    <a href="" 
+                       class="collection-item" 
+                       ng-if="item.dir"
+                       ng-click="view_nersc_folder(item.item)" 
+                       style="padding: 0.5rem; margin-left: 3vw;">
+                      [[item.item]]
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </li>
+          </ul>
         </div>
+        
       </li>
       <li>
         <div class="collapsible-header active">

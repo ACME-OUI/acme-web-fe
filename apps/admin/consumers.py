@@ -24,6 +24,8 @@ def ws_connect(message):
 @channel_session_user_from_http
 def ws_receive(message):
     data = json.loads(message['text'])
+    # user = message.user.username
+    # if user is None:
     user = data.get('user')
     if user is None:
         user = message.user.username

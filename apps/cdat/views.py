@@ -37,6 +37,12 @@ def get_provenance(request):
         print_message('No variable')
         return HttpResponse(status=400)
 
+    print_message('Looking up filepath for file={file}, user={user}, run_name={run_name}, id={id}'.format(
+        file=file_name,
+        user=user,
+        run_name=run_name,
+        id=run_id), 'ok')
+
     filepath = find_filepath(file_name, user, run_name, run_id)
     try:
         file = cdms2.open(filepath)
@@ -75,7 +81,13 @@ def get_variables(request):
         print_message('No run_id')
         return HttpResponse(status=400)
 
+    print_message('Looking up filepath for file={file}, user={user}, run_name={run_name}, id={id}'.format(
+        file=file_name,
+        user=user,
+        run_name=run_name,
+        id=run_id), 'ok')
     filepath = find_filepath(file_name, user, run_name, run_id)
+    print_message('filepath={filepath}'.format(filepath=filepath), 'ok')
     try:
         file = cdms2.open(filepath)
     except Exception as e:

@@ -15,8 +15,8 @@ def view_remote_directory(request):
     if not remote_dir:
         remote_dir = ''
     remote_dir = '/project/projectdirs/acme/{}'.format(remote_dir.split(' ')[0])
-    keypath = 'somekeypath'
-    keypass = 'apassword'
+    keypath = '/export/baldwin32/.ssh/id_rsa'
+    keypass = 'afakepasswordforgit'
 
     k = paramiko.RSAKey.from_private_key_file(keypath, password=keypass)
     c = paramiko.SSHClient()
@@ -25,7 +25,7 @@ def view_remote_directory(request):
     print "connecting"
     c.connect( hostname="edison.nersc.gov", username="sbaldwin", pkey=k )
     print "connected"
-    command = "python /scripts/get_dir_contents.py {}".format(remote_dir)
+    command = "python ~/scripts/get_dir_contents.py {}".format(remote_dir)
     stdin, stdout, stderr = c.exec_command(command)
     directory = {}
     out = stdout.read()

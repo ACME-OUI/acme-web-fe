@@ -10,7 +10,7 @@
     <span>
       <a href="" 
         class="waves-light waves-effect btn" 
-        style="margin-left: 2vw;"
+        style="margin-left: 5vw;"
         ng-click="trigger_option('New run configuration')">
           new configuration
         </a>
@@ -42,6 +42,7 @@
         </div>
       </li>
       <p style="margin-left: 5vw; margin-top: 1vw;"> Run queue </p>
+
         <li ng-repeat="run in all_runs | orderBy: 'job_id' : true">
           <div class="collapsible-header" ng-click="get_run_data(run, run.job_id)">
             <span>[[run.run_name]]_[[run.job_id]]</span>
@@ -136,6 +137,7 @@
           <label for="[[type]]_radio">[[type]]</label>
         </p>
       </div>
+      <a href="#" class="waves-effect waves-light btn" ng-click="new_run_from_template = true">create from template</a>
       <a href="#" class="waves-effect waves-light btn" ng-click="create_run()">create configuraiton</a>
     </div>
   </div>

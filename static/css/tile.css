@@ -1,0 +1,128 @@
+/***********************************
+	Tile 
+***********************************/
+
+.tile-panel-body {
+    cursor: default;
+    margin-bottom: -30px!important;
+    opacity: 1.0;
+    height:calc(100% - 30px);
+    height: -o-calc(100% - 30px); /* opera */
+	height: -webkit-calc(100% - 30px); /* google, safari */
+	height: -moz-calc(100% - 30px); /* firefox */
+	background-color: #fff;
+    padding: 20px 20px 20px 20px;
+    -webkit-transition: all 0.5s ease-in-out;
+    -moz-transition: all 0.5s ease-in-out;
+    -o-transition: all 0.5s ease-in-out;
+    -ms-transition: all 0.5s ease-in-out;
+    transition: all 0.5s ease-in-out;
+}
+
+.ui-draggable-dragging-no-transition {
+    -webkit-transition: none!important;
+    -moz-transition: none!important;
+    -o-transition: none!important;
+    -ms-transition: none!important;
+    transition: none!important;
+}
+
+.tile-panel-heading {
+    background-color: #4179B5;
+    color: #111;
+    cursor: move;
+    overflow: hidden;
+    height: 30px;
+    width: 100%;
+}
+
+.tile {
+    border: 1px solid;
+    list-style: none;
+    position: absolute;
+    -webkit-transition: all 0.5s ease-in-out;
+    -moz-transition: all 0.5s ease-in-out;
+    -o-transition: all 0.5s ease-in-out;
+    -ms-transition: all 0.5s ease-in-out;
+    transition: all 0.5s ease-in-out;
+    z-index: 2;
+}
+
+.tile-contents tr {
+    border-bottom: 1px dotted silver;
+}
+
+.tile-contents table {
+    width: 100%;
+}
+
+.tile-contents .key {
+    padding-left: 20px;
+    padding-top:2px;
+
+}
+
+.tile-contents .value {
+    padding-right: 20px;
+    padding-top:2px;
+    text-align: right;
+}
+
+.tile-contents {
+    overflow-x: auto;
+    overflow-y: auto;
+    height:100%;
+    width:100%;
+}
+
+.tile-board {
+	margin: 0 auto 0 auto;
+	height: 100%;
+    webkit-transition: background-color 0.5s,color 0.5s,border-color 0.5s;
+    transition: background-color 0.5s,color 0.5s,border-color 0.5s;
+}
+
+.wrapper {
+    height: 80vh;
+    width:100%;
+    margin-left: 5px;
+}
+
+
+.ui-resizable-helper {
+	border: 1px dotted #00f;
+	z-index: 10000!important;
+}
+
+.ui-resizable-n {
+    cursor: n-resize;
+    height: 7px;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+}
+
+.ui-resizable-s {
+    cursor: s-resize;
+    height: 7px;
+    left: 0px;
+    width: 100%;
+    bottom: 0px;
+}
+
+.ui-resizable-e {
+    cursor: e-resize;
+    width: 7px;
+    right: 0px;
+    top: 0px;
+    height: 100%;
+}
+
+.ui-resizable-w {
+    cursor: w-resize;
+    width: 7px;
+    left: 0px;
+    top: 0px;
+    height: 100%;
+}
+

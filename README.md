@@ -8,7 +8,7 @@ acme-site
 
 ####Python: This application requires  2.7.9 &lt; Python &lt; 3.0
 
-**setup**
+**init**
 
     fork git@github.com:acme-oui/acme-web-fe.git
     git clone git@github.com:<your-user-name>/acme-web-fe.git
@@ -20,22 +20,21 @@ acme-site
     virtualenv env
     source env/bin/activate
 
-You need to have installed openssl, myproxy-devel, libffi
+    You need to have installed openssl, myproxy-devel, libffi
 
     pip install -U -r requirements.txt
 
 
-You will also need to install the django-sendfile module
-After creating your virtualenv and sourcing it,
+    You will also need to install the django-sendfile module
+    After creating your virtualenv and sourcing it,
 
     git clone https://github.com/johnsensible/django-sendfile
     cd django-sendfile
     python setup.py install
 
 
-next [install redis](http://redis.io/topics/quickstart) for handling websockets
-once redis is setup, run 
-    redis-server
+    next [install redis](http://redis.io/topics/quickstart) for handling websockets
+    once redis is setup, run redis-server
 
 
 **local settings**
@@ -43,7 +42,7 @@ once redis is setup, run
     cp local_settings.py.example local_settings.py
     vim local_settings.py
 
-Modify the settings for your local environment.
+    Modify the settings for your local environment.
 
 **static files**
 
@@ -54,7 +53,7 @@ Modify the settings for your local environment.
 
     python manage.py syncdb
 
-setup admin
+**setup admin**
 
     yes
     admin

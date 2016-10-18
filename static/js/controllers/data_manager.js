@@ -33,12 +33,14 @@
     };
 
     $scope.view_nersc_folder = (folder) => {
-      if($scope.nersc_folder){
-        $scope.nersc_folder += '/' + folder;
+      $scope.nersc_folder = [];
+      $scope.nersc_lookup = true;
+      if($scope.nersc_path){
+        $scope.nersc_path += '/' + folder;
       } else {
-        $scope.nersc_folder = folder;
+        $scope.nersc_path = folder;
       }
-      data = { 'remote_dir': folder }
+      data = { 'remote_dir': $scope.nersc_path };
       $http({
         url: '/transfer/view_remote_directory/',
         method: 'POST',
@@ -48,11 +50,42 @@
           'Content-Type': 'application/json'
         }
       }).then((res) => {
+        $scope.nersc_lookup = false;
         console.log(res.data);
         $scope.nersc_folder = JSON.parse(res.data.out);
       }).catch((res) => {
+        $scope.nersc_lookup = false;
         console.log(res);
-      })
+      });
+    }
+
+    $scope.nersc_up_folder = () => {
+      var path_split = $scope.nersc_path.split('/');
+      $scope.nersc_path = path_split.slice(0, path_split.length - 1).join('/');
+      $scope.nersc_lookup = true;
+      $scope.nersc_folder = [];
+      data = { 'remote_dir': $scope.nersc_path };
+      $http({
+        url: '/transfer/view_remote_directory/',
+        method: 'POST',
+        data: data,
+        headers: {
+          'X-CSRFToken' : $scope.get_csrf(),
+          'Content-Type': 'application/json'
+        }
+      }).then((res) => {
+        $scope.nersc_lookup = false;
+        console.log(res.data);
+        $scope.nersc_folder = JSON.parse(res.data.out);
+      }).catch((res) => {
+        $scope.nersc_lookup = false;
+        console.log(res);
+      });
+    }
+
+    $scope.transfer_from_remote = (item) => {
+      console.log('current nersc folder: ' + $scope.nersc_folder);
+      console.log('selected item: ' + item);
     }
 
     $scope.open_nc = (file, folder, type) => {
