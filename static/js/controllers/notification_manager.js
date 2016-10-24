@@ -111,7 +111,9 @@
       window.ACMEDashboard.socket_handlers.notification = (data) => {
         console.log('got a notication');
         console.log(data);
-        $scope.list_insert(data);
+        $scope.$apply(() => {
+          $scope.list_insert(data);
+        });
       }
 
 
@@ -126,6 +128,7 @@
               continue;
             }
             if(key == data.destination){
+              console.log(`sending socket command to ${key} with ${data} from notification manager`);
               window.ACMEDashboard.socket_handlers[key](data);
               break;
             }

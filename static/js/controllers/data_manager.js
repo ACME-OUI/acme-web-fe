@@ -479,6 +479,7 @@
             continue;
           }
           if(key == data.destination){
+            console.log(`sending socket command to ${key} with ${data} from data manager`);
             window.ACMEDashboard.socket_handlers[key](data);
           }
         }
