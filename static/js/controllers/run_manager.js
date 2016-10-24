@@ -732,7 +732,8 @@
           'X-CSRFToken' : $scope.get_csrf()
         }
       }).then((res) => {
-        $scope.output_list[$scope.selected_job_identifier] = values[1].data.output_list;
+        var result = JSON.parse(res);
+        $scope.output_list[$scope.selected_job_identifier] = result.output_list;
           if($scope.output_list[$scope.selected_job_identifier].length != 0){
             $scope.output_cache_count[$scope.selected_job_identifier] = 0;
             $scope.load_output_cache();

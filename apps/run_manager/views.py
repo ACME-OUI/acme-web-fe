@@ -640,18 +640,32 @@ def get_scripts(request):
     if not run_name:
         print_message('No run name specified in get scripts request', 'error')
         return HttpResponse(status=400)
+    if not job_id:
+        print_message('No job_id given')
+        return HttpResponse(status=400)
 
     try:
-        files = {}
-        script_list = []
-        output_list = []
-
         diag_config = DiagnosticConfig.objects.filter(user=user, name=run_name).extra(order_by=['version'])
         latest = diag_config[len(diag_config) - 1]
         print_message('looking up: {}'.format(latest.__dict__))
+    except Exception as e:
+        print_message('Error looking up diagnostic config')
+        print_debug(e)
+        return HttpResponse(status=500)
+    try:
         output_dir = diag_config[len(diag_config) - 1].output_path
-
+        if not output_dir or len(output_dir) == 0 or job_id != output_dir.split('_').pop():
+            path = 'userdata/{user}/diagnostic_output/{run_name}_{job_id}'.format(
+                user=user,
+                run_name=run_name,
+                job_id=job_id
+            )
+            output_dir = os.path.abspath(path)
         print_message('output_dir: {}'.format(output_dir))
+
+        files = {}
+        script_list = []
+        output_list = []
         if os.path.exists(output_dir):
             for root, dirs, file_list in os.walk(output_dir):
                 for file in file_list:

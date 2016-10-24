@@ -12,6 +12,13 @@
         <input id="config_list_filter" ng-model="config_list_filter" type="text">
         <label for="config_list_filter">filter</label>
       </div>
+      <li>
+        <a href="" 
+          class="waves-light waves-effect btn" 
+          ng-click="trigger_option('New run configuration')">
+            new configuration
+        </a>
+      </li>
       <li ng-repeat="conf in config_name_list | orderBy:conf| filter:config_list_filter">
         <div class="collapsible-header" ng-click="set_selected_run(conf)">
           <span class="">[[conf]]</span>
@@ -44,16 +51,13 @@
           </div>
         </div>
       </li>
-      <li>
-        <a href="" 
-          class="waves-light waves-effect btn" 
-          ng-click="trigger_option('New run configuration')">
-            new configuration
-        </a>
-      </li>
-      <p style="margin-left: 5vw; margin-top: 1vw;"> Run queue </p>
 
-        <li ng-repeat="run in all_runs | orderBy: 'job_id' : true">
+      <p style="margin-left: 5vw; margin-top: 1vw;"> Run queue </p>
+        <div class="input-field col s6" style="margin-left: 3vw;">
+          <input id="run_list_filter" ng-model="run_list_filter" type="text">
+          <label for="run_list_filter">filter</label>
+        </div>
+        <li ng-repeat="run in all_runs | orderBy: 'job_id' : true | filter:run_list_filter">
           <div class="collapsible-header" ng-click="get_run_data(run, run.job_id)">
             <span>[[run.run_name]]_[[run.job_id]]</span>
             <span style="float: right; margin-right: 2vw; color:grey;" id="[[run.job_id]]_queue_status"></span>
@@ -113,21 +117,6 @@
             </ul>
           </div>
         </li>
-
-      <p style="margin-left: 5vw; margin-top: 1vw;">Template List</p>
-      <li>
-        <div class="collapsible-header" ng-click="switch_arrow('template')">
-          <i class="material-icons" id="template_arrow">play_arrow</i>
-          <p>templates</p>
-        </div>
-        <div class="collapsible-body">
-          <ul class="collection" id="template-list">
-            <li ng-repeat="template in template_list" class="collection-item">
-              <a href="#" class="waves-effect waves-light btn">[[template]]</a>
-            </li>
-          </ul>
-        </div>
-      </li>
     </ul>
   </div>
 
