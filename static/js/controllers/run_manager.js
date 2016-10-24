@@ -697,20 +697,7 @@
         headers: {
           'X-CSRFToken' : $scope.get_csrf()
         }
-      });
-      var worker2 = Webworker.create(window.ACMEDashboard.ajax, {async: true});
-      var p2 = worker2.run({
-        url: '/run_manager/get_scripts/',
-        method: 'POST',
-        params: {
-          'run_name' : run.run_name,
-          'job_id': run.job_id
-        },
-        headers: {
-          'X-CSRFToken' : $scope.get_csrf()
-        }
-      });
-      p1.then((res) => {
+      }).then((res) => {
         console.log(res);
         var response = JSON.parse(res);
         $scope.selected_run_config = {};
@@ -733,56 +720,55 @@
         console.log(res);
       });
 
-      p2.then((res) => {
+      var worker2 = Webworker.create(window.ACMEDashboard.ajax, {async: true});
+      var p2 = worker2.run({
+        url: $scope.url_prefix + '/run_manager/get_scripts/',
+        method: 'POST',
+        params: {
+          'run_name': run.run_name,
+          'job_id': run.job_id
+        },
+        headers: {
+          'X-CSRFToken' : $scope.get_csrf()
+        }
+      }).then((res) => {
         $scope.output_list[$scope.selected_job_identifier] = values[1].data.output_list;
           if($scope.output_list[$scope.selected_job_identifier].length != 0){
             $scope.output_cache_count[$scope.selected_job_identifier] = 0;
             $scope.load_output_cache();
           }
-      })
+      }).catch((res) => {
+        console.log(res);
+      });
+    }
 
-      // var worker2 = Webworker.create(window.ACMEDashboard.ajax, {async: true});
-      // worker2.run({
-      //   url: '/run_manager/get_scripts',
-      //   method: 'GET',
-      //   params: {
-      //     'run_name' : run.run_name,
-      //     'job_id': run.job_id
-      //   }
-      // }).then((res) => {
+    $scope.delete_run = (conf) => {
+      $('#delete_run_modal').openModal();
+      $scope.selected_for_delete = conf;
+    }
 
-      // }).catch((res) => {
-
-      // })
-
-      // var get_diag_data = $http(get_diag_http_config);
-      // var get_script_data = $http(get_script_http_config);
-
-      // Promise.all([get_diag_data, get_script_data]).then(values => {
-      //   $timeout(() => {
-      //     $scope.selected_run_config = {};
-      //     for(var k in values[0].data){
-      //       if(values[0].data.hasOwnProperty(k)){
-      //         if(typeof values[0].data[k] != "number"){
-      //           $scope.selected_run_config[k] = values[0].data[k].split('/').pop();  
-      //         } else {
-      //           $scope.selected_run_config[k] = values[0].data[k];
-      //         }
-      //       }
-      //     }
-      //     $scope.output_list[$scope.selected_job_identifier] = values[1].data.output_list;
-      //     if($scope.output_list[$scope.selected_job_identifier].length != 0){
-      //       $scope.output_cache_count[$scope.selected_job_identifier] = 0;
-      //       $scope.load_output_cache();
-      //     }
-      //   }, 50);
-      // }, reason => {
-      //   console.log(reason);
-      // }).then(() => {
-      //   $('.collapsible').collapsible({
-      //     accordion : false
-      //   });
-      // })
+    $scope.delete_run_option = (choice) => {
+      if(choice == 'yes'){
+        $http({
+          url: '/run_manager/delete_diagnostic_config/',
+          method: 'POST',
+          data: {
+            'name': $scope.selected_for_delete
+          },
+          headers: {
+            'X-CSRFToken' : $scope.get_csrf()
+          }
+        }).then((res) => {
+          var index = $scope.config_name_list.indexOf($scope.selected_for_delete);
+          $scope.config_name_list.splice(index, 1);
+        }).catch((res) => {
+          $scope.showToast('Error deleting configuration');
+        }).then(() => {
+          $('#delete_run_modal').closeModal();
+        });
+      } else {
+        $('#delete_run_modal').closeModal();
+      }
     }
 
     $scope.open_output = (run, item, job_id) => {

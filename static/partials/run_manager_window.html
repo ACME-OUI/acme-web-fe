@@ -7,16 +7,12 @@
   <hr>
   <div class="run_list dashboard-show-hide" ng-show="ready == true">
     <p style="margin-left: 5vw;">Configuration List</p>
-    <span>
-      <a href="" 
-        class="waves-light waves-effect btn" 
-        style="margin-left: 5vw;"
-        ng-click="trigger_option('New run configuration')">
-          new configuration
-        </a>
-    </span>
     <ul class="collapsible popout" id="run-list" data-collapsible="accordion">
-      <li ng-repeat="conf in config_name_list | orderBy:conf">
+      <div class="input-field col s6" style="margin-left: 3vw;">
+        <input id="config_list_filter" ng-model="config_list_filter" type="text">
+        <label for="config_list_filter">filter</label>
+      </div>
+      <li ng-repeat="conf in config_name_list | orderBy:conf| filter:config_list_filter">
         <div class="collapsible-header" ng-click="set_selected_run(conf)">
           <span class="">[[conf]]</span>
         </div>
@@ -36,10 +32,24 @@
                     start
                   </a>
                 </span>
+                <span style="margin-left: 2vw;">
+                  <a href="#" class="waves-effect waves-light btn" 
+                     style="color:#009688; padding-bottom: 5px; vertical-align:middle;" 
+                     ng-click="delete_run(conf)">
+                    delete
+                  </a>
+                </span>
               </li>
             </ul>
           </div>
         </div>
+      </li>
+      <li>
+        <a href="" 
+          class="waves-light waves-effect btn" 
+          ng-click="trigger_option('New run configuration')">
+            new configuration
+        </a>
       </li>
       <p style="margin-left: 5vw; margin-top: 1vw;"> Run queue </p>
 
@@ -137,7 +147,6 @@
           <label for="[[type]]_radio">[[type]]</label>
         </p>
       </div>
-      <a href="#" class="waves-effect waves-light btn" ng-click="new_run_from_template = true">create from template</a>
       <a href="#" class="waves-effect waves-light btn" ng-click="create_run()">create configuraiton</a>
     </div>
   </div>
@@ -206,6 +215,21 @@
         </li>
       </ul>
     </div>
+  </div>
+
+  <!-- Delete run modal -->
+  <div class="modal" id="delete_run_modal" style="padding: 2vh;">
+    <p>Perminately delete this run configuration?</p>
+    <a href="" 
+       class="waves-effect waves-light btn red"
+       ng-click="delete_run_option('yes')">
+        yes
+    </a>
+    <a href="" 
+       class="waves-effect waves-light btn"
+       ng-click="delete_run_option('no')">
+        no
+    </a>
   </div>
 
   <!-- Diagnostic run configuration modal -->

@@ -20,6 +20,7 @@ urlpatterns = [
     url(r'^get_user/$', views.get_user),
     url(r'^get_output_zip/$', views.get_output_zip),
     url(r'^save_diagnostic_config/$', views.save_diagnostic_config),
+    url(r'^delete_diagnostic_config/$', views.delete_diagnostic_config),
     url(r'^get_diagnostic_configs/$', views.get_diagnostic_configs),
     url(r'^get_diagnostic_by_name/$', views.get_diagnostic_by_name),
     url(r'^get_all_configs/$', views.get_all_configs),

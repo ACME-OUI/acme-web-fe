@@ -281,6 +281,31 @@ def view_runs(request):
 
 
 @login_required
+def delete_diagnostic_config(request):
+    if request.method != 'POST':
+        print_message('invalid HTTP verb')
+        return HttpResponse(status=404)
+    user = str(request.user)
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print_message('Error loading request json from body: {}'.format(request.body))
+        print_debug(e)
+        return HttpResponse(status=400)
+    name = data.get('name')
+    if not name:
+        print_message('no name given in delete request')
+        return HttpResponse(status=400)
+    try:
+        DiagnosticConfig.objects.filter(user=user, name=name).delete()
+    except Exception as e:
+        print_message('Error deleting diagnostic configs with name: {}'.format(name))
+        print_debug(e)
+        return HttpResponse(status=500)
+    return HttpResponse()
+
+
+@login_required
 def save_diagnostic_config(request):
     """
     Saves the parameters of a diagnostic run to the db
@@ -299,7 +324,7 @@ def save_diagnostic_config(request):
     try:
         data = json.loads(request.body)
     except Exception as e:
-        print_message('Error loading request json')
+        print_message('Error loading request json from body: {}'.format(request.body))
         print_debug(e)
         return HttpResponse(status=400)
 
@@ -603,9 +628,15 @@ def update_script(request):
 #          request for run folder that doesnt exist: status 403
 @login_required
 def get_scripts(request):
-    run_name = request.GET.get('run_name')
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print_message('error loading request body: {}'.format(request.body))
+        print_debug(e)
+        return HttpResponse(status=400)
+    run_name = data.get('run_name')
     user = str(request.user)
-    job_id = str(request.GET.get('job_id'))
+    job_id = str(data.get('job_id'))
     if not run_name:
         print_message('No run name specified in get scripts request', 'error')
         return HttpResponse(status=400)
