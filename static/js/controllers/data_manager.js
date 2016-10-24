@@ -671,9 +671,9 @@
       }).then(function(res){
         $scope.node_list = res.data
         $scope.ready = true;
-        $('#data-select-collapsible').collapsible({
-          accordion : false
-        });
+        // $('#data-select-collapsible').collapsible({
+        //   accordion : false
+        // });
       }).catch(function(res){
         console.log("[-] Error retrieving node list");
         console.log(res);

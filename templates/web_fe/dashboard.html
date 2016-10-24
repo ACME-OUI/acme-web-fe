@@ -6,14 +6,16 @@
 
 {% csrf_token %}
 
-  <link href="{% static "css/widgets.css" %}"/>
-  <script src="{% static "js/resources/Cesium.js" %}"></script>
+  <!-- <link href="{% static "css/widgets.css" %}"/> -->
+ <!--  <script src="{% static "js/resources/Cesium.js" %}"></script> -->
+  <script type="text/javascript" src="http://aims2.llnl.gov:8888/scripts/vcs.js"></script>
+  <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
   <script src="{% static "js/resources/cdms.js" %}"></script>
 
   <!-- Materialize -->
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css">
   <link href="//fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <script src="//cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/js/materialize.min.js"></script>
 
   <!-- Reconnecting Web Socket -->
   <script type="text/javascript" src="{% static "js/resources/reconnecting-websocket.min.js"%}"></script>
@@ -46,9 +48,6 @@
   <script src="{% static "js/controllers/data_manager.js" %}"></script>
   <script src="{% static "js/controllers/run_manager.js" %}"></script>
   <script src="{% static "js/controllers/notification_manager.js" %}"></script>
-
-
-  <script type="text/javascript" src="http://aims2.llnl.gov:8888/vcs.js"></script>
 
   <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
 

@@ -52,7 +52,7 @@
           var note = JSON.parse(v);
           $scope.list_insert(note);
         });
-        $('#notification_list').collapsible({
+        $('.collapsible').collapsible({
             accordion : false
           });
       }).catch((res) => {
