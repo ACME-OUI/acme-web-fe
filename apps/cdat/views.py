@@ -52,9 +52,9 @@ def get_provenance(request):
         return HttpResponse(status=500)
 
     try:
-        provenance = file(variable).export_provenance()
+        provenance = file(variable).exportProvenance()
     except Exception as e:
-        print_message('Error getting information from {file} with variable={var}'.format(filepath, variable))
+        print_message('Error getting information from {file} with variable={var}'.format(file=filepath, var=variable))
         print_debug(e)
         return HttpResponse(status=500)
     return HttpResponse(json.dumps(provenance))
