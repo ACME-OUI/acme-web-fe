@@ -32,7 +32,53 @@
       );
     };
 
+    $scope.publish_from_remote = (item) => {
+      var data = {
+        'remote_dir': $scope.nersc_path,
+        'local_dir': '',
+        'remote_file': item
+      }
+      message = JSON.stringify({
+          'target_app': 'transfer',
+          'destination': 'transfer_file',
+          'content': 'hello world!'
+        })
+      window.ACMEDashboard.socket.send(message);
+    }
+
+    $scope.initialize_nersc_modal = () => {
+      if(!$scope.nersc_credential_pass){
+        $('#nersc_credential_modal').openModal();
+      } else {
+        $scope.view_nersc_folder('');
+      }
+      
+    }
+
+    $scope.nersc_credential_submit = () => {
+      var data = {
+        username: $('#nersc_username').val(),
+        password: $('#nersc_password').val()
+      }
+      $http({
+        url: '/transfer/nersc_login/',
+        method: 'POST',
+        data: data,
+        headers: {
+          'X-CSRFToken' : $scope.get_csrf(),
+          'Content-Type': 'application/json'
+        }
+      }).then((res) => {
+        console.log(res);
+        $scope.nersc_credential_pass = true;
+      }).catch((res) => {
+        console.log(res);
+        $scope.nersc_credential_pass = false;
+      });
+    }
+
     $scope.view_nersc_folder = (folder) => {
+      $scope.nersc_folder_query = '';
       $scope.nersc_folder = [];
       $scope.nersc_lookup = true;
       if($scope.nersc_path){
@@ -60,6 +106,7 @@
     }
 
     $scope.nersc_up_folder = () => {
+      $scope.nersc_folder_query = '';
       var path_split = $scope.nersc_path.split('/');
       $scope.nersc_path = path_split.slice(0, path_split.length - 1).join('/');
       $scope.nersc_lookup = true;
@@ -84,8 +131,23 @@
     }
 
     $scope.transfer_from_remote = (item) => {
-      console.log('current nersc folder: ' + $scope.nersc_folder);
+      console.log('current nersc folder: ' + $scope.nersc_path);
       console.log('selected item: ' + item);
+
+      var data = {
+        params: {
+          'remote_dir': $scope.nersc_path,
+          'local_dir': '',
+          'remote_file': item
+        }
+      }
+      message = JSON.stringify({
+        target_app: 'transfer',
+        destination: 'transfer_file',
+        data: data,
+        user: window.ACMEDashboard.user
+      })
+      window.ACMEDashboard.socket.send(message);
     }
 
     $scope.open_nc = (file, folder, type) => {
@@ -294,6 +356,7 @@
       $scope.publish_config_name = 'adsf';
       $scope.diag_limit = 20;
       $scope.obs_limit = 20;
+      $scope.nersc_credential_pass = false;
       $timeout(() => {
         $scope.get_user_data();
         $('.collapsible').collapsible({
@@ -499,7 +562,7 @@
         'target_app': 'esgf',
         'destination': 'dataset_download',
         'params': params,
-        'user': $scope.user
+        'user': window.ACMEDashboard.user
       })
       window.ACMEDashboard.socket.send(request);
       $scope.downloads = $scope.downloads || {};

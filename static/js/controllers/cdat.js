@@ -103,7 +103,7 @@ angular.module('cdat', ['ngWebworker'])
                     var height = parent.height();
                     vizContainer.width(width);
                     vizContainer.height(height);
-                    $scope.canvas = VCS.init('#vizContainer');
+                    $scope.canvas = vcs.init('#vizContainer', 'server');
                     $scope.canvas.plot(res.data, $scope.boxfill);
                 }, 0, false);
                 
@@ -129,7 +129,7 @@ angular.module('cdat', ['ngWebworker'])
 
     $scope.load_diagnostic_data = () => {
         // load users available diagnostic data
-        $scope.select_data = $scope.user_data[window.ACMEDashboard.user]['diagnostic_output'];
+        $scope.select_data = window.ACMEDashboard.user_data[window.ACMEDashboard.user]['diagnostic_output'];
         $scope.select_data_keys = Object.keys($scope.select_data);
     };
 

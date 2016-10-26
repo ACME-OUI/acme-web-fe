@@ -115,6 +115,13 @@
           $scope.list_insert(data);
         });
       }
+      window.ACMEDashboard.socket_handlers.data_manager_transfer = (data) => {
+        console.log('got a notication');
+        console.log(data);
+        $scope.$apply(() => {
+          $scope.list_insert(data);
+        })
+      }
 
 
       window.ACMEDashboard.socket.onmessage = (message) => {
