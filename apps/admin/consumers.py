@@ -4,6 +4,7 @@ from channels.auth import channel_session_user_from_http
 from util.utilities import print_message
 from apps.run_manager import dispatcher as rm_dispatch
 from apps.esgf import dispatcher as esgf_dispatch
+from apps.transfer import dispatcher as transfer_dispatch
 import json
 
 import pprint
@@ -40,6 +41,8 @@ def ws_receive(message):
         return_code = rm_dispatch.dispatch(message, data, user)
     elif target_app == 'esgf':
         return_code = esgf_dispatch.dispatch(message, data, user)
+    elif target_app == 'transfer':
+        return_code = transfer_dispatch.dispatch(message, data, user)
     else:
         print_message('unrecognized target_app {}'.format(target_app))
         return_code = -1
