@@ -870,16 +870,15 @@ def get_output_zip(request):
         + run_name + '/' \
         + 'output_archive'
 
-    if not os.path.exists(output_filename + '.zip'):
-
+    if not os.path.exists(output_filename + '.tar.gz'):
         try:
             print_message('creating output archive {}'.format(output_filename))
-            shutil.make_archive(output_filename, 'zip', run_directory)
+            shutil.make_archive(output_filename, 'gztar', run_directory)
         except Exception as e:
             print_message('Failed to create zip archive {}'.format(output_filename))
             print_debug(e)
 
-    return sendfile(request, output_filename + '.zip')
+    return sendfile(request, output_filename + '.tar.gz')
 
 
 #
