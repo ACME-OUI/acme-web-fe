@@ -1,4 +1,5 @@
 (function(){
+  'use strict';
   angular.module('data_manager', ['ngAnimate', 'ngMaterial', 'ngWebworker'])
   .controller('DataManagerControl', function($scope, $http, $timeout, $mdToast, Webworker) {
 
@@ -523,9 +524,8 @@
           $scope.downloads[data.data_name]['data_name'] = data.data_name;
           $scope.downloads[data.data_name]['message'] = data.message;
         });
-      }
       window.ACMEDashboard.socket.onopen = function() {
-        message = JSON.stringify({
+        var message = JSON.stringify({
           'target_app': 'run_manager',
           'destination': 'init',
           'content': 'hello world!'
@@ -533,6 +533,9 @@
         window.ACMEDashboard.socket.send(message);
       }
       window.ACMEDashboard.socket.onmessage = (message) => {
+        if(!window.ACMEDashboard.isJson(message.data)){
+          return;
+        }
         var data = JSON.parse(message.data);
         if(data.user != window.ACMEDashboard.user){
           return;
@@ -628,6 +631,7 @@
 
     $scope.set_alldata = (data) => {
       $scope.all_userdata = data;
+      $scope.userdata = $scope.userdata || {};
       $scope.userdata['model_output'] = Object.keys($scope.all_userdata.model_output);
       $scope.userdata['diagnostic_output'] = Object.keys($scope.all_userdata.diagnostic_output);
       $scope.userdata['observations'] = Object.keys($scope.all_userdata.observations);
