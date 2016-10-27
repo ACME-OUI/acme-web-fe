@@ -8,7 +8,7 @@
   <div class="run_list dashboard-show-hide" ng-show="ready == true">
     <p style="margin-left: 5vw;">Configuration List</p>
     <ul class="collapsible popout" id="run-list" data-collapsible="accordion">
-      <div class="input-field col s6" style="margin-left: 3vw;">
+      <div class="input-field col s6" ng-show="config_name_list.length > 0" style="margin-left: 3vw;">
         <input id="config_list_filter" ng-model="config_list_filter" type="text">
         <label for="config_list_filter">filter</label>
       </div>
@@ -53,7 +53,7 @@
       </li>
 
       <p style="margin-left: 5vw; margin-top: 1vw;"> Run queue </p>
-        <div class="input-field col s6" style="margin-left: 3vw;">
+        <div class="input-field col s6" ng-show="all_runs.length > 0" style="margin-left: 3vw;">
           <input id="run_list_filter" ng-model="run_list_filter" type="text">
           <label for="run_list_filter">filter</label>
         </div>
@@ -169,10 +169,19 @@
   </div>
 
   <!-- text edit modal -->
-  <div class="modal" id="text_edit_modal" style="width: 90%;">
+  <!-- <div class="modal" id="text_edit_modal" style="width: 90%;">
     <section>
       <a href="#" id="text_edit_save_btn" class="waves-effect waves-light btn" style="margin: .5vh;" ng-click="update_script()">save</a>
       <div ui-ace="aceOption" ng-model="aceModel"></div>
+    </section>
+  </div> -->
+  <div class="modal" id="text_edit_modal" style="width: 90%;">
+    <section>
+      <div id="text_display">
+        <p>
+          [[text_to_be_displayed]]
+        </p>
+      </div>
     </section>
   </div>
 
@@ -245,7 +254,8 @@
     <a href="" class="waves-effect waves-light btn" style="margin: 1vw;" ng-click="save_diag_config()">save</a>
   </div>
 
-  <div class="modal" id="image_view_modal" style="width: fit-content; overflow: hidden; max-height: 80%;">
+  <!-- Image view modal -->
+  <div class="modal" id="image_view_modal" style="width: fit-content; max-height: 80%;">
     <p id="image_title" style="text-align: center;"></p>
     <img id="image_view" style="margin: 1vw;" class="" src="" />
     <div class="" style="display: flex; justify-content: space-between; width: 100%">

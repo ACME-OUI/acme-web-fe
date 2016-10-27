@@ -28,24 +28,6 @@
       );
     };
 
-    // $scope.get_user = () => {
-    //   if(window.ACMEDashboard.user){
-    //     return;
-    //   } else {
-    //     window.ACMEDashboard.user = true;
-    //   }
-    //   var worker = Webworker.create(window.ACMEDashboard.ajax, {async: true });
-    //   var data = {
-    //     'url': 'http://aims2.llnl.gov:8000/run_manager/get_user/',
-    //     'method': 'GET'
-    //   };
-    //   worker.run(data).then((result) => {
-    //     window.ACMEDashboard.user = result;
-    //   }).catch((res) => {
-    //     console.log(res);
-    //   })
-    // }
-
     $scope.get_user = () => {
       if(window.ACMEDashboard.user){
           return;
@@ -164,6 +146,9 @@
         window.ACMEDashboard.socket.send(message);
       }
       window.ACMEDashboard.socket.onmessage = (message) => {
+        if(!window.ACMEDashboard.isJson(message.data)){
+          return;
+        }
         var data = JSON.parse(message.data);
         if(data.user != window.ACMEDashboard.user){
           return;
@@ -406,6 +391,7 @@
         $scope.showToast('New run requires a type');
         return;
       }
+      run_name = run_name.replace(/\s/g, '');
 
       if(template){
         params = {
