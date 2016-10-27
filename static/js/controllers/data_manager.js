@@ -72,9 +72,13 @@
       }).then((res) => {
         console.log(res);
         $scope.nersc_credential_pass = true;
+        $scope.showToast('Successfully authenticated');
       }).catch((res) => {
         console.log(res);
         $scope.nersc_credential_pass = false;
+        $scope.showToast('Failed to authenticate');
+      }).then(() => {
+        $('#nersc_credential_modal').closeModal();
       });
     }
 
@@ -87,7 +91,9 @@
       } else {
         $scope.nersc_path = folder;
       }
-      data = { 'remote_dir': $scope.nersc_path };
+      var data = { 
+        remote_dir: $scope.nersc_path 
+      };
       $http({
         url: '/transfer/view_remote_directory/',
         method: 'POST',
@@ -523,7 +529,8 @@
           $scope.downloads[data.data_name]['percent_complete'] = data.percent_complete.toFixed(2);
           $scope.downloads[data.data_name]['data_name'] = data.data_name;
           $scope.downloads[data.data_name]['message'] = data.message;
-        });
+        })
+      };
       window.ACMEDashboard.socket.onopen = function() {
         var message = JSON.stringify({
           'target_app': 'run_manager',
@@ -575,25 +582,6 @@
       $('#download_modal').closeModal();
       $scope.step = -1;
     }
-
-    // $scope.get_user = (callback) => {
-    //   $http({
-    //     url: '/run_manager/get_user',
-    //     method: 'GET'
-    //   }).then((res) => {
-    //     $scope.user = res.data
-    //     $scope.get_user_data();
-    //     if(callback){
-    //       callback();
-    //     }
-    //   }).catch((res) => {
-    //     console.log('Error getting user');
-    //     console.log(res);
-    //     if(callback){
-    //       callback();
-    //     }
-    //   });
-    // }
 
     $scope.set_datapath = (path) => {
       $scope.datapath = path;
@@ -705,7 +693,7 @@
           $scope.selected_nodes.push($(val).val());
       })
       .promise()
-      .done(() =>{
+      .done(() => {
         if($scope.selected_nodes.length > 0){
           $scope.nodes_been_selected = true;
           $scope.step = 2;
@@ -716,7 +704,7 @@
           $scope.showToast('Select at least one data node')
         }
       });
-    };
+    }
 
     $scope.deselect_node = (node) => {
       console.log(node);

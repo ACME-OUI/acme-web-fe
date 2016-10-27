@@ -6,7 +6,7 @@
     <i class="material-icons left">navigate_next</i>
   </a>
 
-  <div class="dashboard-show-hide" ng-show="step == -1">
+  <div ng-show="step == -1">
     <ul class="collapsible popout" data-collapsible="accordion">
       <li>
         <div class="collapsible-header">
@@ -181,8 +181,7 @@
 
   <!-- Datapath selection -->
   <!-- Step 0 -->
-  <div class="dashboard-show-hide" ng-show="step == 0 && ready == true">
-    <h2 style="text-align: center">Select a data source</h2>
+  <div ng-show="step == 0 && ready == true">
     <ul class="collapsible popout" id="data-select-collapsible" data-collapsible="accordion">
       <li>
         <div class="collapsible-header">
