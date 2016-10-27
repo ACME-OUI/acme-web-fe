@@ -25,7 +25,7 @@
                             <span ng-if="note.timestamp"> [[ note.timestamp ]] </span>
                             [[ note.optional_message.run_type]] complete
                             <a ng-href="[[note.optional_message.request_attr.server]]?dataset=[[note.optional_message.dataset_id]]"
-                               ng-if="note.last().optional_message.run_type == 'upload_to_viewer'"
+                               ng-if="note.optional_message.run_type == 'upload_to_viewer'"
                                target="_blank">
                                 open in viewer
                             </a>
@@ -48,4 +48,15 @@
             </div>
         </li>
     </ul>
+
+
+    <div class="modal" id="text_display_modal" style="width: 90%;">
+        <section>
+          <div id="text_display" style="padding: 1vh">
+            <p>
+              [[text_to_be_displayed]]
+            </p>
+          </div>
+        </section>
+    </div>
 </div>
