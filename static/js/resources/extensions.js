@@ -5,6 +5,17 @@
 	    };
 	};
 
+  window.ACMEDashboard = window.ACMEDashboard || {};
+
+  window.ACMEDashboard.isJson = function(str) {
+      try {
+          JSON.parse(str);
+      } catch (e) {
+          return false;
+      }
+      return true;
+  }
+
 	window.ACMEDashboard.ajax = function(data){
       var url = data.url;
       var params = data.params;
