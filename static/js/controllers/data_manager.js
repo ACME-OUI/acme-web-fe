@@ -57,6 +57,7 @@
     }
 
     $scope.nersc_credential_submit = () => {
+      $('#nersc_credential_modal').closeModal();
       var data = {
         username: $('#nersc_username').val(),
         password: $('#nersc_password').val()
@@ -77,8 +78,6 @@
         console.log(res);
         $scope.nersc_credential_pass = false;
         $scope.showToast('Failed to authenticate');
-      }).then(() => {
-        $('#nersc_credential_modal').closeModal();
       });
     }
 
@@ -148,7 +147,7 @@
           'remote_file': item
         }
       }
-      message = JSON.stringify({
+      var message = JSON.stringify({
         target_app: 'transfer',
         destination: 'transfer_file',
         data: data,

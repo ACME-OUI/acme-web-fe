@@ -69,15 +69,15 @@
         let value = $scope.notification_list[key];
         if(value.job_id == note.job_id){
           value.list.push(note);
-          inserted = true;
+          return;
         }
       }
-      if(!inserted){
-        $scope.notification_list.push({
-          'job_id': note.job_id,
-          'list': [note]
-        });
-      }
+
+      $scope.notification_list.push({
+        'job_id': note.job_id,
+        'list': [note]
+      });
+      
     }
 
     $scope.open_output = (notification) => {
@@ -120,9 +120,9 @@
       window.ACMEDashboard.socket_handlers.data_manager_transfer = (data) => {
         console.log('got a notication');
         console.log(data);
-        $scope.$apply(() => {
-          $scope.list_insert(data);
-        })
+        // $scope.$apply(() => {
+        $scope.list_insert(data);
+        // })
       }
 
 

@@ -1,10 +1,15 @@
 from util.utilities import print_message
 from util.utilities import print_debug
 from util.utilities import project_root
+from util.utilities import timeformat
+from poller.models import UserRuns
+from web_fe.models import Notification
+from run_manager.dispatcher import group_job_update
 from subprocess import Popen, PIPE
 from channels import Group
 from time import sleep
 
+import datetime
 import json
 import subprocess
 import os
@@ -33,15 +38,17 @@ def transfer_file(message, data, user):
         if not params:
             print_message('No params given')
             return -1
-    remote_dir = params.get('remote_dir')
+    source_dir = params.get('remote_dir')
     remote_file = params.get('remote_file')
-    local_dir = params.get('local_dir')
+    destination_dir = params.get('destination_dir')
+    source_server = params.get('source_server', 'edison.nersc.gov')
+    destination_server = params.get('destination_server', 'pcmdi11.llnl.gov')
 
-    if not remote_dir:
-        remote_dir = ''
-    remote_dir.replace('\n', ' ')
-    remote_dir.replace('&', ' ')
-    remote_dir = '/project/projectdirs/acme/{}'.format(remote_dir.split(' ')[0])
+    if not source_dir:
+        source_dir = ''
+    source_dir.replace('\n', ' ')
+    source_dir.replace('&', ' ')
+    source_dir = '/project/projectdirs/acme/{}'.format(source_dir.split(' ')[0])
 
     if not remote_file:
         print_message('No remote file for transfer')
@@ -49,14 +56,58 @@ def transfer_file(message, data, user):
     remote_file.replace('\n', ' ')
     remote_file.replace('&', ' ')
     remote_file = remote_file.split(' ')[0]
-    remote_dir = remote_dir.split(' ')[0]
-    remote_dir = '/project/projectdirs/acme/{folder}/{file}'.format(folder=remote_dir, file=remote_file)
+    source_dir = '{folder}/{file}'.format(folder=source_dir, file=remote_file)
 
-    if not local_dir:
-        local_dir = ''
-    local_dir.replace('\n', ' ')
-    remote_dir.replace('&', ' ')
-    local_dir = '/export/baldwin32/file_transfers/{user}/{uuid}'.format(user=user, uuid=uuid.uuid4().hex)
+    if not destination_dir:
+        destination_dir = ''
+    destination_dir.replace('\n', ' ')
+    source_dir.replace('&', ' ')
+
+    folder_id = uuid.uuid4().hex
+    destination_dir = '/{user}/{uuid}'.format(user=user, uuid=folder_id)
+
+    config = {
+        'run_type': 'file_transfer',
+        'run_name': remote_file,
+        'user': user,
+        'request_attr': json.dumps({
+            'source_dir': source_dir,
+            'source_server': source_server,
+            'destination_server': destination_server,
+            'destination_dir': destination_dir
+        })
+    }
+    try:
+        new_run = UserRuns.objects.create(
+            status='new',
+            config_options=json.dumps(config),
+            user=user
+        )
+        new_run.save()
+    except Exception as e:
+        print_debug(e)
+        print_message('error saving new run')
+        return -1
+
+    message = {
+        'run_name': remote_file,
+        'run_type': config.get('run_type'),
+        'request_attr': config.get('request_attr'),
+        'timestamp': datetime.datetime.now().strftime(timeformat)
+    }
+    try:
+        note = Notification.objects.get(user=new_run.user)
+        new_notification = json.dumps({
+            'job_id': new_run.id,
+            'run_type': config.get('run_type'),
+            'optional_message': message,
+            'status': 'new',
+            'timestamp': datetime.datetime.now().strftime(timeformat)
+        })
+        note.notification_list += new_notification + ' -|- '
+        note.save()
+    except Exception, e:
+        raise
 
     try:
         cmd = ['python',
@@ -64,28 +115,35 @@ def transfer_file(message, data, user):
                '--source-endpoint',
                'b9d02196-6d04-11e5-ba46-22000b92c6ec',  # edison@nersc
                '--source-path',
-               remote_dir,
+               source_dir,
                '--destination-endpoint',
                'a49fff56-96b9-11e6-b0ab-22000b92c261',  # pcmdi11@llnl
                '--destination-path',
-               local_dir,
+               destination_dir,
                '--config',
                os.path.join(project_root(), 'userdata/system/config.json')]
-        print_message('Starting data transfer\n remote_dir: {remote_dir}, local_dir: {local_dir}'.format(remote_dir=remote_dir, local_dir=local_dir))
+        print_message(
+            'Starting data transfer\n'
+            'source_dir: {source_dir}, destination_dir: {destination_dir}'.format(
+                source_dir=source_dir,
+                destination_dir=destination_dir))
         print_message(' '.join(cmd))
         p = Popen(cmd, stdout=PIPE)
-        update_message = {
-            'text': json.dumps({
-                'user': user,
-                'transfer_name': remote_dir
-                'message': 'transfer started',
-                'destination': 'data_manager_transfer'
-            })
-        }
-        Group('active').send(update_message)
-        while True:
+        new_run.status = 'in_progress'
+        new_run.save()
+
+        group_job_update(
+            new_run.id,
+            new_run.user,
+            new_run.status,
+            optional_message=new_run.config_options,
+            destination='set_run_status')
+
+        done = False
+        while not done:
             try:
                 msg = p.stdout.readline()
+                done = p.poll()
                 update_message = {
                     'text': json.dumps({
                         'user': user,
@@ -94,17 +152,21 @@ def transfer_file(message, data, user):
                         'destination': 'data_manager_transfer'
                     })
                 }
-                Group('active').send(update_message)
+                group_job_update(
+                    new_run.id,
+                    new_run.user,
+                    new_run.status,
+                    optional_message=update_message,
+                    destination='data_manager_transfer')
             except Exception as e:
                 print_message('no update from the transfer')
                 print_debug(e)
             else:
                 print_message(msg)
-                if msg == 'progress 1/1':
-                    print_message('file transfer complete', 'ok')
-                    break
             finally:
                 sleep(1)
+        new_run.status = 'complete'
+        new_run.save()
         update_message = {
             'text': json.dumps({
                 'user': user,
@@ -113,7 +175,12 @@ def transfer_file(message, data, user):
                 'destination': 'data_manager_transfer'
             })
         }
-        Group('active').send(update_message)
+        group_job_update(
+            new_run.id,
+            new_run.user,
+            new_run.status,
+            optional_message=update_message,
+            destination='set_run_status')
     except Exception as e:
         print_message('Error transfering file')
         print_debug(e)
