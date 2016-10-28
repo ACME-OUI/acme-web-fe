@@ -1,6 +1,7 @@
 (function(){
-  angular.module('data_manager', ['ngAnimate', 'ngMaterial'])
-  .controller('DataManagerControl', function($scope, $http, $timeout, $mdToast) {
+  'use strict';
+  angular.module('data_manager', ['ngAnimate', 'ngMaterial', 'ngWebworker'])
+  .controller('DataManagerControl', function($scope, $http, $timeout, $mdToast, Webworker) {
 
     /**
      * Slices the object. Note that returns a new spliced object,
@@ -31,6 +32,130 @@
           .hideDelay(1200)
       );
     };
+
+    $scope.publish_from_remote = (item) => {
+      var data = {
+        'remote_dir': $scope.nersc_path,
+        'local_dir': '',
+        'remote_file': item
+      }
+      message = JSON.stringify({
+          'target_app': 'transfer',
+          'destination': 'transfer_file',
+          'content': 'hello world!'
+        })
+      window.ACMEDashboard.socket.send(message);
+    }
+
+    $scope.initialize_nersc_modal = () => {
+      if(!$scope.nersc_credential_pass){
+        $('#nersc_credential_modal').openModal();
+      } else {
+        $scope.view_nersc_folder('');
+      }
+      
+    }
+
+    $scope.nersc_credential_submit = () => {
+      var data = {
+        username: $('#nersc_username').val(),
+        password: $('#nersc_password').val()
+      }
+      $http({
+        url: '/transfer/nersc_login/',
+        method: 'POST',
+        data: data,
+        headers: {
+          'X-CSRFToken' : $scope.get_csrf(),
+          'Content-Type': 'application/json'
+        }
+      }).then((res) => {
+        console.log(res);
+        $scope.nersc_credential_pass = true;
+        $scope.showToast('Successfully authenticated');
+      }).catch((res) => {
+        console.log(res);
+        $scope.nersc_credential_pass = false;
+        $scope.showToast('Failed to authenticate');
+      }).then(() => {
+        $('#nersc_credential_modal').closeModal();
+      });
+    }
+
+    $scope.view_nersc_folder = (folder) => {
+      $scope.nersc_folder_query = '';
+      $scope.nersc_folder = [];
+      $scope.nersc_lookup = true;
+      if($scope.nersc_path){
+        $scope.nersc_path += '/' + folder;
+      } else {
+        $scope.nersc_path = folder;
+      }
+      var data = { 
+        remote_dir: $scope.nersc_path 
+      };
+      $http({
+        url: '/transfer/view_remote_directory/',
+        method: 'POST',
+        data: data,
+        headers: {
+          'X-CSRFToken' : $scope.get_csrf(),
+          'Content-Type': 'application/json'
+        }
+      }).then((res) => {
+        $scope.nersc_lookup = false;
+        console.log(res.data);
+        $scope.nersc_folder = JSON.parse(res.data.out);
+      }).catch((res) => {
+        $scope.nersc_lookup = false;
+        console.log(res);
+      });
+    }
+
+    $scope.nersc_up_folder = () => {
+      $scope.nersc_folder_query = '';
+      var path_split = $scope.nersc_path.split('/');
+      $scope.nersc_path = path_split.slice(0, path_split.length - 1).join('/');
+      $scope.nersc_lookup = true;
+      $scope.nersc_folder = [];
+      data = { 'remote_dir': $scope.nersc_path };
+      $http({
+        url: '/transfer/view_remote_directory/',
+        method: 'POST',
+        data: data,
+        headers: {
+          'X-CSRFToken' : $scope.get_csrf(),
+          'Content-Type': 'application/json'
+        }
+      }).then((res) => {
+        $scope.nersc_lookup = false;
+        console.log(res.data);
+        $scope.nersc_folder = JSON.parse(res.data.out);
+      }).catch((res) => {
+        $scope.nersc_lookup = false;
+        console.log(res);
+      });
+    }
+
+    $scope.transfer_from_remote = (item) => {
+      console.log('current nersc folder: ' + $scope.nersc_path);
+      console.log('selected item: ' + item);
+
+      var data = {
+        params: {
+          'remote_dir': $scope.nersc_path,
+          'local_dir': '',
+          'remote_file': item
+        }
+      }
+      message = JSON.stringify({
+        target_app: 'transfer',
+        destination: 'transfer_file',
+        data: data,
+        user: window.ACMEDashboard.user
+      })
+      window.ACMEDashboard.socket.send(message);
+    }
 
     $scope.open_nc = (file, folder, type) => {
       params = {
@@ -88,18 +213,39 @@
       })
     }
 
-    $scope.get_user = () => {
-      $http({
-        url: '/run_manager/get_user',
-        method: 'GET'
-      }).then((res) => {
-        window.ACMEDashboard.user = res.data;
-        resolve(res.data);
-      }).catch((res) => {
-        console.log('Error getting user');
-        console.log(res);
-        reject(res);
-      });
+    // $scope.get_user = () => {
+    //   $http({
+    //     url: '/run_manager/get_user/',
+    //     method: 'GET'
+    //   }).then((res) => {
+    //     window.ACMEDashboard.user = res.data;
+    //     resolve(res.data);
+    //   }).catch((res) => {
+    //     console.log('Error getting user');
+    //     console.log(res);
+    //     reject(res);
+    //   });
+    // }
+    $scope.get_user = (config) => {
+      if(window.ACMEDashboard.user){
+          return;
+      } else {
+          window.ACMEDashboard.user = 'pending';
+      }
+      var worker = Webworker.create(window.ACMEDashboard.ajax, {async: true });
+      var data = {
+          'url': 'http://aims2.llnl.gov:8000/run_manager/get_user/',
+          'method': 'GET'
+      };
+      if(config && config.async){
+        return worker.run(data);
+      } else {
+        worker.run(data).then((result) => {
+            window.ACMEDashboard.user = result;
+        }).catch((res) => {
+            console.log(res);
+        });
+      }
     }
 
     $scope.open_pdf = (diag, diag_folder) => {
@@ -137,11 +283,7 @@
     $scope.get_src = (index) => {
       return new Promise((resolve, reject) => {
         if(typeof window.ACMEDashboard.user === 'undefined'){
-          $http({
-            url: '/run_manager/get_user',
-            method: 'GET'
-          }).then((res) => {
-            window.ACMEDashboard.user = res.data;
+          $scope.get_user({async: true}).then(() => {
             var prefix = '/acme/userdata/image/userdata/' + window.ACMEDashboard.user + '/diagnostic_output/';
             var src = prefix + $scope.diag_folder + '/amwg/' + $scope.diag_cache[$scope.diag_folder][index];
             resolve(src);
@@ -221,6 +363,7 @@
       $scope.publish_config_name = 'adsf';
       $scope.diag_limit = 20;
       $scope.obs_limit = 20;
+      $scope.nersc_credential_pass = false;
       $timeout(() => {
         $scope.get_user_data();
         $('.collapsible').collapsible({
@@ -386,10 +529,10 @@
           $scope.downloads[data.data_name]['percent_complete'] = data.percent_complete.toFixed(2);
           $scope.downloads[data.data_name]['data_name'] = data.data_name;
           $scope.downloads[data.data_name]['message'] = data.message;
-        });
-      }
+        })
+      };
       window.ACMEDashboard.socket.onopen = function() {
-        message = JSON.stringify({
+        var message = JSON.stringify({
           'target_app': 'run_manager',
           'destination': 'init',
           'content': 'hello world!'
@@ -397,6 +540,9 @@
         window.ACMEDashboard.socket.send(message);
       }
       window.ACMEDashboard.socket.onmessage = (message) => {
+        if(!window.ACMEDashboard.isJson(message.data)){
+          return;
+        }
         var data = JSON.parse(message.data);
         if(data.user != window.ACMEDashboard.user){
           return;
@@ -406,6 +552,7 @@
             continue;
           }
           if(key == data.destination){
+            console.log(`sending socket command to ${key} with ${data} from data manager`);
             window.ACMEDashboard.socket_handlers[key](data);
           }
         }
@@ -425,7 +572,7 @@
         'target_app': 'esgf',
         'destination': 'dataset_download',
         'params': params,
-        'user': $scope.user
+        'user': window.ACMEDashboard.user
       })
       window.ACMEDashboard.socket.send(request);
       $scope.downloads = $scope.downloads || {};
@@ -436,25 +583,6 @@
       $scope.step = -1;
     }
 
-    $scope.get_user = (callback) => {
-      $http({
-        url: '/run_manager/get_user',
-        method: 'GET'
-      }).then((res) => {
-        $scope.user = res.data
-        $scope.get_user_data();
-        if(callback){
-          callback();
-        }
-      }).catch((res) => {
-        console.log('Error getting user');
-        console.log(res);
-        if(callback){
-          callback();
-        }
-      });
-    }
-
     $scope.set_datapath = (path) => {
       $scope.datapath = path;
       if(path == 'esgf'){
@@ -463,17 +591,27 @@
     }
 
     $scope.get_user_data = () => {
+      // if(window.ACMEDashboard.user_data){
+      //   return;
+      // } else {
+      //   window.ACMEDashboard.user_data = 'pending';
+      // }
       $http({
         url: '/esgf/get_user_data'
       }).then((res) => {
         console.log(res.data);
-        if($scope.user){
-          $scope.set_alldata(res.data[$scope.user]);
+        if(window.ACMEDashboard.user){
+          $scope.set_alldata(res.data[window.ACMEDashboard.user]);
+          window.ACMEDashboard.user_data = res.data[window.ACMEDashboard.user];
         } else {
           $scope.get_user(() => {
             $scope.set_alldata(res.data[$scope.user]);
+            window.ACMEDashboard.user_data = res.data[$scope.user];
           });
         }
+        $('.collapsible').collapsible({
+          accordion : false
+        });
       }).catch((res) => {
         console.log(res.data);
       });
@@ -481,6 +619,7 @@
 
     $scope.set_alldata = (data) => {
       $scope.all_userdata = data;
+      $scope.userdata = $scope.userdata || {};
       $scope.userdata['model_output'] = Object.keys($scope.all_userdata.model_output);
       $scope.userdata['diagnostic_output'] = Object.keys($scope.all_userdata.diagnostic_output);
       $scope.userdata['observations'] = Object.keys($scope.all_userdata.observations);
@@ -554,7 +693,7 @@
           $scope.selected_nodes.push($(val).val());
       })
       .promise()
-      .done(() =>{
+      .done(() => {
         if($scope.selected_nodes.length > 0){
           $scope.nodes_been_selected = true;
           $scope.step = 2;
@@ -565,7 +704,7 @@
           $scope.showToast('Select at least one data node')
         }
       });
-    };
+    }
 
     $scope.deselect_node = (node) => {
       console.log(node);
@@ -587,9 +726,9 @@
       }).then(function(res){
         $scope.node_list = res.data
         $scope.ready = true;
-        $('#data-select-collapsible').collapsible({
-          accordion : false
-        });
+        // $('#data-select-collapsible').collapsible({
+        //   accordion : false
+        // });
       }).catch(function(res){
         console.log("[-] Error retrieving node list");
         console.log(res);

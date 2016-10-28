@@ -1,6 +1,6 @@
 (function(){
-  angular.module('run_manager', ['ui.ace', 'ngMaterial'])
-  .controller('RunManagerControl', function($scope, $http, $timeout, $mdToast, $rootScope) {
+  angular.module('run_manager', ['ui.ace', 'ngMaterial', 'ngWebworker'])
+  .controller('RunManagerControl', function($scope, $http, $timeout, $mdToast, Webworker) {
 
     /**
      * Slices the object. Note that returns a new spliced object,
@@ -29,14 +29,20 @@
     };
 
     $scope.get_user = () => {
-      $http({
-        url: '/run_manager/get_user',
-        method: 'GET'
-      }).then((res) => {
-        window.ACMEDashboard.user = res.data
+      if(window.ACMEDashboard.user){
+          return;
+      } else {
+          window.ACMEDashboard.user = 'pending';
+      }
+      var worker = Webworker.create(window.ACMEDashboard.ajax, {async: true });
+      var data = {
+          'url': 'http://aims2.llnl.gov:8000/run_manager/get_user/',
+          'method': 'GET'
+      };
+      worker.run(data).then((result) => {
+          window.ACMEDashboard.user = result;
       }).catch((res) => {
-        console.log('Error getting user');
-        console.log(res);
+          console.log(res);
       });
     }
 
@@ -59,7 +65,7 @@
 
     $scope.init = function(){
       console.log('[+] Initializing RunManager window parent scope.id = ' + $scope.$parent.$id);
-      console.log($rootScope);
+      $scope.url_prefix = 'http://' + window.location.hostname + ':' + window.location.port;
       $scope.setup_socket();
       $scope.run_options = ['New run configuration', 'start run', 'stop run', 'update status', 'new template'];
       $scope.run_types = ['diagnostic', 'model'];
@@ -140,6 +146,9 @@
         window.ACMEDashboard.socket.send(message);
       }
       window.ACMEDashboard.socket.onmessage = (message) => {
+        if(!window.ACMEDashboard.isJson(message.data)){
+          return;
+        }
         var data = JSON.parse(message.data);
         if(data.user != window.ACMEDashboard.user){
           return;
@@ -149,6 +158,7 @@
             continue;
           }
           if(key == data.destination){
+            console.log(`sending socket command to ${key} with ${data} from run_manager`);
             window.ACMEDashboard.socket_handlers[key](data);
             break;
           }
@@ -381,6 +391,7 @@
         $scope.showToast('New run requires a type');
         return;
       }
+      run_name = run_name.replace(/\s/g, '');
 
       if(template){
         params = {
@@ -551,7 +562,9 @@
       if($scope.config_list[$scope.selected_run].type == 'diagnostic'){
         $scope.get_diagnostic_config_options();
         $scope.get_saved_diagnostic_config(conf);
-        $('#diagnostic_run_setup_modal').openModal();
+        $timeout(() => {
+          $('#diagnostic_run_setup_modal').openModal();
+        });
       }
       else if($scope.config_list[$scope.selected_run].type == 'model'){
         // handle model config
@@ -618,17 +631,18 @@
 
     $scope.get_saved_diagnostic_config = () => {
       $http({
-        url: '/run_manager/get_diagnostic_by_name',
-        method: 'GET',
-        params: {
+        url: '/run_manager/get_diagnostic_by_name/',
+        method: 'POST',
+        data: {
           'name': $scope.selected_run
-        }
+        },
+        headers: {
+          'X-CSRFToken' : $scope.get_csrf()
+        },
       }).then((res) => {
         console.log(res.data);
         $timeout(() => {
-          // $('#diag_select_model_' + res.data.model_path.split('/').pop()).selected = true;
           $('#diag_model_select').val(res.data.model_path.split('/').pop())
-          //$('#diag_select_obs_' + res.data.obs_path.split('/').pop()).selected = true;
           $('#diag_obs_select').val(res.data.obs_path.split('/').pop())
           $('select').material_select();
           $('.diag_set_checkbox').prop("checked", false);
@@ -638,8 +652,8 @@
               $('#diag_set_select_' + value).prop({'checked': true});
             })  
           }
-        }, 100);
-      
+        }, 1000);
+        
       }).catch((res) => {
         console.log(res.data);
       })
@@ -652,52 +666,96 @@
 
     $scope.get_run_data = (run, job_id) => {
       $scope.switch_arrow(run.run_name);
+      if($scope.selected_run == run.run_name && $scope.selected_job_id == run.job_id){
+        return;
+      }
       $scope.selected_run = run.run_name;
       $scope.selected_job_id = run.job_id;
       $scope.selected_job_identifier = run.run_name + '_' + run.job_id;
-      var get_diag_http_config = {
-        url: '/run_manager/get_diagnostic_by_name',
-        method: 'GET',
-        params: {
-          'name': run.run_name
-        }
-      }
-      var get_script_http_config = {
-        url: '/run_manager/get_scripts',
-        method: 'GET',
-        params: {
-          'run_name' : run.run_name,
-          'job_id': run.job_id
-        }
-      }
-      var get_diag_data = $http(get_diag_http_config);
-      var get_script_data = $http(get_script_http_config);
 
-      Promise.all([get_diag_data, get_script_data]).then(values => {
+      var worker1 = Webworker.create(window.ACMEDashboard.ajax, {async: true});
+      var p1 = worker1.run({
+        url: $scope.url_prefix + '/run_manager/get_diagnostic_by_name/',
+        method: 'POST',
+        params: {
+          'name': run.run_name,
+        },
+        headers: {
+          'X-CSRFToken' : $scope.get_csrf()
+        }
+      }).then((res) => {
+        console.log(res);
+        var response = JSON.parse(res);
+        $scope.selected_run_config = {};
         $timeout(() => {
-          $scope.selected_run_config = {};
-          for(var k in values[0].data){
-            if(values[0].data.hasOwnProperty(k)){
-              if(typeof values[0].data[k] != "number"){
-                $scope.selected_run_config[k] = values[0].data[k].split('/').pop();  
+          for(var k in response){
+            if(response.hasOwnProperty(k)){
+              if(typeof response[k] != "number"){
+                $scope.selected_run_config[k] = response[k].split('/').pop();  
               } else {
-                $scope.selected_run_config[k] = values[0].data[k];
+                $scope.selected_run_config[k] = response[k];
               }
             }
           }
-          $scope.output_list[$scope.selected_job_identifier] = values[1].data.output_list;
+          $scope.selected_run_config_keys = Object.keys($scope.selected_run_config);
+          $('.collapsible').collapsible({
+            accordion : false
+          });
+        });
+      }).catch((res) => {
+        console.log(res);
+      });
+
+      var worker2 = Webworker.create(window.ACMEDashboard.ajax, {async: true});
+      var p2 = worker2.run({
+        url: $scope.url_prefix + '/run_manager/get_scripts/',
+        method: 'POST',
+        params: {
+          'run_name': run.run_name,
+          'job_id': run.job_id
+        },
+        headers: {
+          'X-CSRFToken' : $scope.get_csrf()
+        }
+      }).then((res) => {
+        var result = JSON.parse(res);
+        $scope.output_list[$scope.selected_job_identifier] = result.output_list;
           if($scope.output_list[$scope.selected_job_identifier].length != 0){
             $scope.output_cache_count[$scope.selected_job_identifier] = 0;
             $scope.load_output_cache();
           }
-        }, 50);
-      }, reason => {
-        console.log(reason);
-      }).then(() => {
-        $('.collapsible').collapsible({
-          accordion : false
+      }).catch((res) => {
+        console.log(res);
+      });
+    }
+
+    $scope.delete_run = (conf) => {
+      $('#delete_run_modal').openModal();
+      $scope.selected_for_delete = conf;
+    }
+
+    $scope.delete_run_option = (choice) => {
+      if(choice == 'yes'){
+        $http({
+          url: '/run_manager/delete_diagnostic_config/',
+          method: 'POST',
+          data: {
+            'name': $scope.selected_for_delete
+          },
+          headers: {
+            'X-CSRFToken' : $scope.get_csrf()
+          }
+        }).then((res) => {
+          var index = $scope.config_name_list.indexOf($scope.selected_for_delete);
+          $scope.config_name_list.splice(index, 1);
+        }).catch((res) => {
+          $scope.showToast('Error deleting configuration');
+        }).then(() => {
+          $('#delete_run_modal').closeModal();
         });
-      })
+      } else {
+        $('#delete_run_modal').closeModal();
+      }
     }
 
     $scope.open_output = (run, item, job_id) => {

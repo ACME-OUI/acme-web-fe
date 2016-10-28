@@ -4,7 +4,24 @@
     $scope.init = () => {
       console.log('[+] Initializing Notification Manager parent scope.id = ' + $scope.$parent.$id);
       $scope.notification_list = [];
-      $scope.get_notification_list();
+      $scope.get_notification_list().then((res) => {
+        var list = res.data;
+        $.each(list, (i, v) => {
+          if(v == ' '){
+            return;
+          }
+          var note = JSON.parse(v);
+          $scope.list_insert(note);
+        });
+        $('#notification_list').collapsible({
+          accordion : false
+        });
+      }).catch((res) => {
+        console.log('error retrieving notification list from server')
+      }).then(() => {
+        console.log($scope.notification_list);
+      });
+
       $scope.setup_socket();
 
       // ACE setup
@@ -40,26 +57,10 @@
     }
 
     $scope.get_notification_list = () => {
-      $http({
+      return $http({
         url: '/acme/get_notification_list/',
         method: 'GET'
-      }).then((res) => {
-        var list = res.data;
-        $.each(list, (i, v) => {
-          if(v == ' '){
-            return;
-          }
-          var note = JSON.parse(v);
-          $scope.list_insert(note);
-        });
-        $('#notification_list').collapsible({
-            accordion : false
-          });
-      }).catch((res) => {
-        console.log('error retrieving notification list from server')
-      }).then(() => {
-        console.log($scope.notification_list)
-      })
+      });
     }
 
     $scope.list_insert = (note) => {
@@ -91,11 +92,12 @@
         params: params
       }).then((res) => {
         text = res.data.output;
-        $('#text_edit_modal').openModal();
-        window.ACMEDashboard.ace.setValue(text);
-        window.ACMEDashboard.ace.setReadOnly(true);
-        window.ACMEDashboard.ace.setMode('text');
-        $('#text_edit_save_btn').addClass('disabled');
+        $('#text_display_modal').openModal();
+        $scope.text_to_be_displayed = text;
+        // window.ACMEDashboard.ace.setValue(text);
+        // window.ACMEDashboard.ace.setReadOnly(true);
+        // window.ACMEDashboard.ace.setMode('text');
+        // $('#text_edit_save_btn').addClass('disabled');
       }).catch((res) => {
         console.log(res);
       });
@@ -111,12 +113,24 @@
       window.ACMEDashboard.socket_handlers.notification = (data) => {
         console.log('got a notication');
         console.log(data);
+        // $scope.$apply(() => {
         $scope.list_insert(data);
+        //});
+      }
+      window.ACMEDashboard.socket_handlers.data_manager_transfer = (data) => {
+        console.log('got a notication');
+        console.log(data);
+        $scope.$apply(() => {
+          $scope.list_insert(data);
+        })
       }
 
 
       window.ACMEDashboard.socket.onmessage = (message) => {
         $scope.$apply(() => {
+          if(!window.ACMEDashboard.isJson(message.data)){
+            return;
+          }
           var data = JSON.parse(message.data);
           if(data.user != window.ACMEDashboard.user){
             return;
@@ -126,6 +140,7 @@
               continue;
             }
             if(key == data.destination){
+              console.log(`sending socket command to ${key} with ${data} from notification manager`);
               window.ACMEDashboard.socket_handlers[key](data);
               break;
             }

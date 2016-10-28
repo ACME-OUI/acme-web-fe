@@ -6,6 +6,10 @@ import json
 pp = pprint.PrettyPrinter(indent=4)
 
 
+def project_root():
+    return os.getcwd()
+
+
 def get_client_ip(request):
     """see: http://stackoverflow.com/a/4581997"""
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')

@@ -9,30 +9,30 @@ from web_fe.models import Notification
 from django.test import Client
 
 
-# class TestUploadToViewer(LiveServerTestCase):
-#     def setUp(self):
-#         self.user = User.objects.create(username='test')
-#         self.user.set_password('test')
-#         self.user.save()
-#         self.c = Client()
-#         logged_in = self.c.login(username='test', password='test')
-#         self.note = Notification(user='test')
-#         self.note.save()
-#         self.upload_viewer_user = 'baldwin2'
-#         self.upload_password = 'qwertyuiop'
-#         self.server_url = 'https://acme-ea.ornl.gov/'
-#         self.upload_endpoint = '/esgf/upload_to_viewer/'
+class TestUploadToViewer(LiveServerTestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='test')
+        self.user.set_password('test')
+        self.user.save()
+        self.c = Client()
+        logged_in = self.c.login(username='test', password='test')
+        self.note = Notification(user='test')
+        self.note.save()
+        self.upload_viewer_user = 'baldwin2'
+        self.upload_password = 'qwertyuiop'
+        self.server_url = 'https://acme-ea.ornl.gov/'
+        self.upload_endpoint = '/esgf/upload_to_viewer/'
 
-#     def test_upload_to_viewer(self):
-#         request = json.dumps({
-#             'run_name': 'test_run',
-#             'username': self.upload_viewer_user,
-#             'password': self.upload_password,
-#             'server': self.server_url
-#         })
-#         r = self.c.post(self.upload_endpoint, data=request, content_type='application/json')
-#         self.assertTrue(r.status_code == 200)
-#         self.assertTrue('dataset_id' in r.content)
+    def test_upload_to_viewer(self):
+        request = json.dumps({
+            'run_name': 'test_run',
+            'username': self.upload_viewer_user,
+            'password': self.upload_password,
+            'server': self.server_url
+        })
+        r = self.c.post(self.upload_endpoint, data=request, content_type='application/json')
+        self.assertTrue(r.status_code == 200)
+        self.assertTrue('dataset_id' in r.content)
 
 
 class TestPublishConfig(LiveServerTestCase):

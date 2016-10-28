@@ -14,7 +14,7 @@
                  }
              },{
                  type: 'component',
-                 componentName: 'CDAT',
+                 componentName: 'vCDAT',
                  componentState: {
                    templateId: 'cdat_wrapper'
                  }
@@ -54,7 +54,7 @@
         // Actually kick off Angular's magic
         angular.bootstrap( element[ 0 ], [ state.module ] );
      });
-     window.layout.registerComponent( 'CDAT', function( container, state ){
+     window.layout.registerComponent( 'vCDAT', function( container, state ){
        var templateHtml = $( '#' + state.templateId ).html();
        var element = container.getElement();
        state.module = 'cdat';
@@ -125,7 +125,7 @@
    };
 
    addMenuItem('DataManager', 'data_manager_wrapper');
-   addMenuItem('CDAT', 'cdat_wrapper');
+   addMenuItem('vCDAT', 'cdat_wrapper');
    addMenuItem('RunManager', 'run_manager_wrapper');
    addMenuItem('Notifications', 'notification_manager_wrapper');
 

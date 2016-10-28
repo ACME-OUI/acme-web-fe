@@ -122,9 +122,10 @@ def upload_to_viewer(request):
         if not params[p]:
             return HttpResponse(status=400)
 
-    run_directory = USER_DATA_PREFIX \
-        + user + '/diagnostic_output/' \
-        + params['run_name'] + '/diagnostic_output/amwg/'
+    run_directory = '{prefix}{user}/diagnostic_output/{run_name}/amwg/'.format(
+        prefix=USER_DATA_PREFIX,
+        user=user,
+        run_name=params.get('run_name', 'default'))
 
     request = mydict()
     request.body = json.dumps({

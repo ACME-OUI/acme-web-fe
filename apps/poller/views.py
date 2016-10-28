@@ -123,11 +123,6 @@ def post_update(job_id, data, request_type):
         # if it does, write it to the db and an output file
         if output:
             job.output = output
-            try:
-                job.save()
-            except Exception as e:
-                print_debug(e)
-                print_message('Unable to save job {}'.format(job.__dict__))
             run_type = options.get('run_type')
             print_message('Job finished with output options: {}'.format(options), 'ok')
             outputdir = options.get('output_dir')
@@ -135,7 +130,6 @@ def post_update(job_id, data, request_type):
                 message.update({
                     'run_type': 'diagnostic',
                     'run_name': options.get('run_name'),
-                    'status': request_type
                 })
             elif run_type == 'model':
                 outputdir = options.get('output_dir')
@@ -181,6 +175,7 @@ def post_update(job_id, data, request_type):
         })
         note.notification_list += new_notification + ' -|- '
         note.save()
+        print_message('Pushing update to client {}'.format(message))
         group_job_update(job_id, job.user, request_type, optional_message=message)
         return HttpResponse(status=200)
     except Exception as e:
@@ -236,37 +231,39 @@ def post_new(user, data):
     if data.get('diag_set'):
         config['set'] = data.get('diag_set')
         del config['diag_set']
-    print_message(config, 'ok')
 
     config_json = json.dumps(config)
-    new_run = UserRuns.objects.create(
-        status='new',
-        config_options=config_json,
-        user=user
-    )
+    print_message('job config:' + config_json, 'ok')
+
     try:
+        new_run = UserRuns.objects.create(
+            status='new',
+            config_options=config_json,
+            user=user
+        )
         new_run.save()
     except Exception as e:
         print_debug(e)
         print_message('error saving new run {}'.format(new_run.__dict__))
         return HttpResponse(status=500)
 
-    path = 'userdata/{user}/{run_type}_output/{run_name}_{id}'.format(
-        user=user,
-        run_type=config.get('run_type'),
-        run_name=run_name,
-        id=new_run.id
-    )
-    output_dir = os.path.abspath(path)
-    print_message('creating output directory: {}'.format(output_dir))
-    try:
-        os.makedirs(output_dir)
-    except Exception as e:
-        print_debug(e)
-        print_message('Error creating output directory {}'.format(output_dir))
-        return HttpResponse(status=500)
+    if run_name != 'upload_to_viewer':
+        path = 'userdata/{user}/{run_type}_output/{run_name}_{id}'.format(
+            user=user,
+            run_type=config.get('run_type'),
+            run_name=run_name,
+            id=new_run.id
+        )
+        output_dir = os.path.abspath(path)
+        print_message('creating output directory: {}'.format(output_dir))
+        try:
+            os.makedirs(output_dir)
+        except Exception as e:
+            print_debug(e)
+            print_message('Error creating output directory {}'.format(output_dir))
+            return HttpResponse(status=500)
+        config['output_dir'] = output_dir
 
-    config['output_dir'] = output_dir
     try:
         new_run.config_options = json.dumps(config)
         new_run.save()
@@ -274,19 +271,21 @@ def post_new(user, data):
         print_debug(e)
         print_message('error saving new run {}'.format(new_run.__dict__))
         return HttpResponse(status=500)
-    try:
-        diag_config = DiagnosticConfig.objects.filter(user=user, name=run_name).extra(order_by=['version'])
-        if diag_config:
-            latest = diag_config[len(diag_config) - 1]
-            latest.output_path = output_dir
-            latest.save()
-        else:
-            print_message('Unable to find config with name {}'.format(run_name))
-            return HttpResponse(status=400)
-    except Exception as e:
-        print_debug(e)
-        print_message('Error saving diagnostic config')
-        return HttpResponse(status=500)
+
+    if data.get('run_type') == 'diagnostic':
+        try:
+            diag_config = DiagnosticConfig.objects.filter(user=user, name=run_name).extra(order_by=['version'])
+            if diag_config:
+                latest = diag_config[len(diag_config) - 1]
+                latest.output_path = output_dir
+                latest.save()
+            else:
+                print_message('Unable to find config with name {}'.format(run_name))
+                return HttpResponse(status=400)
+        except Exception as e:
+            print_debug(e)
+            print_message('Error saving diagnostic config')
+            return HttpResponse(status=500)
 
     print_message('returning job_id: {}'.format(new_run.id), 'ok')
     response = json.dumps({
@@ -314,10 +313,7 @@ def post_new(user, data):
         note.save()
     except Exception, e:
         raise
-    else:
-        pass
-    finally:
-        pass
+
     print_message('Pushing update to client {}'.format(message))
     group_job_update(new_run.id, new_run.user, 'new', optional_message=message)
     return HttpResponse(response, content_type='application/json')

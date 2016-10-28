@@ -4,24 +4,23 @@
       height : 70vh;
     }
   </style>
-  <div id="run_options" style="display: flex; justify-content: space-between; width: 80%; margin-left: 10%">
-    <div class="" ng-repeat="option in run_options">
-      <a
-        href="#"
-        class="waves-effect waves-light btn"
-        ng-click="trigger_option(option)"
-        style="margin-left: 0.5vw; margin-right: 0.5vw; margin-top: 1vh;">
-         [[option]]
-      </a>
-    </div>
-  </div>
   <hr>
   <div class="run_list dashboard-show-hide" ng-show="ready == true">
     <p style="margin-left: 5vw;">Configuration List</p>
     <ul class="collapsible popout" id="run-list" data-collapsible="accordion">
-      <li ng-repeat="conf in config_name_list | orderBy:conf">
+      <div class="input-field col s6" ng-show="config_name_list.length > 0" style="margin-left: 3vw;">
+        <input id="config_list_filter" ng-model="config_list_filter" type="text">
+        <label for="config_list_filter">filter</label>
+      </div>
+      <li>
+        <a href="" 
+          class="waves-light waves-effect btn" 
+          ng-click="trigger_option('New run configuration')">
+            new configuration
+        </a>
+      </li>
+      <li ng-repeat="conf in config_name_list | orderBy:conf| filter:config_list_filter">
         <div class="collapsible-header" ng-click="set_selected_run(conf)">
-          <i class="material-icons" id="[[conf]]_arrow">play_arrow</i>
           <span class="">[[conf]]</span>
         </div>
         <div class="collapsible-body">
@@ -30,15 +29,35 @@
               <li class="collection-item">
                 <a href="#" 
                    class="waves-effect waves-light btn"
-                   ng-click="edit_run_config(conf)">edit configuration</a>
+                   ng-click="edit_run_config(conf)">
+                    edit configuration
+                </a>
+                <span style="margin-left: 2vw;">
+                  <a href="#" class="waves-effect waves-light btn" 
+                     style="color:#009688; padding-bottom: 5px; vertical-align:middle;" 
+                     ng-click="start_run(conf)">
+                    start
+                  </a>
+                </span>
+                <span style="margin-left: 2vw;">
+                  <a href="#" class="waves-effect waves-light btn" 
+                     style="color:#009688; padding-bottom: 5px; vertical-align:middle;" 
+                     ng-click="delete_run(conf)">
+                    delete
+                  </a>
+                </span>
               </li>
             </ul>
           </div>
         </div>
       </li>
-      <p style="margin-left: 5vw; margin-top: 1vw;"> Run queue </p>
 
-        <li ng-repeat="run in all_runs | orderBy: 'job_id' : true">
+      <p style="margin-left: 5vw; margin-top: 1vw;"> Run queue </p>
+        <div class="input-field col s6" ng-show="all_runs.length > 0" style="margin-left: 3vw;">
+          <input id="run_list_filter" ng-model="run_list_filter" type="text">
+          <label for="run_list_filter">filter</label>
+        </div>
+        <li ng-repeat="run in all_runs | orderBy: 'job_id' : true | filter:run_list_filter">
           <div class="collapsible-header" ng-click="get_run_data(run, run.job_id)">
             <span>[[run.run_name]]_[[run.job_id]]</span>
             <span style="float: right; margin-right: 2vw; color:grey;" id="[[run.job_id]]_queue_status"></span>
@@ -98,21 +117,6 @@
             </ul>
           </div>
         </li>
-
-      <p style="margin-left: 5vw; margin-top: 1vw;">Template List</p>
-      <li>
-        <div class="collapsible-header" ng-click="switch_arrow('template')">
-          <i class="material-icons" id="template_arrow">play_arrow</i>
-          <p>templates</p>
-        </div>
-        <div class="collapsible-body">
-          <ul class="collection" id="template-list">
-            <li ng-repeat="template in template_list" class="collection-item">
-              <a href="#" class="waves-effect waves-light btn">[[template]]</a>
-            </li>
-          </ul>
-        </div>
-      </li>
     </ul>
   </div>
 
@@ -124,7 +128,7 @@
     <div class="modal-content">
       <div class="input-field col s6">
           <input id="new_run_name" type="text">
-          <label for="new_run_name">New Run Name</label>
+          <label for="new_run_name">New Configuration Name</label>
       </div>
       <div class="" id="run_type_radio_select">
         <p ng-repeat="type in run_types">
@@ -132,16 +136,7 @@
           <label for="[[type]]_radio">[[type]]</label>
         </p>
       </div>
-      <a href="#" class="waves-effect waves-light btn" ng-click="new_run_from_template = true">create from template</a>
-      <a href="#" class="waves-effect waves-light btn" ng-click="create_run()">create empty run</a>
-      <ul class="collection dashboard-show-hide" id="template_collection" ng-show="new_run_from_template == true">
-        <li class="collection-item" ng-repeat="template in template_list">
-          <a href="#" class="" style="color:#009688;" ng-click="create_run(template)">
-            <i class="material-icons" >insert_drive_file</i>
-            [[template]]
-          </a>
-        </li>
-      </ul>
+      <a href="#" class="waves-effect waves-light btn" ng-click="create_run()">create configuraiton</a>
     </div>
   </div>
 
@@ -174,10 +169,19 @@
   </div>
 
   <!-- text edit modal -->
-  <div class="modal" id="text_edit_modal" style="width: 90%;">
+  <!-- <div class="modal" id="text_edit_modal" style="width: 90%;">
     <section>
       <a href="#" id="text_edit_save_btn" class="waves-effect waves-light btn" style="margin: .5vh;" ng-click="update_script()">save</a>
       <div ui-ace="aceOption" ng-model="aceModel"></div>
+    </section>
+  </div> -->
+  <div class="modal" id="text_edit_modal" style="width: 90%;">
+    <section>
+      <div id="text_display">
+        <p>
+          [[text_to_be_displayed]]
+        </p>
+      </div>
     </section>
   </div>
 
@@ -211,6 +215,21 @@
     </div>
   </div>
 
+  <!-- Delete run modal -->
+  <div class="modal" id="delete_run_modal" style="padding: 2vh;">
+    <p>Perminately delete this run configuration?</p>
+    <a href="" 
+       class="waves-effect waves-light btn red"
+       ng-click="delete_run_option('yes')">
+        yes
+    </a>
+    <a href="" 
+       class="waves-effect waves-light btn"
+       ng-click="delete_run_option('no')">
+        no
+    </a>
+  </div>
+
   <!-- Diagnostic run configuration modal -->
   <div class="modal" id="diagnostic_run_setup_modal" style="padding: 2vh;">
     <div class="input-field col s12">
@@ -235,7 +254,8 @@
     <a href="" class="waves-effect waves-light btn" style="margin: 1vw;" ng-click="save_diag_config()">save</a>
   </div>
 
-  <div class="modal" id="image_view_modal" style="width: fit-content; overflow: hidden; max-height: 80%;">
+  <!-- Image view modal -->
+  <div class="modal" id="image_view_modal" style="width: fit-content; max-height: 80%;">
     <p id="image_title" style="text-align: center;"></p>
     <img id="image_view" style="margin: 1vw;" class="" src="" />
     <div class="" style="display: flex; justify-content: space-between; width: 100%">

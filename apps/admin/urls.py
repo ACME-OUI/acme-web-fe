@@ -9,5 +9,6 @@ urlpatterns = [
     url(r'^poller/', include('poller.urls')),
     url(r'^run_manager/', include('run_manager.urls')),
     url(r'^esgf/', include('esgf.urls')),
-    url(r'^cdat/', include('cdat.urls'))
+    url(r'^cdat/', include('cdat.urls')),
+    url(r'^transfer/', include('transfer.urls')),
 ]

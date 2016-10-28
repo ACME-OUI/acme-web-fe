@@ -2,11 +2,11 @@ language: python
 python:
     - "2.7"
 services:
-    - redis-server
+#    - redis-server
 install:
-    - pip install -r requirements.txt
+#    - pip install -r requirements.txt
     - pip install pep8
-    - pip install coveralls
+#    - pip install coveralls
 env:
     global:
         - build_on_travis=true
@@ -16,6 +16,6 @@ before_script:
     - "python manage.py makemigrations"
     - "python manage.py migrate"
 script:
-    - "./manage.py test"
+#    - "./manage.py test"
 after_success:
   - coveralls
