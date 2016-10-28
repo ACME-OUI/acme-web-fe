@@ -208,15 +208,7 @@ def get_notification_list(request):
     except Exception, e:
         raise
         return HttpResponse(status=500)
-    else:
-        pass
-    finally:
-        pass
-
     n_list = note.notification_list.split('-|-')
-    import pprint
-    pp = pprint.PrettyPrinter(indent=4)
-    pp.pprint(n_list)
     return HttpResponse(json.dumps(n_list))
 
 
@@ -251,10 +243,6 @@ def register(request):
                     note.save()
                 except Exception, e:
                     raise
-                else:
-                    pass
-                finally:
-                    pass
         else:
             print user_form.errors
     else:

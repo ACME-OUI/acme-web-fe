@@ -3,7 +3,10 @@ import traceback
 import pprint
 import os
 import json
+from inspect import currentframe, getframeinfo
 pp = pprint.PrettyPrinter(indent=4)
+
+timeformat = '%b %d %H:%M:%S'
 
 
 def project_root():
@@ -43,9 +46,14 @@ class colors:
 
 def print_message(message, status='error'):
     if status == 'error':
-        print(colors.FAIL + '[-] ' + colors.ENDC + colors.BOLD + str(message) + colors.ENDC)
+        content = colors.FAIL + '[-] ' + colors.ENDC + colors.BOLD + str(message)
+        bf = currentframe().f_back
+        filename = getframeinfo(bf).filename
+        lnumber = bf.f_lineno
+        content += '\n\tfile: {}\n\tline: {}\n'.format(filename, lnumber) + colors.ENDC
     elif status == 'ok':
-        print(colors.OKGREEN + '[+] ' + colors.ENDC + str(message))
+        content = colors.OKGREEN + '[+] ' + colors.ENDC + str(message)
+    print(content)
 
 
 # see: http://code.activestate.com/recipes/577879-create-a-nested-dictionary-from-oswalk/
