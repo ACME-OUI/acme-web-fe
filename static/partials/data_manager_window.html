@@ -220,26 +220,26 @@
                    style="margin-left: 3vw;">
                     <i class="material-icons" style="vertical-align:middle;">navigate_before</i>
                 </a>
-                <ul class="collapsible">
-                  <div class="input-field col s6" style="margin-left: 3vw;">
-                    <input type="text" ng-model="nersc_folder_query" name="nersc_folder_query_field">
+                <ul class="collapsible" style="padding: 1vh">
+                  <div class="input-field col s6" style="margin-left: 2vw;">
+                    <input type="text" id ="nersc_folder_query" ng-model="nersc_folder_query_text" name="nersc_folder_query_field">
                     <label for="nersc_folder_query_field">filter</label>
                   </div>
                   <li class="collection" ng-repeat="item in nersc_folder | orderBy:folder | filter:nersc_folder_query">
                     <span class="collection-item" 
                           ng-if="!item.dir" 
-                          style="padding: 0.5rem; margin-left: 3vw;">
+                          style="padding: 0.5rem; margin-left: 3vw; margin-bottom: 0.5vw">
                       [[item.item]]
                       <a href="" 
                          class="waves-effect waves-light btn"
                          style="height: 30px; float: right;" 
-                         ng-click="transfer_from_remote(item.item)">
+                         ng-click="import_modal_trigger(item.item)">
                           import
                       </a>
                       <a href="" 
                          class="waves-effect waves-light btn"
                          style="height: 30px; float: right;" 
-                         ng-click="publish_from_remote(item.item)">
+                         ng-click="publish_modal_trigger()">
                           publish
                       </a>
                     </span>
@@ -396,8 +396,54 @@
     </form>
   </div>
 
+  <!-- Import modal -->
+  <div class="modal" id="import_modal" style="height: 20%; padding: 2vh;">
+    <div class="input-field col s12" 
+         ng-show="!import_type_selected">
+      <select id="import_type_select">
+        <option value="" disabled selected>Select the type of data</option>
+        <option value="diagnostic">
+          Diagnostic
+        </option>
+        <option value="observation">
+          Observation
+        </option>
+        <option value="model">
+          Model
+        </option>
+        <label>
+          Select data type
+        </label>
+      </select>
+      <a href=""
+         class="wave-effect waves-light btn"
+         ng-click="import_type_select()">
+          import
+      </a>
+    </div>
+    <div ng-show="import_type_select"
+         class="input-field col s12">
+      <ul>
+        <li ng-repeat="folder in import_type_select_folders">
+          <a href=""
+             class="wave-effect waves-light btn"
+             ng-click="transfer_from_remote(folder, 'aims4.llnl.gov')">
+              [[folder]]
+          </a>
+        </li>
+        <li>
+          <a href=""
+             class="wave-effect waves-light btn"
+             ng-click="transfer_from_remote('new', 'aims4.llnl.gov')">
+              new folder
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
   <div class="modal" id="publish_modal" style="max-height: 80%;">
-    <div class="input-field col s6" ng-show="publish_configs">
+<!--     <div class="input-field col s6" ng-show="publish_configs">
       <select>
         <option ng-repeat="config in publish_configs"> [[ config.name ]] </option>
       </select>
@@ -406,7 +452,7 @@
     <div class="input-field col s6" style="margin: 1em;">
       <input id="publish_config_name" ng-model="publish_config_name" type="text">
       <label for="publish_config_name">Configuration name</label>
-    </div>
+    </div> -->
     <div class="input-field col s6" style="margin: 1em;">
       <input id="publish_name" type="text">
       <label for="publish_name">Publication name</label>
@@ -448,12 +494,12 @@
        style="margin: 1em;">
         new facet
     </a>
-    <a href="" 
+<!--     <a href="" 
        class="waves-effect waves-light btn" 
        ng-click="save_publication_config()"
        style="margin: 1em 0em 1em 0em;">
         save configuration
-    </a>
+    </a> -->
     <a href="" 
        class="waves-effect waves-light btn" 
        ng-click="publish()"
@@ -540,5 +586,15 @@
     </div>
   </div>
 
+  <!-- Text edit modal -->
+  <div class="modal" id="text_edit_modal" style="width: 90%; overflow: auto;">
+    <section>
+      <div id="text_display">
+        <pre>
+          [[text_to_be_displayed]]
+        </pre>
+      </div>
+    </section>
+  </div>
 
 </div>

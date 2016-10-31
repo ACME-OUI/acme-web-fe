@@ -36,7 +36,7 @@
       }
       var worker = Webworker.create(window.ACMEDashboard.ajax, {async: true });
       var data = {
-          'url': 'http://aims2.llnl.gov:8000/run_manager/get_user/',
+          'url': 'http://' + window.location.hostname + ':8000/run_manager/get_user/',
           'method': 'GET'
       };
       worker.run(data).then((result) => {

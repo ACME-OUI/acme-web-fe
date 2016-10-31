@@ -14,6 +14,7 @@ import json
 import subprocess
 import os
 import uuid
+import paramiko
 
 
 def dispatch(message, data, user):
@@ -26,7 +27,105 @@ def dispatch(message, data, user):
     return -1
 
 
-def transfer_file(message, data, user):
+def publish_file(message, data, user):
+    destination = '/export/baldwin32/file_transfer/' + uuid.uuid4().hex
+    transfer_file(
+        message,
+        data,
+        user,
+        override_destination=destination)
+
+    try:
+        params = data.get('data').get('params')
+    except Exception as e:
+        print_message('Unable to decode params: {}'.format(data))
+        return -1
+    else:
+        if not params:
+            print_message('No params given')
+            return -1
+
+    username = params.get('username')
+    password = params.get('password')
+
+    if not username or not password:
+        print_message('No username or password')
+        return -1
+    try:
+        print_message('connecting to publication server', 'ok')
+        client = paramiko.SSHClient()
+        client.load_system_host_keys()
+        client.connect('pcmdi11.llnl.gov',
+                       port=22,
+                       username=username,
+                       password=password)
+        print_message('connected!', 'ok')
+    except Exception as e:
+        print_message('Error connecting to publication server')
+        print_debug(e)
+        return -1
+
+    pub_name = params.get('pub_name')
+    pub_org = params.get('pub_org')
+    pub_firstname = params.get('pub_firstname')
+    pub_lastname = params.get('pub_lastname')
+    pub_desc = params.get('pub_desc')
+    facets = params.get('pub_facets')
+
+    submission_config = {
+        'metadata': [
+            {
+                'name': 'name',
+                'value': pub_name
+            },
+            {
+                'name': 'organization',
+                'value': pub_org,
+            },
+            {
+                'name': 'firstname',
+                'value': pub_firstname,
+            },
+            {
+                'name': 'lastname',
+                'value': pub_lastname,
+            },
+            {
+                'name': 'description',
+                'value': pub_desc,
+            },
+            {
+                'name': 'datanode',
+                'value': 'pcmdi11.llnl.gov'
+            }
+        ],
+        'facets': [{'name': k, 'value': facets[k]} for k in facets],
+        'scan': {
+            'options': '',
+            'path': destination
+        },
+        'publish': {
+            'options': {
+                'files': 'all'
+            },
+            'files': []
+        }
+    }
+    command = "python ~/publication/publish.py {}".format(json.dumps(submission_config))
+    print_message(command)
+    try:
+        stdin, stdout, stderr = client.exec_command(command)
+    except Exception as e:
+        print_debug(e)
+        print_message('Error executing command {}'.format(command))
+        return HttpResponse(status=500)
+    response = {
+        'error': stderr.read(),
+        'out': stdout.read()
+    }
+
+
+def transfer_file(message, data, user, override_destination=False):
     print_message('transfer_file request', 'ok')
     print_message(data, 'ok')
     try:
@@ -43,6 +142,17 @@ def transfer_file(message, data, user):
     destination_dir = params.get('destination_dir')
     source_server = params.get('source_server', 'edison.nersc.gov')
     destination_server = params.get('destination_server', 'pcmdi11.llnl.gov')
+    data_type = params.get('data_type', 'diagnostic')
+
+    if destination_server == 'pcmdi11.llnl.gov':
+        destination_endpoint = 'a49fff56-96b9-11e6-b0ab-22000b92c261'
+        print_message('transfering to pcmdi11', 'ok')
+    elif destination_server == 'aims4.llnl.gov':
+        destination_endpoint = '43d64772-a82e-11e5-99d3-22000b96db58'
+        print_message('transfering to aims4', 'ok')
+    else:
+        destination_endpoint = 'a49fff56-96b9-11e6-b0ab-22000b92c261'
+        print_message('transfering to pcmdi11', 'ok')
 
     if not source_dir:
         source_dir = ''
@@ -63,8 +173,26 @@ def transfer_file(message, data, user):
     destination_dir.replace('\n', ' ')
     source_dir.replace('&', ' ')
 
-    folder_id = uuid.uuid4().hex
-    destination_dir = '/{user}/{uuid}'.format(user=user, uuid=folder_id)
+    if override_destination:
+        destination_path = override_destination
+    else:
+        destination_path = '{project_root}/userdata/{user}/'.format(
+            project_root=project_root(),
+            user=user)
+        if data_type == 'diagnostic':
+            destination_path += 'diagnostic_output/'
+        elif data_type == 'model':
+            destination_path += 'model_output/'
+        elif data_type == 'observation':
+            destination_path += 'observations/'
+        else:
+            print_message('Invalid data_type {}'.format(data_type))
+            return -1
+
+        if destination_dir == 'new':
+            destination_dir = destination_path + remote_file.split('.')[0] + '/' + remote_file
+        else:
+            destination_dir = destination_path + destination_dir + '/' + remote_file
 
     config = {
         'run_type': 'file_transfer',
@@ -108,6 +236,12 @@ def transfer_file(message, data, user):
         note.save()
     except Exception, e:
         raise
+    group_job_update(
+        new_run.id,
+        new_run.user,
+        new_run.status,
+        optional_message=new_run.config_options,
+        destination='set_run_status')
 
     try:
         cmd = ['python',
@@ -117,7 +251,7 @@ def transfer_file(message, data, user):
                '--source-path',
                source_dir,
                '--destination-endpoint',
-               'a49fff56-96b9-11e6-b0ab-22000b92c261',  # pcmdi11@llnl
+               destination_endpoint,  # pcmdi11@llnl
                '--destination-path',
                destination_dir,
                '--config',
@@ -139,11 +273,12 @@ def transfer_file(message, data, user):
             optional_message=new_run.config_options,
             destination='set_run_status')
 
-        done = False
-        while not done:
+        done = 2
+        while done != 0:
             try:
                 msg = p.stdout.readline()
                 done = p.poll()
+                print 'done: ' + str(done)
                 update_message = {
                     'text': json.dumps({
                         'user': user,
@@ -165,6 +300,7 @@ def transfer_file(message, data, user):
                 print_message(msg)
             finally:
                 sleep(1)
+        print_message("file transfer complete", 'ok')
         new_run.status = 'complete'
         new_run.save()
         update_message = {
