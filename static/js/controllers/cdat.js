@@ -5,43 +5,9 @@ angular.module('cdat', ['ngWebworker'])
     $scope.init = function(){
         console.log('[+] Initializing CDAT window');
         $scope.boxfill = {
-            "boxfill": {
-                "test": {
-                    "boxfill_type": "linear", 
-                    "color_1": 16, 
-                    "color_2": 239, 
-                    "colormap": null, 
-                    "datawc_calendar": 135441, 
-                    "datawc_timeunits": "days since 2000", 
-                    "datawc_x1": 1e+20, 
-                    "datawc_x2": 1e+20, 
-                    "datawc_y1": 1e+20, 
-                    "datawc_y2": 1e+20, 
-                    "ext_1": false, 
-                    "ext_2": false, 
-                    "fillareacolors": null, 
-                    "fillareaindices": [1], 
-                    "fillareaopacity": [], 
-                    "fillareastyle": "solid", 
-                    "legend": null, 
-                    "level_1": 1e+20, 
-                    "level_2": 1e+20, 
-                    "levels": [1e+20, 1e+20], 
-                    "missing": 1, 
-                    "projection": "linear", 
-                    "xaxisconvert": "linear", 
-                    "xmtics1": "", 
-                    "xmtics2": "", 
-                    "xticlabels1": "*", 
-                    "xticlabels2": "*", 
-                    "yaxisconvert": "linear", 
-                    "ymtics1": "", 
-                    "ymtics2": "", 
-                    "yticlabels1": "*", 
-                    "yticlabels2": "*"
-                }
-            }
+            g_name: "Gfb"
         };
+
         $scope.selected_source = undefined;
         $scope.data_options = undefined;
         $scope.get_user();
@@ -103,8 +69,10 @@ angular.module('cdat', ['ngWebworker'])
                     var height = parent.height();
                     vizContainer.width(width);
                     vizContainer.height(height);
-                    $scope.canvas = vcs.init('#vizContainer', 'server');
-                    $scope.canvas.plot(res.data, $scope.boxfill);
+                    $scope.canvas = vcs.init(document.getElementById('vizContainer'), 'server');
+                    $scope.canvas.plot(res.data, $scope.boxfill).then(() => {
+                        $scope.rendering = false;
+                    });
                 }, 0, false);
                 
             }).catch((res) => {
@@ -129,8 +97,21 @@ angular.module('cdat', ['ngWebworker'])
 
     $scope.load_diagnostic_data = () => {
         // load users available diagnostic data
-        $scope.select_data = window.ACMEDashboard.user_data[window.ACMEDashboard.user]['diagnostic_output'];
-        $scope.select_data_keys = Object.keys($scope.select_data);
+        if(window.ACMEDashboard.user_data && window.ACMEDashboard.user_data != 'pending'){
+            if($scope.select_data = window.ACMEDashboard.user_data[window.ACMEDashboard.user]){
+                $scope.select_data = window.ACMEDashboard.user_data[window.ACMEDashboard.user]['diagnostic_output'];
+            } else {
+                $scope.select_data = window.ACMEDashboard.user_data['diagnostic_output'];
+            }
+            
+            $scope.select_data_keys = Object.keys($scope.select_data);
+        } else {
+            $timeout(() => {
+                $scope.select_data = window.ACMEDashboard.user_data[window.ACMEDashboard.user]['diagnostic_output'];
+                $scope.select_data_keys = Object.keys($scope.select_data);
+            }, 500);
+        }
+        
     };
 
     $scope.load_model_data = () => {
@@ -173,7 +154,7 @@ angular.module('cdat', ['ngWebworker'])
         }
         var worker = Webworker.create(window.ACMEDashboard.ajax, {async: true });
         var data = {
-            'url': 'http://aims2.llnl.gov:8000/esgf/get_user_data',
+            'url': 'http://' + window.location.hostname + ':8000/esgf/get_user_data',
             'method': 'GET'
         };
         worker.run(data).then((result) => {
@@ -192,7 +173,7 @@ angular.module('cdat', ['ngWebworker'])
         }
         var worker = Webworker.create(window.ACMEDashboard.ajax, {async: true });
         var data = {
-            'url': 'http://aims2.llnl.gov:8000/run_manager/get_user/',
+            'url': 'http://' + window.location.hostname + ':8000/run_manager/get_user/',
             'method': 'GET'
         };
         worker.run(data).then((result) => {
