@@ -21,6 +21,7 @@ from util.utilities import print_debug
 from util.utilities import print_message
 from util.utilities import get_directory_structure
 from util.utilities import check_params
+from util.utilities import project_root
 from util.esgf_publication_client import IngestionClient
 
 import json
@@ -36,6 +37,38 @@ import os
 # without needing to make an http request
 class mydict(dict):
     pass
+
+
+@login_required
+def get_data_type_folders(request):
+    user = str(request.user)
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print_message("Unable to load request body")
+        print_debug(e)
+        return HttpResponse(status=400)
+    data_type = data.get('type')
+    if not data_type:
+        print_message('No data type given')
+        return HttpResponse(status=400)
+
+    folder_path = '{project_root}/userdata/{user}/'.format(
+        project_root=project_root(),
+        user=user)
+    if data_type == 'diagnostic':
+        folder_path += 'diagnostic_output'
+    elif data_type == 'model':
+        folder_path += 'model_output'
+    elif data_type == 'observation':
+        folder_path += 'observations'
+    else:
+        print_message('Invalid data_type {}'.format(data_type))
+        return HttpResponse(status=400)
+
+    print_message('Looking for folders in {}'.format(folder_path))
+    folder_contents = os.listdir(folder_path)
+    return HttpResponse(json.dumps(folder_contents))
 
 
 @login_required
@@ -61,7 +94,10 @@ def read_nc(request):
         + '/../../userdata/' \
         + user + '/'
     if data_type == 'diagnostic':
-        path += 'diagnostic_output/' + folder + '/diagnostic_output/amwg/'
+        if os.path.exists(path + 'diagnostic_output/' + folder + '/amwg/'):
+            path += 'diagnostic_output/' + folder + '/amwg/'
+        else:
+            path += 'diagnostic_output/' + folder + '/'
     elif data_type == 'model':
         path += 'model_output/' + folder + '/'
     elif data_type == 'observation':
@@ -71,8 +107,7 @@ def read_nc(request):
         return HttpResponse(status=400)
     path += filename
     path = os.path.abspath(path)
-    proc = Popen(['ncdump', '-h',path], stdout=PIPE)
-    output = proc.stdout.read()
+    output, err = Popen(['ncdump', '-h', path], stdout=PIPE).communicate()
     return HttpResponse(str(output))
 
 
