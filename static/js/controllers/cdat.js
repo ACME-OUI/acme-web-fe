@@ -44,7 +44,8 @@ angular.module('cdat', ['ngWebworker'])
                 'run_name': run_name,
                 'run_id': run_id
             }
-        }).then((res) => {
+        })
+        .then((res) => {
             $scope.variables = res.data;
             $scope.rendering = true;
             $http({
@@ -59,7 +60,8 @@ angular.module('cdat', ['ngWebworker'])
                     'run_id': run_id,
                     'variable': $scope.variables[0]
                 }
-            }).then((res) => {
+            })
+            .then((res) => {
                 console.log(res.data);
                 $scope.vizualizer = 'active';
                 $timeout(() => {
@@ -69,15 +71,24 @@ angular.module('cdat', ['ngWebworker'])
                     var height = parent.height();
                     vizContainer.width(width);
                     vizContainer.height(height);
-                    $scope.canvas = vcs.init(document.getElementById('vizContainer'), 'server');
-                    $scope.canvas.plot(res.data, $scope.boxfill).then(() => {
-                        $scope.rendering = false;
-                    });
+                    if ($scope.canvas !== undefined) {
+                        $scope.canvas.clear();
+                    } else {
+                        $scope.canvas = vcs.init(document.getElementById('vizContainer'), 'server');
+                        vizContainer.on('vcsPlotEnd', function(){
+                            $scope.$apply(() => {
+                                $scope.rendering = false;
+                            });
+                        });
+                    }
+                    $scope.canvas.plot(res.data, $scope.boxfill);
                 }, 0, false);
                 
             }).catch((res) => {
                 console.log(res);
             });
+        }).catch((res) => {
+            console.log(res);
         });
         
     }

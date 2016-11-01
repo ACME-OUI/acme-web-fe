@@ -96,9 +96,11 @@ def get_variables(request):
         return HttpResponse(status=500)
 
     variables = []
+    bounds_arrays = [a.bounds for _, a in file.axes.items() if hasattr(a, "bounds")]
     for v in file.variables:
-        if v != 'bounds_Latitude' and v != 'bounds_Longitude':
-            variables.append(v)
+        if v in bounds_arrays:
+            continue
+        variables.append(v)
     return HttpResponse(json.dumps(variables))
 
 
