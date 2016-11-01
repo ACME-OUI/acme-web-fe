@@ -21,6 +21,8 @@ def dispatch(message, data, user):
     destination = data.get('destination')
     if destination == 'transfer_file':
         return transfer_file(message, data, user)
+    elif destination == 'publish_file':
+        return publish_file(message, data, user)
     else:
         print_message('unrecognised destination {}'.format(destination))
         return -1
@@ -29,7 +31,7 @@ def dispatch(message, data, user):
 
 def publish_file(message, data, user):
     destination = '/export/baldwin32/file_transfer/' + uuid.uuid4().hex
-    transfer_file(
+    retval = transfer_file(
         message,
         data,
         user,
@@ -55,6 +57,7 @@ def publish_file(message, data, user):
         print_message('connecting to publication server', 'ok')
         client = paramiko.SSHClient()
         client.load_system_host_keys()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.connect('pcmdi11.llnl.gov',
                        port=22,
                        username=username,
@@ -71,6 +74,7 @@ def publish_file(message, data, user):
     pub_lastname = params.get('pub_lastname')
     pub_desc = params.get('pub_desc')
     facets = params.get('pub_facets')
+    remote_file = params.get('remote_file')
 
     submission_config = {
         'metadata': [
@@ -99,7 +103,28 @@ def publish_file(message, data, user):
                 'value': 'pcmdi11.llnl.gov'
             }
         ],
-        'facets': [{'name': k, 'value': facets[k]} for k in facets],
+        'facets': [{
+            'name': 'project',
+            'value': 'ACME'
+        },{
+            'name': 'data_type',
+            'value': 'h0'
+        },{
+            'name': 'experiment',
+            'value': 'b1850c5_m1a'
+        },{
+            'name': 'versionnum',
+            'value': 'v0_1'
+        },{
+            'name': 'realm',
+            'value': 'atm'
+        },{
+            'name': 'regridding',
+            'value': 'ne30_g16'
+        },{
+            'name': 'range',
+            'value': 'all'
+        }],
         'scan': {
             'options': '',
             'path': destination
@@ -111,18 +136,139 @@ def publish_file(message, data, user):
             'files': []
         }
     }
-    command = "python ~/publication/publish.py {}".format(json.dumps(submission_config))
+    command = "python ~/publication/publish.py {}".format(json.dumps(submission_config).replace("\"", "\\\""))
     print_message(command)
+
+    config = {
+        'run_type': 'file_publish',
+        'run_name': remote_file,
+        'user': user,
+        'request_attr': json.dumps(submission_config)
+    }
     try:
-        stdin, stdout, stderr = client.exec_command(command)
+        new_run = UserRuns.objects.create(
+            status='new',
+            config_options=json.dumps(config),
+            user=user
+        )
+        new_run.save()
+    except Exception as e:
+        print_debug(e)
+        print_message('error saving new run')
+        return -1
+
+    message = {
+        'run_name': remote_file,
+        'run_type': config.get('run_type'),
+        'request_attr': config.get('request_attr'),
+        'timestamp': datetime.datetime.now().strftime(timeformat)
+    }
+    try:
+        note = Notification.objects.get(user=new_run.user)
+        new_notification = json.dumps({
+            'job_id': new_run.id,
+            'run_type': config.get('run_type'),
+            'optional_message': message,
+            'status': 'new',
+            'timestamp': datetime.datetime.now().strftime(timeformat)
+        })
+        note.notification_list += new_notification + ' -|- '
+        note.save()
+    except Exception, e:
+        print_message('Error creating new notification')
+        print_debug(e)
+        return -1
+
+    group_job_update(
+        new_run.id,
+        new_run.user,
+        new_run.status,
+        optional_message=new_run.config_options,
+        destination='set_run_status')
+
+    try:
+        stdin, stdout, stderr = client.exec_command(command, get_pty=True)
     except Exception as e:
         print_debug(e)
         print_message('Error executing command {}'.format(command))
-        return HttpResponse(status=500)
-    response = {
-        'error': stderr.read(),
-        'out': stdout.read()
+        client.close()
+        return -1
+
+    new_run.status = 'in_progress'
+    new_run.save()
+    message = {
+        'run_name': remote_file,
+        'run_type': config.get('run_type'),
+        'request_attr': config.get('request_attr'),
+        'timestamp': datetime.datetime.now().strftime(timeformat),
+        'error': 'stdout',
+        'out': 'stderr'
     }
+    try:
+        note = Notification.objects.get(user=new_run.user)
+        new_notification = json.dumps({
+            'job_id': new_run.id,
+            'run_type': config.get('run_type'),
+            'optional_message': message,
+            'status': 'in_progress',
+            'timestamp': datetime.datetime.now().strftime(timeformat)
+        })
+        note.notification_list += new_notification + ' -|- '
+        note.save()
+    except Exception, e:
+        raise
+    group_job_update(
+        new_run.id,
+        new_run.user,
+        new_run.status,
+        optional_message=new_notification,
+        destination='set_run_status')
+
+    out = stdout.read()
+    err = stderr.read()
+    print_message(out, 'ok')
+    print_message(err)
+
+    if 'successfully' in out:
+        try:
+            note = Notification.objects.get(user=new_run.user)
+            new_notification = json.dumps({
+                'job_id': new_run.id,
+                'run_type': config.get('run_type'),
+                'optional_message': message,
+                'status': 'complete',
+                'timestamp': datetime.datetime.now().strftime(timeformat)
+            })
+            note.notification_list += new_notification + ' -|- '
+            note.save()
+        except Exception, e:
+            raise
+        group_job_update(
+            new_run.id,
+            new_run.user,
+            new_run.status,
+            optional_message=new_notification,
+            destination='set_run_status')
+    else:
+        try:
+            note = Notification.objects.get(user=new_run.user)
+            new_notification = json.dumps({
+                'job_id': new_run.id,
+                'run_type': config.get('run_type'),
+                'optional_message': message,
+                'status': 'error',
+                'timestamp': datetime.datetime.now().strftime(timeformat)
+            })
+            note.notification_list += new_notification + ' -|- '
+            note.save()
+        except Exception, e:
+            raise
+        group_job_update(
+            new_run.id,
+            new_run.user,
+            new_run.status,
+            optional_message=new_notification,
+            destination='set_run_status')
 
 
 def transfer_file(message, data, user, override_destination=False):
@@ -162,7 +308,7 @@ def transfer_file(message, data, user, override_destination=False):
 
     if not remote_file:
         print_message('No remote file for transfer')
-        return HttpResponse(status=400)
+        return -1
     remote_file.replace('\n', ' ')
     remote_file.replace('&', ' ')
     remote_file = remote_file.split(' ')[0]

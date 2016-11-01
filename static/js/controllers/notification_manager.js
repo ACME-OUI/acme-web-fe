@@ -113,6 +113,9 @@
       window.ACMEDashboard.socket_handlers.notification = (data) => {
         console.log('got a notication');
         console.log(data);
+        if(typeof data.optional_message === 'string'){
+          data.optional_message = JSON.parse(data.optional_message)
+        }
         // $scope.$apply(() => {
         $scope.list_insert(data);
         //});
@@ -120,6 +123,9 @@
       window.ACMEDashboard.socket_handlers.data_manager_transfer = (data) => {
         console.log('got a notication');
         console.log(data);
+        if(typeof data.optional_message === 'string'){
+          data.optional_message = JSON.parse(data.optional_message)
+        }
         // $scope.$apply(() => {
         $scope.list_insert(data);
         // })

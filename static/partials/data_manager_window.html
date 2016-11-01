@@ -239,7 +239,7 @@
                       <a href="" 
                          class="waves-effect waves-light btn"
                          style="height: 30px; float: right;" 
-                         ng-click="publish_modal_trigger()">
+                         ng-click="publish_modal_trigger(item.item)">
                           publish
                       </a>
                     </span>
@@ -502,7 +502,7 @@
     </a> -->
     <a href="" 
        class="waves-effect waves-light btn" 
-       ng-click="publish()"
+       ng-click="publish_credential_modal_trigger()"
        style="margin: 1em;">
         publish [[data_folder]]
     </a>
@@ -526,7 +526,9 @@
   </div>
 
   <div class="modal" id="nersc_credential_modal">
-    <span>Enter your NERSC credentials</span>
+    <span style="margin: 1em;">
+      Enter your NERSC credentials
+    </span>
     <div class="input-field col s6" style="margin: 1em;">
       <input id="nersc_username" ng-model="nersc_username" type="text">
       <label for="nersc_username">username</label>
@@ -537,6 +539,25 @@
     </div>
     <a href=""
        ng-click="nersc_credential_submit()"
+       class="waves-light wave-effect btn">
+        submit
+    </a>
+  </div>
+
+  <div class="modal" id="publish_credential_modal">
+    <span style="margin: 1em;">
+      Enter your publication credentials
+    </span>
+    <div class="input-field col s6" style="margin: 1em;">
+      <input id="publish_username" ng-model="publish_username" type="text">
+      <label for="publish_username">username</label>
+    </div>
+    <div class="input-field col s6" style="margin: 1em;">
+      <input id="publish_password" ng-model="publish_password" type="password">
+      <label for="publish_password">password</label>
+    </div>
+    <a href=""
+       ng-click="publish_from_remote()"
        class="waves-light wave-effect btn">
         submit
     </a>

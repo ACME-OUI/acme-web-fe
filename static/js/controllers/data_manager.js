@@ -152,23 +152,64 @@
       $scope.transfer_item = item;
     }
 
-    $scope.publish_modal_trigger = () => {
+    $scope.publish_modal_trigger = (item) => {
+      $scope.publish_item = item;
       $('#publish_modal').openModal();
     }
 
-    $scope.publish_from_remote = (item) => {
+    $scope.publish_credential_modal_trigger = () => {
+      $('#publish_modal').closeModal();
+      $timeout(() => {
+        $('#publish_credential_modal').openModal();
+      }, 600);
+      
+    }
+
+    $scope.publish_from_remote = () => {
+      $('#publish_credential_modal').closeModal();
       var data = {
         params: {
+          pub_name: 'sterlings new data',
+          pub_org: 'ACME',
+          pub_firstname: 'Sterling',
+          pub_lastname: 'Baldwin',
+          pub_des: 'A test dataset from the dashboard',
+          facets: [
+              {
+                  'project': 'ACME'
+              },
+              {
+                  'data_type': 'h0'
+              },
+              {
+                  'experiment': 'b1850c5_m1a'
+              },
+              {
+                  'versionnum': 'v0_1'
+              },
+              {
+                  'realm': 'atm'
+              },
+              {
+                  'regridding': 'ne30_g16'
+              },
+              {
+                  'range': 'all'
+              }
+          ],
           remote_dir: $scope.nersc_path,
           local_dir: '',
-          remote_file: $scope.transfer_item,
-          destination_dir: item,
+          remote_file: $scope.publish_item,
+          destination_dir: $scope.publish_item,
+          username: $('#publish_username').val(),
+          password: $('#publish_password').val()
         }
       }
-      message = JSON.stringify({
+      var message = JSON.stringify({
         target_app: 'transfer',
         destination: 'publish_file',
         data: data,
+        user: window.ACMEDashboard.user
       });
       $scope.showToast('Publication job submitted');
       window.ACMEDashboard.socket.send(message);
