@@ -1,4 +1,4 @@
-<div class="">
+<div class="" style="margin: 1em;">
   <a class="waves-effect waves-light btn teal dashboard-show-hide" style="margin-bottom: 1em;" ng-show="step >= 0" ng-click="set_step(step - 1)">
     <i class="material-icons left">navigate_before</i>
   </a>
@@ -417,12 +417,14 @@
       </select>
       <a href=""
          class="wave-effect waves-light btn"
-         ng-click="import_type_select()">
+         ng-click="import_type_select()"
+         ng-show="!import_type_select">
           import
       </a>
     </div>
     <div ng-show="import_type_select"
          class="input-field col s12">
+         <span>Destination folder</span>
       <ul>
         <li ng-repeat="folder in import_type_select_folders">
           <a href=""
@@ -563,7 +565,7 @@
     </a>
   </div>
 
-  <div class="modal" id="image_view_modal_data_manager" style="width: fit-content; overflow: hidden; max-height: 80%;">
+  <div class="modal" id="image_view_modal_data_manager" style="width: fit-content; max-height: 80%;">
     <p id="image_title_data_manager" style="text-align: center;"></p>
     <img ng-show="image_type == 'image'" 
          id="image_view_data_manager" 

@@ -487,6 +487,7 @@ def get_next():
     }
     r.update(config)
     group_job_update(data.id, data.user, 'in_progress', optional_message=r)
+    print_message('looking up notification for user {}'.format(data.user))
     try:
         note = Notification.objects.get(user=data.user)
         new_notification = json.dumps({

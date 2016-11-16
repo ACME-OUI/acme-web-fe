@@ -30,7 +30,7 @@ def dispatch(message, data, user):
 
 
 def publish_file(message, data, user):
-    destination = '/export/baldwin32/file_transfer/' + uuid.uuid4().hex
+    destination = uuid.uuid4().hex
     retval = transfer_file(
         message,
         data,
@@ -111,7 +111,7 @@ def publish_file(message, data, user):
             'value': 'h0'
         },{
             'name': 'experiment',
-            'value': 'b1850c5_m1a'
+            'value': 'ACME'
         },{
             'name': 'versionnum',
             'value': 'v0_1'
@@ -127,7 +127,7 @@ def publish_file(message, data, user):
         }],
         'scan': {
             'options': '',
-            'path': destination
+            'path': '/' + destination
         },
         'publish': {
             'options': {
@@ -188,6 +188,11 @@ def publish_file(message, data, user):
 
     try:
         stdin, stdout, stderr = client.exec_command(command, get_pty=True)
+        out = stdout.read()
+        err = stderr.read()
+        print_message(out, 'ok')
+        if err:
+            print_message(err)
     except Exception as e:
         print_debug(e)
         print_message('Error executing command {}'.format(command))
@@ -201,8 +206,8 @@ def publish_file(message, data, user):
         'run_type': config.get('run_type'),
         'request_attr': config.get('request_attr'),
         'timestamp': datetime.datetime.now().strftime(timeformat),
-        'error': 'stdout',
-        'out': 'stderr'
+        'error': out,
+        'out': err
     }
     try:
         note = Notification.objects.get(user=new_run.user)
@@ -224,12 +229,8 @@ def publish_file(message, data, user):
         optional_message=new_notification,
         destination='set_run_status')
 
-    out = stdout.read()
-    err = stderr.read()
-    print_message(out, 'ok')
-    print_message(err)
-
-    if 'successfully' in out:
+    if 'Dataset files have been published' in out:
+        print_message('sending success notification to client')
         try:
             note = Notification.objects.get(user=new_run.user)
             new_notification = json.dumps({
@@ -243,6 +244,14 @@ def publish_file(message, data, user):
             note.save()
         except Exception, e:
             raise
+        try:
+            new_run.status = 'complete'
+            new_run.save()
+        except Exception as e:
+            print_message('error saving run')
+            print_debug(e)
+            return -1
+
         group_job_update(
             new_run.id,
             new_run.user,
@@ -250,6 +259,7 @@ def publish_file(message, data, user):
             optional_message=new_notification,
             destination='set_run_status')
     else:
+        print_message('sending error notification to client')
         try:
             note = Notification.objects.get(user=new_run.user)
             new_notification = json.dumps({
@@ -263,6 +273,14 @@ def publish_file(message, data, user):
             note.save()
         except Exception, e:
             raise
+        try:
+            new_run.status = 'error'
+            new_run.save()
+        except Exception as e:
+            print_message('error saving run')
+            print_debug(e)
+            return -1
+
         group_job_update(
             new_run.id,
             new_run.user,
@@ -319,8 +337,20 @@ def transfer_file(message, data, user, override_destination=False):
     destination_dir.replace('\n', ' ')
     source_dir.replace('&', ' ')
 
+    try:
+        new_run = UserRuns.objects.create(
+            status='new',
+            config_options='',
+            user=user)
+        new_run.save()
+    except Exception as e:
+        print_debug(e)
+        print_message('error saving new run')
+        return -1
+
     if override_destination:
-        destination_path = override_destination
+        print_message('Overriding destination with {}'.format(override_destination))
+        destination_dir = '/' + override_destination + '/' + remote_file
     else:
         destination_path = '{project_root}/userdata/{user}/'.format(
             project_root=project_root(),
@@ -336,9 +366,9 @@ def transfer_file(message, data, user, override_destination=False):
             return -1
 
         if destination_dir == 'new':
-            destination_dir = destination_path + remote_file.split('.')[0] + '/' + remote_file
+            destination_dir = destination_path + '.'.join(remote_file.split('.')[0:-1]) + '_' + str(new_run.id) + '/' + remote_file
         else:
-            destination_dir = destination_path + destination_dir + '/' + remote_file
+            destination_dir = destination_path + destination_dir + '_' + str(new_run.id) + '/' + remote_file
 
     config = {
         'run_type': 'file_transfer',
@@ -352,11 +382,7 @@ def transfer_file(message, data, user, override_destination=False):
         })
     }
     try:
-        new_run = UserRuns.objects.create(
-            status='new',
-            config_options=json.dumps(config),
-            user=user
-        )
+        new_run.config_options = json.dumps(config)
         new_run.save()
     except Exception as e:
         print_debug(e)
@@ -375,7 +401,7 @@ def transfer_file(message, data, user, override_destination=False):
             'job_id': new_run.id,
             'run_type': config.get('run_type'),
             'optional_message': message,
-            'status': 'new',
+            'status': new_run.status,
             'timestamp': datetime.datetime.now().strftime(timeformat)
         })
         note.notification_list += new_notification + ' -|- '
@@ -387,7 +413,7 @@ def transfer_file(message, data, user, override_destination=False):
         new_run.user,
         new_run.status,
         optional_message=new_run.config_options,
-        destination='set_run_status')
+        destination='notification')
 
     try:
         cmd = ['python',
@@ -412,12 +438,32 @@ def transfer_file(message, data, user, override_destination=False):
         new_run.status = 'in_progress'
         new_run.save()
 
+        message = {
+            'run_name': remote_file,
+            'run_type': config.get('run_type'),
+            'request_attr': config.get('request_attr'),
+            'timestamp': datetime.datetime.now().strftime(timeformat)
+        }
+        try:
+            note = Notification.objects.get(user=new_run.user)
+            new_notification = json.dumps({
+                'job_id': new_run.id,
+                'run_type': config.get('run_type'),
+                'optional_message': message,
+                'status': new_run.status,
+                'timestamp': datetime.datetime.now().strftime(timeformat)
+            })
+            note.notification_list += new_notification + ' -|- '
+            note.save()
+        except Exception, e:
+            raise
+
         group_job_update(
             new_run.id,
             new_run.user,
             new_run.status,
             optional_message=new_run.config_options,
-            destination='set_run_status')
+            destination='notification')
 
         done = 2
         while done != 0:
@@ -430,15 +476,34 @@ def transfer_file(message, data, user, override_destination=False):
                         'user': user,
                         'data_name': remote_file,
                         'message': msg,
-                        'destination': 'data_manager_transfer'
+                        'destination': 'notification'
                     })
                 }
+                message = {
+                    'run_name': remote_file,
+                    'run_type': config.get('run_type'),
+                    'request_attr': config.get('request_attr'),
+                    'timestamp': datetime.datetime.now().strftime(timeformat)
+                }
+                try:
+                    note = Notification.objects.get(user=new_run.user)
+                    new_notification = json.dumps({
+                        'job_id': new_run.id,
+                        'run_type': config.get('run_type'),
+                        'optional_message': message,
+                        'status': new_run.status,
+                        'timestamp': datetime.datetime.now().strftime(timeformat)
+                    })
+                    note.notification_list += new_notification + ' -|- '
+                    note.save()
+                except Exception, e:
+                    raise
                 group_job_update(
                     new_run.id,
                     new_run.user,
                     new_run.status,
                     optional_message=update_message,
-                    destination='data_manager_transfer')
+                    destination='notification')
             except Exception as e:
                 print_message('no update from the transfer')
                 print_debug(e)
@@ -446,15 +511,35 @@ def transfer_file(message, data, user, override_destination=False):
                 print_message(msg)
             finally:
                 sleep(1)
+
         print_message("file transfer complete", 'ok')
         new_run.status = 'complete'
         new_run.save()
+        message = {
+            'run_name': remote_file,
+            'run_type': config.get('run_type'),
+            'request_attr': config.get('request_attr'),
+            'timestamp': datetime.datetime.now().strftime(timeformat)
+        }
+        try:
+            note = Notification.objects.get(user=new_run.user)
+            new_notification = json.dumps({
+                'job_id': new_run.id,
+                'run_type': config.get('run_type'),
+                'optional_message': message,
+                'status': new_run.status,
+                'timestamp': datetime.datetime.now().strftime(timeformat)
+            })
+            note.notification_list += new_notification + ' -|- '
+            note.save()
+        except Exception, e:
+            raise
         update_message = {
             'text': json.dumps({
                 'user': user,
                 'data_name': remote_file,
                 'message': 'transfer complete',
-                'destination': 'data_manager_transfer'
+                'destination': 'notification'
             })
         }
         group_job_update(
@@ -462,7 +547,7 @@ def transfer_file(message, data, user, override_destination=False):
             new_run.user,
             new_run.status,
             optional_message=update_message,
-            destination='set_run_status')
+            destination='notification')
     except Exception as e:
         print_message('Error transfering file')
         print_debug(e)

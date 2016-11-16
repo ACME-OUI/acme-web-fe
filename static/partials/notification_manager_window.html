@@ -12,6 +12,9 @@
                 <span ng-if="n.list.last().status == 'new'">
                     <i class="material-icons" style="vertical-align:middle;">input</i>
                 </span>
+                <span ng-if="n.list.last().status == 'error'">
+                    <i class="material-icons" style="vertical-align:middle;">error</i>
+                </span>
                 <span>[[ n.list.last().status ]]</span>
             </div>
             <div class="collapsible-body">

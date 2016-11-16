@@ -363,6 +363,10 @@ def save_diagnostic_config(request):
     version = latest
 
     def find_directory(directory, model, obs):
+        print_message('looking in {dir} for model: {model} and obs: {obs}'.format(
+            dir=directory,
+            model=model,
+            obs=obs))
         model_path = None
         obs_path = None
         for dirname, subdirlist, filelist in os.walk(directory):

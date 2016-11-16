@@ -127,8 +127,20 @@ angular.module('cdat', ['ngWebworker'])
 
     $scope.load_model_data = () => {
         // load users available model data
-        $scope.select_data = $scope.user_data[window.ACMEDashboard.user]['model_output'];
-        $scope.select_data_keys = Object.keys($scope.select_data);
+        if(window.ACMEDashboard.user_data && window.ACMEDashboard.user_data != 'pending'){
+            if($scope.select_data = window.ACMEDashboard.user_data[window.ACMEDashboard.user]){
+                $scope.select_data = window.ACMEDashboard.user_data[window.ACMEDashboard.user]['model_output'];
+            } else {
+                $scope.select_data = window.ACMEDashboard.user_data['model_output'];
+            }
+            
+            $scope.select_data_keys = Object.keys($scope.select_data);
+        } else {
+            $timeout(() => {
+                $scope.select_data = window.ACMEDashboard.user_data[window.ACMEDashboard.user]['model_output'];
+                $scope.select_data_keys = Object.keys($scope.select_data);
+            }, 500);
+        }
     };
 
     $scope.increase_d_limit = (all) => {
@@ -145,11 +157,20 @@ angular.module('cdat', ['ngWebworker'])
         } else {
             $scope.selected_data_option = data;
             $scope.selected_data_options = [];
-            for(k in $scope.select_data[data]['amwg']){
-                if(k.endsWith('.nc')){
-                    $scope.selected_data_options.push(k);
+            if($scope.selected_source == 'diagnostic'){
+                for(k in $scope.select_data[data]['amwg']){
+                    if(k.endsWith('.nc')){
+                        $scope.selected_data_options.push(k);
+                    }
+                }
+            } else {
+                for(k in $scope.select_data[data]){
+                    if(k.endsWith('.nc')){
+                        $scope.selected_data_options.push(k);
+                    }
                 }
             }
+
             $('.collapsible').collapsible({
                 accordion : false
             });

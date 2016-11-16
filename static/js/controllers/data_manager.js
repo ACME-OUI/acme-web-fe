@@ -127,7 +127,7 @@
       $scope.nersc_path = path_split.slice(0, path_split.length - 1).join('/');
       $scope.nersc_lookup = true;
       $scope.nersc_folder = [];
-      data = { 'remote_dir': $scope.nersc_path };
+      var data = { 'remote_dir': $scope.nersc_path };
       $http({
         url: '/transfer/view_remote_directory/',
         method: 'POST',
@@ -219,13 +219,14 @@
       console.log('current nersc folder: ' + $scope.nersc_path);
       console.log('selected item: ' + $scope.transfer_item);
       console.log('destination folder: ' + folder);
+      var transfer_data_type = $('#import_type_select option:selected').val();
       var data = {
         params: {
           remote_dir: $scope.nersc_path,
           local_dir: '',
           remote_file: $scope.transfer_item,
           destination_dir: folder,
-          data_type: $scope.transfer_data_type
+          data_type: transfer_data_type
         }
       }
       if(endpoint){
@@ -269,6 +270,12 @@
 
     $scope.set_step = (step) => {
       $scope.step = step;
+      if(step == -1){
+        $scope.get_user_data();
+        $('.collapsible').collapsible({
+          accordion : false
+        });
+      }
     }
 
     $scope.set_favorite_plot = () => {
@@ -303,28 +310,36 @@
     }
 
     $scope.get_user = (config, callback) => {
-      if(window.ACMEDashboard.user){
-          return;
-      } else {
-          window.ACMEDashboard.user = 'pending';
-      }
-      var worker = Webworker.create(window.ACMEDashboard.ajax, {async: true });
-      var data = {
-          'url': 'http://' + window.location.hostname + ':8000/run_manager/get_user/',
-          'method': 'GET'
-      };
-      if(config && config.async){
-        return worker.run(data);
-      } else {
-        worker.run(data).then((result) => {
-            window.ACMEDashboard.user = result;
-            if(callback){
-              callback();
-            }
-        }).catch((res) => {
-            console.log(res);
-        });
-      }
+      // if(window.ACMEDashboard.user){
+      //     return;
+      // } else {
+      //     window.ACMEDashboard.user = 'pending';
+      // }
+      // var worker = Webworker.create(window.ACMEDashboard.ajax, {async: true });
+      // var data = {
+      //     'url': 'http://' + window.location.hostname + ':8000/run_manager/get_user/',
+      //     'method': 'GET'
+      // };
+      // if(config && config.async){
+      //   return worker.run(data);
+      // } else {
+      //   worker.run(data).then((result) => {
+      //       window.ACMEDashboard.user = result;
+      //       if(callback){
+      //         callback();
+      //       }
+      //   }).catch((res) => {
+      //       console.log(res);
+      //   });
+      // }
+      $http({
+        url: 'http://' + window.location.hostname + ':8000/run_manager/get_user/',
+        method: 'GET'
+      }).then((res) => {
+        window.ACMEDashboard.user = res.data;
+      }).catch((res) => {
+        console.log(res);
+      })
     }
 
     $scope.open_pdf = (diag, diag_folder) => {
@@ -647,7 +662,7 @@
         'search_string': $scope.searchTerms,
         'nodes': $scope.selected_nodes,
       };
-      request = JSON.stringify({
+      var request = JSON.stringify({
         'target_app': 'esgf',
         'destination': 'dataset_download',
         'params': params,
@@ -658,7 +673,7 @@
       $scope.downloads[params.data_name] = {
         'percent_complete': 0
       };      
-      $('#download_modal').closeModal();
+      $('#download_dataset_modal').closeModal();
       $scope.step = -1;
     }
 
@@ -681,7 +696,7 @@
             accordion : false
           });
         } else {
-          $scope.get_user({async: true}).then(() => {
+          $scope.get_user({async: true}, () => {
             $scope.set_alldata(res.data[$scope.user]);
             window.ACMEDashboard.user_data = res.data[$scope.user];
             $('.collapsible').collapsible({

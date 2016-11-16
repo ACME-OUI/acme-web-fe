@@ -46,3 +46,6 @@ climateTestFile.nc
 
 /webroot
 sftp-config.json
+ftp-sync.json
+
+\\.vscode
