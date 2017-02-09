@@ -6,7 +6,7 @@ from util.utilities import print_message
 from util.utilities import print_debug
 
 import os
-import vcs
+#import vcs
 import cdms2
 import numpy
 import json
