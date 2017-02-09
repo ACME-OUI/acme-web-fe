@@ -7,8 +7,8 @@ from util.utilities import print_debug
 
 import os
 # import vcs
-import cdms2
-import numpy
+# import cdms2
+# import numpy
 import json
 
 
