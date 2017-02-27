@@ -33,30 +33,42 @@
       );
     };
 
-    $scope.publish_from_remote = (item) => {
-      var data = {
-        'remote_dir': $scope.nersc_path,
-        'local_dir': '',
-        'remote_file': item
-      }
-      message = JSON.stringify({
-          'target_app': 'transfer',
-          'destination': 'transfer_file',
-          'content': 'hello world!'
-        })
-      window.ACMEDashboard.socket.send(message);
-    }
-
     $scope.initialize_nersc_modal = () => {
       if(!$scope.nersc_credential_pass){
         $('#nersc_credential_modal').openModal();
       } else {
         $scope.view_nersc_folder('');
       }
-      
+    }
+
+    $scope.import_type_select = () => {
+      var type = $('#import_type_select option:selected').val();
+      $scope.get_data_type_folders(type);
+    }
+
+    $scope.get_data_type_folders = (type) => {
+      $scope.transfer_data_type = type;
+      var data = {
+        'type': type
+      }
+      $http({
+        url: '/esgf/get_data_type_folders/',
+        method: 'POST',
+        data: data,
+        headers: {
+          'X-CSRFToken' : $scope.get_csrf(),
+          'Content-Type': 'application/json'
+        }
+      }).then((res) => {
+        console.log(res);
+        $scope.import_type_select_folders = res.data;
+      }).catch((res) => {
+        console.log(res);
+      })
     }
 
     $scope.nersc_credential_submit = () => {
+      $('#nersc_credential_modal').closeModal();
       var data = {
         username: $('#nersc_username').val(),
         password: $('#nersc_password').val()
@@ -77,13 +89,10 @@
         console.log(res);
         $scope.nersc_credential_pass = false;
         $scope.showToast('Failed to authenticate');
-      }).then(() => {
-        $('#nersc_credential_modal').closeModal();
       });
     }
 
     $scope.view_nersc_folder = (folder) => {
-      $scope.nersc_folder_query = '';
       $scope.nersc_folder = [];
       $scope.nersc_lookup = true;
       if($scope.nersc_path){
@@ -118,7 +127,7 @@
       $scope.nersc_path = path_split.slice(0, path_split.length - 1).join('/');
       $scope.nersc_lookup = true;
       $scope.nersc_folder = [];
-      data = { 'remote_dir': $scope.nersc_path };
+      var data = { 'remote_dir': $scope.nersc_path };
       $http({
         url: '/transfer/view_remote_directory/',
         method: 'POST',
@@ -137,28 +146,108 @@
       });
     }
 
-    $scope.transfer_from_remote = (item) => {
-      console.log('current nersc folder: ' + $scope.nersc_path);
-      console.log('selected item: ' + item);
+    $scope.import_modal_trigger = (item) => {
+      $('#import_type_select').material_select();
+      $('#import_modal').openModal();
+      $scope.transfer_item = item;
+    }
 
+    $scope.publish_modal_trigger = (item) => {
+      $scope.publish_item = item;
+      $('#publish_modal').openModal();
+    }
+
+    $scope.publish_credential_modal_trigger = () => {
+      $('#publish_modal').closeModal();
+      $timeout(() => {
+        $('#publish_credential_modal').openModal();
+      }, 600);
+      
+    }
+
+    $scope.publish_from_remote = () => {
+      $('#publish_credential_modal').closeModal();
       var data = {
         params: {
-          'remote_dir': $scope.nersc_path,
-          'local_dir': '',
-          'remote_file': item
+          pub_name: 'sterlings new data',
+          pub_org: 'ACME',
+          pub_firstname: 'Sterling',
+          pub_lastname: 'Baldwin',
+          pub_des: 'A test dataset from the dashboard',
+          facets: [
+              {
+                  'project': 'ACME'
+              },
+              {
+                  'data_type': 'h0'
+              },
+              {
+                  'experiment': 'b1850c5_m1a'
+              },
+              {
+                  'versionnum': 'v0_1'
+              },
+              {
+                  'realm': 'atm'
+              },
+              {
+                  'regridding': 'ne30_g16'
+              },
+              {
+                  'range': 'all'
+              }
+          ],
+          remote_dir: $scope.nersc_path,
+          local_dir: '',
+          remote_file: $scope.publish_item,
+          destination_dir: $scope.publish_item,
+          username: $('#publish_username').val(),
+          password: $('#publish_password').val()
         }
       }
-      message = JSON.stringify({
+      var message = JSON.stringify({
+        target_app: 'transfer',
+        destination: 'publish_file',
+        data: data,
+        user: window.ACMEDashboard.user
+      });
+      $scope.showToast('Publication job submitted');
+      window.ACMEDashboard.socket.send(message);
+    }
+
+    $scope.transfer_from_remote = (folder, endpoint) => {
+      console.log('current nersc folder: ' + $scope.nersc_path);
+      console.log('selected item: ' + $scope.transfer_item);
+      console.log('destination folder: ' + folder);
+      var transfer_data_type = $('#import_type_select option:selected').val();
+      var data = {
+        params: {
+          remote_dir: $scope.nersc_path,
+          local_dir: '',
+          remote_file: $scope.transfer_item,
+          destination_dir: folder,
+          data_type: transfer_data_type
+        }
+      }
+      if(endpoint){
+        data.params['destination_server'] = endpoint;
+        console.log('transfering to ' + endpoint);
+      } else {
+        console.log('transfering to pcmdi11');
+      }
+      var message = JSON.stringify({
         target_app: 'transfer',
         destination: 'transfer_file',
         data: data,
         user: window.ACMEDashboard.user
-      })
+      });
+      $('#import_modal').closeModal();
+      $scope.showToast('Transfer job submitted');
       window.ACMEDashboard.socket.send(message);
     }
 
     $scope.open_nc = (file, folder, type) => {
-      params = {
+      var params = {
         'filename': file,
         'folder': folder,
         'data_type': type
@@ -169,10 +258,11 @@
         params: params
       }).then((res)=>{
         $('#text_edit_modal').openModal();
-        console.log(res);
-        window.ACMEDashboard.ace.setValue(res.data);
-        window.ACMEDashboard.ace.setReadOnly(false);
-        $('#text_edit_save_btn').addClass('disabled');
+        // console.log(res);
+        // window.ACMEDashboard.ace.setValue(res.data);
+        // window.ACMEDashboard.ace.setReadOnly(false);
+        $scope.text_to_be_displayed = res.data;
+        //$('#text_edit_save_btn').addClass('disabled');
       }).catch((res)=>{
 
       })
@@ -180,6 +270,12 @@
 
     $scope.set_step = (step) => {
       $scope.step = step;
+      if(step == -1){
+        $scope.get_user_data();
+        $('.collapsible').collapsible({
+          accordion : false
+        });
+      }
     }
 
     $scope.set_favorite_plot = () => {
@@ -213,39 +309,37 @@
       })
     }
 
-    // $scope.get_user = () => {
-    //   $http({
-    //     url: '/run_manager/get_user/',
-    //     method: 'GET'
-    //   }).then((res) => {
-    //     window.ACMEDashboard.user = res.data;
-    //     resolve(res.data);
-    //   }).catch((res) => {
-    //     console.log('Error getting user');
-    //     console.log(res);
-    //     reject(res);
-    //   });
-    // }
-    $scope.get_user = (config) => {
-      if(window.ACMEDashboard.user){
-          return;
-      } else {
-          window.ACMEDashboard.user = 'pending';
-      }
-      var worker = Webworker.create(window.ACMEDashboard.ajax, {async: true });
-      var data = {
-          'url': 'http://aims2.llnl.gov:8000/run_manager/get_user/',
-          'method': 'GET'
-      };
-      if(config && config.async){
-        return worker.run(data);
-      } else {
-        worker.run(data).then((result) => {
-            window.ACMEDashboard.user = result;
-        }).catch((res) => {
-            console.log(res);
-        });
-      }
+    $scope.get_user = (config, callback) => {
+      // if(window.ACMEDashboard.user){
+      //     return;
+      // } else {
+      //     window.ACMEDashboard.user = 'pending';
+      // }
+      // var worker = Webworker.create(window.ACMEDashboard.ajax, {async: true });
+      // var data = {
+      //     'url': 'http://' + window.location.hostname + ':8000/run_manager/get_user/',
+      //     'method': 'GET'
+      // };
+      // if(config && config.async){
+      //   return worker.run(data);
+      // } else {
+      //   worker.run(data).then((result) => {
+      //       window.ACMEDashboard.user = result;
+      //       if(callback){
+      //         callback();
+      //       }
+      //   }).catch((res) => {
+      //       console.log(res);
+      //   });
+      // }
+      $http({
+        url: 'http://' + window.location.hostname + ':8000/run_manager/get_user/',
+        method: 'GET'
+      }).then((res) => {
+        window.ACMEDashboard.user = res.data;
+      }).catch((res) => {
+        console.log(res);
+      })
     }
 
     $scope.open_pdf = (diag, diag_folder) => {
@@ -568,7 +662,7 @@
         'search_string': $scope.searchTerms,
         'nodes': $scope.selected_nodes,
       };
-      request = JSON.stringify({
+      var request = JSON.stringify({
         'target_app': 'esgf',
         'destination': 'dataset_download',
         'params': params,
@@ -579,7 +673,7 @@
       $scope.downloads[params.data_name] = {
         'percent_complete': 0
       };      
-      $('#download_modal').closeModal();
+      $('#download_dataset_modal').closeModal();
       $scope.step = -1;
     }
 
@@ -591,27 +685,25 @@
     }
 
     $scope.get_user_data = () => {
-      // if(window.ACMEDashboard.user_data){
-      //   return;
-      // } else {
-      //   window.ACMEDashboard.user_data = 'pending';
-      // }
       $http({
         url: '/esgf/get_user_data'
       }).then((res) => {
         console.log(res.data);
-        if(window.ACMEDashboard.user){
+        if(window.ACMEDashboard.user && window.ACMEDashboard.user != 'pending'){
           $scope.set_alldata(res.data[window.ACMEDashboard.user]);
           window.ACMEDashboard.user_data = res.data[window.ACMEDashboard.user];
+          $('.collapsible').collapsible({
+            accordion : false
+          });
         } else {
-          $scope.get_user(() => {
+          $scope.get_user({async: true}, () => {
             $scope.set_alldata(res.data[$scope.user]);
             window.ACMEDashboard.user_data = res.data[$scope.user];
+            $('.collapsible').collapsible({
+              accordion : false
+            });
           });
         }
-        $('.collapsible').collapsible({
-          accordion : false
-        });
       }).catch((res) => {
         console.log(res.data);
       });
@@ -620,13 +712,25 @@
     $scope.set_alldata = (data) => {
       $scope.all_userdata = data;
       $scope.userdata = $scope.userdata || {};
-      $scope.userdata['model_output'] = Object.keys($scope.all_userdata.model_output);
-      $scope.userdata['diagnostic_output'] = Object.keys($scope.all_userdata.diagnostic_output);
-      $scope.userdata['observations'] = Object.keys($scope.all_userdata.observations);
-      $scope.obs_cache = undefined;
-      $scope.diag_cache = undefined;
-      $scope.model_cache = undefined;
-      $scope.get_favorite_plots();
+      if(!$scope.all_userdata){
+        $timeout(() => {
+          $scope.userdata['model_output'] = Object.keys($scope.all_userdata.model_output);
+          $scope.userdata['diagnostic_output'] = Object.keys($scope.all_userdata.diagnostic_output);
+          $scope.userdata['observations'] = Object.keys($scope.all_userdata.observations);
+          $scope.obs_cache = undefined;
+          $scope.diag_cache = undefined;
+          $scope.model_cache = undefined;
+          $scope.get_favorite_plots();
+        }, 500);
+      } else {
+        $scope.userdata['model_output'] = Object.keys($scope.all_userdata.model_output);
+        $scope.userdata['diagnostic_output'] = Object.keys($scope.all_userdata.diagnostic_output);
+        $scope.userdata['observations'] = Object.keys($scope.all_userdata.observations);
+        $scope.obs_cache = undefined;
+        $scope.diag_cache = undefined;
+        $scope.model_cache = undefined;
+        $scope.get_favorite_plots();
+      }
     }
 
     $scope.load_obs_cache = (obs_folder) => {
@@ -638,8 +742,14 @@
       $scope.model_cache[model_folder] = Object.keys($scope.all_userdata['model_output'][model_folder]);
     }
     $scope.load_diag_cache = (diag_folder) => {
-      $scope.diag_cache = $scope.diag_cache || {};      $scope.diag_limit = 20;
-      $scope.diag_cache[diag_folder] = Object.keys($scope.all_userdata['diagnostic_output'][diag_folder]['amwg']);
+      $scope.diag_cache = $scope.diag_cache || {};      
+      $scope.diag_limit = 20;
+      if($scope.all_userdata['diagnostic_output'][diag_folder]['amwg']){
+        $scope.diag_cache[diag_folder] = Object.keys($scope.all_userdata['diagnostic_output'][diag_folder]['amwg']);
+      } else {
+        $scope.diag_cache[diag_folder] = Object.keys($scope.all_userdata['diagnostic_output'][diag_folder]);
+      }
+      
     }
     $scope.increase_diag_limit = () => {
       $scope.diag_limit += 20;

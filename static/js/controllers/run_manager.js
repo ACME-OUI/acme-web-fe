@@ -29,21 +29,29 @@
     };
 
     $scope.get_user = () => {
-      if(window.ACMEDashboard.user){
-          return;
-      } else {
-          window.ACMEDashboard.user = 'pending';
-      }
-      var worker = Webworker.create(window.ACMEDashboard.ajax, {async: true });
-      var data = {
-          'url': 'http://aims2.llnl.gov:8000/run_manager/get_user/',
-          'method': 'GET'
-      };
-      worker.run(data).then((result) => {
-          window.ACMEDashboard.user = result;
+      // if(window.ACMEDashboard.user){
+      //     return;
+      // } else {
+      //     window.ACMEDashboard.user = 'pending';
+      // }
+      // var worker = Webworker.create(window.ACMEDashboard.ajax, {async: true });
+      // var data = {
+      //     'url': 'http://' + window.location.hostname + ':8000/run_manager/get_user/',
+      //     'method': 'GET'
+      // };
+      // worker.run(data).then((result) => {
+      //     window.ACMEDashboard.user = result;
+      // }).catch((res) => {
+      //     console.log(res);
+      // });
+      $http({
+        url: 'http://' + window.location.hostname + ':8000/run_manager/get_user/',
+        method: 'GET'
+      }).then((res) => {
+        window.ACMEDashboard.user = res.data;
       }).catch((res) => {
-          console.log(res);
-      });
+        console.log(res);
+      })
     }
 
     $scope.get_csrf = () => {
@@ -578,8 +586,8 @@
     }
     
     $scope.save_diag_config = (run_name) => {
-      var model_selected = $('#diag_model_select option:selected').text();
-      var obs_selected = $('#diag_obs_select option:selected').text();
+      var model_selected = $('#diag_model_select option:selected').text().trim();
+      var obs_selected = $('#diag_obs_select option:selected').text().trim();
       params = {
         'model': model_selected,
         'obs': obs_selected,

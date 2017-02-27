@@ -1,10 +1,4 @@
 <div class="" ng-init="init()">
-  <style media="screen">
-    .ace_editor  {
-      height : 70vh;
-    }
-  </style>
-  <hr>
   <div class="run_list dashboard-show-hide" ng-show="ready == true">
     <p style="margin-left: 5vw;">Configuration List</p>
     <ul class="collapsible popout" id="run-list" data-collapsible="accordion">
@@ -235,20 +229,34 @@
     <div class="input-field col s12">
       <select id="diag_model_select">
         <option value="" disabled selected>Model</option>
-        <option ng-repeat="model in diag_model_options" id="diag_select_model_[[model]]"value="[[model]]">[[model]]</option>
+        <option ng-repeat="model in diag_model_options" 
+                id="diag_select_model_[[model]]"
+                value="[[model]]">[[model]]</option>
       </select>
     </div>
     <div class="input-field col s12">
       <select id="diag_obs_select">
         <option value="" disabled selected>Observation</option>
-        <option ng-repeat="obs in diag_obs_options" id="diag_select_obs_[[obs]]" value="[[obs]]">[[obs]]</option>
+        <option ng-repeat="obs in diag_obs_options" 
+                id="diag_select_obs_[[obs]]" 
+                value="[[obs]]">[[obs]]</option>
       </select>
     </div>
     <div class="input-field col s12">
       <p ng-repeat="set in diag_set_options" id="diag_set_select">
-        <input type="checkbox" class="filled-in diag_set_checkbox" ng-if="set != 'all'" id="diag_set_select_[[set]]" value="[[set]]"/>
-        <input type="checkbox" class="filled-in" ng-if="set == 'all'" ng-click="select_all_diag_set()" id="diag_set_select_[[set]]" />
-        <label for="diag_set_select_[[set]]">[[set]]</label>
+        <input type="checkbox" 
+               class="filled-in diag_set_checkbox" 
+               ng-if="set != 'all'" 
+               id="diag_set_select_[[set]]" 
+               value="[[set]]"/>
+        <input type="checkbox" 
+               class="filled-in" 
+               ng-if="set == 'all'" 
+               ng-click="select_all_diag_set()" 
+               id="diag_set_select_[[set]]" />
+        <label for="diag_set_select_[[set]]">
+          [[set]]
+        </label>
       </p>
     </div>
     <a href="" class="waves-effect waves-light btn" style="margin: 1vw;" ng-click="save_diag_config()">save</a>

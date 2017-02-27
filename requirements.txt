@@ -20,6 +20,7 @@ httplib2==0.9
 idna==2.0
 ipdb==0.8.1
 ipython==3.1.0
+paramiko
 ipython-genutils==0.1.0
 MarkupSafe==0.23
 msgpack-python==0.4.8

@@ -95,6 +95,7 @@ def transfer(options):
     # Check a status of the transfer every minute (60 secs)
     while True:
         code, reason, data = api_client.task(task_id)
+        print data['status']
         if data['status'] == 'SUCCEEDED':
             print 'progress %d/%d' % (data['files_transferred'], data['files'])
             return ('success', '')

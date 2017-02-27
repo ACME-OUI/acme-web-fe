@@ -10,11 +10,11 @@ import datetime
 from util.utilities import print_debug
 from util.utilities import print_message
 from util.utilities import is_json
+from util.utilities import timeformat
 from run_manager.constants import DIAG_OUTPUT_PREFIX
 from run_manager.dispatcher import group_job_update
 from run_manager.models import DiagnosticConfig
 from web_fe.models import Notification
-timeformat = '%b %d %H:%M:%S'
 
 
 @csrf_exempt
@@ -487,6 +487,7 @@ def get_next():
     }
     r.update(config)
     group_job_update(data.id, data.user, 'in_progress', optional_message=r)
+    print_message('looking up notification for user {}'.format(data.user))
     try:
         note = Notification.objects.get(user=data.user)
         new_notification = json.dumps({
