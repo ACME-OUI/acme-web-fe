@@ -1,0 +1,49 @@
+*** Settings ***
+Documentation     Opens each one of the dashboard tiles
+...               to make sure they are
+Suite Setup       Open Browser And Log In
+Suite Teardown    Close Browser
+Resource          common_resources.txt
+
+*** Testcases ***
+Open Each Tile
+    Check Tile    provenance    1
+    Check Tile    status    2
+    Check Tile    science    3
+    Check Tile    nodeSearch    4
+    Check Tile    heatMap    5
+    Check TIle    velo    6
+    Check TIle    nodeSelect    7
+    Check Tile    cdat    8
+    Check Tile    charting    9
+
+Open All Tiles At Once
+    Click Element   id=toggle-left-a
+    Click Button    xpath=/html/body/nav/ul/li[1]/button
+    Click Button    xpath=/html/body/nav/ul/li[2]/button
+    Click Button    xpath=/html/body/nav/ul/li[3]/button
+    Click Button    xpath=/html/body/nav/ul/li[4]/button
+    Click Button    xpath=/html/body/nav/ul/li[5]/button
+    Click Button    xpath=/html/body/nav/ul/li[6]/button
+    Click Button    xpath=/html/body/nav/ul/li[7]/button
+    Click Button    xpath=/html/body/nav/ul/li[8]/button
+    Click Button    xpath=/html/body/nav/ul/li[9]/button
+    Page Should Contain Element    provenance_window
+    Page Should Contain Element    status_window
+    Page Should Contain Element    science_window
+    Page Should Contain Element    nodeSearch_window
+    Page Should Contain Element    heatMap_window
+    Page Should Contain Element    velo_window
+    Page Should Contain Element    nodeSelect_window
+    Page Should Contain Element    cdat_window
+    Page Should Contain Element    charting_window
+
+
+*** Keywords ***
+Check Tile  [Arguments]    ${tilename}    ${tilenumber}
+    Click Element   id=toggle-left-a
+    Click Button    xpath=/html/body/nav/ul/li[${tilenumber}]/button
+    Click Element   id=toggle-left-a
+    Wait Until Element Is Visible  ${tilename}_window
+    Page Should Contain Element    ${tilename}_window
+    Close Tile      ${tilename}_window

@@ -1,0 +1,38 @@
+*** Settings ***
+
+Documentation   Resources needed by the registration tests.
+Library         Selenium2Library  timeout=10  implicit_wait=0.5
+
+*** Variables ***
+
+${SERVER}			      localhost:8000
+${REGISTRATION}	    http://${SERVER}/acme/register/
+${FIREFOX}			    ff
+${CHROME}			      googlechrome
+${SAFARI}			      safari
+
+${VALID_USER}		    testregistration
+${VALID_EMAIL}      test@test.com
+${VALID_NAME}       Testman
+${VALID_PASS}		    testpass
+${INVALID_CAPTHCA}  123456789
+
+*** Keywords ***
+
+Open Browser And Register  [Arguments]  ${browser}
+	Open Browser  ${REGISTRATION}  ${browser}
+  Maximize Browser Window
+
+  Input Text  id=id_username                ${VALID_USER}
+  Input Text  id=id_email                   ${VALID_EMAIL}
+  Input Text  id=id_first_name              ${VALID_NAME}
+  Input Text  id=id_last_name               ${VALID_NAME}
+  Input Text  id=id_password1               ${VALID_PASS}
+  Input Text  id=id_password2               ${VALID_PASS}
+  Input Text  id=recaptcha_response_field   ${INVALID_CAPTHCA}
+
+  Click Element  xpath=//*[@id="user_form"]/button
+  Page Should Contain  Incorrect, please try again.
+
+  Close Browser
+

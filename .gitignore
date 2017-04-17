@@ -38,7 +38,7 @@ apps/run_manager/resource/test
 db
 
 /migrations
-
+cover
 .coverage
 coverage.xml
 cover

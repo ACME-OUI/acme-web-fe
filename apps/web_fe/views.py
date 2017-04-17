@@ -221,6 +221,7 @@ def register(request):
         user_form = UserCreationForm(data=request.POST)
         username = request.POST['username']
         if user_form.is_valid():
+            print user_form
             user = user_form.save()
             try:
                 group = Group.objects.get(name="Default")

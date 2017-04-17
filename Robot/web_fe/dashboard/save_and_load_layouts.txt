@@ -1,0 +1,36 @@
+*** Settings ***
+
+Documentation    Tests for saving and loading layouts
+Resource         common_resources.txt
+Test Setup       Open Browser And Log In
+Test Teardown    Close Browser
+
+
+*** Testcases ***
+Load Layout
+  Click Element  id=toggle-left-a
+  Click Button   id=load-layout
+  Page Should Contain  Select Layout:
+  Click Element  select-layout
+  Click Element  id=layout-c
+  Click Element  id=load-button
+  Wait Until Page Contains Element  id=provenance_window
+  Page Should Contain Element  id=provenance_window
+  Page Should Contain Element  id=status_window 
+  Page Should Contain Element  id=science_window
+
+
+Save Non-Default Layout
+  Click Element             id=toggle-left-a
+  Click Button              id=save-layout
+  Input Text                id=layout-name  new_layout
+  Click Button              id=save-btn
+  Alert Should Be Present   layout saved
+
+Save Default Layout
+  Click Element             id=toggle-left-a
+  Click Button              id=save-layout
+  Input Text                id=layout-name  new_default_layout
+  Click Element             id=default
+  Click Button              id=save-btn
+  Alert Should Be Present   layout saved

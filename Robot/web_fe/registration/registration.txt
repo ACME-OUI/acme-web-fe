@@ -1,0 +1,9 @@
+*** Settings ***
+
+Documentation   A test suite for registration
+Resource        common_resources.txt
+
+*** Testcases ***
+Test The registration page captcha is failing
+  Open Browser And Register  ${FIREFOX}
+  Open Browser And Register  ${CHROME}
